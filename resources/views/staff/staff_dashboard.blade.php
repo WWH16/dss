@@ -4,157 +4,120 @@
 
 @section('content')
 <div class="py-10 bg-neutral-50/50 min-h-screen">
-    <div class="container max-w-6xl">
+    <div class="container max-w-5xl">
         <!-- Dashboard Header -->
-        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+        <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
-                <h1 class="text-3xl font-display font-bold tracking-tight text-neutral-900 leading-tight">Staff Dashboard</h1>
-                <p class="text-neutral-500 mt-1 text-sm leading-relaxed">Welcome back, <span class="font-semibold text-brand-700">{{ $profile->name }}</span></p>
+                <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">Staff Dashboard</h1>
+                <p class="text-neutral-500 text-sm">Welcome back, <span class="font-semibold text-brand-700">{{ $profile->name }}</span></p>
             </div>
-            <div class="bg-brand-50 text-brand-800 px-4 py-2 rounded-xl text-xs font-bold uppercase tracking-wider inline-flex items-center gap-2 border border-brand-100 self-start md:self-auto">
-                <span class="material-symbols-outlined text-lg">storefront</span>
-                Assigned Stall: <span class="underline font-extrabold">{{ $profile->stall_name ?? 'Not Assigned' }}</span>
+            <div class="bg-brand-50 text-brand-800 px-3 py-1.5 rounded-lg text-xs font-bold uppercase tracking-wider border border-brand-100/50 self-start sm:self-auto">
+                Assigned Stall: {{ $profile->stall_name ?? 'Not Assigned' }}
             </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-            <!-- Left Column: Profile & Evaluation Summary -->
-            <div class="space-y-8">
-                <!-- Profile details -->
-                <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
-                    <div class="flex items-center gap-3 mb-5 pb-4 border-b border-neutral-100">
-                        <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-2.5 rounded-xl">account_circle</span>
-                        <div>
-                            <h2 class="font-bold text-neutral-900 tracking-tight leading-snug">Staff Profile</h2>
-                            <p class="text-xs text-neutral-400 font-medium">Canteen Staff Account</p>
-                        </div>
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
+            <!-- Sidebar Panel: Info & Warnings (Flat layout) -->
+            <div class="md:col-span-1 space-y-6 text-sm">
+                <!-- Profile -->
+                <div class="space-y-4">
+                    <div class="pb-2 border-b border-neutral-200">
+                        <h2 class="font-bold text-neutral-800 uppercase tracking-wider text-[10px]">Staff Info</h2>
                     </div>
-                    <div class="space-y-4">
+                    <div class="space-y-3">
                         <div>
-                            <span class="text-[10px] text-neutral-400 block uppercase tracking-widest font-bold mb-1">Name</span>
-                            <span class="text-sm text-neutral-800 font-semibold leading-normal">{{ $profile->name }}</span>
-                        </div>
-                        <div>
-                            <span class="text-[10px] text-neutral-400 block uppercase tracking-widest font-bold mb-1">Email Address</span>
-                            <span class="text-sm text-neutral-800 font-semibold break-all leading-normal">{{ $profile->email }}</span>
+                            <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-0.5">Email</span>
+                            <span class="text-neutral-800 font-semibold break-all leading-tight">{{ $profile->email }}</span>
                         </div>
                     </div>
                 </div>
 
-                <!-- Evaluation Summary (Progress Bars/Grid) -->
-                <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
-                    <div class="flex items-center gap-3 mb-6 pb-4 border-b border-neutral-100">
-                        <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-2.5 rounded-xl">analytics</span>
-                        <div>
-                            <h2 class="font-bold text-neutral-900 tracking-tight leading-snug">Evaluation Summary</h2>
-                            <p class="text-xs text-neutral-400 font-medium">Average score out of 5.0</p>
+                <!-- Warnings / Improvements -->
+                @if(count($improvements))
+                    <div class="space-y-3">
+                        <div class="pb-2 border-b border-neutral-200">
+                            <h2 class="font-bold text-amber-800 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
+                                <span class="material-symbols-outlined text-sm leading-none">warning</span>
+                                Needs Attention
+                            </h2>
                         </div>
+                        <ul class="space-y-2 text-xs">
+                            @foreach($improvements as $item)
+                                <li class="text-neutral-600 font-medium">
+                                    Score registered: <strong class="text-amber-700 font-bold tabular-nums">{{ number_format($item['score'], 2) }}</strong>
+                                </li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
+            </div>
+
+            <!-- Main Content Area -->
+            <div class="md:col-span-3 space-y-8">
+                <!-- Evaluation Summary Card -->
+                <div class="bg-white rounded-xl border border-neutral-200/60 p-6">
+                    <div class="flex items-center justify-between mb-6 pb-3 border-b border-neutral-100">
+                        <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Evaluation Scores</h2>
+                        <span class="text-xs text-neutral-400 font-medium">Out of 5.0 max</span>
                     </div>
 
                     @if($ratings && $ratings->isNotEmpty())
                         @php
                             $firstRating = $ratings->first();
                         @endphp
-                        <div class="space-y-5">
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
                             @foreach([
-                                ['label' => 'Cleanliness', 'value' => $firstRating->cleanliness ?? 0, 'icon' => 'cleaning_services', 'color' => 'bg-emerald-500'],
-                                ['label' => 'Service Quality', 'value' => $firstRating->service ?? 0, 'icon' => 'support_agent', 'color' => 'bg-blue-500'],
-                                ['label' => 'Taste', 'value' => $firstRating->taste ?? 0, 'icon' => 'restaurant', 'color' => 'bg-amber-500'],
-                                ['label' => 'Price Fairness', 'value' => $firstRating->price ?? 0, 'icon' => 'payments', 'color' => 'bg-purple-500']
+                                ['label' => 'Cleanliness', 'value' => $firstRating->cleanliness ?? 0, 'color' => 'text-emerald-600'],
+                                ['label' => 'Service', 'value' => $firstRating->service ?? 0, 'color' => 'text-blue-600'],
+                                ['label' => 'Taste', 'value' => $firstRating->taste ?? 0, 'color' => 'text-amber-600'],
+                                ['label' => 'Price', 'value' => $firstRating->price ?? 0, 'color' => 'text-purple-600']
                             ] as $metric)
-                                <div>
-                                    <div class="flex justify-between items-center text-sm mb-1.5">
-                                        <span class="text-neutral-700 font-medium inline-flex items-center gap-2">
-                                            <span class="material-symbols-outlined text-neutral-400 text-base leading-none">{{ $metric['icon'] }}</span>
-                                            {{ $metric['label'] }}
-                                        </span>
-                                        <span class="font-bold text-neutral-900 tabular-nums">{{ number_format($metric['value'], 2) }}</span>
-                                    </div>
-                                    <div class="w-full bg-neutral-100 rounded-full h-2">
-                                        <div class="{{ $metric['color'] }} h-2 rounded-full" style="width: {{ min(100, ($metric['value'] / 5) * 100) }}%"></div>
-                                    </div>
+                                <div class="bg-neutral-50/50 p-4 rounded-xl border border-neutral-100/50 text-center">
+                                    <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">{{ $metric['label'] }}</span>
+                                    <span class="text-xl font-extrabold tabular-nums {{ $metric['color'] }}">{{ number_format($metric['value'], 2) }}</span>
                                 </div>
                             @endforeach
                         </div>
                     @else
-                        <div class="text-center py-6 text-neutral-400">
-                            <span class="material-symbols-outlined text-3xl mb-1">info</span>
-                            <p class="text-sm font-medium">No evaluations yet.</p>
+                        <div class="text-center py-6 text-neutral-400 text-sm">
+                            No evaluations recorded yet.
                         </div>
                     @endif
                 </div>
 
-                <!-- Things to Improve -->
-                <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
-                    <div class="flex items-center gap-3 mb-4 pb-4 border-b border-neutral-100">
-                        <span class="material-symbols-outlined text-amber-600 bg-amber-50 p-2.5 rounded-xl">campaign</span>
-                        <div>
-                            <h2 class="font-bold text-neutral-900 tracking-tight leading-snug">Things to Improve</h2>
-                            <p class="text-xs text-neutral-400 font-medium">Action items based on scores</p>
-                        </div>
-                    </div>
-
-                    @if(count($improvements))
-                        <ul class="space-y-3">
-                            @foreach($improvements as $item)
-                                <li class="text-sm text-neutral-700 flex items-start gap-2.5 leading-relaxed">
-                                    <span class="material-symbols-outlined text-amber-500 text-base mt-0.5 leading-none">warning</span>
-                                    <span>Score registered: <strong class="font-bold tabular-nums">{{ number_format($item['score'], 2) }}</strong></span>
-                                </li>
-                            @endforeach
-                        </ul>
-                    @else
-                        <div class="flex items-center gap-3 text-emerald-700 bg-emerald-50/50 border border-emerald-100 p-4 rounded-xl">
-                            <span class="material-symbols-outlined text-xl leading-none">check_circle</span>
-                            <span class="text-xs font-bold uppercase tracking-wider">Great! No major improvements needed.</span>
-                        </div>
-                    @endif
-                </div>
-            </div>
-
-            <!-- Right Column: Recent Evaluations (Table) -->
-            <div class="lg:col-span-2 space-y-8">
-                <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
-                    <div class="flex items-center gap-3 mb-6">
-                        <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-2.5 rounded-xl">history</span>
-                        <div>
-                            <h2 class="font-bold text-neutral-900 tracking-tight leading-snug">Recent Evaluations</h2>
-                            <p class="text-xs text-neutral-400 font-medium">Student feedback records</p>
-                        </div>
+                <!-- Recent Evaluations Table -->
+                <div class="bg-white rounded-xl border border-neutral-200/60 p-6">
+                    <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-100">
+                        <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Recent Evaluations</h2>
+                        <span class="bg-brand-50 text-brand-700 text-xs font-bold px-2.5 py-0.5 rounded-full tabular-nums">
+                            {{ $evaluations->count() }} total
+                        </span>
                     </div>
 
                     @if($evaluations->isNotEmpty())
-                        <div class="overflow-x-auto -mx-6 px-6">
-                            <table class="w-full text-left border-collapse min-w-[600px]">
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left border-collapse min-w-[500px]">
                                 <thead>
-                                    <tr class="border-b border-neutral-100 text-[10px] text-neutral-400 font-bold uppercase tracking-widest">
-                                        <th class="pb-3 font-bold">Date</th>
-                                        <th class="pb-3 font-bold text-center">Cleanliness</th>
-                                        <th class="pb-3 font-bold text-center">Service</th>
-                                        <th class="pb-3 font-bold text-center">Taste</th>
-                                        <th class="pb-3 font-bold text-center">Price</th>
-                                        <th class="pb-3 font-bold">Comment</th>
+                                    <tr class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider border-b border-neutral-100 pb-2">
+                                        <th class="pb-2">Date</th>
+                                        <th class="pb-2 text-center">Cleanliness</th>
+                                        <th class="pb-2 text-center">Service</th>
+                                        <th class="pb-2 text-center">Taste</th>
+                                        <th class="pb-2 text-center">Price</th>
+                                        <th class="pb-2">Comment</th>
                                     </tr>
                                 </thead>
                                 <tbody class="divide-y divide-neutral-50">
                                     @foreach($evaluations as $eval)
-                                        <tr class="text-sm text-neutral-800 hover:bg-neutral-50/30">
-                                            <td class="py-3.5 whitespace-nowrap text-xs text-neutral-500 font-semibold tabular-nums">
+                                        <tr class="text-sm hover:bg-neutral-50/30">
+                                            <td class="py-2.5 whitespace-nowrap text-xs text-neutral-500 font-semibold tabular-nums">
                                                 {{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y') }}
                                             </td>
-                                            <td class="py-3.5 text-center font-bold text-neutral-900 tabular-nums">
-                                                {{ $eval->cleanliness }}
-                                            </td>
-                                            <td class="py-3.5 text-center font-bold text-neutral-900 tabular-nums">
-                                                {{ $eval->service }}
-                                            </td>
-                                            <td class="py-3.5 text-center font-bold text-neutral-900 tabular-nums">
-                                                {{ $eval->taste }}
-                                            </td>
-                                            <td class="py-3.5 text-center font-bold text-neutral-900 tabular-nums">
-                                                {{ $eval->price }}
-                                            </td>
-                                            <td class="py-3.5 text-neutral-600 text-sm max-w-[200px] truncate leading-normal" title="{{ $eval->comment }}">
+                                            <td class="py-2.5 text-center font-bold text-neutral-900 tabular-nums">{{ $eval->cleanliness }}</td>
+                                            <td class="py-2.5 text-center font-bold text-neutral-900 tabular-nums">{{ $eval->service }}</td>
+                                            <td class="py-2.5 text-center font-bold text-neutral-900 tabular-nums">{{ $eval->taste }}</td>
+                                            <td class="py-2.5 text-center font-bold text-neutral-900 tabular-nums">{{ $eval->price }}</td>
+                                            <td class="py-2.5 text-neutral-600 text-xs max-w-[180px] truncate" title="{{ $eval->comment }}">
                                                 {{ $eval->comment ?? '-' }}
                                             </td>
                                         </tr>
@@ -163,9 +126,8 @@
                             </table>
                         </div>
                     @else
-                        <div class="text-center py-12 text-neutral-400">
-                            <span class="material-symbols-outlined text-4xl mb-2">rate_review</span>
-                            <p class="font-medium text-sm leading-relaxed">No evaluations found.</p>
+                        <div class="text-center py-6 text-neutral-400 text-sm">
+                            No evaluations found.
                         </div>
                     @endif
                 </div>
