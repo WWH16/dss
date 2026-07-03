@@ -1,31 +1,13 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Register | ISU Canteen DSS</title>
+@extends('layouts.app')
 
+@section('title', 'Register | ISU Canteen DSS')
+
+@section('head')
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
     <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-</head>
+@endsection
 
-<body>
-
-<nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
-    <div class="container">
-        <a class="navbar-brand text-success fw-bold" href="/">ISU Canteen DSS</a>
-
-        <div class="collapse navbar-collapse">
-            <ul class="navbar-nav ms-auto">
-                <li class="nav-item"><a class="nav-link" href="{{ url('/') }}">Home</a></li>
-                <li class="nav-item"><a class="nav-link active" href="{{ url('/about') }}">About</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url('/login') }}">Login</a></li>
-                <li class="nav-item"><a class="nav-link" href="{{ url('/register') }}">Register</a></li>
-            </ul>
-        </div>
-    </div>
-</nav>
-
+@section('content')
 <div class="auth-page">
     <div class="auth-card shadow-sm">
 
@@ -122,7 +104,9 @@
 
     </div>
 </div>
+@endsection
 
+@section('scripts')
 <script>
 function toggleRegisterFields() {
     const role = document.getElementById('role').value;
@@ -135,6 +119,4 @@ function toggleRegisterFields() {
 
 document.addEventListener('DOMContentLoaded', toggleRegisterFields);
 </script>
-
-</body>
-</html>
+@endsection
