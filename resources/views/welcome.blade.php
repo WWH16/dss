@@ -9,10 +9,10 @@
     {{-- Tailwind v4 + app CSS via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Fonts: Plus Jakarta Sans + Sora --}}
+    {{-- Fonts: Plus Jakarta Sans + Sora + Material Symbols --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
 </head>
 <body>
 
@@ -199,7 +199,9 @@
 
         <div class="criteria-grid" role="list">
             <div class="criterion" role="listitem">
-                <div class="criterion-icon" aria-hidden="true">🧹</div>
+                <div class="criterion-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined text-brand-600">cleaning_services</span>
+                </div>
                 <div>
                     <div class="criterion-title">Cleanliness</div>
                     <div class="criterion-desc">
@@ -209,7 +211,9 @@
             </div>
 
             <div class="criterion" role="listitem">
-                <div class="criterion-icon" aria-hidden="true">🙋</div>
+                <div class="criterion-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined text-brand-600">support_agent</span>
+                </div>
                 <div>
                     <div class="criterion-title">Service Quality</div>
                     <div class="criterion-desc">
@@ -219,7 +223,9 @@
             </div>
 
             <div class="criterion" role="listitem">
-                <div class="criterion-icon" aria-hidden="true">🍽️</div>
+                <div class="criterion-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined text-brand-600">restaurant</span>
+                </div>
                 <div>
                     <div class="criterion-title">Taste</div>
                     <div class="criterion-desc">
@@ -229,7 +235,9 @@
             </div>
 
             <div class="criterion" role="listitem">
-                <div class="criterion-icon" aria-hidden="true">💰</div>
+                <div class="criterion-icon" aria-hidden="true">
+                    <span class="material-symbols-outlined text-brand-600">payments</span>
+                </div>
                 <div>
                     <div class="criterion-title">Price Fairness</div>
                     <div class="criterion-desc">

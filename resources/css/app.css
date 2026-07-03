@@ -212,6 +212,12 @@ body {
     font-weight: 600;
 }
 
+.nav-links-wrap {
+    display: flex;
+    align-items: center;
+    gap: var(--space-6);
+}
+
 .nav-cta {
     display: flex;
     gap: var(--space-2);
@@ -471,13 +477,10 @@ body {
     .hero-scroll-line { animation: none; opacity: 0.5; }
 }
 
-/* Hero image — fills a lower strip in the hero, fades into brand color above */
+/* Hero image — full bleed cinematic background overlay */
 .hero-visual {
     position: absolute;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    height: 55%;
+    inset: 0;
     z-index: 0;
 }
 
@@ -491,9 +494,9 @@ body {
     width: 100%;
     height: 100%;
     object-fit: cover;
-    object-position: center 40%;
-    opacity: 0.18;
-    filter: saturate(0.3) contrast(0.9);
+    object-position: center;
+    opacity: 0.52;
+    filter: saturate(0.35) contrast(1.0) brightness(0.85);
     display: block;
 }
 
@@ -502,9 +505,9 @@ body {
     inset: 0;
     background: linear-gradient(
         to bottom,
-        var(--color-brand-900) 0%,
-        oklch(0.24 0.09 155 / 0.7) 40%,
-        oklch(0.18 0.07 155 / 0.95) 100%
+        oklch(0.24 0.09 155 / 0.8) 0%,
+        oklch(0.24 0.09 155 / 0.7) 50%,
+        oklch(0.18 0.07 155 / 0.9) 100%
     );
 }
 
