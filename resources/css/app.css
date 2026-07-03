@@ -333,7 +333,11 @@ body {
     position: relative;
     overflow: hidden;
     background-color: var(--color-brand-900);
-    padding-block: clamp(5rem, 12vw, 8rem);
+    min-height: calc(100vh - 4rem);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding-block: var(--space-12);
 }
 
 /* Subtle radial glow, not a loud gradient */
