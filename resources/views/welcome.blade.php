@@ -275,16 +275,37 @@
 {{-- ── Footer ───────────────────────────────────────────────────────────── --}}
 <footer class="site-footer" role="contentinfo">
     <div class="container">
-        <div class="footer-inner">
-            <span class="footer-brand">ISU-Cauayan Canteen DSS</span>
-            <nav aria-label="Footer navigation">
-                <ul class="footer-links" role="list">
-                    <li><a href="{{ url('/about') }}">About</a></li>
-                    <li><a href="{{ url('/login') }}">Login</a></li>
-                    <li><a href="{{ url('/register') }}">Register</a></li>
+        <div class="footer-grid">
+            <div class="footer-brand-col">
+                <a href="{{ url('/') }}" class="footer-brand-logo">
+                    <img src="{{ asset('assets/images/isu_logo.jpg') }}" alt="" width="28" height="28" aria-hidden="true">
+                    <span>ISU Canteen DSS</span>
+                </a>
+                <p class="footer-brand-desc">
+                    A Decision Support System tailored for campus dining. Utilizing AHP pairwise criteria weighting and SAW calculations to foster fair, transparent canteen stall rankings.
+                </p>
+            </div>
+            
+            <div class="footer-links-col">
+                <h4 class="footer-col-title">Platform</h4>
+                <ul class="footer-links-list" role="list">
+                    <li><a href="{{ url('/') }}">Home Portal</a></li>
+                    <li><a href="{{ url('/about') }}">About DSS</a></li>
                 </ul>
-            </nav>
-            <p class="footer-copy">&copy; 2026 ISU-Cauayan Canteen DSS</p>
+            </div>
+
+            <div class="footer-links-col">
+                <h4 class="footer-col-title">Account Portal</h4>
+                <ul class="footer-links-list" role="list">
+                    <li><a href="{{ url('/login') }}">Login to Portal</a></li>
+                    <li><a href="{{ url('/register') }}">Create Account</a></li>
+                </ul>
+            </div>
+        </div>
+        
+        <div class="footer-bottom">
+            <p class="footer-copy">&copy; 2026 Isabela State University — Cauayan Campus. All rights reserved.</p>
+            <p class="footer-meta">AHP &amp; SAW Evaluation Platform</p>
         </div>
     </div>
 </footer>
