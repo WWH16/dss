@@ -21,7 +21,7 @@
     <div class="container">
         <div class="nav-inner">
             <a href="{{ url('/') }}" class="nav-brand" aria-label="ISU-Cauayan Canteen DSS Home">
-                <img src="{{ asset('assets/images/isu_logo.jpg') }}" alt="" width="32" height="32" aria-hidden="true">
+                <img src="{{ asset('assets/images/isu_logo.png') }}" alt="" width="32" height="32" aria-hidden="true">
                 ISU Canteen DSS
             </a>
 
@@ -278,14 +278,14 @@
         <div class="footer-grid">
             <div class="footer-brand-col">
                 <a href="{{ url('/') }}" class="footer-brand-logo">
-                    <img src="{{ asset('assets/images/isu_logo.jpg') }}" alt="" width="28" height="28" aria-hidden="true">
+                    <img src="{{ asset('assets/images/isu_logo.png') }}" alt="" width="28" height="28" aria-hidden="true">
                     <span>ISU Canteen DSS</span>
                 </a>
                 <p class="footer-brand-desc">
                     A Decision Support System tailored for campus dining. Utilizing AHP pairwise criteria weighting and SAW calculations to foster fair, transparent canteen stall rankings.
                 </p>
             </div>
-            
+
             <div class="footer-links-col">
                 <h4 class="footer-col-title">Platform</h4>
                 <ul class="footer-links-list" role="list">
@@ -302,7 +302,7 @@
                 </ul>
             </div>
         </div>
-        
+
         <div class="footer-bottom">
             <p class="footer-copy">&copy; 2026 Isabela State University — Cauayan Campus. All rights reserved.</p>
             <p class="footer-meta">AHP &amp; SAW Evaluation Platform</p>
