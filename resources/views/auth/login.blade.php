@@ -2,56 +2,57 @@
 
 @section('title', 'Login | ISU Canteen DSS')
 
-@section('head')
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-@endsection
-
 @section('content')
-<div class="auth-page">
-  <div class="auth-card shadow-sm">
+<div class="py-16 md:py-24 bg-neutral-50/50 min-h-[calc(100vh-8rem)] flex items-center justify-center px-4">
+  <div class="w-full max-w-md bg-white rounded-2xl border border-neutral-200/60 p-6 md:p-8 shadow-sm">
 
-    <div class="text-center mb-4">
-      <h1 class="fw-bold text-success">Login</h1>
-      <p class="text-muted">Access your evaluation dashboard</p>
+    <div class="text-center mb-6">
+      <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">Login</h1>
+      <p class="text-neutral-500 text-xs mt-1">Access your evaluation dashboard</p>
     </div>
 
     @if($success)
-      <div class="alert alert-success">{{ $success }}</div>
+      <div class="mb-4 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg leading-none">check_circle</span>
+        {{ $success }}
+      </div>
     @endif
 
     @if($error)
-      <div class="alert alert-danger">{{ $error }}</div>
+      <div class="mb-4 p-4 bg-red-50 border border-red-100 text-red-800 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+        <span class="material-symbols-outlined text-lg leading-none">error</span>
+        {{ $error }}
+      </div>
     @endif
 
-    <form action="{{ url('/login') }}" method="POST">
+    <form action="{{ url('/login') }}" method="POST" class="space-y-4">
       @csrf
 
-      <div class="mb-3">
-        <label class="form-label">Role</label>
-        <select id="role" name="role" class="form-select" onchange="toggleLoginFields()">
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1.5">Role</label>
+        <select id="role" name="role" class="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 font-medium text-neutral-800" onchange="toggleLoginFields()">
           <option value="student" {{ $selectedRole=='student'?'selected':'' }}>Student</option>
           <option value="staff" {{ $selectedRole=='staff'?'selected':'' }}>Staff</option>
           <option value="admin" {{ $selectedRole=='admin'?'selected':'' }}>Admin</option>
         </select>
       </div>
 
-      <div class="mb-3" id="student_number_field">
-        <label class="form-label">Student Number</label>
-        <input type="text" name="student_number" class="form-control">
+      <div id="student_number_field">
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1.5">Student Number</label>
+        <input type="text" name="student_number" class="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 font-medium text-neutral-800">
       </div>
 
-      <div class="mb-3" id="email_field">
-        <label class="form-label">Email</label>
-        <input type="email" name="email" class="form-control">
+      <div id="email_field">
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1.5">Email</label>
+        <input type="email" name="email" class="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 font-medium text-neutral-800">
       </div>
 
-      <div class="mb-3">
-        <label class="form-label">Password</label>
-        <input type="password" name="password" class="form-control" required>
+      <div>
+        <label class="block text-[10px] font-bold uppercase tracking-widest text-neutral-400 mb-1.5">Password</label>
+        <input type="password" name="password" class="w-full px-4 py-2.5 bg-neutral-50 border border-neutral-200 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-100 font-medium text-neutral-800" required>
       </div>
 
-      <button type="submit" class="btn btn-success w-100">
+      <button type="submit" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2">
         Login
       </button>
     </form>
