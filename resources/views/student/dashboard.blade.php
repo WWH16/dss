@@ -1,162 +1,102 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Student Dashboard</title>
+@extends('layouts.app')
 
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-</head>
+@section('title', 'Student Dashboard | ISU Canteen DSS')
 
-<body class="bg-light">
-
-<div class="container py-5">
-
-    <!-- HEADER -->
-    <div class="card shadow-sm mb-4">
-        <div class="card-body d-flex justify-content-between align-items-center">
-
+@section('content')
+<div class="py-10 bg-neutral-50/50 min-h-screen">
+    <div class="container max-w-5xl">
+        <!-- Dashboard Header -->
+        <div class="mb-8 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
             <div>
-                <h2 class="text-success mb-1">Student Dashboard</h2>
-                <p class="mb-0">
-                    Welcome,
-                    <strong>{{ $profile->name ?? $profile->student_number }}</strong>
-                </p>
+                <h1 class="text-3xl font-display font-bold tracking-tight text-neutral-900 leading-tight">Student Dashboard</h1>
+                <p class="text-neutral-500 mt-1 text-sm leading-relaxed">Welcome back, <span class="font-semibold text-brand-700">{{ $profile->name ?? $profile->student_number }}</span></p>
+            </div>
+            <div>
+                <a href="{{ route('student.evaluation') }}" class="btn btn-primary inline-flex items-center gap-2 text-sm font-semibold tracking-wide">
+                    <span class="material-symbols-outlined text-lg">rate_review</span>
+                    Evaluate Food Stall
+                </a>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <!-- Profile Details Card (left column on desktop) -->
+            <div class="bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
+                <div class="flex items-center gap-3 mb-5 pb-4 border-b border-neutral-100">
+                    <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-2.5 rounded-xl">account_circle</span>
+                    <div>
+                        <h2 class="font-bold text-neutral-900 tracking-tight leading-snug">My Profile</h2>
+                        <p class="text-xs text-neutral-400 font-medium">Student Account</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-4">
+                    <div>
+                        <span class="text-[10px] text-neutral-400 block uppercase tracking-widest font-bold mb-1">Student Number</span>
+                        <span class="text-sm text-neutral-800 font-semibold tabular-nums">{{ $profile->student_number }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-neutral-400 block uppercase tracking-widest font-bold mb-1">Email Address</span>
+                        <span class="text-sm text-neutral-800 font-semibold break-all leading-normal">{{ $profile->email }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-neutral-400 block uppercase tracking-widest font-bold mb-1">Course</span>
+                        <span class="text-sm text-neutral-800 font-semibold">{{ $profile->course }}</span>
+                    </div>
+                    <div>
+                        <span class="text-[10px] text-neutral-400 block uppercase tracking-widest font-bold mb-1">Year Level</span>
+                        <span class="text-sm text-neutral-800 font-semibold">{{ $profile->year_level }}</span>
+                    </div>
+                </div>
             </div>
 
-            <form action="{{ route('logout') }}" method="POST">
-                @csrf
-                <button class="btn btn-outline-danger">
-                    Logout
-                </button>
-            </form>
-
-        </div>
-    </div>
-
-    <!-- PROFILE -->
-    <div class="card shadow-sm mb-4">
-
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">My Profile</h5>
-        </div>
-
-        <div class="card-body">
-
-            <div class="row">
-
-                <div class="col-md-6">
-                    <p><strong>Name:</strong> {{ $profile->name }}</p>
-                    <p><strong>Student Number:</strong> {{ $profile->student_number }}</p>
-                    <p><strong>Email:</strong> {{ $profile->email }}</p>
+            <!-- My Evaluations (right column on desktop) -->
+            <div class="md:col-span-2 bg-white rounded-2xl shadow-sm border border-neutral-100 p-6">
+                <div class="flex items-center gap-3 mb-6">
+                    <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-2.5 rounded-xl">history</span>
+                    <div>
+                        <h2 class="font-bold text-neutral-900 tracking-tight leading-snug">My Evaluated Stalls</h2>
+                        <p class="text-xs text-neutral-400 font-medium">Recent stall feedback history</p>
+                    </div>
                 </div>
 
-                <div class="col-md-6">
-                    <p><strong>Course:</strong> {{ $profile->course }}</p>
-                    <p><strong>Year Level:</strong> {{ $profile->year_level }}</p>
-                </div>
-
+                @if($myStudentEvals->isEmpty())
+                    <div class="flex flex-col items-center justify-center py-12 text-center">
+                        <span class="material-symbols-outlined text-4xl text-neutral-300 mb-3">ballot</span>
+                        <p class="text-neutral-500 font-medium text-sm leading-relaxed">You haven't evaluated any food stall yet.</p>
+                        <a href="{{ route('student.evaluation') }}" class="text-brand-600 hover:text-brand-700 font-semibold text-xs tracking-wider uppercase mt-3 inline-flex items-center gap-1">
+                            Submit your first evaluation <span class="material-symbols-outlined text-sm">arrow_forward</span>
+                        </a>
+                    </div>
+                @else
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse">
+                            <thead>
+                                <tr class="border-b border-neutral-100 text-[10px] text-neutral-400 font-bold uppercase tracking-widest">
+                                    <th class="pb-3 font-bold">Food Stall</th>
+                                    <th class="pb-3 font-bold text-right">Date Evaluated</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-neutral-50">
+                                @foreach($myStudentEvals as $eval)
+                                    @php
+                                        $stall = $stalls->firstWhere('id', $eval->stall_id);
+                                    @endphp
+                                    <tr class="text-sm text-neutral-800 hover:bg-neutral-50/50">
+                                        <td class="py-3.5 font-semibold text-neutral-900 leading-snug">
+                                            {{ $stall->name ?? 'Unknown Stall' }}
+                                        </td>
+                                        <td class="py-3.5 text-right text-xs text-neutral-500 tabular-nums font-medium">
+                                            {{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y h:i A') }}
+                                        </td>
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
+                @endif
             </div>
-
         </div>
-
     </div>
-
-    <!-- EVALUATE BUTTON -->
-    <div class="card shadow-sm mb-4">
-
-        <div class="card-body text-center">
-
-            <h4 class="text-success">
-                Food Stall Evaluation
-            </h4>
-
-            <p>
-                Click the button below to evaluate a food stall.
-            </p>
-
-            <a href="{{ route('student.evaluation') }}"
-               class="btn btn-success btn-lg">
-
-                Evaluate Food Stall
-
-            </a>
-
-        </div>
-
-    </div>
-
-    <!-- MY EVALUATIONS -->
-    <div class="card shadow-sm">
-
-        <div class="card-header bg-success text-white">
-            <h5 class="mb-0">
-                My Evaluated Stalls
-            </h5>
-        </div>
-
-        <div class="card-body">
-
-            @if($myStudentEvals->isEmpty())
-
-                <div class="alert alert-info">
-                    You haven't evaluated any food stall yet.
-                </div>
-
-            @else
-
-                <table class="table table-bordered">
-
-                    <thead>
-
-                        <tr>
-
-                            <th>Food Stall</th>
-
-                            <th>Date Evaluated</th>
-
-                        </tr>
-
-                    </thead>
-
-                    <tbody>
-
-                    @foreach($myStudentEvals as $eval)
-
-                        <tr>
-
-                            <td>
-
-                                @php
-                                    $stall = $stalls->firstWhere('id', $eval->stall_id);
-                                @endphp
-
-                                {{ $stall->name ?? 'Unknown Stall' }}
-
-                            </td>
-
-                            <td>
-
-                                {{ \Carbon\Carbon::parse($eval->created_at)->format('F d, Y h:i A') }}
-
-                            </td>
-
-                        </tr>
-
-                    @endforeach
-
-                    </tbody>
-
-                </table>
-
-            @endif
-
-        </div>
-
-    </div>
-
 </div>
-
-</body>
-</html>
+@endsection
