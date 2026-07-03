@@ -882,3 +882,67 @@ body {
         gap: var(--space-2);
     }
 }
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Floating Back to Top Button
+───────────────────────────────────────────────────────────────────────── */
+.back-to-top {
+    position: fixed;
+    bottom: var(--space-8);
+    right: var(--space-8);
+    width: 3.25rem;
+    height: 3.25rem;
+    border-radius: 9999px;
+    background: var(--color-brand-600);
+    color: #fff;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--shadow-md);
+    z-index: var(--z-sticky);
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(15px);
+    transition: opacity 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                visibility 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                transform 0.28s cubic-bezier(0.16, 1, 0.3, 1),
+                background-color 0.2s ease,
+                box-shadow 0.2s ease;
+}
+
+.back-to-top.visible {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+}
+
+.back-to-top:hover {
+    background: var(--color-brand-700);
+    box-shadow: var(--shadow-lg);
+    transform: translateY(-2px);
+}
+
+.back-to-top:active {
+    transform: scale(0.92);
+}
+
+.back-to-top svg {
+    width: 1.5rem;
+    height: 1.5rem;
+    transition: transform 0.2s ease;
+}
+
+.back-to-top:hover svg {
+    transform: translateY(-2px);
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .back-to-top {
+        transition: none !important;
+    }
+    .back-to-top:hover svg {
+        transform: none !important;
+    }
+}
