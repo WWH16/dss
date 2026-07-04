@@ -44,7 +44,7 @@
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
-                    <a href="{{ url('/login') }}" class="hero-btn-outline" id="hero-login-btn">Login to Dashboard</a>
+                    <a href="{{ url('/login') }}" class="btn btn-outline-white btn-lg" id="hero-login-btn">Login to Dashboard</a>
                 @endauth
             </div>
         </div>
@@ -244,7 +244,7 @@
                     <a href="{{ url('/register') }}" class="btn btn-primary btn-lg" id="cta-register-btn">
                         Create an Account
                     </a>
-                    <a href="{{ url('/about') }}" class="hero-btn-outline" id="cta-about-btn">
+                    <a href="{{ url('/about') }}" class="btn btn-outline-white btn-lg" id="cta-about-btn">
                         Learn More
                     </a>
                 @endauth

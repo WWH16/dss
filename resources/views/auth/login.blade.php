@@ -17,7 +17,7 @@
 
     <!-- Standalone Back Navigation Arrow -->
     <div class="absolute top-6 left-6 z-50">
-        <a href="javascript:history.length > 1 ? history.back() : window.location.href = '/';" class="inline-flex items-center justify-center w-10 h-10 rounded-[4px] border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:border-neutral-300 shadow-sm transition-all" aria-label="Go back">
+        <a href="{{ url('/') }}" class="inline-flex items-center justify-center w-10 h-10 rounded-[4px] border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:border-neutral-300 shadow-sm transition-all" aria-label="Go back">
             <span class="material-symbols-outlined text-xl leading-none">arrow_back</span>
         </a>
     </div>
