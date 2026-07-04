@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>@yield('title', 'ISU-Cauayan Canteen DSS — Transparent Campus Dining')</title>
     <meta name="description" content="@yield('meta_description', 'A Decision Support System collecting student feedback to fairly rank ISU-Cauayan canteen stalls using AHP and SAW algorithms.')">
+    <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     {{-- Tailwind v4 + app CSS via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
