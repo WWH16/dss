@@ -48,7 +48,7 @@
                     <input
                         type="text"
                         name="name"
-                        class="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-100"
+                        class="flex-1 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-semibold focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600/15"
                         placeholder="New Stall Name"
                         required>
                     <button class="btn btn-primary text-xs py-2 px-3 font-semibold flex items-center gap-1">

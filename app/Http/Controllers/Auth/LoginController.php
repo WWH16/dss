@@ -10,8 +10,8 @@ class LoginController extends Controller
 {
     public function showLogin(Request $request)
     {
-        $error = $request->get('error');
-        $success = $request->get('success');
+        $error = $request->get('error') ?? session('error');
+        $success = $request->get('success') ?? session('success');
 
         $allowedRoles = ['student', 'staff', 'admin'];
         $selectedRole = $request->get('role', 'student');
@@ -20,10 +20,13 @@ class LoginController extends Controller
             $selectedRole = 'student';
         }
 
+        $activeTab = $request->get('tab', 'login');
+
         return view('auth.login', compact(
             'error',
             'success',
-            'selectedRole'
+            'selectedRole',
+            'activeTab'
         ));
     }
 

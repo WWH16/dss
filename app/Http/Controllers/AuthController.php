@@ -10,7 +10,12 @@ class AuthController extends Controller
 {
     public function showRegister()
     {
-        return view('auth.register');
+        return view('auth.login', [
+            'activeTab' => 'register',
+            'selectedRole' => 'student',
+            'error' => session('error'),
+            'success' => session('success')
+        ]);
     }
 
     public function register(Request $request)
