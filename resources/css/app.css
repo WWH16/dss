@@ -360,6 +360,39 @@
     transform: translateY(1px) scale(0.98);
 }
 
+/* ── Button loading / disabled state ─────────────────────────── */
+.btn-loading {
+    opacity: 0.72;
+    cursor: not-allowed;
+    pointer-events: none;
+    transform: none;
+}
+
+.btn-loading:hover,
+.btn-loading:active {
+    transform: none;
+    box-shadow: 0 1px 3px oklch(0.24 0.09 155 / 0.12);
+}
+
+/* Hourglass icon rotation */
+@keyframes hourglass-rotate {
+    0%   { transform: rotate(0deg); }
+    40%  { transform: rotate(180deg); }
+    100% { transform: rotate(180deg); }
+}
+
+.btn-hourglass {
+    display: inline-flex;
+    animation: hourglass-rotate 1.2s ease-in-out infinite;
+    transform-origin: center;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .btn-hourglass {
+        animation: none;
+    }
+}
+
 .btn-ghost {
     background-color: transparent;
     color: var(--color-ink-700);

@@ -104,16 +104,9 @@
                     </div>
                 </div>
 
-                <button type="submit" id="login-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center">
-                    <span id="login-btn-content" class="flex items-center justify-center gap-2">
-                        Login
-                    </span>
-                    <span id="login-btn-loader" class="hidden">
-                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </span>
+                <button type="submit" id="login-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">
+                    <span id="login-btn-loader" class="material-symbols-outlined text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;">hourglass_top</span>
+                    <span id="login-btn-content">Login</span>
                 </button>
             </form>
         </div>
@@ -204,16 +197,9 @@
                     </div>
                 </div>
 
-                <button type="submit" id="register-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center">
-                    <span id="register-btn-content" class="flex items-center justify-center gap-2">
-                        Register
-                    </span>
-                    <span id="register-btn-loader" class="hidden">
-                        <svg class="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                        </svg>
-                    </span>
+                <button type="submit" id="register-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">
+                    <span id="register-btn-loader" class="material-symbols-outlined text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;">hourglass_top</span>
+                    <span id="register-btn-content">Register</span>
                 </button>
             </form>
         </div>
@@ -288,36 +274,47 @@
 
             if (loginForm) {
                 loginForm.addEventListener('submit', (e) => {
-                    handleFormSubmit(loginForm, 'login-submit-btn', 'login-btn-content', 'login-btn-loader');
+                    if (!handleFormSubmit(loginForm, 'login-submit-btn', 'login-btn-content', 'login-btn-loader', 'Logging in…')) {
+                        e.preventDefault();
+                    }
                 });
             }
 
             if (registerForm) {
                 registerForm.addEventListener('submit', (e) => {
-                    handleFormSubmit(registerForm, 'register-submit-btn', 'register-btn-content', 'register-btn-loader');
+                    if (!handleFormSubmit(registerForm, 'register-submit-btn', 'register-btn-content', 'register-btn-loader', 'Registering…')) {
+                        e.preventDefault();
+                    }
                 });
             }
         });
 
-        function handleFormSubmit(formElement, btnId, contentId, loaderId) {
+        function handleFormSubmit(formElement, btnId, contentId, loaderId, loadingText) {
             const btn = document.getElementById(btnId);
             const content = document.getElementById(contentId);
             const loader = document.getElementById(loaderId);
 
-            // Double submit check
+            // Block double submit
             if (formElement.dataset.submitting === 'true') {
-                return;
+                return false;
             }
             formElement.dataset.submitting = 'true';
 
-            // Show loading state
-            content.classList.add('hidden');
-            loader.classList.remove('hidden');
-            btn.disabled = true;
-            btn.classList.add('opacity-75', 'cursor-not-allowed');
+            // Swap button text to loading label
+            content.textContent = loadingText;
 
-            // Visual locking feedback (pointer-events-none prevents clicks without disabling inputs)
-            formElement.classList.add('pointer-events-none', 'opacity-70');
+            // Show hourglass icon
+            loader.style.display = '';
+
+            // Disable button
+            btn.disabled = true;
+            btn.classList.add('btn-loading');
+
+            // Dim form inputs to signal locked state
+            formElement.classList.add('pointer-events-none');
+            formElement.style.opacity = '0.6';
+
+            return true;
         }
     </script>
 </body>
