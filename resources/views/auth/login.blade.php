@@ -86,18 +86,18 @@
 
                 <div id="login_student_number_field">
                     <label for="login_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                    <input type="text" id="login_student_number" name="student_number" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="username">
+                    <input type="text" id="login_student_number" name="student_number" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username">
                 </div>
 
                 <div id="login_email_field">
                     <label for="login_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
-                    <input type="email" id="login_email" name="email" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="username email">
+                    <input type="email" id="login_email" name="email" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username email">
                 </div>
 
                 <div>
                     <label for="login_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password</label>
                     <div class="relative">
-                        <input type="password" id="login_password" name="password" class="w-full pl-4 pr-11 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="current-password" required>
+                        <input type="password" id="login_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="current-password" required>
                         <button type="button" onclick="togglePasswordVisibility('login_password', 'login_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
                             <span id="login_password_icon" class="material-symbols-outlined text-lg leading-none">visibility</span>
                         </button>
@@ -134,12 +134,12 @@
 
                 <div>
                     <label for="register_name" class="block text-xs font-semibold text-neutral-700 mb-1.5">Full Name</label>
-                    <input type="text" id="register_name" name="name" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="name" required>
+                    <input type="text" id="register_name" name="name" placeholder="e.g. Juan Dela Cruz" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="name" required>
                 </div>
 
                 <div>
                     <label for="register_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
-                    <input type="email" id="register_email" name="email" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="email" required>
+                    <input type="email" id="register_email" name="email" placeholder="e.g. student@example.com" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="email" required>
                 </div>
 
                 {{-- STUDENT FIELDS --}}
@@ -169,7 +169,7 @@
 
                     <div>
                         <label for="register_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                        <input type="text" id="register_student_number" name="student_number" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="username">
+                        <input type="text" id="register_student_number" name="student_number" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username">
                     </div>
                 </div>
 
@@ -177,7 +177,7 @@
                 <div id="register_staff_field" style="display:none;">
                     <div>
                         <label for="register_stall_name" class="block text-xs font-semibold text-neutral-700 mb-1.5">Stall Number / Name</label>
-                        <input type="text" id="register_stall_name" name="stall_name" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800">
+                        <input type="text" id="register_stall_name" name="stall_name" placeholder="e.g. Stall #1 - Food Hub" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400">
                     </div>
                 </div>
 
@@ -186,7 +186,7 @@
                     <div>
                         <label for="register_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password</label>
                         <div class="relative">
-                            <input type="password" id="register_password" name="password" class="w-full pl-4 pr-11 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="new-password" required>
+                            <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password', 'register_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
                                 <span id="register_password_icon" class="material-symbols-outlined text-lg leading-none">visibility</span>
                             </button>
@@ -196,7 +196,7 @@
                     <div>
                         <label for="register_password_confirmation" class="block text-xs font-semibold text-neutral-700 mb-1.5">Confirm Password</label>
                         <div class="relative">
-                            <input type="password" id="register_password_confirmation" name="password_confirmation" class="w-full pl-4 pr-11 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" autocomplete="new-password" required>
+                            <input type="password" id="register_password_confirmation" name="password_confirmation" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password_confirmation', 'register_password_confirm_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password confirmation visibility">
                                 <span id="register_password_confirm_icon" class="material-symbols-outlined text-lg leading-none">visibility</span>
                             </button>
