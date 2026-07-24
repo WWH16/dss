@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Authentication | ISU Canteen DSS</title>
+    <title>Authentication | Decision Support System: ISU Cauayan Canteen Client Evaluation System</title>
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     
     {{-- Tailwind v4 + app CSS via Vite --}}
@@ -31,8 +31,8 @@
             <div class="flex justify-center mb-4">
                 <img src="{{ asset('assets/images/isu_logo.png') }}" alt="ISU Logo" class="w-14 h-14 object-contain">
             </div>
-            <h1 class="text-xl font-display font-bold text-neutral-900 tracking-tight" id="auth-heading">Access Platform</h1>
-            <p class="text-neutral-500 text-xs mt-1" id="auth-subheading">Sign in or register to get started</p>
+            <h1 class="text-lg font-display font-bold text-neutral-900 tracking-tight" id="auth-heading">ISU Cauayan Canteen Client Evaluation System</h1>
+            <p class="text-neutral-500 text-xs mt-1 font-medium" id="auth-subheading">Decision Support System Portal</p>
         </div>
 
         {{-- Laravel Errors/Success Alerts --}}

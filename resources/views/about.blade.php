@@ -1,13 +1,14 @@
 @extends('layouts.app')
 
-@section('title', 'About ISU Canteen')
+@section('title', 'About — Decision Support System: ISU Cauayan Canteen Client Evaluation System')
 
 @section('content')
 {{-- ── Compact Page Header ────────────────────────────────────────────── --}}
 <section class="relative bg-brand-900 text-white py-16 md:py-24 overflow-hidden">
   <div class="container relative z-10 animate-fade-up">
-    <h1 class="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-white mb-4">
-      About the Platform
+    <span class="text-brand-300 font-bold text-base md:text-lg block mb-2 tracking-tight">Decision Support System</span>
+    <h1 class="text-3xl md:text-5xl font-display font-extrabold tracking-tight text-white mb-4 max-w-4xl">
+      ISU Cauayan Canteen Client Evaluation System
     </h1>
     <p class="text-base md:text-lg text-brand-100 max-w-2xl leading-relaxed text-balance">
       Empowering the ISU-Cauayan community with an objective, data-driven system for canteen evaluation and stall rankings.

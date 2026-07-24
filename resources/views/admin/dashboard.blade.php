@@ -1,6 +1,6 @@
 @extends('layouts.app')
 
-@section('title', 'Admin Dashboard | ISU Canteen DSS')
+@section('title', 'Admin Dashboard | Decision Support System: ISU Cauayan Canteen Client Evaluation System')
 
 @section('content')
 <div class="py-10 bg-neutral-50/50 min-h-screen">

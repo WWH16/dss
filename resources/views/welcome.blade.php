@@ -1,24 +1,19 @@
 @extends('layouts.app')
 
-@section('title', 'ISU-Cauayan Canteen DSS — Transparent Campus Dining')
+@section('title', 'Decision Support System: ISU Cauayan Canteen Client Evaluation System')
 
 @section('content')
 {{-- ── Hero ─────────────────────────────────────────────────────────────── --}}
 <section class="hero" aria-labelledby="hero-heading">
     <div class="container">
         <div class="hero-inner">
-            <div class="animate-fade-up">
-                <span class="hero-badge">ISU-Cauayan · Decision Support System</span>
-            </div>
-
-            <h1 class="hero-heading animate-fade-up delay-100" id="hero-heading">
-                Fair Rankings for<br>
-                <em>Every Canteen Stall</em>
+            <h1 class="hero-heading animate-fade-up" id="hero-heading">
+                <span class="hero-title-category">Decision Support System</span>
+                <span class="hero-title-name">ISU Cauayan Canteen Client Evaluation System</span>
             </h1>
 
-            <p class="hero-sub animate-fade-up delay-200">
-                Collect student feedback, evaluate stalls using AHP and SAW algorithms,
-                and keep campus dining transparent, fair, and high-quality.
+            <p class="hero-sub animate-fade-up delay-100">
+                Fair, transparent campus dining rankings powered by student feedback and decision science algorithms (AHP &amp; SAW).
             </p>
 
             <div class="hero-actions animate-fade-up delay-300">

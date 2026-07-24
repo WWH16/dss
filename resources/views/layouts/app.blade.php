@@ -3,8 +3,8 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>@yield('title', 'ISU-Cauayan Canteen DSS — Transparent Campus Dining')</title>
-    <meta name="description" content="@yield('meta_description', 'A Decision Support System collecting student feedback to fairly rank ISU-Cauayan canteen stalls using AHP and SAW algorithms.')">
+    <title>@yield('title', 'Decision Support System: ISU Cauayan Canteen Client Evaluation System')</title>
+    <meta name="description" content="@yield('meta_description', 'Decision Support System: ISU Cauayan Canteen Client Evaluation System — collecting student feedback to rank canteen stalls using AHP and SAW algorithms.')">
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
 
     {{-- Tailwind v4 + app CSS via Vite --}}
@@ -23,9 +23,9 @@
 <nav class="site-nav" role="navigation" aria-label="Main navigation">
     <div class="container">
         <div class="nav-inner">
-            <a href="{{ url('/') }}" class="nav-brand" aria-label="ISU-Cauayan Canteen DSS Home">
+            <a href="{{ url('/') }}" class="nav-brand" aria-label="Decision Support System: ISU Cauayan Canteen Client Evaluation System">
                 <img src="{{ asset('assets/images/isu_logo.png') }}" alt="" width="32" height="32" aria-hidden="true">
-                ISU Canteen DSS
+                <span>ISU Cauayan Canteen DSS</span>
             </a>
 
             <button class="nav-toggle" id="nav-toggle" aria-controls="nav-links-wrap" aria-expanded="false" aria-label="Toggle menu">
@@ -79,7 +79,7 @@
             <div class="footer-brand-col">
                 <a href="{{ url('/') }}" class="footer-brand-logo">
                     <img src="{{ asset('assets/images/isu_logo.png') }}" alt="" width="28" height="28" aria-hidden="true">
-                    <span>ISU Canteen DSS</span>
+                    <span>ISU Cauayan Canteen Client Evaluation System</span>
                 </a>
                 <p class="footer-brand-desc">
                     A Decision Support System tailored for campus dining. Utilizing AHP pairwise criteria weighting and SAW calculations to foster fair, transparent canteen stall rankings.
