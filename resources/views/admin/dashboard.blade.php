@@ -75,40 +75,85 @@
         </div>
     @endif
 
-    {{-- Average Scores Table --}}
-    @if($results->isNotEmpty())
-    <div class="bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm mt-6">
-        <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
-            <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Average Stall Scores</h2>
-            <span class="text-[10px] text-neutral-400 font-bold uppercase">Out of 5.0 max</span>
-        </div>
+    {{-- Data Tables --}}
+    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6 mt-6">
+        
+        {{-- Average Scores Table --}}
+        @if($results->isNotEmpty())
+        <div class="bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
+                <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Average Stall Scores</h2>
+                <span class="text-[10px] text-neutral-400 font-bold uppercase">Out of 5.0 max</span>
+            </div>
 
-        <div class="overflow-x-auto">
-            <table class="w-full text-left border-collapse min-w-[400px]">
-                <thead>
-                    <tr class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider border-b border-neutral-100">
-                        <th class="pb-2">Food Stall</th>
-                        <th class="pb-2 text-center">Cleanliness</th>
-                        <th class="pb-2 text-center">Service</th>
-                        <th class="pb-2 text-center">Taste</th>
-                        <th class="pb-2 text-center">Price</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-neutral-50">
-                    @foreach($results as $result)
-                        <tr class="text-sm hover:bg-neutral-50/50 transition-colors">
-                            <td class="py-3 font-bold text-neutral-900">{{ $result->name }}</td>
-                            <td class="py-3 text-center font-bold tabular-nums {{ $result->cleanliness >= 4 ? 'text-brand-600' : ($result->cleanliness >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->cleanliness, 2) }}</td>
-                            <td class="py-3 text-center font-bold tabular-nums {{ $result->service >= 4 ? 'text-brand-600' : ($result->service >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->service, 2) }}</td>
-                            <td class="py-3 text-center font-bold tabular-nums {{ $result->taste >= 4 ? 'text-brand-600' : ($result->taste >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->taste, 2) }}</td>
-                            <td class="py-3 text-center font-bold tabular-nums {{ $result->price >= 4 ? 'text-brand-600' : ($result->price >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->price, 2) }}</td>
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse min-w-[400px]">
+                    <thead>
+                        <tr class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider border-b border-neutral-100">
+                            <th class="pb-2">Food Stall</th>
+                            <th class="pb-2 text-center">Cleanliness</th>
+                            <th class="pb-2 text-center">Service</th>
+                            <th class="pb-2 text-center">Taste</th>
+                            <th class="pb-2 text-center">Price</th>
                         </tr>
-                    @endforeach
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-50">
+                        @foreach($results as $result)
+                            <tr class="text-sm hover:bg-neutral-50/50 transition-colors">
+                                <td class="py-3 font-bold text-neutral-900">{{ $result->name }}</td>
+                                <td class="py-3 text-center font-bold tabular-nums {{ $result->cleanliness >= 4 ? 'text-brand-600' : ($result->cleanliness >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->cleanliness, 2) }}</td>
+                                <td class="py-3 text-center font-bold tabular-nums {{ $result->service >= 4 ? 'text-brand-600' : ($result->service >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->service, 2) }}</td>
+                                <td class="py-3 text-center font-bold tabular-nums {{ $result->taste >= 4 ? 'text-brand-600' : ($result->taste >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->taste, 2) }}</td>
+                                <td class="py-3 text-center font-bold tabular-nums {{ $result->price >= 4 ? 'text-brand-600' : ($result->price >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->price, 2) }}</td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
+        @endif
+
+        {{-- Recent Evaluations Table --}}
+        @if($recentEvaluations->isNotEmpty())
+        <div class="bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm flex flex-col">
+            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
+                <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Recent Evaluations</h2>
+                <a href="{{ route('admin.evaluations') }}" class="text-[10px] text-brand-600 hover:text-brand-700 font-bold uppercase inline-flex items-center gap-0.5 transition-colors">
+                    View All <span class="material-symbols-outlined text-[12px] leading-none">arrow_forward</span>
+                </a>
+            </div>
+
+            <div class="overflow-x-auto flex-1">
+                <table class="w-full text-left border-collapse min-w-[400px]">
+                    <thead>
+                        <tr class="text-[10px] text-neutral-400 font-bold uppercase tracking-wider border-b border-neutral-100">
+                            <th class="pb-2">Student</th>
+                            <th class="pb-2">Stall</th>
+                            <th class="pb-2 text-center">Avg Score</th>
+                            <th class="pb-2 text-right">Date</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-neutral-50">
+                        @foreach($recentEvaluations as $eval)
+                            @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
+                            <tr class="text-sm hover:bg-neutral-50/50 transition-colors">
+                                <td class="py-3 font-semibold text-neutral-900 truncate max-w-[120px]" title="{{ $eval->student_name }}">{{ $eval->student_name }}</td>
+                                <td class="py-3 text-neutral-500 font-medium truncate max-w-[100px]" title="{{ $eval->stall_name }}">{{ $eval->stall_name }}</td>
+                                <td class="py-3 text-center font-bold tabular-nums {{ $avg >= 4 ? 'text-brand-600' : ($avg >= 3 ? 'text-amber-600' : 'text-red-500') }}">
+                                    {{ number_format($avg, 1) }}
+                                </td>
+                                <td class="py-3 text-right text-neutral-400 text-xs whitespace-nowrap">
+                                    {{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans(null, true, true) }} ago
+                                </td>
+                            </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        @endif
+
     </div>
-    @endif
 
 </div>
 

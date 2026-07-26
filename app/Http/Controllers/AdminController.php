@@ -78,6 +78,15 @@ class AdminController extends Controller
             ->groupBy('stalls.name')
             ->get();
 
+        // Recent 5 evaluations
+        $recentEvaluations = DB::table('stall_evaluations')
+            ->join('users', 'users.id', '=', 'stall_evaluations.student_id')
+            ->join('stalls', 'stalls.id', '=', 'stall_evaluations.stall_id')
+            ->select('stall_evaluations.*', 'users.name as student_name', 'stalls.name as stall_name')
+            ->orderBy('stall_evaluations.created_at', 'desc')
+            ->limit(5)
+            ->get();
+
         return view('admin.dashboard', compact(
             'studentCount',
             'stallCount',
@@ -87,7 +96,8 @@ class AdminController extends Controller
             'results',
             'trendDates',
             'trendCounts',
-            'pieChartData'
+            'pieChartData',
+            'recentEvaluations'
         ));
     }
 
