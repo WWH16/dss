@@ -78,6 +78,14 @@ Route::middleware('auth')->group(function () {
         [AdminController::class,'dashboard'])
         ->name('admin.dashboard');
 
+    Route::get('/admin/stalls',
+        [AdminController::class,'stalls'])
+        ->name('admin.stalls');
+
+    Route::get('/admin/evaluations',
+        [AdminController::class,'evaluations'])
+        ->name('admin.evaluations');
+
     Route::post('/admin/stall/add',
         [AdminController::class,'addStall'])
         ->name('admin.stall.add');

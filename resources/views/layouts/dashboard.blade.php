@@ -155,7 +155,15 @@
             @elseif($user && $user->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <span class="material-symbols-outlined">dashboard</span>
-                    Dashboard
+                    Overview
+                </a>
+                <a href="{{ route('admin.stalls') }}" class="sidebar-link {{ request()->routeIs('admin.stalls') ? 'active' : '' }}">
+                    <span class="material-symbols-outlined">storefront</span>
+                    Stalls
+                </a>
+                <a href="{{ route('admin.evaluations') }}" class="sidebar-link {{ request()->routeIs('admin.evaluations') ? 'active' : '' }}">
+                    <span class="material-symbols-outlined">rate_review</span>
+                    Evaluations
                 </a>
             @elseif($user && $user->role === 'staff')
                 <a href="{{ route('staff.dashboard') }}" class="sidebar-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
