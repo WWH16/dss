@@ -18,16 +18,26 @@
     <div class="bg-white rounded-2xl border border-neutral-200/60 shadow-sm overflow-hidden">
         
         <!-- Form Header (Paper style) -->
-        <div class="p-8 md:p-10 border-b border-neutral-100 bg-neutral-50/30">
-            <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
-                <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-20 h-20 object-contain" alt="ISU Logo">
-                <div class="flex-1">
-                    <p class="uppercase font-bold text-neutral-800 text-sm tracking-wider mb-0.5">Isabela State University</p>
-                    <p class="text-neutral-500 text-sm mb-3">Cauayan Campus</p>
-                    <h1 class="text-2xl font-display font-bold text-brand-700 leading-tight">Citizen / Client Satisfaction Survey</h1>
-                    <p class="text-sm text-neutral-500 mt-2">Please answer each statement by selecting the rating that best reflects your opinion.</p>
+        <div class="p-6 md:p-10 border-b border-neutral-100 bg-neutral-50/30">
+            <div class="flex flex-col md:flex-row items-center justify-center md:justify-between gap-6 md:gap-8 text-center">
+                <!-- Mobile Logos (Side-by-side) -->
+                <div class="flex md:hidden w-full justify-center gap-8 mb-2">
+                    <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-16 h-16 object-contain drop-shadow-sm" alt="ISU Logo">
+                    <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="w-16 h-16 object-contain drop-shadow-sm" alt="Bagong Pilipinas">
                 </div>
-                <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="w-20 h-20 object-contain" alt="Bagong Pilipinas">
+
+                <!-- Desktop Left Logo -->
+                <img src="{{ asset('assets/images/isu_logo.png') }}" class="hidden md:block w-24 h-24 object-contain shrink-0 drop-shadow-sm" alt="ISU Logo">
+                
+                <div class="flex-1 min-w-0">
+                    <p class="uppercase font-bold text-neutral-800 text-xs sm:text-sm tracking-widest mb-1">Isabela State University</p>
+                    <p class="text-neutral-500 text-xs sm:text-sm mb-4 font-medium uppercase tracking-wider">Cauayan Campus</p>
+                    <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-brand-800 leading-tight mb-3">Citizen / Client Satisfaction Survey</h1>
+                    <p class="text-sm text-neutral-500 max-w-lg mx-auto">Please answer each statement by selecting the rating that best reflects your opinion.</p>
+                </div>
+
+                <!-- Desktop Right Logo -->
+                <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="hidden md:block w-24 h-24 object-contain shrink-0 drop-shadow-sm" alt="Bagong Pilipinas">
             </div>
         </div>
 
@@ -83,29 +93,30 @@
                     </div>
 
                     <!-- Survey Table -->
-                    <div class="mb-8 overflow-x-auto rounded-xl border border-neutral-200">
-                        <table class="w-full text-left border-collapse min-w-[600px]">
+                    <div class="mb-8 overflow-x-auto rounded-xl border border-neutral-200 shadow-sm">
+                        <table class="w-full text-left border-collapse min-w-[650px]">
                             <thead>
-                                <tr class="bg-neutral-50 border-b border-neutral-200 text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
-                                    <th class="p-4">Statement</th>
-                                    <th class="p-4 text-center w-14">5</th>
-                                    <th class="p-4 text-center w-14">4</th>
-                                    <th class="p-4 text-center w-14">3</th>
-                                    <th class="p-4 text-center w-14">2</th>
-                                    <th class="p-4 text-center w-14">1</th>
+                                <tr class="bg-neutral-50/80 border-b border-neutral-200 text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+                                    <th class="p-4 sticky left-0 bg-neutral-50/95 backdrop-blur-sm z-20 shadow-[2px_0_8px_rgba(0,0,0,0.04)] border-r border-neutral-200">Statement</th>
+                                    <th class="p-4 text-center w-16">5</th>
+                                    <th class="p-4 text-center w-16">4</th>
+                                    <th class="p-4 text-center w-16">3</th>
+                                    <th class="p-4 text-center w-16">2</th>
+                                    <th class="p-4 text-center w-16">1</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-100">
                                 @foreach($displayStatements as $index => $statement)
-                                    <tr class="hover:bg-neutral-50/50 transition-colors">
-                                        <td class="p-4 text-sm font-medium text-neutral-800">
-                                            <span class="text-neutral-400 mr-2">{{ $index + 1 }}.</span>
+                                    <tr class="group hover:bg-brand-50/20 transition-colors">
+                                        <td class="p-4 text-sm font-medium text-neutral-800 sticky left-0 bg-white group-hover:bg-neutral-50/90 transition-colors z-10 shadow-[2px_0_8px_rgba(0,0,0,0.04)] border-r border-neutral-100">
+                                            <span class="text-neutral-400 mr-2 tabular-nums">{{ $index + 1 }}.</span>
                                             {{ $statement['statement'] }}
                                         </td>
                                         @for($val = 5; $val >= 1; $val--)
-                                            <td class="p-4 text-center align-middle">
-                                                <input type="radio" name="responses[{{ $statement['id'] }}]" value="{{ $val }}" required 
-                                                    class="appearance-auto w-5 h-5 cursor-pointer accent-brand-600">
+                                            <td class="p-0 text-center align-middle border-l border-neutral-50">
+                                                <label class="flex items-center justify-center w-full h-full min-h-[56px] cursor-pointer hover:bg-brand-50/40 transition-colors">
+                                                    <input type="radio" name="responses[{{ $statement['id'] }}]" value="{{ $val }}" required class="appearance-auto w-5 h-5 cursor-pointer accent-brand-600">
+                                                </label>
                                             </td>
                                         @endfor
                                     </tr>
@@ -116,14 +127,18 @@
 
                     <!-- Comments -->
                     <div class="mb-8">
-                        <label class="block text-sm font-bold text-neutral-800 mb-2">Compliments / Suggestions / Complaints</label>
-                        <textarea name="comment" rows="4" class="w-full px-4 py-3 bg-white border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 resize-none shadow-sm" placeholder="Share compliments, suggestions, or complaints here...">{{ old('comment') }}</textarea>
+                        <label class="block text-sm font-bold text-neutral-800 mb-2">Compliments / Suggestions / Complaints <span class="text-neutral-400 font-normal">(Optional)</span></label>
+                        <textarea name="comment" rows="4" class="w-full px-4 py-3 bg-white border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 transition-all resize-none shadow-sm" placeholder="Share your honest thoughts here..."></textarea>
                     </div>
 
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-neutral-200">
-                        <p class="text-xs text-neutral-400 font-medium">This information is treated confidentially.</p>
-                        <button type="submit" class="btn btn-primary px-8 w-full sm:w-auto text-sm">
-                            Submit Evaluation
+                        <p class="text-xs text-neutral-500 font-medium flex items-center gap-1.5">
+                            <span class="material-symbols-outlined text-[16px] text-neutral-400">lock</span>
+                            This evaluation is completely confidential.
+                        </p>
+                        <button type="submit" class="btn btn-primary px-8 py-3 w-full sm:w-auto text-sm flex items-center justify-center gap-2 group">
+                            <span>Submit Evaluation</span>
+                            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform duration-300 ease-out-quint">arrow_forward</span>
                         </button>
                     </div>
                 </form>
