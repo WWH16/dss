@@ -1,10 +1,9 @@
-@extends('layouts.app')
+@extends('layouts.dashboard')
 
 @section('title', 'Staff Dashboard | Decision Support System: ISU Cauayan Canteen Client Evaluation System')
 
 @section('content')
-<div class="py-10 bg-neutral-50/50 min-h-screen">
-    <div class="container max-w-5xl">
+<div class="max-w-5xl mx-auto">
         <!-- Dashboard Header -->
         <div class="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
             <div>
@@ -134,5 +133,4 @@
             </div>
         </div>
     </div>
-</div>
 @endsection
