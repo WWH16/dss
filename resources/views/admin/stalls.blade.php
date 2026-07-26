@@ -36,9 +36,11 @@
             <div class="space-y-1">
                 @forelse($stalls as $stall)
                     <div class="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-neutral-50 transition-colors border border-transparent hover:border-neutral-100">
-                        <div class="flex items-center gap-2.5">
-                            <span class="material-symbols-outlined text-[18px] text-brand-400">storefront</span>
-                            <span class="text-sm font-semibold text-neutral-800">{{ $stall->name }}</span>
+                        <div class="flex items-center gap-3">
+                            <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                                <span class="material-symbols-outlined text-[16px]">storefront</span>
+                            </div>
+                            <span class="text-sm font-bold text-neutral-900">{{ $stall->name }}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <button type="button"
