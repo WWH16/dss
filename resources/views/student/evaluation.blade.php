@@ -32,21 +32,7 @@
         </div>
 
         <div class="p-8 md:p-10">
-            <!-- Student Info -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
-                <div>
-                    <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">Name</span>
-                    <span class="text-neutral-900 font-semibold">{{ $profile->name ?? ($profile->student_number ?? 'Student') }}</span>
-                </div>
-                <div>
-                    <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">Date</span>
-                    <span class="text-neutral-900 font-semibold">{{ now()->format('F d, Y') }}</span>
-                </div>
-                <div>
-                    <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">Time</span>
-                    <span class="text-neutral-900 font-semibold">{{ now()->format('h:i A') }}</span>
-                </div>
-            </div>
+
 
             @if(session('success'))
                 <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2">
