@@ -90,9 +90,17 @@
             </div>
         </div>
 
+        @php
+            $topStalls = collect($results)->map(function($stall) {
+                // Safely add an avg property for sorting without mutating original tightly
+                $obj = clone $stall;
+                $obj->avg = ($obj->cleanliness + $obj->service + $obj->taste + $obj->price) / 4;
+                return $obj;
+            })->sortByDesc('avg')->take(5)->values();
+        @endphp
         <div class="lg:col-span-5 bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
             <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
-                <h2 class="font-bold text-neutral-800 text-base tracking-tight">Stall Performance</h2>
+                <h2 class="font-bold text-neutral-800 text-base tracking-tight">Top {{ min(5, $topStalls->count()) }} Performing Stalls</h2>
             </div>
             <div class="relative w-full" style="height: 240px;">
                 <canvas id="stallScoresChart" role="img" aria-label="Bar chart showing the average scores per stall">
@@ -221,12 +229,12 @@ var cLineBg = rootStyles.getPropertyValue('--chart-line-bg').trim();
     new Chart(ctx, {
         type: 'bar',
         data: {
-            labels: @json($results->pluck('name')),
+            labels: @json($topStalls->pluck('name')),
             datasets: [
-                { label: 'Cleanliness', data: @json($results->pluck('cleanliness')->map(fn($v) => round($v,2))), backgroundColor: c1a, borderColor: c1b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
-                { label: 'Service',     data: @json($results->pluck('service')->map(fn($v) => round($v,2))),     backgroundColor: c2a, borderColor: c2b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
-                { label: 'Taste',       data: @json($results->pluck('taste')->map(fn($v) => round($v,2))),       backgroundColor: c3a, borderColor: c3b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
-                { label: 'Price',       data: @json($results->pluck('price')->map(fn($v) => round($v,2))),       backgroundColor: c4a, borderColor: c4b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
+                { label: 'Cleanliness', data: @json($topStalls->pluck('cleanliness')->map(fn($v) => round($v,2))), backgroundColor: c1a, borderColor: c1b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
+                { label: 'Service',     data: @json($topStalls->pluck('service')->map(fn($v) => round($v,2))),     backgroundColor: c2a, borderColor: c2b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
+                { label: 'Taste',       data: @json($topStalls->pluck('taste')->map(fn($v) => round($v,2))),       backgroundColor: c3a, borderColor: c3b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
+                { label: 'Price',       data: @json($topStalls->pluck('price')->map(fn($v) => round($v,2))),       backgroundColor: c4a, borderColor: c4b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
             ]
         },
         options: {
