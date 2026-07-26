@@ -103,7 +103,7 @@
                         </ul>
                     </div>
                 @endif
-                <form action="{{ route('student.evaluation.store') }}" method="POST">
+                <form id="evaluationForm" action="{{ route('student.evaluation.store') }}" method="POST">
                     @csrf
                     
                     <!-- Stall Selection -->
@@ -171,9 +171,10 @@
                             <span class="material-symbols-outlined text-[16px] text-neutral-400">lock</span>
                             This evaluation is completely confidential.
                         </p>
-                        <button type="submit" class="btn btn-primary px-8 py-3 w-full sm:w-auto text-sm flex items-center justify-center gap-2 group">
-                            <span>Submit Evaluation</span>
-                            <span class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform duration-300 ease-out-quint">arrow_forward</span>
+                        <button type="submit" id="submitEvaluationBtn" class="btn btn-primary px-8 py-3 w-full sm:w-auto text-sm flex items-center justify-center gap-2 group transition-all">
+                            <span id="submitEvaluationText">Submit Evaluation</span>
+                            <span id="submitEvaluationIcon" class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform duration-300 ease-out-quint">arrow_forward</span>
+                            <span id="submitEvaluationLoader" class="material-symbols-outlined text-[18px] animate-spin" style="display: none;">progress_activity</span>
                         </button>
                     </div>
                 </form>
@@ -181,4 +182,32 @@
         </div>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const form = document.getElementById('evaluationForm');
+        const submitBtn = document.getElementById('submitEvaluationBtn');
+        const btnText = document.getElementById('submitEvaluationText');
+        const btnIcon = document.getElementById('submitEvaluationIcon');
+        const btnLoader = document.getElementById('submitEvaluationLoader');
+
+        if(form && submitBtn) {
+            form.addEventListener('submit', function(e) {
+                // If HTML5 validation passes, show loading state
+                if (form.checkValidity()) {
+                    // Slight delay to ensure the form actually submits before freezing the button
+                    setTimeout(() => {
+                        submitBtn.disabled = true;
+                        submitBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                        btnText.textContent = 'Submitting...';
+                        btnIcon.style.display = 'none';
+                        btnLoader.style.display = 'inline-block';
+                    }, 10);
+                }
+            });
+        }
+    });
+</script>
 @endsection
