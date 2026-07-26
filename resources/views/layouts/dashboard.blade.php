@@ -116,7 +116,14 @@
                 box-shadow: 0 0 40px oklch(0.14 0.01 255 / 0.35);
             }
             .dashboard-sidebar.open { left: 0; }
-            .mobile-toggle { display: block; }
+            .mobile-toggle { 
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                min-width: 44px;
+                min-height: 44px;
+                margin-left: -8px;
+            }
             .sidebar-overlay.open { display: block; opacity: 1; }
         }
     </style>
@@ -193,7 +200,7 @@
                 <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu">
                     <span class="material-symbols-outlined">menu</span>
                 </button>
-                <h2 class="font-display font-semibold text-lg text-ink-900 hidden sm:block">
+                <h2 class="font-display font-semibold text-lg text-ink-900">
                     @yield('header_title', 'Dashboard')
                 </h2>
             </div>

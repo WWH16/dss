@@ -21,12 +21,12 @@
         <div class="bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
             <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider mb-5 pb-2 border-b border-neutral-100">Add New Stall</h2>
 
-            <form action="{{ route('admin.stall.add') }}" method="POST" class="flex gap-2 mb-6">
+            <form action="{{ route('admin.stall.add') }}" method="POST" class="flex flex-col sm:flex-row gap-2 mb-6">
                 @csrf
                 <input type="text" name="name"
                     class="flex-1 px-3 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-sm font-medium focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600/15"
                     placeholder="e.g. Stall #1 - Food Hub" required>
-                <button class="btn btn-primary text-sm py-2 px-4 font-semibold flex items-center gap-1 shrink-0">
+                <button class="btn btn-primary text-sm py-2 px-4 font-semibold flex items-center justify-center gap-1 shrink-0 w-full sm:w-auto">
                     <span class="material-symbols-outlined text-sm leading-none">add</span>
                     Add
                 </button>
@@ -43,7 +43,7 @@
                         <div class="flex items-center gap-2">
                             <button type="button"
                                 onclick="openEditModal({{ $stall->id }}, '{{ addslashes($stall->name) }}')"
-                                class="text-brand-600 hover:text-brand-700 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 transition-colors bg-white px-2 py-1 rounded border border-brand-100 hover:border-brand-200 hover:bg-brand-50">
+                                class="relative text-brand-600 hover:text-brand-700 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 transition-colors bg-white px-2 py-1.5 rounded border border-brand-100 hover:border-brand-200 hover:bg-brand-50 before:absolute before:inset-[-8px]">
                                 <span class="material-symbols-outlined text-[14px] leading-none">edit</span>
                                 Edit
                             </button>
@@ -53,7 +53,7 @@
                             </form>
                             <button type="button"
                                 onclick="openDeleteModal({{ $stall->id }}, '{{ addslashes($stall->name) }}')"
-                                class="text-red-400 hover:text-red-600 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 transition-colors bg-white px-2 py-1 rounded border border-red-100 hover:border-red-200 hover:bg-red-50">
+                                class="relative text-red-400 hover:text-red-600 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 transition-colors bg-white px-2 py-1.5 rounded border border-red-100 hover:border-red-200 hover:bg-red-50 before:absolute before:inset-[-8px]">
                                 <span class="material-symbols-outlined text-[14px] leading-none">delete</span>
                                 Delete
                             </button>

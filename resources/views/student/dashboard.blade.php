@@ -65,16 +65,20 @@
         </div>
 
         @if($myStudentEvals->isEmpty())
-            <div class="flex flex-col items-center justify-center py-16 text-center px-6">
-                <div class="w-14 h-14 rounded-full flex items-center justify-center mb-4" style="background: oklch(0.93 0.06 155);">
-                    <span class="material-symbols-outlined text-2xl" style="color: oklch(0.48 0.15 155);">rate_review</span>
+            <div class="p-6">
+                <div class="flex flex-col items-center justify-center py-16 text-center px-6 rounded-xl border border-dashed border-brand-200 bg-brand-50/30">
+                    <div class="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-white shadow-sm border border-brand-100">
+                        <span class="material-symbols-outlined text-3xl text-brand-600">rate_review</span>
+                    </div>
+                    <p class="font-bold text-neutral-900 mb-2 text-lg tracking-tight">Your history is empty</p>
+                    <p class="text-sm text-neutral-500 max-w-sm mb-6 leading-relaxed">
+                        Submit your first evaluation to help improve the canteen quality at ISU Cauayan. Your feedback is entirely anonymous.
+                    </p>
+                    <a href="{{ route('student.evaluation') }}" class="inline-flex items-center gap-2 text-sm font-bold bg-brand-600 hover:bg-brand-700 text-white px-5 py-2.5 rounded-lg transition-colors shadow-sm">
+                        <span class="material-symbols-outlined text-[18px] leading-none">add_circle</span>
+                        Evaluate a stall now
+                    </a>
                 </div>
-                <p class="font-semibold text-neutral-800 mb-1">No evaluations yet</p>
-                <p class="text-sm text-neutral-500 max-w-xs">Submit your first evaluation and help improve canteen quality at ISU Cauayan.</p>
-                <a href="{{ route('student.evaluation') }}" class="mt-5 inline-flex items-center gap-1.5 text-sm font-bold" style="color: oklch(0.48 0.15 155);">
-                    <span class="material-symbols-outlined text-[18px]">add_circle</span>
-                    Evaluate a stall now
-                </a>
             </div>
         @else
             <div class="overflow-x-auto">
