@@ -7,67 +7,102 @@
 @section('content')
 <div class="max-w-4xl mx-auto">
     
-    <!-- Back to Dashboard Arrow Button -->
-    <div class="mb-6">
-        <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-brand-600 transition-colors bg-white px-4 py-2 rounded-lg border border-neutral-200 shadow-sm">
-            <span class="material-symbols-outlined text-lg leading-none">arrow_back</span>
-            Back to Dashboard
-        </a>
-    </div>
+    @if(!session('success'))
+        <!-- Back to Dashboard Arrow Button -->
+        <div class="mb-6">
+            <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-brand-600 transition-colors bg-white px-4 py-2 rounded-lg border border-neutral-200 shadow-sm">
+                <span class="material-symbols-outlined text-lg leading-none">arrow_back</span>
+                Back to Dashboard
+            </a>
+        </div>
+    @endif
 
     <div class="bg-white rounded-2xl border border-neutral-200/60 shadow-sm overflow-hidden">
-        
-        <!-- Form Header (Paper style) -->
-        <div class="p-6 md:p-10 border-b border-neutral-100 bg-neutral-50/30">
-            <div class="flex flex-col md:flex-row items-center justify-center md:justify-between gap-6 md:gap-8 text-center">
-                <!-- Mobile Logos (Side-by-side) -->
-                <div class="flex md:hidden w-full justify-center gap-8 mb-2">
-                    <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-16 h-16 object-contain drop-shadow-sm" alt="ISU Logo">
-                    <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="w-16 h-16 object-contain drop-shadow-sm" alt="Bagong Pilipinas">
-                </div>
+        @if(!session('success'))
+            <!-- Form Header (Paper style) -->
+            <div class="p-6 md:p-10 border-b border-neutral-100 bg-neutral-50/30">
+                <div class="flex flex-col md:flex-row items-center justify-center md:justify-between gap-6 md:gap-8 text-center">
+                    <!-- Mobile Logos (Side-by-side) -->
+                    <div class="flex md:hidden w-full justify-center gap-8 mb-2">
+                        <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-16 h-16 object-contain drop-shadow-sm" alt="ISU Logo">
+                        <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="w-16 h-16 object-contain drop-shadow-sm" alt="Bagong Pilipinas">
+                    </div>
 
-                <!-- Desktop Left Logo -->
-                <img src="{{ asset('assets/images/isu_logo.png') }}" class="hidden md:block w-24 h-24 object-contain shrink-0 drop-shadow-sm" alt="ISU Logo">
-                
-                <div class="flex-1 min-w-0">
-                    <p class="uppercase font-bold text-neutral-800 text-xs sm:text-sm tracking-widest mb-1">Isabela State University</p>
-                    <p class="text-neutral-500 text-xs sm:text-sm mb-4 font-medium uppercase tracking-wider">Cauayan Campus</p>
-                    <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-brand-800 leading-tight mb-3">Citizen / Client Satisfaction Survey</h1>
-                    <p class="text-sm text-neutral-500 max-w-lg mx-auto">Please answer each statement by selecting the rating that best reflects your opinion.</p>
-                </div>
+                    <!-- Desktop Left Logo -->
+                    <img src="{{ asset('assets/images/isu_logo.png') }}" class="hidden md:block w-24 h-24 object-contain shrink-0 drop-shadow-sm" alt="ISU Logo">
+                    
+                    <div class="flex-1 min-w-0">
+                        <p class="uppercase font-bold text-neutral-800 text-xs sm:text-sm tracking-widest mb-1">Isabela State University</p>
+                        <p class="text-neutral-500 text-xs sm:text-sm mb-4 font-medium uppercase tracking-wider">Cauayan Campus</p>
+                        <h1 class="text-2xl sm:text-3xl font-display font-extrabold text-brand-800 leading-tight mb-3">Citizen / Client Satisfaction Survey</h1>
+                        <p class="text-sm text-neutral-500 max-w-lg mx-auto">Please answer each statement by selecting the rating that best reflects your opinion.</p>
+                    </div>
 
-                <!-- Desktop Right Logo -->
-                <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="hidden md:block w-24 h-24 object-contain shrink-0 drop-shadow-sm" alt="Bagong Pilipinas">
+                    <!-- Desktop Right Logo -->
+                    <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="hidden md:block w-24 h-24 object-contain shrink-0 drop-shadow-sm" alt="Bagong Pilipinas">
+                </div>
             </div>
-        </div>
+        @endif
 
         <div class="p-8 md:p-10">
 
 
             @if(session('success'))
-                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-                    <span class="material-symbols-outlined text-lg leading-none">check_circle</span>
-                    {{ session('success') }}
+                <style>
+                    @keyframes popIn {
+                        0% { transform: scale(0.8); opacity: 0; }
+                        50% { transform: scale(1.1); }
+                        100% { transform: scale(1); opacity: 1; }
+                    }
+                    @keyframes slideUpFade {
+                        from { transform: translateY(20px); opacity: 0; }
+                        to { transform: translateY(0); opacity: 1; }
+                    }
+                    .animate-pop-in { animation: popIn 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+                    .animate-slide-up-1 { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.1s forwards; opacity: 0; }
+                    .animate-slide-up-2 { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.2s forwards; opacity: 0; }
+                    .animate-slide-up-3 { animation: slideUpFade 0.6s cubic-bezier(0.16, 1, 0.3, 1) 0.3s forwards; opacity: 0; }
+                </style>
+                <div class="py-16 md:py-24 flex flex-col items-center justify-center text-center">
+                    <div class="relative w-24 h-24 mb-8 animate-pop-in">
+                        <div class="absolute inset-0 bg-brand-200 rounded-full animate-ping opacity-60" style="animation-duration: 2.5s;"></div>
+                        <div class="relative flex items-center justify-center w-full h-full bg-brand-600 rounded-full shadow-2xl shadow-brand-600/40">
+                            <span class="material-symbols-outlined text-white text-5xl">task_alt</span>
+                        </div>
+                    </div>
+                    
+                    <h2 class="text-3xl md:text-4xl font-display font-extrabold text-brand-800 mb-4 animate-slide-up-1">Evaluation Submitted!</h2>
+                    
+                    <p class="text-neutral-500 max-w-sm mx-auto mb-10 text-base animate-slide-up-2">
+                        Thank you for your feedback. Your insights directly help us maintain excellent dining standards at the Cauayan Campus!
+                    </p>
+                    
+                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto animate-slide-up-3">
+                        <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-6 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl transition-colors text-sm text-center">
+                            Back to Dashboard
+                        </a>
+                        <a href="{{ route('student.evaluation') }}" class="btn btn-primary w-full sm:w-auto px-6 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2 group">
+                            <span class="material-symbols-outlined text-[18px] group-hover:-rotate-12 transition-transform">refresh</span>
+                            <span>Evaluate Another</span>
+                        </a>
+                    </div>
                 </div>
-            @endif
-
-            @if($errors->any())
-                <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-800 rounded-xl text-sm">
-                    <ul class="list-disc pl-5 mb-0">
-                        @foreach($errors->all() as $error)
-                            <li>{{ $error }}</li>
-                        @endforeach
-                    </ul>
-                </div>
-            @endif
-
-            @if($stalls->isEmpty())
+            @elseif($stalls->isEmpty())
                 <div class="p-6 text-center bg-amber-50 border border-amber-100 rounded-xl text-amber-800">
                     <span class="material-symbols-outlined text-3xl mb-2">warning</span>
                     <p class="font-semibold">No stalls are available yet.</p>
                     <p class="text-sm">Please ask an administrator to add stall information first.</p>
                 </div>
             @else
+                @if($errors->any())
+                    <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-800 rounded-xl text-sm">
+                        <ul class="list-disc pl-5 mb-0">
+                            @foreach($errors->all() as $error)
+                                <li>{{ $error }}</li>
+                            @endforeach
+                        </ul>
+                    </div>
+                @endif
                 <form action="{{ route('student.evaluation.store') }}" method="POST">
                     @csrf
                     
