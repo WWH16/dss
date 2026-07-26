@@ -53,9 +53,9 @@
                             }
                         @endphp
                         <a href="{{ $dashboardRoute }}" class="btn btn-ghost btn-sm">Dashboard</a>
-                        <form action="{{ route('logout') }}" method="POST" class="inline" style="display: inline;">
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" class="inline" style="display: inline;">
                             @csrf
-                            <button type="submit" class="btn btn-primary btn-sm">Logout</button>
+                            <button type="button" class="btn btn-primary btn-sm js-logout-trigger">Logout</button>
                         </form>
                     @else
                         <a href="{{ url('/login') }}" class="btn btn-ghost btn-sm">Login</a>
@@ -162,6 +162,68 @@
                 behavior: 'smooth'
             });
         });
+    })();
+</script>
+
+<!-- Logout Confirmation Modal -->
+<dialog id="logout-confirm-modal" class="confirm-modal">
+    <div class="flex items-start gap-4 mb-4">
+        <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-700">
+            <span class="material-symbols-outlined" style="font-size: 1.4rem;">logout</span>
+        </div>
+        <div>
+            <h3 class="text-base font-bold text-neutral-900 leading-tight mb-1" style="font-family: var(--font-display);">Confirm Logout</h3>
+            <p class="text-neutral-500 text-xs leading-relaxed">
+                Are you sure you want to end your current session?
+            </p>
+        </div>
+    </div>
+    <div class="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
+        <button type="button" class="btn btn-ghost btn-sm js-close-modal">Cancel</button>
+        <button type="button" class="btn btn-primary btn-sm bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 js-confirm-logout" style="background-color: oklch(0.58 0.23 28); border-color: oklch(0.58 0.23 28);">Logout</button>
+    </div>
+</dialog>
+
+<script>
+    (function () {
+        var modal = document.getElementById('logout-confirm-modal');
+        var triggers = document.querySelectorAll('.js-logout-trigger');
+        var closeBtns = modal ? modal.querySelectorAll('.js-close-modal') : [];
+        var confirmBtn = modal ? modal.querySelector('.js-confirm-logout') : null;
+        var logoutForm = document.getElementById('logout-form');
+
+        if (!modal) return;
+
+        triggers.forEach(function (btn) {
+            btn.addEventListener('click', function (e) {
+                e.preventDefault();
+                modal.showModal();
+            });
+        });
+
+        closeBtns.forEach(function (btn) {
+            btn.addEventListener('click', function () {
+                modal.close();
+            });
+        });
+
+        // Close on clicking backdrop area
+        modal.addEventListener('click', function (e) {
+            var rect = modal.getBoundingClientRect();
+            var isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
+                rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
+            if (!isInDialog) {
+                modal.close();
+            }
+        });
+
+        if (confirmBtn && logoutForm) {
+            confirmBtn.addEventListener('click', function () {
+                confirmBtn.classList.add('btn-loading');
+                confirmBtn.innerHTML = '<span class="material-symbols-outlined btn-hourglass">hourglass_empty</span> Logging out...';
+                logoutForm.submit();
+            });
+        }
     })();
 </script>
 

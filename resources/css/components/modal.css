@@ -1,0 +1,36 @@
+/* ─────────────────────────────────────────────────────────────────────────
+   Modal / Dialog
+───────────────────────────────────────────────────────────────────────── */
+dialog.confirm-modal {
+    border: 1px solid oklch(0.84 0.10 155 / 0.5);
+    border-radius: 0.75rem;
+    background-color: var(--color-surface);
+    color: var(--color-ink-900);
+    padding: var(--space-6);
+    max-width: 24rem;
+    width: 90%;
+    box-shadow: var(--shadow-lg);
+    outline: none;
+    margin: auto;
+}
+
+dialog.confirm-modal::backdrop {
+    background: oklch(0.14 0.01 255 / 0.6);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+}
+
+dialog.confirm-modal[open] {
+    animation: modal-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes modal-enter {
+    from {
+        opacity: 0;
+        transform: scale(0.96) translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
+}

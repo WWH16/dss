@@ -314,11 +314,11 @@
 
     <div class="mt-4 text-end">
 
-        <form action="{{ route('logout') }}" method="POST">
+        <form action="{{ route('logout') }}" method="POST" id="logout-form">
 
             @csrf
 
-            <button type="submit" class="btn btn-outline-secondary">
+            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
 
                 Logout
 
@@ -331,6 +331,43 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<!-- Logout Confirmation Modal (Bootstrap 5) -->
+<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-sm">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header border-0 pb-0">
+        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="logoutConfirmModalLabel">
+          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor" class="text-danger">
+              <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
+          </svg>
+          Confirm Logout
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body text-secondary small py-3">
+        Are you sure you want to end your session?
+      </div>
+      <div class="modal-footer border-0 pt-0">
+        <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancel</button>
+        <button type="button" class="btn btn-sm btn-danger px-3" id="bootstrap-confirm-logout">Logout</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var confirmBtn = document.getElementById('bootstrap-confirm-logout');
+        var logoutForm = document.getElementById('logout-form');
+        if (confirmBtn && logoutForm) {
+            confirmBtn.addEventListener('click', function () {
+                confirmBtn.disabled = true;
+                confirmBtn.innerHTML = 'Logging out...';
+                logoutForm.submit();
+            });
+        }
+    });
+</script>
 
 </body>
 </html>
