@@ -23,8 +23,8 @@
             min-height: 100vh;
         }
         .dashboard-sidebar {
-            background-color: var(--color-surface);
-            border-right: 1px solid oklch(0.84 0.10 155 / 0.5);
+            background-color: oklch(0.22 0.09 155);
+            border-right: 1px solid oklch(0.30 0.10 155);
             display: flex;
             flex-direction: column;
             position: sticky;
@@ -44,30 +44,47 @@
             top: 0;
             z-index: 30;
         }
+        .sidebar-brand {
+            border-bottom-color: oklch(0.30 0.10 155);
+        }
+        .sidebar-brand-text {
+            color: oklch(0.90 0.06 155);
+        }
         .sidebar-link {
             display: flex;
             align-items: center;
             gap: var(--space-3);
             padding: var(--space-3) var(--space-4);
-            color: var(--color-ink-500);
+            color: oklch(0.78 0.06 155);
             text-decoration: none;
             font-weight: 500;
             font-size: 0.925rem;
             border-radius: var(--radius-sm);
             margin: 0 var(--space-3) var(--space-1);
-            transition: all 0.2s ease;
+            transition: all 0.18s ease;
         }
         .sidebar-link:hover {
-            background-color: var(--color-brand-50);
-            color: var(--color-brand-800);
+            background-color: oklch(0.30 0.09 155);
+            color: oklch(0.95 0.04 155);
         }
         .sidebar-link.active {
-            background-color: var(--color-brand-100);
-            color: var(--color-brand-900);
+            background-color: oklch(0.48 0.15 155);
+            color: #fff;
             font-weight: 600;
+            box-shadow: 0 2px 8px oklch(0.48 0.15 155 / 0.40);
         }
         .sidebar-link .material-symbols-outlined {
             font-size: 1.25rem;
+        }
+        .sidebar-footer {
+            border-top-color: oklch(0.30 0.10 155);
+        }
+        .sidebar-logout {
+            color: oklch(0.72 0.08 28) !important;
+        }
+        .sidebar-logout:hover {
+            background-color: oklch(0.28 0.08 28) !important;
+            color: oklch(0.90 0.08 28) !important;
         }
         .mobile-toggle {
             display: none;
@@ -83,7 +100,7 @@
             display: none;
             position: fixed;
             inset: 0;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.5);
             z-index: 35;
             opacity: 0;
             transition: opacity 0.3s ease;
@@ -96,7 +113,7 @@
                 left: -16rem;
                 transition: left 0.3s ease;
                 width: 16rem;
-                box-shadow: var(--shadow-xl);
+                box-shadow: 0 0 40px oklch(0.14 0.01 255 / 0.35);
             }
             .dashboard-sidebar.open { left: 0; }
             .mobile-toggle { display: block; }
@@ -113,9 +130,9 @@
     {{-- ── Sidebar ─────────────────────────────────────────────────────── --}}
     <aside class="dashboard-sidebar" id="sidebar">
         <!-- Brand -->
-        <a href="{{ url('/') }}" class="h-16 flex items-center gap-3 px-6 border-b border-neutral-100 mb-4 text-decoration-none">
+        <a href="{{ url('/') }}" class="sidebar-brand h-16 flex items-center gap-3 px-6 border-b mb-4 text-decoration-none">
             <img src="{{ asset('assets/images/isu_logo.png') }}" alt="" width="28" height="28">
-            <span class="font-display font-bold text-brand-900 leading-tight">DSS Portal</span>
+            <span class="sidebar-brand-text font-display font-bold leading-tight">DSS Portal</span>
         </a>
 
         <!-- Navigation Links -->
@@ -149,11 +166,11 @@
         </nav>
 
         <!-- Sidebar Footer (Logout) -->
-        <div class="p-4 border-t border-neutral-100">
+        <div class="sidebar-footer p-4 border-t">
             <form id="logout-form" action="{{ route('logout') }}" method="POST" class="hidden">
                 @csrf
             </form>
-            <button type="button" class="sidebar-link w-full text-left js-logout-trigger !text-red-600 hover:!bg-red-50 hover:!text-red-700 !m-0 !w-full cursor-pointer bg-transparent border-0">
+            <button type="button" class="sidebar-link sidebar-logout w-full text-left js-logout-trigger !m-0 !w-full cursor-pointer bg-transparent border-0">
                 <span class="material-symbols-outlined">logout</span>
                 Logout
             </button>
