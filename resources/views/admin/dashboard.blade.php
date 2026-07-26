@@ -34,7 +34,7 @@
 
     {{-- Charts --}}
     @if($results->isNotEmpty())
-    <div class="grid grid-cols-1 xl:grid-cols-2 gap-6">
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6">
         <div class="bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
             <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
                 <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Stall Performance</h2>
@@ -52,6 +52,16 @@
             </div>
             <div class="relative w-full" style="height: 240px;">
                 <canvas id="evalTrendChart"></canvas>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
+            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
+                <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Evaluation Share</h2>
+                <span class="text-[10px] text-neutral-400 font-bold uppercase">Per Stall</span>
+            </div>
+            <div class="relative w-full" style="height: 240px;">
+                <canvas id="evalPieChart"></canvas>
             </div>
         </div>
     </div>
@@ -159,6 +169,47 @@ Chart.defaults.font.family = 'Plus Jakarta Sans';
             scales: {
                 x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8', maxRotation: 0, callback: function(v,i) { return (isMobile ? i%5 : i%3) === 0 ? trendDates[i] : ''; } }, border: { display: false } },
                 y: { min: 0, beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, precision: 0, font: { size: 10 }, color: '#94a3b8' }, border: { display: false } }
+            }
+        }
+    });
+})();
+
+// Pie Chart
+(function() {
+    var ctx = document.getElementById('evalPieChart');
+    if (!ctx) return;
+    var pieData = @json($pieChartData);
+    new Chart(ctx, {
+        type: 'pie',
+        data: {
+            labels: pieData.map(function(item) { return item.name; }),
+            datasets: [{
+                data: pieData.map(function(item) { return item.count; }),
+                backgroundColor: [
+                    'oklch(0.48 0.15 155)',
+                    'oklch(0.60 0.14 155)',
+                    'oklch(0.74 0.14 155)',
+                    'oklch(0.87 0.08 155)'
+                ],
+                borderWidth: 2,
+                borderColor: '#ffffff',
+                hoverOffset: 4
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, color: '#52525b', padding: 14, usePointStyle: true, pointStyle: 'circle' } },
+                tooltip: {
+                    backgroundColor: 'oklch(0.18 0.07 155)',
+                    titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 },
+                    padding: 10, cornerRadius: 8,
+                    callbacks: {
+                        label: function(c) {
+                            return ' ' + c.label + ': ' + c.parsed + ' evaluation' + (c.parsed !== 1 ? 's' : '');
+                        }
+                    }
+                }
             }
         }
     });

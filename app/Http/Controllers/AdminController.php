@@ -71,6 +71,13 @@ class AdminController extends Controller
             $trendCounts[] = isset($evalTrend[$d]) ? (int) $evalTrend[$d]->count : 0;
         }
 
+        // Evaluations per stall (for Pie Chart)
+        $pieChartData = DB::table('stall_evaluations')
+            ->join('stalls', 'stalls.id', '=', 'stall_evaluations.stall_id')
+            ->select('stalls.name', DB::raw('COUNT(*) as count'))
+            ->groupBy('stalls.name')
+            ->get();
+
         return view('admin.dashboard', compact(
             'studentCount',
             'stallCount',
@@ -79,7 +86,8 @@ class AdminController extends Controller
             'evaluations',
             'results',
             'trendDates',
-            'trendCounts'
+            'trendCounts',
+            'pieChartData'
         ));
     }
 
