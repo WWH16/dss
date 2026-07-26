@@ -112,7 +112,7 @@
                         <select name="stall_id" class="w-full md:w-1/2 px-4 py-2.5 bg-white border border-neutral-300 rounded-lg text-sm font-semibold focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500" required>
                             <option value="">Choose a Stall...</option>
                             @foreach($stalls as $stall)
-                                <option value="{{ $stall->id }}">{{ $stall->name }}</option>
+                                <option value="{{ $stall->id }}" {{ request('stall') == $stall->id ? 'selected' : '' }}>{{ $stall->name }}</option>
                             @endforeach
                         </select>
                     </div>
