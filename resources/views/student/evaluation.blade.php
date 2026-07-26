@@ -17,7 +17,7 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-2xl border border-neutral-200/60 shadow-sm overflow-hidden">
+    <div class="bg-white rounded-xl border border-neutral-200/60 shadow-sm overflow-hidden">
         @if(!session('success'))
             <!-- Form Header (Paper style) -->
             <div class="p-6 md:p-10 border-b border-neutral-100 bg-neutral-50/30">
@@ -78,10 +78,10 @@
                     </p>
                     
                     <div class="flex flex-col sm:flex-row items-center justify-center gap-4 w-full sm:w-auto animate-slide-up-3">
-                        <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-6 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-xl transition-colors text-sm text-center">
+                        <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-6 py-3 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 font-bold rounded-lg transition-colors text-sm text-center">
                             Back to Dashboard
                         </a>
-                        <a href="{{ route('student.evaluation') }}" class="btn btn-primary w-full sm:w-auto px-6 py-3 rounded-xl text-sm text-center flex items-center justify-center gap-2 group">
+                        <a href="{{ route('student.evaluation') }}" class="btn btn-primary w-full sm:w-auto px-6 py-3 rounded-lg text-sm text-center flex items-center justify-center gap-2 group">
                             <span class="material-symbols-outlined text-[18px] group-hover:-rotate-12 transition-transform">refresh</span>
                             <span>Evaluate Another</span>
                         </a>
