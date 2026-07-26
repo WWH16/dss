@@ -57,4 +57,25 @@ class StudentDashboardController extends Controller
 
         return view('student.profile', compact('profile'));
     }
+
+    public function history()
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'student') {
+            return redirect('/login');
+        }
+
+        $myStudentEvals = DB::table('stall_evaluations')
+            ->join('stalls', 'stall_evaluations.stall_id', '=', 'stalls.id')
+            ->where('stall_evaluations.student_id', $user->id)
+            ->select(
+                'stall_evaluations.*',
+                'stalls.name as stall_name'
+            )
+            ->orderByDesc('stall_evaluations.created_at')
+            ->get();
+
+        return view('student.history', compact('myStudentEvals'));
+    }
 }

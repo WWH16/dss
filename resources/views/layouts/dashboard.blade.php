@@ -159,6 +159,10 @@
                     <span class="material-symbols-outlined">rate_review</span>
                     Evaluate
                 </a>
+                <a href="{{ route('student.history') }}" class="sidebar-link {{ request()->routeIs('student.history') ? 'active' : '' }}">
+                    <span class="material-symbols-outlined">history</span>
+                    History
+                </a>
             @elseif($user && $user->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <span class="material-symbols-outlined">dashboard</span>
