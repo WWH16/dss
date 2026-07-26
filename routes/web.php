@@ -49,6 +49,10 @@ Route::middleware('auth')->group(function () {
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
         ->name('student.dashboard');
 
+    // Profile
+    Route::get('/student/profile', [StudentDashboardController::class, 'profile'])
+        ->name('student.profile');
+
     // Evaluation Form
     Route::get('/student/evaluation', [StudentEvaluationController::class, 'index'])
         ->name('student.evaluation');

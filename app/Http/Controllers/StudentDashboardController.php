@@ -42,4 +42,19 @@ class StudentDashboardController extends Controller
             'myStudentEvals'
         ));
     }
+
+    public function profile()
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'student') {
+            return redirect('/login');
+        }
+
+        $profile = DB::table('users')
+            ->where('id', $user->id)
+            ->first();
+
+        return view('student.profile', compact('profile'));
+    }
 }

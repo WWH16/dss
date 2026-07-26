@@ -18,34 +18,9 @@
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-8">
-            <!-- Left Info Panel (Flat, no card wrapper needed) -->
-            <div class="md:col-span-1 space-y-4 text-sm">
-                <div class="pb-3 border-b border-neutral-200">
-                    <h2 class="font-bold text-neutral-800 uppercase tracking-wider text-[10px]">My Details</h2>
-                </div>
-                <div class="space-y-3.5">
-                    <div>
-                        <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-0.5">Student Number</span>
-                        <span class="text-neutral-800 font-semibold tabular-nums">{{ $profile->student_number }}</span>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-0.5">Email</span>
-                        <span class="text-neutral-800 font-semibold break-all leading-tight">{{ $profile->email }}</span>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-0.5">Course</span>
-                        <span class="text-neutral-800 font-semibold">{{ $profile->course }}</span>
-                    </div>
-                    <div>
-                        <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-0.5">Year Level</span>
-                        <span class="text-neutral-800 font-semibold">{{ $profile->year_level }}</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Right Content Panel -->
-            <div class="md:col-span-3 bg-white rounded-xl border border-neutral-200/60 p-6">
+        <div>
+            <!-- Evaluation History Panel -->
+            <div class="bg-white rounded-xl border border-neutral-200/60 p-6">
                 <div class="flex items-center justify-between mb-4 pb-3 border-b border-neutral-100">
                     <h2 class="font-bold text-neutral-800 text-sm uppercase tracking-wider">Evaluation History</h2>
                     <span class="bg-brand-50 text-brand-700 text-xs font-bold px-2.5 py-0.5 rounded-full tabular-nums">

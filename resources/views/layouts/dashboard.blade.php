@@ -127,6 +127,10 @@
                     <span class="material-symbols-outlined">dashboard</span>
                     Dashboard
                 </a>
+                <a href="{{ route('student.profile') }}" class="sidebar-link {{ request()->routeIs('student.profile') ? 'active' : '' }}">
+                    <span class="material-symbols-outlined">person</span>
+                    My Profile
+                </a>
                 <a href="{{ route('student.evaluation') }}" class="sidebar-link {{ request()->routeIs('student.evaluation') ? 'active' : '' }}">
                     <span class="material-symbols-outlined">rate_review</span>
                     Evaluate
