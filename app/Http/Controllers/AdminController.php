@@ -53,13 +53,33 @@ class AdminController extends Controller
             ->groupBy('stalls.name')
             ->get();
 
+        // Daily evaluation trend (last 30 days)
+        $evalTrend = DB::table('stall_evaluations')
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subDays(29)->startOfDay())
+            ->groupByRaw('DATE(created_at)')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        // Build full 30-day range filled with 0 for missing days
+        $trendDates = [];
+        $trendCounts = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $d = now()->subDays($i)->format('Y-m-d');
+            $trendDates[] = now()->subDays($i)->format('M d');
+            $trendCounts[] = isset($evalTrend[$d]) ? (int) $evalTrend[$d]->count : 0;
+        }
+
         return view('admin.dashboard', compact(
             'studentCount',
             'stallCount',
             'evaluationCount',
             'stalls',
             'evaluations',
-            'results'
+            'results',
+            'trendDates',
+            'trendCounts'
         ));
     }
 
