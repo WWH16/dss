@@ -90,6 +90,10 @@ Route::middleware('auth')->group(function () {
         [AdminController::class,'addStall'])
         ->name('admin.stall.add');
 
+    Route::put('/admin/stall/{id}',
+        [AdminController::class,'editStall'])
+        ->name('admin.stall.edit');
+
     Route::delete('/admin/stall/{id}',
         [AdminController::class,'deleteStall'])
         ->name('admin.stall.delete');

@@ -125,18 +125,36 @@ class AdminController extends Controller
     // Add Stall
     public function addStall(Request $request)
     {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
         $request->validate([
-            'name'=>'required',
-            
+            'name' => 'required|string|max:255'
         ]);
 
         DB::table('stalls')->insert([
-            'name'=>$request->name,
-            'created_at'=>now(),
-            'updated_at'=>now(),
+            'name' => trim($request->name),
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
-        return back()->with('success','Stall added successfully.');
+        return redirect()->back()->with('success', 'Stall added successfully!');
+    }
+
+    // Edit Stall
+    public function editStall(Request $request, $id)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $request->validate([
+            'name' => 'required|string|max:255'
+        ]);
+
+        DB::table('stalls')->where('id', $id)->update([
+            'name' => trim($request->name),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Stall updated successfully!');
     }
 
     // Delete Stall
