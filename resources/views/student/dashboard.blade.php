@@ -17,7 +17,55 @@
                 </a>
             </div>
         </div>
+        <!-- Dashboard Metrics (True Dashboard Features) -->
+        @php
+            $totalEvals = $myStudentEvals->count();
+            $averageRating = 0;
+            if ($totalEvals > 0) {
+                $totalScore = $myStudentEvals->sum(function($eval) {
+                    return ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4;
+                });
+                $averageRating = round($totalScore / $totalEvals, 1);
+            }
+            $lastEval = $myStudentEvals->first();
+        @endphp
 
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-8">
+            <!-- Metric 1 -->
+            <div class="bg-white rounded-xl border border-neutral-200/60 p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-brand-50 flex items-center justify-center text-brand-600 shrink-0">
+                    <span class="material-symbols-outlined">ballot</span>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5">Total Submitted</p>
+                    <p class="text-2xl font-bold text-neutral-900 tabular-nums leading-none">{{ $totalEvals }}</p>
+                </div>
+            </div>
+
+            <!-- Metric 2 -->
+            <div class="bg-white rounded-xl border border-neutral-200/60 p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center text-amber-500 shrink-0">
+                    <span class="material-symbols-outlined">star</span>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5">Avg Rating Given</p>
+                    <p class="text-2xl font-bold text-neutral-900 tabular-nums leading-none">{{ $totalEvals > 0 ? $averageRating : '--' }}</p>
+                </div>
+            </div>
+
+            <!-- Metric 3 -->
+            <div class="bg-white rounded-xl border border-neutral-200/60 p-5 shadow-sm flex items-center gap-4">
+                <div class="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center text-blue-500 shrink-0">
+                    <span class="material-symbols-outlined">history</span>
+                </div>
+                <div>
+                    <p class="text-[11px] font-bold text-neutral-400 uppercase tracking-wider mb-0.5">Last Submission</p>
+                    <p class="text-sm font-bold text-neutral-900 leading-tight mt-1">
+                        {{ $lastEval ? \Carbon\Carbon::parse($lastEval->created_at)->diffForHumans() : 'Never' }}
+                    </p>
+                </div>
+            </div>
+        </div>
         <div>
             <!-- Evaluation History Panel -->
             <div class="bg-white rounded-xl border border-neutral-200/60 p-6">
