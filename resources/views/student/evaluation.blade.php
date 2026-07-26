@@ -1,373 +1,148 @@
-<!doctype html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Evaluation</title>
+@extends('layouts.focused')
 
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+@section('title', 'Evaluate Food Stall | DSS')
 
-    <link rel="stylesheet" href="{{ asset('assets/css/style.css') }}">
-</head>
+@section('header_title', 'Evaluate Food Stall')
 
-<body class="survey-page">
-
-<div class="survey-paper">
-
-    <div class="survey-top">
-
-        <img src="{{ asset('assets/images/isu_logo.jpg') }}"
-             class="survey-logo"
-             alt="ISU Logo">
-
-        <div class="survey-title">
-
-            <p class="line-1 text-uppercase fw-bold mb-1">
-                Isabela State University
-            </p>
-
-            <p class="line-2 mb-1">
-                Cauayan Campus
-            </p>
-
-            <h1 class="text-success">
-                Citizen / Client Satisfaction Survey
-            </h1>
-
-            <p class="line-3 mb-0">
-                Please answer each statement by selecting the rating that best reflects your opinion.
-            </p>
-
-        </div>
-
-        <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}"
-             class="survey-logo"
-             alt="Bagong Pilipinas">
-
+@section('content')
+<div class="max-w-4xl mx-auto">
+    
+    <!-- Back to Dashboard Arrow Button -->
+    <div class="mb-6">
+        <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-brand-600 transition-colors bg-white px-4 py-2 rounded-lg border border-neutral-200 shadow-sm">
+            <span class="material-symbols-outlined text-lg leading-none">arrow_back</span>
+            Back to Dashboard
+        </a>
     </div>
 
-    <div class="survey-divider"></div>
-
-    <div class="survey-section-box mb-4">
-
-        <div class="row g-3 survey-info-grid">
-
-            <div class="col-md-4 survey-info-item">
-                <dl class="mb-0">
-                    <dt>Name</dt>
-                    <dd>{{ $profile->name ?? $profile->student_number }}</dd>
-                </dl>
-            </div>
-
-            <div class="col-md-4 survey-info-item">
-                <dl class="mb-0">
-                    <dt>Date</dt>
-                    <dd>{{ now()->format('F d, Y') }}</dd>
-                </dl>
-            </div>
-
-            <div class="col-md-4 survey-info-item">
-                <dl class="mb-0">
-                    <dt>Time</dt>
-                    <dd>{{ now()->format('h:i A') }}</dd>
-                </dl>
-            </div>
-
-        </div>
-
-    </div>
-
-    @if(session('success'))
-
-        <div class="alert alert-success">
-
-            {{ session('success') }}
-
-        </div>
-
-    @endif
-
-    @if($errors->any())
-
-        <div class="alert alert-danger">
-
-            <ul class="mb-0">
-
-                @foreach($errors->all() as $error)
-
-                    <li>{{ $error }}</li>
-
-                @endforeach
-
-            </ul>
-
-        </div>
-
-    @endif
-
-    @if($stalls->isEmpty())
-
-        <div class="alert alert-warning">
-
-            No stalls are available yet.
-
-            Please ask an administrator to add stall information first.
-
-        </div>
-
-    @else
-
-    <form action="{{ route('student.evaluation.store') }}" method="POST">
-
-        @csrf
-
-        <div class="survey-section-box mb-4">
-
-            <div class="row g-3 align-items-center">
-
-                <div class="col-md-8">
-
-                    <label class="form-label">
-
-                        Food Stall Evaluated
-
-                    </label>
-
-                    <select
-                        name="stall_id"
-                        class="form-select"
-                        required>
-
-                        <option value="">
-                            Choose a Stall
-                        </option>
-
-                        @foreach($stalls as $stall)
-
-                            <option value="{{ $stall->id }}">
-
-                                {{ $stall->name }}
-
-                            </option>
-
-                        @endforeach
-
-                    </select>
-
+    <div class="bg-white rounded-2xl border border-neutral-200/60 shadow-sm overflow-hidden">
+        
+        <!-- Form Header (Paper style) -->
+        <div class="p-8 md:p-10 border-b border-neutral-100 bg-neutral-50/30">
+            <div class="flex flex-col md:flex-row items-center gap-6 text-center md:text-left">
+                <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-20 h-20 object-contain" alt="ISU Logo">
+                <div class="flex-1">
+                    <p class="uppercase font-bold text-neutral-800 text-sm tracking-wider mb-0.5">Isabela State University</p>
+                    <p class="text-neutral-500 text-sm mb-3">Cauayan Campus</p>
+                    <h1 class="text-2xl font-display font-bold text-brand-700 leading-tight">Citizen / Client Satisfaction Survey</h1>
+                    <p class="text-sm text-neutral-500 mt-2">Please answer each statement by selecting the rating that best reflects your opinion.</p>
                 </div>
+                <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="w-20 h-20 object-contain" alt="Bagong Pilipinas">
+            </div>
+        </div>
 
-                <div class="col-md-4">
+        <div class="p-8 md:p-10">
+            <!-- Student Info -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 p-4 bg-neutral-50 rounded-xl border border-neutral-100">
+                <div>
+                    <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">Name</span>
+                    <span class="text-neutral-900 font-semibold">{{ $profile->name ?? ($profile->student_number ?? 'Student') }}</span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">Date</span>
+                    <span class="text-neutral-900 font-semibold">{{ now()->format('F d, Y') }}</span>
+                </div>
+                <div>
+                    <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">Time</span>
+                    <span class="text-neutral-900 font-semibold">{{ now()->format('h:i A') }}</span>
+                </div>
+            </div>
 
-                    <div class="alert alert-info mb-0 py-3">
+            @if(session('success'))
+                <div class="mb-6 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2">
+                    <span class="material-symbols-outlined text-lg leading-none">check_circle</span>
+                    {{ session('success') }}
+                </div>
+            @endif
 
-                        <strong>Scale</strong>
+            @if($errors->any())
+                <div class="mb-6 p-4 bg-red-50 border border-red-100 text-red-800 rounded-xl text-sm">
+                    <ul class="list-disc pl-5 mb-0">
+                        @foreach($errors->all() as $error)
+                            <li>{{ $error }}</li>
+                        @endforeach
+                    </ul>
+                </div>
+            @endif
 
-                        <div>5 = Strongly Agree / Excellent</div>
-
-                        <div>4 = Agree / Very Good</div>
-
-                        <div>3 = Neutral / Good</div>
-
-                        <div>2 = Disagree / Fair</div>
-
-                        <div>1 = Strongly Disagree / Poor</div>
-
+            @if($stalls->isEmpty())
+                <div class="p-6 text-center bg-amber-50 border border-amber-100 rounded-xl text-amber-800">
+                    <span class="material-symbols-outlined text-3xl mb-2">warning</span>
+                    <p class="font-semibold">No stalls are available yet.</p>
+                    <p class="text-sm">Please ask an administrator to add stall information first.</p>
+                </div>
+            @else
+                <form action="{{ route('student.evaluation.store') }}" method="POST">
+                    @csrf
+                    
+                    <!-- Stall Selection -->
+                    <div class="mb-8 p-6 bg-brand-50/50 rounded-xl border border-brand-100/50">
+                        <label class="block text-sm font-bold text-neutral-800 mb-2">Select Food Stall to Evaluate</label>
+                        <select name="stall_id" class="w-full md:w-1/2 px-4 py-2.5 bg-white border border-neutral-300 rounded-lg text-sm font-semibold focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500" required>
+                            <option value="">Choose a Stall...</option>
+                            @foreach($stalls as $stall)
+                                <option value="{{ $stall->id }}">{{ $stall->name }}</option>
+                            @endforeach
+                        </select>
                     </div>
 
-                </div>
+                    <!-- Scale Info -->
+                    <div class="mb-8 flex flex-wrap gap-3 text-xs font-medium text-neutral-600 bg-neutral-50 p-4 rounded-xl border border-neutral-100">
+                        <strong class="text-neutral-900 mr-2">Rating Scale:</strong>
+                        <span class="flex items-center gap-1"><span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-[10px] tabular-nums">5</span> Excellent</span>
+                        <span class="flex items-center gap-1"><span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-[10px] tabular-nums">4</span> Very Good</span>
+                        <span class="flex items-center gap-1"><span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-[10px] tabular-nums">3</span> Good</span>
+                        <span class="flex items-center gap-1"><span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-[10px] tabular-nums">2</span> Fair</span>
+                        <span class="flex items-center gap-1"><span class="w-5 h-5 rounded-full bg-brand-100 text-brand-700 flex items-center justify-center font-bold text-[10px] tabular-nums">1</span> Poor</span>
+                    </div>
 
-            </div>
+                    <!-- Survey Table -->
+                    <div class="mb-8 overflow-x-auto rounded-xl border border-neutral-200">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-neutral-50 border-b border-neutral-200 text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+                                    <th class="p-4">Statement</th>
+                                    <th class="p-4 text-center w-14">5</th>
+                                    <th class="p-4 text-center w-14">4</th>
+                                    <th class="p-4 text-center w-14">3</th>
+                                    <th class="p-4 text-center w-14">2</th>
+                                    <th class="p-4 text-center w-14">1</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-neutral-100">
+                                @foreach($displayStatements as $index => $statement)
+                                    <tr class="hover:bg-neutral-50/50 transition-colors">
+                                        <td class="p-4 text-sm font-medium text-neutral-800">
+                                            <span class="text-neutral-400 mr-2">{{ $index + 1 }}.</span>
+                                            {{ $statement['statement'] }}
+                                        </td>
+                                        @for($val = 5; $val >= 1; $val--)
+                                            <td class="p-4 text-center align-middle">
+                                                <input type="radio" name="responses[{{ $statement['id'] }}]" value="{{ $val }}" required 
+                                                    class="appearance-auto w-5 h-5 cursor-pointer accent-brand-600">
+                                            </td>
+                                        @endfor
+                                    </tr>
+                                @endforeach
+                            </tbody>
+                        </table>
+                    </div>
 
+                    <!-- Comments -->
+                    <div class="mb-8">
+                        <label class="block text-sm font-bold text-neutral-800 mb-2">Compliments / Suggestions / Complaints</label>
+                        <textarea name="comment" rows="4" class="w-full px-4 py-3 bg-white border border-neutral-300 rounded-xl text-sm focus:outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500 resize-none shadow-sm" placeholder="Share compliments, suggestions, or complaints here...">{{ old('comment') }}</textarea>
+                    </div>
+
+                    <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-neutral-200">
+                        <p class="text-xs text-neutral-400 font-medium">This information is treated confidentially.</p>
+                        <button type="submit" class="btn btn-primary px-8 w-full sm:w-auto text-sm">
+                            Submit Evaluation
+                        </button>
+                    </div>
+                </form>
+            @endif
         </div>
-                <div class="survey-table table-responsive">
-
-            <table class="table table-bordered align-middle">
-
-                <thead>
-
-                    <tr>
-
-                        <th style="width:70%">
-                            Statement
-                        </th>
-
-                        <th class="text-center">5</th>
-
-                        <th class="text-center">4</th>
-
-                        <th class="text-center">3</th>
-
-                        <th class="text-center">2</th>
-
-                        <th class="text-center">1</th>
-
-                    </tr>
-
-                </thead>
-
-                <tbody>
-
-                    @foreach($displayStatements as $index => $statement)
-
-                        <tr>
-
-                            <td>
-
-                                {{ $index + 1 }}.
-                                {{ $statement['statement'] }}
-
-                            </td>
-
-                            @for($val = 5; $val >= 1; $val--)
-
-                                <td class="text-center">
-
-                                    <input
-                                        class="form-check-input"
-                                        type="radio"
-                                        name="responses[{{ $statement['id'] }}]"
-                                        value="{{ $val }}"
-                                        required>
-
-                                </td>
-
-                            @endfor
-
-                        </tr>
-
-                    @endforeach
-
-                </tbody>
-
-            </table>
-
-        </div>
-
-        <div class="survey-section-box mb-4">
-
-            <label class="form-label">
-
-                Compliments / Suggestions / Complaints
-
-            </label>
-
-            <textarea
-                name="comment"
-                rows="4"
-                class="form-control"
-                placeholder="Share compliments, suggestions, or complaints here.">{{ old('comment') }}</textarea>
-
-        </div>
-
-        <div class="survey-note">
-
-            Please mark only one rating for each statement.
-
-        </div>
-                <div class="survey-footer mt-4">
-
-            <div class="survey-footer-left">
-
-                <div class="line"></div>
-
-                <div class="small text-muted">
-
-                    Signature over printed name
-
-                </div>
-
-            </div>
-
-            <div class="survey-footer-right">
-
-                <div class="line"></div>
-
-                <div class="small text-muted">
-
-                    Designation / Department
-
-                </div>
-
-            </div>
-
-        </div>
-
-        <div class="survey-footnote mt-3">
-
-            This information is treated confidentially and used to improve student satisfaction.
-
-        </div>
-
-        <div class="mt-4">
-
-            <button type="submit" class="btn btn-success">
-
-                Submit Evaluation
-
-            </button>
-
-        </div>
-
-    </form>
-
-    @endif
-
-    <div class="mt-4 text-end">
-
-        <form action="{{ route('logout') }}" method="POST" id="logout-form">
-
-            @csrf
-
-            <button type="button" class="btn btn-outline-secondary" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal">
-
-                Logout
-
-            </button>
-
-        </form>
-
     </div>
-
 </div>
-
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-<!-- Logout Confirmation Modal (Bootstrap 5) -->
-<div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-dialog-centered modal-sm">
-    <div class="modal-content border-0 shadow">
-      <div class="modal-header border-0 pb-0">
-        <h5 class="modal-title fw-bold text-dark d-flex align-items-center gap-2" id="logoutConfirmModalLabel">
-          <svg xmlns="http://www.w3.org/2000/svg" height="20" viewBox="0 -960 960 960" width="20" fill="currentColor" class="text-danger">
-              <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"/>
-          </svg>
-          Confirm Logout
-        </h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body text-secondary small py-3">
-        Are you sure you want to end your session?
-      </div>
-      <div class="modal-footer border-0 pt-0">
-        <button type="button" class="btn btn-sm btn-light border" data-bs-dismiss="modal">Cancel</button>
-        <button type="button" class="btn btn-sm btn-danger px-3" id="bootstrap-confirm-logout">Logout</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var confirmBtn = document.getElementById('bootstrap-confirm-logout');
-        var logoutForm = document.getElementById('logout-form');
-        if (confirmBtn && logoutForm) {
-            confirmBtn.addEventListener('click', function () {
-                confirmBtn.disabled = true;
-                confirmBtn.innerHTML = 'Logging out...';
-                logoutForm.submit();
-            });
-        }
-    });
-</script>
-
-</body>
-</html>
+@endsection
