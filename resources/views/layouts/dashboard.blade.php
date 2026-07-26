@@ -137,10 +137,10 @@
     {{-- ── Sidebar ─────────────────────────────────────────────────────── --}}
     <aside class="dashboard-sidebar" id="sidebar">
         <!-- Brand -->
-        <a href="{{ url('/') }}" class="sidebar-brand h-16 flex items-center gap-3 px-6 border-b mb-4 text-decoration-none">
+        <div class="sidebar-brand h-16 flex items-center gap-3 px-6 border-b mb-4 text-decoration-none cursor-default select-none">
             <img src="{{ asset('assets/images/isu_logo.png') }}" alt="" width="28" height="28">
             <span class="sidebar-brand-text font-display font-bold leading-tight">DSS Portal</span>
-        </a>
+        </div>
 
         <!-- Navigation Links -->
         <nav class="flex-1 overflow-y-auto">
