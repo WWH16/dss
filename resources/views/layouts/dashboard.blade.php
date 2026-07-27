@@ -19,7 +19,7 @@
         body { background-color: var(--color-surface-alt); }
         .dashboard-layout {
             display: grid;
-            grid-template-columns: 16rem 1fr;
+            grid-template-columns: 16rem minmax(0, 1fr);
             min-height: 100vh;
         }
         .dashboard-sidebar {
@@ -107,7 +107,8 @@
         }
 
         @media (max-width: 768px) {
-            .dashboard-layout { grid-template-columns: 1fr; }
+            .dashboard-layout { grid-template-columns: minmax(0, 1fr); }
+
             .dashboard-sidebar {
                 position: fixed;
                 left: -16rem;

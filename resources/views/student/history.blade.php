@@ -33,7 +33,7 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+                <table class="w-full text-left border-collapse min-w-[800px]">
                     <thead>
                         <tr class="bg-neutral-50/50 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-100">
                             <th class="px-6 py-4">Food Stall</th>
@@ -57,10 +57,10 @@
                                         <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
                                             <span class="material-symbols-outlined text-[16px]">storefront</span>
                                         </div>
-                                        <span class="text-sm font-bold text-neutral-900">{{ $eval->stall_name ?? 'Unknown Stall' }}</span>
+                                        <span class="text-sm font-bold text-neutral-900 whitespace-nowrap">{{ $eval->stall_name ?? 'Unknown Stall' }}</span>
                                     </div>
                                 </td>
-                                <td class="px-6 py-4 text-sm text-neutral-600 tabular-nums">
+                                <td class="px-6 py-4 text-sm text-neutral-600 tabular-nums whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y') }}
                                     <span class="text-xs text-neutral-400 block mt-0.5">{{ \Carbon\Carbon::parse($eval->created_at)->format('h:i A') }}</span>
                                 </td>
@@ -85,7 +85,7 @@
                                     </span>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="inline-flex items-center gap-1.5 bg-neutral-50 px-2.5 py-1 rounded-md text-sm font-bold text-neutral-900 border border-neutral-200/60">
+                                    <div class="inline-flex items-center gap-1.5 bg-neutral-50 px-2.5 py-1 rounded-md text-sm font-bold text-neutral-900 border border-neutral-200/60 whitespace-nowrap">
                                         {{ $avg }} <span class="material-symbols-outlined text-[14px] text-amber-500">star</span>
                                     </div>
                                 </td>
