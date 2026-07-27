@@ -30,6 +30,7 @@
             position: sticky;
             top: 0;
             height: 100vh;
+            height: 100dvh;
             z-index: 40;
         }
         .dashboard-header {
@@ -112,6 +113,9 @@
             .dashboard-sidebar {
                 position: fixed;
                 left: -16rem;
+                top: 0;
+                height: 100vh;
+                height: 100dvh;
                 transition: left 0.3s ease;
                 width: 16rem;
                 box-shadow: 0 0 40px oklch(0.14 0.01 255 / 0.35);
