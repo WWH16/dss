@@ -5,14 +5,14 @@
 
 @section('content')
 <div class="max-w-6xl mx-auto space-y-6">
-    <div class="flex items-center justify-between">
+    <div class="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight leading-tight mb-1">Evaluation History</h1>
+            <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight leading-tight mb-1" style="text-wrap: balance">Evaluation History</h1>
             <p class="text-sm font-medium text-neutral-500">A complete record of all the food stalls you have rated.</p>
         </div>
-        
-        <div class="flex items-center gap-2">
-            <span class="bg-brand-50 text-brand-700 text-sm font-bold px-3 py-1 rounded-full tabular-nums">
+
+        <div class="flex items-center gap-2 shrink-0">
+            <span class="bg-brand-50 text-brand-700 text-sm font-bold px-3 py-1.5 rounded-full tabular-nums border border-brand-100">
                 {{ $myStudentEvals->count() }} Total
             </span>
         </div>
