@@ -16,7 +16,7 @@
     @endif
 
     {{-- Metric Cards --}}
-    <div class="bg-white rounded-xl border border-neutral-200/60 shadow-sm mb-6 flex flex-col sm:flex-row sm:divide-x divide-neutral-100 overflow-hidden">
+    <div class="bg-white rounded-xl border border-neutral-200/60 shadow-sm mb-6 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-neutral-100 overflow-hidden">
         @foreach([
             ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'group'],
             ['label' => 'Total Stalls',      'value' => $stallCount,      'icon' => 'storefront'],
@@ -65,7 +65,7 @@
                 <h2 class="font-bold text-neutral-800 text-base tracking-tight">Average Stall Scores</h2>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[400px]">
+                <table class="w-full text-left border-collapse min-w-[400px] hidden md:table">
                     <thead>
                         <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-100">
                             <th class="pb-2">Food Stall</th>
@@ -87,6 +87,33 @@
                         @endforeach
                     </tbody>
                 </table>
+                
+                <!-- Mobile View -->
+                <div class="md:hidden divide-y divide-neutral-100">
+                    @foreach($results as $result)
+                        <div class="py-3 flex flex-col gap-2">
+                            <h3 class="font-bold text-neutral-900 text-sm">{{ $result->name }}</h3>
+                            <div class="grid grid-cols-4 gap-2 text-center">
+                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Clean</span>
+                                    <span class="block text-xs font-bold {{ $result->cleanliness >= 4 ? 'text-emerald-600' : ($result->cleanliness >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->cleanliness, 1) }}</span>
+                                </div>
+                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Serv</span>
+                                    <span class="block text-xs font-bold {{ $result->service >= 4 ? 'text-emerald-600' : ($result->service >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->service, 1) }}</span>
+                                </div>
+                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Taste</span>
+                                    <span class="block text-xs font-bold {{ $result->taste >= 4 ? 'text-emerald-600' : ($result->taste >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->taste, 1) }}</span>
+                                </div>
+                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Price</span>
+                                    <span class="block text-xs font-bold {{ $result->price >= 4 ? 'text-emerald-600' : ($result->price >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->price, 1) }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
 
@@ -119,7 +146,7 @@
                 </a>
             </div>
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[600px]">
+                <table class="w-full text-left border-collapse min-w-[600px] hidden md:table">
                     <thead>
                         <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-100">
                             <th class="pb-2">Student</th>
@@ -152,6 +179,23 @@
                         @endforeach
                     </tbody>
                 </table>
+                
+                <!-- Mobile View -->
+                <div class="md:hidden divide-y divide-neutral-100">
+                    @foreach($recentEvaluations as $eval)
+                        @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
+                        <div class="py-3 flex items-start justify-between gap-3">
+                            <div>
+                                <h3 class="text-sm font-bold text-neutral-900 leading-tight">{{ $eval->student_name }}</h3>
+                                <p class="text-[11px] font-bold uppercase tracking-wider text-brand-600 mt-0.5">{{ $eval->stall_name }}</p>
+                                <p class="text-[10px] text-neutral-400 mt-0.5">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
+                            </div>
+                            <div class="shrink-0 inline-flex items-center gap-1 bg-neutral-50 px-2 py-1 rounded-md text-xs font-bold text-neutral-900 border border-neutral-200/60">
+                                {{ number_format($avg, 1) }} <span class="material-symbols-outlined text-[12px] text-amber-500">star</span>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         </div>
         @endif

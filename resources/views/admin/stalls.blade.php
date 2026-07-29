@@ -36,18 +36,18 @@
             <div class="space-y-1">
                 @forelse($stalls as $stall)
                     <div class="flex items-center justify-between py-2.5 px-3 rounded-lg hover:bg-neutral-50 transition-colors border border-transparent hover:border-neutral-100">
-                        <div class="flex items-center gap-3">
+                        <div class="flex items-center gap-3 min-w-0 pr-2">
                             <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
                                 <span class="material-symbols-outlined text-[16px]">storefront</span>
                             </div>
-                            <span class="text-sm font-bold text-neutral-900">{{ $stall->name }}</span>
+                            <span class="text-sm font-bold text-neutral-900 truncate">{{ $stall->name }}</span>
                         </div>
-                        <div class="flex items-center gap-2">
+                        <div class="flex items-center gap-2 shrink-0">
                             <button type="button"
                                 onclick="openEditModal({{ $stall->id }}, '{{ addslashes($stall->name) }}')"
                                 class="relative text-brand-600 hover:text-brand-700 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 transition-colors bg-white px-2 py-1.5 rounded border border-brand-100 hover:border-brand-200 hover:bg-brand-50 before:absolute before:inset-[-8px]">
                                 <span class="material-symbols-outlined text-[14px] leading-none">edit</span>
-                                Edit
+                                <span class="hidden sm:inline">Edit</span>
                             </button>
                             <form id="delete-form-{{ $stall->id }}" action="{{ route('admin.stall.delete', $stall->id) }}" method="POST" class="hidden">
                                 @csrf
@@ -57,7 +57,7 @@
                                 onclick="openDeleteModal({{ $stall->id }}, '{{ addslashes($stall->name) }}')"
                                 class="relative text-red-400 hover:text-red-600 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 transition-colors bg-white px-2 py-1.5 rounded border border-red-100 hover:border-red-200 hover:bg-red-50 before:absolute before:inset-[-8px]">
                                 <span class="material-symbols-outlined text-[14px] leading-none">delete</span>
-                                Delete
+                                <span class="hidden sm:inline">Delete</span>
                             </button>
                         </div>
                     </div>
