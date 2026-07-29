@@ -35,7 +35,7 @@
                 Academic Information
             </h2>
             
-            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-8">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-8 gap-x-8">
                 <div class="group">
                     <dt class="text-sm font-medium text-neutral-500 mb-1 flex items-center gap-2">
                         Student Number

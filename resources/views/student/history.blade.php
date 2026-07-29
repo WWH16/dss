@@ -33,7 +33,7 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[800px]">
+                <table class="w-full text-left border-collapse min-w-[800px] hidden md:table">
                     <thead>
                         <tr class="bg-neutral-50/50 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-100">
                             <th class="px-6 py-4">Food Stall</th>
@@ -93,6 +93,50 @@
                         @endforeach
                     </tbody>
                 </table>
+
+                <!-- Mobile View -->
+                <div class="md:hidden divide-y divide-neutral-100">
+                    @foreach($myStudentEvals as $eval)
+                        @php
+                            $avg = round(($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4, 1);
+                        @endphp
+                        <div class="p-4 flex flex-col gap-3 hover:bg-neutral-50 transition-colors">
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-8 h-8 rounded-full bg-orange-50 text-orange-600 flex items-center justify-center shrink-0">
+                                        <span class="material-symbols-outlined text-[16px]">storefront</span>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-sm font-bold text-neutral-900">{{ $eval->stall_name ?? 'Unknown Stall' }}</h3>
+                                        <p class="text-[11px] font-medium text-neutral-500">{{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y • h:i A') }}</p>
+                                    </div>
+                                </div>
+                                <div class="shrink-0 inline-flex items-center gap-1 bg-neutral-50 px-2 py-1 rounded-md text-xs font-bold text-neutral-900 border border-neutral-200/60">
+                                    {{ $avg }} <span class="material-symbols-outlined text-[12px] text-amber-500">star</span>
+                                </div>
+                            </div>
+                            
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-2 mt-1 pt-3 border-t border-neutral-100/80">
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-neutral-500 font-medium">Cleanliness</span>
+                                    <span class="font-bold flex items-center gap-0.5 {{ $eval->cleanliness >= 4 ? 'text-emerald-600' : ($eval->cleanliness <= 2 ? 'text-rose-500' : 'text-neutral-700') }}">{{ $eval->cleanliness }} <span class="material-symbols-outlined text-[10px]">star</span></span>
+                                </div>
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-neutral-500 font-medium">Service</span>
+                                    <span class="font-bold flex items-center gap-0.5 {{ $eval->service >= 4 ? 'text-emerald-600' : ($eval->service <= 2 ? 'text-rose-500' : 'text-neutral-700') }}">{{ $eval->service }} <span class="material-symbols-outlined text-[10px]">star</span></span>
+                                </div>
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-neutral-500 font-medium">Taste</span>
+                                    <span class="font-bold flex items-center gap-0.5 {{ $eval->taste >= 4 ? 'text-emerald-600' : ($eval->taste <= 2 ? 'text-rose-500' : 'text-neutral-700') }}">{{ $eval->taste }} <span class="material-symbols-outlined text-[10px]">star</span></span>
+                                </div>
+                                <div class="flex justify-between items-center text-[11px]">
+                                    <span class="text-neutral-500 font-medium">Price</span>
+                                    <span class="font-bold flex items-center gap-0.5 {{ $eval->price >= 4 ? 'text-emerald-600' : ($eval->price <= 2 ? 'text-rose-500' : 'text-neutral-700') }}">{{ $eval->price }} <span class="material-symbols-outlined text-[10px]">star</span></span>
+                                </div>
+                            </div>
+                        </div>
+                    @endforeach
+                </div>
             </div>
         @endif
     </div>
