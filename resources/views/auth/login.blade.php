@@ -203,46 +203,47 @@
                             </button>
                         </div>
 
-                        {{-- PASSWORD CRITERIA CHECKLIST (Inline under field) --}}
-                        <div id="password-criteria-box" class="mt-2 p-2.5 bg-neutral-50/80 border border-neutral-100 rounded-[4px]">
-                            {{-- Segmented Progress Bar --}}
-                            <div class="flex gap-1 mb-2">
-                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-1" class="h-full bg-red-500 w-0 transition-all duration-300 ease-out"></div>
+                        {{-- PASSWORD CRITERIA CHECKLIST (Structured Layout) --}}
+                        <div id="password-criteria-box" class="mt-2">
+                            
+                            {{-- Segmented Progress Bar (Full Width) --}}
+                            <div class="flex gap-1 w-full mb-1">
+                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-1" class="h-full w-0 transition-all duration-300 ease-out"></div>
                                 </div>
-                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-2" class="h-full bg-orange-500 w-0 transition-all duration-300 ease-out"></div>
+                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-2" class="h-full w-0 transition-all duration-300 ease-out"></div>
                                 </div>
-                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-3" class="h-full bg-amber-500 w-0 transition-all duration-300 ease-out"></div>
+                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-3" class="h-full w-0 transition-all duration-300 ease-out"></div>
                                 </div>
-                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-4" class="h-full bg-emerald-500 w-0 transition-all duration-300 ease-out"></div>
+                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-4" class="h-full w-0 transition-all duration-300 ease-out"></div>
                                 </div>
                             </div>
                             
-                            {{-- Strength Text (Lower Left) --}}
-                            <div class="mb-1.5 text-left">
-                                <span id="pwd-strength-text" class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest">None</span>
+                            {{-- Strength Text (Lower Right, No Label) --}}
+                            <div class="mb-1.5 text-right">
+                                <span id="pwd-strength-text" class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest transition-colors duration-300">NONE</span>
                             </div>
 
-                            {{-- Checklist Items (Compact) --}}
-                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-2 gap-y-1 font-medium text-neutral-500">
-                                <div id="req-length" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[9px] whitespace-nowrap">8+ chars</span>
+                            {{-- Checklist Items (Spaced 2x2 Grid) --}}
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 font-medium text-neutral-500">
+                                <div id="req-length" class="flex items-center gap-1.5 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[10px] whitespace-nowrap">8+ characters</span>
                                 </div>
-                                <div id="req-case" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[9px] whitespace-nowrap">Upper & lower</span>
+                                <div id="req-case" class="flex items-center gap-1.5 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[10px] whitespace-nowrap">Upper & lowercase</span>
                                 </div>
-                                <div id="req-number" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[9px] whitespace-nowrap">One number</span>
+                                <div id="req-number" class="flex items-center gap-1.5 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[10px] whitespace-nowrap">One number</span>
                                 </div>
-                                <div id="req-symbol" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[9px] whitespace-nowrap">One symbol</span>
+                                <div id="req-symbol" class="flex items-center gap-1.5 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[10px] whitespace-nowrap">One symbol</span>
                                 </div>
                             </div>
                         </div>
@@ -409,7 +410,7 @@
                     bar3.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
                     bar4.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
                     strengthText.textContent = "NONE";
-                    strengthText.className = "text-[9px] font-bold text-neutral-400 uppercase tracking-widest";
+                    strengthText.className = "text-[10px] font-bold text-neutral-400 uppercase tracking-widest transition-colors duration-300";
                 } else {
                     // Update widths based on how many are valid, all using the synchronized barColor
                     bar1.className = `h-full transition-all duration-300 ease-out ${validCount >= 1 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
@@ -419,19 +420,19 @@
                     
                     if (validCount === 1) {
                         strengthText.textContent = "WEAK";
-                        strengthText.className = "text-[9px] font-bold text-red-500 uppercase tracking-widest";
+                        strengthText.className = "text-[10px] font-bold text-red-600 uppercase tracking-widest transition-colors duration-300";
                     } else if (validCount === 2) {
                         strengthText.textContent = "FAIR";
-                        strengthText.className = "text-[9px] font-bold text-orange-500 uppercase tracking-widest";
+                        strengthText.className = "text-[10px] font-bold text-orange-600 uppercase tracking-widest transition-colors duration-300";
                     } else if (validCount === 3) {
                         strengthText.textContent = "GOOD";
-                        strengthText.className = "text-[9px] font-bold text-amber-500 uppercase tracking-widest";
+                        strengthText.className = "text-[10px] font-bold text-amber-600 uppercase tracking-widest transition-colors duration-300";
                     } else if (validCount === 4) {
                         strengthText.textContent = "STRONG";
-                        strengthText.className = "text-[9px] font-bold text-emerald-600 uppercase tracking-widest";
+                        strengthText.className = "text-[10px] font-bold text-emerald-600 uppercase tracking-widest transition-colors duration-300";
                     } else {
                         strengthText.textContent = "WEAK";
-                        strengthText.className = "text-[9px] font-bold text-red-500 uppercase tracking-widest";
+                        strengthText.className = "text-[10px] font-bold text-red-600 uppercase tracking-widest transition-colors duration-300";
                     }
                 }
             }
