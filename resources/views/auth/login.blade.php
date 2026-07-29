@@ -13,8 +13,19 @@
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+    <style>
+        @keyframes icon-pop {
+            0% { transform: scale(0.5); opacity: 0.5; }
+            40% { transform: scale(1.3); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .animate-icon-pop {
+            animation: icon-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+    </style>
 </head>
 <body class="bg-neutral-50/50 min-h-screen flex items-center justify-center px-4 relative antialiased">
+
 
     <!-- Standalone Back Navigation Arrow -->
     <div class="absolute top-6 left-6 z-50">
@@ -183,7 +194,7 @@
 
                 {{-- PASSWORDS --}}
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
+                    <div class="relative">
                         <label for="register_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password</label>
                         <div class="relative">
                             <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
@@ -191,6 +202,51 @@
                                 <span id="register_password_icon" class="material-symbols-outlined text-lg leading-none">visibility</span>
                             </button>
                         </div>
+
+                        {{-- PASSWORD CRITERIA CHECKLIST (Inline under field) --}}
+                        <div id="password-criteria-box" class="mt-2 p-2 bg-neutral-50 border border-neutral-100 rounded-[4px]">
+                            {{-- Segmented Progress Bar --}}
+                            <div class="flex gap-0.5 mb-1.5">
+                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-1" class="h-full bg-red-500 w-0 transition-all duration-300 ease-out"></div>
+                                </div>
+                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-2" class="h-full bg-orange-500 w-0 transition-all duration-300 ease-out"></div>
+                                </div>
+                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-3" class="h-full bg-amber-500 w-0 transition-all duration-300 ease-out"></div>
+                                </div>
+                                <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
+                                    <div id="pwd-bar-4" class="h-full bg-emerald-500 w-0 transition-all duration-300 ease-out"></div>
+                                </div>
+                            </div>
+                            
+                            {{-- Strength Text (Lower Left) --}}
+                            <div class="mb-1.5 text-left">
+                                <span id="pwd-strength-text" class="text-[9px] font-bold text-neutral-400 uppercase tracking-widest">None</span>
+                            </div>
+
+                            {{-- Checklist Items (Compact) --}}
+                            <div class="grid grid-cols-2 gap-x-1 gap-y-1 font-medium text-neutral-500">
+                                <div id="req-length" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">8+ chars</span>
+                                </div>
+                                <div id="req-case" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">Upper & lower</span>
+                                </div>
+                                <div id="req-number" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">One number</span>
+                                </div>
+                                <div id="req-symbol" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">One symbol</span>
+                                </div>
+                            </div>
+                        </div>
+
                         @error('password')
                             <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
                         @enderror
@@ -206,6 +262,7 @@
                         </div>
                     </div>
                 </div>
+
 
                 <button type="submit" id="register-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">
                     <span id="register-btn-loader" class="material-symbols-outlined text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;">hourglass_top</span>
@@ -253,11 +310,18 @@
 
         function toggleRegisterFields() {
             const role = document.getElementById('register_role').value;
-            document.getElementById('register_student_fields').style.display =
-                (role === 'student') ? 'block' : 'none';
+            const isStudent = role === 'student';
+            const isStaff = role === 'staff';
 
-            document.getElementById('register_staff_field').style.display =
-                (role === 'staff') ? 'block' : 'none';
+            // Toggle student fields visibility and required state
+            document.getElementById('register_student_fields').style.display = isStudent ? 'block' : 'none';
+            document.getElementById('register_course').required = isStudent;
+            document.getElementById('register_year').required = isStudent;
+            document.getElementById('register_student_number').required = isStudent;
+
+            // Toggle staff fields visibility and required state
+            document.getElementById('register_staff_field').style.display = isStaff ? 'block' : 'none';
+            document.getElementById('register_stall_name').required = isStaff;
         }
 
         function togglePasswordVisibility(fieldId, iconId) {
@@ -280,6 +344,103 @@
             switchTab(initialTab);
             toggleLoginFields();
             toggleRegisterFields();
+
+            // Dynamic Password Validation Checklist
+            const passwordInput = document.getElementById('register_password');
+            const reqs = {
+                length: { el: document.getElementById('req-length'), icon: document.querySelector('#req-length .req-icon'), check: (val) => val.length >= 8, state: null },
+                case: { el: document.getElementById('req-case'), icon: document.querySelector('#req-case .req-icon'), check: (val) => /[a-z]/.test(val) && /[A-Z]/.test(val), state: null },
+                number: { el: document.getElementById('req-number'), icon: document.querySelector('#req-number .req-icon'), check: (val) => /[0-9]/.test(val), state: null },
+                symbol: { el: document.getElementById('req-symbol'), icon: document.querySelector('#req-symbol .req-icon'), check: (val) => /[^A-Za-z0-9]/.test(val), state: null }
+            };
+
+            const bar1 = document.getElementById('pwd-bar-1');
+            const bar2 = document.getElementById('pwd-bar-2');
+            const bar3 = document.getElementById('pwd-bar-3');
+            const bar4 = document.getElementById('pwd-bar-4');
+            const strengthText = document.getElementById('pwd-strength-text');
+
+            function evaluatePassword() {
+                const val = passwordInput.value;
+                const isEmpty = val.length === 0;
+                let validCount = 0;
+
+                for (const key in reqs) {
+                    const req = reqs[key];
+                    const isValid = req.check(val);
+                    if (isValid) validCount++;
+                    
+                    const newState = isEmpty ? 'empty' : (isValid ? 'valid' : 'invalid');
+
+                    // Only update DOM if the visual state needs to change
+                    if (req.state !== newState) {
+                        req.state = newState;
+                        
+                        // Remove animation class before re-applying to allow re-triggering if needed
+                        req.icon.classList.remove('animate-icon-pop');
+                        
+                        if (newState === 'empty') {
+                            req.el.className = "flex items-center gap-1.5 text-neutral-500 transition-colors duration-300";
+                            req.icon.className = "material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300";
+                            req.icon.textContent = "radio_button_unchecked";
+                        } else if (newState === 'valid') {
+                            req.el.className = "flex items-center gap-1.5 text-emerald-600 font-bold transition-colors duration-300";
+                            // Add pop animation when it becomes valid
+                            req.icon.className = "material-symbols-outlined text-[14px] leading-none text-emerald-500 req-icon transition-colors duration-300 animate-icon-pop";
+                            req.icon.textContent = "check_circle";
+                        } else {
+                            req.el.className = "flex items-center gap-1.5 text-neutral-500 transition-colors duration-300";
+                            req.icon.className = "material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300";
+                            req.icon.textContent = "radio_button_unchecked";
+                        }
+                    }
+                }
+
+                // Update segmented strength meter with width animations and synchronized colors
+                let barColor = 'bg-red-500'; // Default
+                if (validCount === 1) barColor = 'bg-red-500';
+                else if (validCount === 2) barColor = 'bg-orange-500';
+                else if (validCount === 3) barColor = 'bg-amber-500';
+                else if (validCount >= 4) barColor = 'bg-emerald-500';
+
+                if (isEmpty) {
+                    bar1.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
+                    bar2.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
+                    bar3.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
+                    bar4.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
+                    strengthText.textContent = "NONE";
+                    strengthText.className = "text-[9px] font-bold text-neutral-400 uppercase tracking-widest";
+                } else {
+                    // Update widths based on how many are valid, all using the synchronized barColor
+                    bar1.className = `h-full transition-all duration-300 ease-out ${validCount >= 1 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
+                    bar2.className = `h-full transition-all duration-300 ease-out ${validCount >= 2 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
+                    bar3.className = `h-full transition-all duration-300 ease-out ${validCount >= 3 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
+                    bar4.className = `h-full transition-all duration-300 ease-out ${validCount >= 4 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
+                    
+                    if (validCount === 1) {
+                        strengthText.textContent = "WEAK";
+                        strengthText.className = "text-[9px] font-bold text-red-500 uppercase tracking-widest";
+                    } else if (validCount === 2) {
+                        strengthText.textContent = "FAIR";
+                        strengthText.className = "text-[9px] font-bold text-orange-500 uppercase tracking-widest";
+                    } else if (validCount === 3) {
+                        strengthText.textContent = "GOOD";
+                        strengthText.className = "text-[9px] font-bold text-amber-500 uppercase tracking-widest";
+                    } else if (validCount === 4) {
+                        strengthText.textContent = "STRONG";
+                        strengthText.className = "text-[9px] font-bold text-emerald-600 uppercase tracking-widest";
+                    } else {
+                        strengthText.textContent = "WEAK";
+                        strengthText.className = "text-[9px] font-bold text-red-500 uppercase tracking-widest";
+                    }
+                }
+            }
+
+            if (passwordInput) {
+                passwordInput.addEventListener('input', evaluatePassword);
+                // Run on load in case browser pre-filled password
+                evaluatePassword();
+            }
 
             // Intercept form submissions
             const loginForm = document.querySelector('#login-form-block form');

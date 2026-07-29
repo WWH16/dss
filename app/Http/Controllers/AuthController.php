@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
 
+use Illuminate\Validation\Rules\Password;
+
 class AuthController extends Controller
 {
     public function showRegister()
@@ -24,7 +26,15 @@ class AuthController extends Controller
             'role' => 'required|in:student,staff,admin',
             'name' => 'required|string|max:255',
             'email' => 'required|email|max:255|unique:users,email',
-            'password' => 'required|string|confirmed',
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)
+                    ->letters()
+                    ->mixedCase()
+                    ->numbers()
+                    ->symbols()
+            ],
             'course' => 'required_if:role,student|nullable|string|max:255',
             'year_level' => 'required_if:role,student|nullable|string|max:255',
             'student_number' => 'required_if:role,student|nullable|string|max:255|unique:users,student_number',
