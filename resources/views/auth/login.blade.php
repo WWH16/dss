@@ -204,10 +204,10 @@
                         </div>
 
                         {{-- PASSWORD CRITERIA CHECKLIST (Structured Layout) --}}
-                        <div id="password-criteria-box" class="mt-2">
+                        <div id="password-criteria-box" class="mt-4">
                             
                             {{-- Segmented Progress Bar (Full Width) --}}
-                            <div class="flex gap-1 w-full mb-1">
+                            <div class="flex gap-1 w-full mb-0.5">
                                 <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
                                     <div id="pwd-bar-1" class="h-full w-0 transition-all duration-300 ease-out"></div>
                                 </div>
@@ -223,27 +223,27 @@
                             </div>
                             
                             {{-- Strength Text (Lower Right, No Label) --}}
-                            <div class="mb-1.5 text-right">
+                            <div class="mb-0.5 text-right">
                                 <span id="pwd-strength-text" class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest transition-colors duration-300">NONE</span>
                             </div>
 
                             {{-- Checklist Items (Spaced 2x2 Grid) --}}
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-1 font-medium text-neutral-500">
-                                <div id="req-length" class="flex items-center gap-1.5 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[10px] whitespace-nowrap">8+ characters</span>
+                            <div class="grid grid-cols-2 gap-x-4 gap-y-0 font-medium text-neutral-500">
+                                <div id="req-length" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">8+ characters</span>
                                 </div>
-                                <div id="req-case" class="flex items-center gap-1.5 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[10px] whitespace-nowrap">Upper & lowercase</span>
+                                <div id="req-case" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">Upper & lowercase</span>
                                 </div>
-                                <div id="req-number" class="flex items-center gap-1.5 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[10px] whitespace-nowrap">One number</span>
+                                <div id="req-number" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">One number</span>
                                 </div>
-                                <div id="req-symbol" class="flex items-center gap-1.5 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
-                                    <span class="text-[10px] whitespace-nowrap">One symbol</span>
+                                <div id="req-symbol" class="flex items-center gap-1 transition-colors duration-300">
+                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <span class="text-[9px] whitespace-nowrap">One symbol</span>
                                 </div>
                             </div>
                         </div>
@@ -381,17 +381,17 @@
                         req.icon.classList.remove('animate-icon-pop');
                         
                         if (newState === 'empty') {
-                            req.el.className = "flex items-center gap-1.5 text-neutral-500 transition-colors duration-300";
-                            req.icon.className = "material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300";
+                            req.el.className = "flex items-center gap-1 text-neutral-500 transition-colors duration-300";
+                            req.icon.className = "material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
                             req.icon.textContent = "radio_button_unchecked";
                         } else if (newState === 'valid') {
-                            req.el.className = "flex items-center gap-1.5 text-emerald-600 font-bold transition-colors duration-300";
+                            req.el.className = "flex items-center gap-1 text-emerald-600 font-bold transition-colors duration-300";
                             // Add pop animation when it becomes valid
-                            req.icon.className = "material-symbols-outlined text-[14px] leading-none text-emerald-500 req-icon transition-colors duration-300 animate-icon-pop";
+                            req.icon.className = "material-symbols-outlined text-[12px] leading-none text-emerald-500 req-icon transition-colors duration-300 animate-icon-pop";
                             req.icon.textContent = "check_circle";
                         } else {
-                            req.el.className = "flex items-center gap-1.5 text-neutral-500 transition-colors duration-300";
-                            req.icon.className = "material-symbols-outlined text-[14px] leading-none text-neutral-400 req-icon transition-colors duration-300";
+                            req.el.className = "flex items-center gap-1 text-neutral-500 transition-colors duration-300";
+                            req.icon.className = "material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
                             req.icon.textContent = "radio_button_unchecked";
                         }
                     }
