@@ -52,7 +52,7 @@ class LoginController extends Controller
 
             if ($user->role !== $role) {
                 Auth::logout();
-                return redirect()->back()->with('error', 'Invalid role selected');
+                return redirect()->back()->withInput($request->except('password'))->with('error', 'Invalid credentials');
             }
 
             if ($role === 'admin') {
@@ -66,6 +66,6 @@ class LoginController extends Controller
             return redirect('/staff/dashboard');
         }
 
-        return redirect()->back()->with('error', 'Invalid credentials');
+        return redirect()->back()->withInput($request->except('password'))->with('error', 'Invalid credentials');
     }
 }
