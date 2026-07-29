@@ -193,9 +193,9 @@
                 </div>
 
                 {{-- PASSWORDS --}}
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="space-y-4">
                     <div class="relative">
-                        <label for="register_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password</label>
+                        <label for="register_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password', 'register_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
@@ -204,9 +204,9 @@
                         </div>
 
                         {{-- PASSWORD CRITERIA CHECKLIST (Inline under field) --}}
-                        <div id="password-criteria-box" class="mt-2 p-2 bg-neutral-50 border border-neutral-100 rounded-[4px]">
+                        <div id="password-criteria-box" class="mt-2 p-2.5 bg-neutral-50/80 border border-neutral-100 rounded-[4px]">
                             {{-- Segmented Progress Bar --}}
-                            <div class="flex gap-0.5 mb-1.5">
+                            <div class="flex gap-1 mb-2">
                                 <div class="flex-1 h-[3px] bg-neutral-200 rounded-full overflow-hidden">
                                     <div id="pwd-bar-1" class="h-full bg-red-500 w-0 transition-all duration-300 ease-out"></div>
                                 </div>
@@ -227,7 +227,7 @@
                             </div>
 
                             {{-- Checklist Items (Compact) --}}
-                            <div class="grid grid-cols-2 gap-x-1 gap-y-1 font-medium text-neutral-500">
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-x-2 gap-y-1 font-medium text-neutral-500">
                                 <div id="req-length" class="flex items-center gap-1 transition-colors duration-300">
                                     <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
                                     <span class="text-[9px] whitespace-nowrap">8+ chars</span>
@@ -253,7 +253,7 @@
                     </div>
 
                     <div>
-                        <label for="register_password_confirmation" class="block text-xs font-semibold text-neutral-700 mb-1.5">Confirm Password</label>
+                        <label for="register_password_confirmation" class="block text-xs font-semibold text-neutral-700 mb-1.5">Confirm Password <span class="text-red-500">*</span></label>
                         <div class="relative">
                             <input type="password" id="register_password_confirmation" name="password_confirmation" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password_confirmation') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password_confirmation', 'register_password_confirm_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password confirmation visibility">
