@@ -3,8 +3,8 @@
 ───────────────────────────────────────────────────────────────────────── */
 .site-footer {
     background: var(--color-brand-950);
-    border-top: 1px solid oklch(0.24 0.09 155 / 0.5);
-    padding-block: var(--space-12) var(--space-6);
+    border-top: 1px solid oklch(0.24 0.09 155 / 0.4);
+    padding-block: var(--space-10) var(--space-5);
 }
 
 .footer-grid {

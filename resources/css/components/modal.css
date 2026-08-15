@@ -2,14 +2,14 @@
    Modal / Dialog
 ───────────────────────────────────────────────────────────────────────── */
 dialog.confirm-modal {
-    border: 1px solid oklch(0.84 0.10 155 / 0.5);
-    border-radius: 0.75rem;
+    border: 1px solid oklch(0.84 0.10 155 / 0.35);
+    border-radius: var(--radius-lg);
     background-color: var(--color-surface);
     color: var(--color-ink-900);
     padding: var(--space-6);
     max-width: 24rem;
     width: 90%;
-    box-shadow: var(--shadow-lg);
+    box-shadow: var(--shadow-lg), 0 0 0 1px oklch(0.14 0.01 255 / 0.03);
     outline: none;
     margin: auto;
 }

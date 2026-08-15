@@ -1,115 +1,151 @@
 @extends('layouts.dashboard')
 @section('title', 'Overview | Admin — DSS')
-@section('content')
-<div class="max-w-6xl mx-auto">
+@section('head')
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
+<link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+@endsection
 
-    <div class="mb-6">
-        <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">Overview</h1>
-        <p class="text-neutral-500 text-sm">Welcome back, <span class="font-semibold text-brand-700">{{ Auth::user()->name }}</span></p>
+@section('content')
+<div class="max-w-6xl mx-auto space-y-7">
+
+    {{-- ── 1. Page Header ─────────────────────────────────────────────────── --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div>
+            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">Overview</h1>
+            <p class="text-neutral-500 text-sm mt-0.5">Welcome back, <span class="font-semibold text-brand-700">{{ Auth::user()->name }}</span></p>
+        </div>
     </div>
 
     @if(session('success'))
-        <div class="mb-5 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-xl text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-            <span class="material-symbols-outlined text-lg leading-none">check_circle</span>
+        <div class="p-4 bg-emerald-50 border border-emerald-200/80 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-sm">
+            <span class="material-symbols-outlined text-lg leading-none text-emerald-600">check_circle</span>
             {{ session('success') }}
         </div>
     @endif
 
-    {{-- Metric Cards --}}
-    <div class="bg-white rounded-xl border border-neutral-200/60 shadow-sm mb-6 flex flex-col sm:flex-row divide-y sm:divide-y-0 sm:divide-x divide-neutral-100 overflow-hidden">
+    {{-- ── 2. Minimalist Stat Cards ───────────────────────────────────────── --}}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
         @foreach([
-            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'group'],
-            ['label' => 'Total Stalls',      'value' => $stallCount,      'icon' => 'storefront'],
-            ['label' => 'Total Evaluations', 'value' => $evaluationCount, 'icon' => 'rate_review'],
+            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'group',       'desc' => 'Enrolled evaluators'],
+            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront',  'desc' => 'Active food vendors'],
+            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'rate_review', 'desc' => 'Feedback submitted'],
         ] as $stat)
-            <div class="flex-1 p-5 lg:p-6 flex items-center gap-5 hover:bg-neutral-50/50 transition-colors">
-                <span class="material-symbols-outlined text-brand-600 bg-brand-50 p-3 rounded-xl text-2xl leading-none">{{ $stat['icon'] }}</span>
-                <div>
-                    <span class="text-[11px] text-neutral-500 block uppercase tracking-wider font-semibold">{{ $stat['label'] }}</span>
-                    <span class="text-3xl font-bold text-neutral-900 tabular-nums leading-none mt-1 block tracking-tight">{{ $stat['value'] }}</span>
+            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 shadow-sm hover:border-brand-300/80 transition-all">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">{{ $stat['label'] }}</span>
+                    <div class="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
+                        <span class="material-symbols-outlined text-xl leading-none">{{ $stat['icon'] }}</span>
+                    </div>
                 </div>
+                <div class="text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
+                    {{ $stat['value'] }}
+                </div>
+                <p class="text-xs text-neutral-400 mt-2 font-medium">{{ $stat['desc'] }}</p>
             </div>
         @endforeach
     </div>
 
-    {{-- Dashboard Data (Bento Grid) --}}
     @if($results->isNotEmpty())
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        
-        {{-- Top Row: Activity (8) + Share (4) --}}
-        <div class="lg:col-span-8 bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
-                <h2 class="font-bold text-neutral-800 text-base tracking-tight">Evaluation Activity</h2>
+        {{-- ── 3. Primary Chart Card: Evaluation Activity ──────────────────── --}}
+        <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-6 pb-4 border-b border-neutral-100">
+                <div>
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Activity</h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">30-day evaluation timeline across canteen stalls</p>
+                </div>
             </div>
-            <div class="relative w-full" style="height: 260px;">
+            <div class="relative w-full" style="height: 250px;">
                 <canvas id="evalTrendChart" role="img" aria-label="Line chart showing the number of evaluations over the last 30 days">
                     <p>Line chart showing the number of evaluations over the last 30 days. Please use the data tables below for accessible data.</p>
                 </canvas>
             </div>
         </div>
 
-        <div class="lg:col-span-4 bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
-                <h2 class="font-bold text-neutral-800 text-base tracking-tight">Evaluation Share</h2>
+        {{-- ── 4. Secondary Chart Cards: Top Stalls & Share ─────────────────── --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7" style="content-visibility: auto; contain-intrinsic-size: auto 320px;">
+            @php
+                $topStalls = collect($results)->map(function($stall) {
+                    $obj = clone $stall;
+                    $obj->avg = ($obj->cleanliness + $obj->service + $obj->taste + $obj->price) / 4;
+                    return $obj;
+                })->sortByDesc('avg')->take(5)->values();
+            @endphp
+
+            {{-- Top Performing Stalls Card --}}
+            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm">
+                <div class="mb-5 pb-4 border-b border-neutral-100">
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Top {{ min(5, $topStalls->count()) }} Performing Stalls</h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">Average score breakdown across 4 criteria</p>
+                </div>
+                <div class="relative w-full" style="height: 240px;">
+                    <canvas id="stallScoresChart" role="img" aria-label="Bar chart showing the average scores per stall">
+                        <p>Bar chart showing the average scores per stall for Cleanliness, Service, Taste, and Price.</p>
+                    </canvas>
+                </div>
             </div>
-            <div class="relative w-full" style="height: 260px;">
-                <canvas id="evalPieChart" role="img" aria-label="Pie chart showing the distribution of evaluations per stall">
-                    <p>Pie chart showing the distribution of evaluations per stall. Please use the data tables below for accessible data.</p>
-                </canvas>
+
+            {{-- Evaluation Share Card --}}
+            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm">
+                <div class="mb-5 pb-4 border-b border-neutral-100">
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Share</h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">Proportion of student submissions per stall</p>
+                </div>
+                <div class="relative w-full" style="height: 240px;">
+                    <canvas id="evalPieChart" role="img" aria-label="Pie chart showing the distribution of evaluations per stall">
+                        <p>Pie chart showing the distribution of evaluations per stall. Please use the data tables below for accessible data.</p>
+                    </canvas>
+                </div>
             </div>
         </div>
 
-        {{-- Middle Row: Average Scores (7) + Performance Bar (5) --}}
-        <div class="lg:col-span-7 bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
-                <h2 class="font-bold text-neutral-800 text-base tracking-tight">Average Stall Scores</h2>
+        {{-- ── 5. Average Stall Scores Card ────────────────────────────────── --}}
+        <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: auto 320px;">
+            <div class="p-6 pb-4">
+                <h2 class="text-base font-bold text-neutral-900 tracking-tight">Average Stall Scores</h2>
+                <p class="text-xs text-neutral-500 mt-0.5">Aggregate performance ratings per category</p>
             </div>
+
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[400px] hidden md:table">
+                <table class="w-full text-left border-collapse min-w-[500px] hidden md:table">
                     <thead>
-                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-100">
-                            <th class="pb-2">Food Stall</th>
-                            <th class="pb-2 text-center">Cleanliness</th>
-                            <th class="pb-2 text-center">Service</th>
-                            <th class="pb-2 text-center">Taste</th>
-                            <th class="pb-2 text-center">Price</th>
+                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/70 border-y border-neutral-100">
+                            <th class="py-3 px-6 font-semibold">Food Stall</th>
+                            <th class="py-3 px-4 text-center font-semibold">Cleanliness</th>
+                            <th class="py-3 px-4 text-center font-semibold">Service</th>
+                            <th class="py-3 px-4 text-center font-semibold">Taste</th>
+                            <th class="py-3 px-4 text-center font-semibold">Price</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-50">
+                    <tbody class="divide-y divide-neutral-100">
                         @foreach($results as $result)
-                            <tr class="text-sm hover:bg-neutral-50/50 transition-colors">
-                                <td class="py-3 font-bold text-neutral-900">{{ $result->name }}</td>
-                                <td class="py-3 text-center font-bold tabular-nums {{ $result->cleanliness >= 4 ? 'text-brand-600' : ($result->cleanliness >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->cleanliness, 2) }}</td>
-                                <td class="py-3 text-center font-bold tabular-nums {{ $result->service >= 4 ? 'text-brand-600' : ($result->service >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->service, 2) }}</td>
-                                <td class="py-3 text-center font-bold tabular-nums {{ $result->taste >= 4 ? 'text-brand-600' : ($result->taste >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->taste, 2) }}</td>
-                                <td class="py-3 text-center font-bold tabular-nums {{ $result->price >= 4 ? 'text-brand-600' : ($result->price >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->price, 2) }}</td>
+                            <tr class="text-sm hover:bg-neutral-50/60 transition-colors">
+                                <td class="py-3.5 px-6 font-semibold text-neutral-900">{{ $result->name }}</td>
+                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->cleanliness >= 4 ? 'text-brand-700' : ($result->cleanliness >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->cleanliness, 2) }}</td>
+                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->service >= 4 ? 'text-brand-700' : ($result->service >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->service, 2) }}</td>
+                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->taste >= 4 ? 'text-brand-700' : ($result->taste >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->taste, 2) }}</td>
+                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->price >= 4 ? 'text-brand-700' : ($result->price >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->price, 2) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-                
+
                 <!-- Mobile View -->
-                <div class="md:hidden divide-y divide-neutral-100">
+                <div class="md:hidden divide-y divide-neutral-100 border-t border-neutral-100">
                     @foreach($results as $result)
-                        <div class="py-3 flex flex-col gap-2">
-                            <h3 class="font-bold text-neutral-900 text-sm">{{ $result->name }}</h3>
+                        <div class="p-5 flex flex-col gap-2.5">
+                            <h3 class="font-semibold text-neutral-900 text-sm">{{ $result->name }}</h3>
                             <div class="grid grid-cols-4 gap-2 text-center">
-                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Clean</span>
-                                    <span class="block text-xs font-bold {{ $result->cleanliness >= 4 ? 'text-emerald-600' : ($result->cleanliness >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->cleanliness, 1) }}</span>
+                                @foreach([
+                                    ['label' => 'Clean', 'val' => $result->cleanliness],
+                                    ['label' => 'Serv',  'val' => $result->service],
+                                    ['label' => 'Taste', 'val' => $result->taste],
+                                    ['label' => 'Price', 'val' => $result->price],
+                                ] as $m)
+                                <div class="bg-neutral-50 rounded-lg p-2 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">{{ $m['label'] }}</span>
+                                    <span class="block text-xs font-bold {{ $m['val'] >= 4 ? 'text-brand-700' : ($m['val'] >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($m['val'], 1) }}</span>
                                 </div>
-                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Serv</span>
-                                    <span class="block text-xs font-bold {{ $result->service >= 4 ? 'text-emerald-600' : ($result->service >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->service, 1) }}</span>
-                                </div>
-                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Taste</span>
-                                    <span class="block text-xs font-bold {{ $result->taste >= 4 ? 'text-emerald-600' : ($result->taste >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->taste, 1) }}</span>
-                                </div>
-                                <div class="bg-neutral-50 rounded p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">Price</span>
-                                    <span class="block text-xs font-bold {{ $result->price >= 4 ? 'text-emerald-600' : ($result->price >= 3 ? 'text-amber-600' : 'text-red-500') }}">{{ number_format($result->price, 1) }}</span>
-                                </div>
+                                @endforeach
                             </div>
                         </div>
                     @endforeach
@@ -117,81 +153,66 @@
             </div>
         </div>
 
-        @php
-            $topStalls = collect($results)->map(function($stall) {
-                // Safely add an avg property for sorting without mutating original tightly
-                $obj = clone $stall;
-                $obj->avg = ($obj->cleanliness + $obj->service + $obj->taste + $obj->price) / 4;
-                return $obj;
-            })->sortByDesc('avg')->take(5)->values();
-        @endphp
-        <div class="lg:col-span-5 bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
-                <h2 class="font-bold text-neutral-800 text-base tracking-tight">Top {{ min(5, $topStalls->count()) }} Performing Stalls</h2>
-            </div>
-            <div class="relative w-full" style="height: 240px;">
-                <canvas id="stallScoresChart" role="img" aria-label="Bar chart showing the average scores per stall">
-                    <p>Bar chart showing the average scores per stall for Cleanliness, Service, Taste, and Price.</p>
-                </canvas>
-            </div>
-        </div>
-
-        {{-- Bottom Row: Recent Evaluations (12) --}}
+        {{-- ── 6. Recent Evaluations Card ──────────────────────────────────── --}}
         @if($recentEvaluations->isNotEmpty())
-        <div class="lg:col-span-12 bg-white rounded-xl border border-neutral-200/60 p-6 shadow-sm">
-            <div class="flex items-center justify-between mb-5 pb-2 border-b border-neutral-100">
-                <h2 class="font-bold text-neutral-800 text-base tracking-tight">Recent Evaluations</h2>
-                <a href="{{ route('admin.evaluations') }}" class="relative text-[11px] text-brand-600 hover:text-brand-700 font-bold uppercase inline-flex items-center gap-0.5 transition-colors before:absolute before:inset-[-12px]">
+        <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: auto 340px;">
+            <div class="p-6 pb-4 flex items-center justify-between">
+                <div>
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Recent Evaluations</h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">Latest submitted feedback records from students</p>
+                </div>
+                <a href="{{ route('admin.evaluations') }}" class="text-xs text-brand-700 hover:text-brand-800 font-semibold inline-flex items-center gap-1 transition-colors">
                     View All <span class="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">arrow_forward</span>
                 </a>
             </div>
+
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[600px] hidden md:table">
+                <table class="w-full text-left border-collapse min-w-[640px] hidden md:table">
                     <thead>
-                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-100">
-                            <th class="pb-2">Student</th>
-                            <th class="pb-2">Stall</th>
-                            <th class="pb-2 text-center">Cleanliness</th>
-                            <th class="pb-2 text-center">Service</th>
-                            <th class="pb-2 text-center">Taste</th>
-                            <th class="pb-2 text-center">Price</th>
-                            <th class="pb-2 text-center">Avg Score</th>
-                            <th class="pb-2 text-right">Date</th>
+                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/70 border-y border-neutral-100">
+                            <th class="py-3 px-6 font-semibold">Student</th>
+                            <th class="py-3 px-4 font-semibold">Stall</th>
+                            <th class="py-3 px-3 text-center font-semibold">Clean</th>
+                            <th class="py-3 px-3 text-center font-semibold">Serv</th>
+                            <th class="py-3 px-3 text-center font-semibold">Taste</th>
+                            <th class="py-3 px-3 text-center font-semibold">Price</th>
+                            <th class="py-3 px-3 text-center font-semibold">Avg</th>
+                            <th class="py-3 px-6 text-right font-semibold">Date</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-50">
+                    <tbody class="divide-y divide-neutral-100">
                         @foreach($recentEvaluations as $eval)
                             @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
-                            <tr class="text-sm hover:bg-neutral-50/50 transition-colors">
-                                <td class="py-3 font-semibold text-neutral-900 truncate max-w-[120px]" title="{{ $eval->student_name }}">{{ $eval->student_name }}</td>
-                                <td class="py-3 text-neutral-500 font-medium truncate max-w-[100px]" title="{{ $eval->stall_name }}">{{ $eval->stall_name }}</td>
-                                <td class="py-3 text-center text-neutral-500 tabular-nums">{{ number_format($eval->cleanliness, 1) }}</td>
-                                <td class="py-3 text-center text-neutral-500 tabular-nums">{{ number_format($eval->service, 1) }}</td>
-                                <td class="py-3 text-center text-neutral-500 tabular-nums">{{ number_format($eval->taste, 1) }}</td>
-                                <td class="py-3 text-center text-neutral-500 tabular-nums">{{ number_format($eval->price, 1) }}</td>
-                                <td class="py-3 text-center font-bold tabular-nums {{ $avg >= 4 ? 'text-brand-600' : ($avg >= 3 ? 'text-amber-600' : 'text-red-500') }}">
-                                    {{ number_format($avg, 1) }}
+                            <tr class="text-sm hover:bg-neutral-50/60 transition-colors">
+                                <td class="py-3.5 px-6 font-semibold text-neutral-900 truncate max-w-[150px]" title="{{ $eval->student_name }}">{{ $eval->student_name }}</td>
+                                <td class="py-3.5 px-4 text-neutral-600 font-medium truncate max-w-[130px]" title="{{ $eval->stall_name }}">{{ $eval->stall_name }}</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->cleanliness, 1) }}</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->service, 1) }}</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->taste, 1) }}</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->price, 1) }}</td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <span class="font-bold tabular-nums text-xs {{ $avg >= 4 ? 'text-brand-700' : ($avg >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($avg, 1) }}</span>
                                 </td>
-                                <td class="py-3 text-right text-neutral-400 text-xs whitespace-nowrap">
+                                <td class="py-3.5 px-6 text-right text-neutral-400 text-xs tabular-nums whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans(null, true, true) }}
                                 </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-                
+
                 <!-- Mobile View -->
-                <div class="md:hidden divide-y divide-neutral-100">
+                <div class="md:hidden divide-y divide-neutral-100 border-t border-neutral-100">
                     @foreach($recentEvaluations as $eval)
                         @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
-                        <div class="py-3 flex items-start justify-between gap-3">
-                            <div>
-                                <h3 class="text-sm font-bold text-neutral-900 leading-tight">{{ $eval->student_name }}</h3>
-                                <p class="text-[11px] font-bold uppercase tracking-wider text-brand-600 mt-0.5">{{ $eval->stall_name }}</p>
+                        <div class="p-5 flex items-start justify-between gap-3">
+                            <div class="min-w-0">
+                                <h3 class="text-sm font-semibold text-neutral-900 leading-tight truncate">{{ $eval->student_name }}</h3>
+                                <p class="text-xs font-medium text-neutral-500 mt-0.5 truncate">{{ $eval->stall_name }}</p>
                                 <p class="text-[10px] text-neutral-400 mt-0.5">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
                             </div>
-                            <div class="shrink-0 inline-flex items-center gap-1 bg-neutral-50 px-2 py-1 rounded-md text-xs font-bold text-neutral-900 border border-neutral-200/60">
-                                {{ number_format($avg, 1) }} <span class="material-symbols-outlined text-[12px] text-amber-500">star</span>
+                            <div class="shrink-0 inline-flex items-center gap-1 bg-neutral-100/80 px-2.5 py-1 rounded-md text-xs font-bold text-neutral-900 border border-neutral-200/60">
+                                {{ number_format($avg, 1) }} <span class="material-symbols-outlined text-[12px] text-amber-600">star</span>
                             </div>
                         </div>
                     @endforeach
@@ -200,18 +221,16 @@
         </div>
         @endif
 
-    </div>
     @else
-        <div class="p-6">
-            <div class="flex flex-col items-center justify-center py-16 text-center px-6 rounded-xl border border-dashed border-brand-200 bg-brand-50/30">
-                <div class="w-16 h-16 rounded-full flex items-center justify-center mb-5 bg-white shadow-sm border border-brand-100">
-                    <span class="material-symbols-outlined text-3xl text-brand-600">bar_chart</span>
-                </div>
-                <p class="font-bold text-neutral-900 mb-2 text-lg tracking-tight">No chart data yet</p>
-                <p class="text-sm text-neutral-500 max-w-sm leading-relaxed">
-                    Charts and insights will automatically appear here once students begin submitting their stall evaluations.
-                </p>
+        {{-- Empty State Card --}}
+        <div class="bg-white rounded-xl border border-neutral-200/70 p-12 text-center shadow-sm">
+            <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 bg-brand-50 text-brand-700 border border-brand-100">
+                <span class="material-symbols-outlined text-2xl">bar_chart</span>
             </div>
+            <p class="font-bold text-neutral-900 mb-1 text-base tracking-tight">No evaluation data yet</p>
+            <p class="text-sm text-neutral-500 max-w-xs mx-auto leading-relaxed">
+                Charts and statistics will appear here automatically once students begin submitting stall evaluations.
+            </p>
         </div>
     @endif
 
@@ -245,128 +264,127 @@
 </style>
 
 @section('scripts')
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js" defer></script>
 <script>
-Chart.defaults.font.family = 'Plus Jakarta Sans';
+document.addEventListener('DOMContentLoaded', function() {
+    if (typeof Chart === 'undefined') return;
 
-// Get global styles
-var rootStyles = getComputedStyle(document.documentElement);
-var c1 = rootStyles.getPropertyValue('--chart-color-1').trim();
-var c1a = rootStyles.getPropertyValue('--chart-color-1-alpha').trim();
-var c1b = rootStyles.getPropertyValue('--chart-color-1-border').trim();
-var c2 = rootStyles.getPropertyValue('--chart-color-2').trim();
-var c2a = rootStyles.getPropertyValue('--chart-color-2-alpha').trim();
-var c2b = rootStyles.getPropertyValue('--chart-color-2-border').trim();
-var c3 = rootStyles.getPropertyValue('--chart-color-3').trim();
-var c3a = rootStyles.getPropertyValue('--chart-color-3-alpha').trim();
-var c3b = rootStyles.getPropertyValue('--chart-color-3-border').trim();
-var c4 = rootStyles.getPropertyValue('--chart-color-4').trim();
-var c4a = rootStyles.getPropertyValue('--chart-color-4-alpha').trim();
-var c4b = rootStyles.getPropertyValue('--chart-color-4-border').trim();
-var cLineBg = rootStyles.getPropertyValue('--chart-line-bg').trim();
+    Chart.defaults.font.family = 'Plus Jakarta Sans';
 
-@if($results->isNotEmpty())
-// Bar Chart
-(function() {
-    var ctx = document.getElementById('stallScoresChart');
-    if (!ctx) return;
-    new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels: @json($topStalls->pluck('name')),
-            datasets: [
-                { label: 'Cleanliness', data: @json($topStalls->pluck('cleanliness')->map(fn($v) => round($v,2))), backgroundColor: c1a, borderColor: c1b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
-                { label: 'Service',     data: @json($topStalls->pluck('service')->map(fn($v) => round($v,2))),     backgroundColor: c2a, borderColor: c2b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
-                { label: 'Taste',       data: @json($topStalls->pluck('taste')->map(fn($v) => round($v,2))),       backgroundColor: c3a, borderColor: c3b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
-                { label: 'Price',       data: @json($topStalls->pluck('price')->map(fn($v) => round($v,2))),       backgroundColor: c4a, borderColor: c4b, borderWidth: 1.5, borderRadius: 4, borderSkipped: false },
-            ]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, color: '#52525b', padding: 14, usePointStyle: true, pointStyle: 'rectRounded' } },
-                tooltip: { backgroundColor: 'oklch(0.18 0.07 155)', titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 }, padding: 10, cornerRadius: 8, callbacks: { label: function(c) { return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(2) + ' / 5.00'; } } }
-            },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' }, color: '#374151' }, border: { display: false } },
-                y: { min: 0, max: 5, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, font: { size: 10 }, color: '#94a3b8' }, border: { display: false } }
-            }
-        }
-    });
-})();
-
-// Line Chart
-(function() {
-    var ctx = document.getElementById('evalTrendChart');
-    if (!ctx) return;
-    var trendDates  = @json($trendDates);
-    var trendCounts = @json($trendCounts);
-    var isMobile = window.innerWidth < 640;
-    new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: trendDates,
-            datasets: [{ label: 'Evaluations', data: trendCounts, borderColor: c1, backgroundColor: cLineBg, pointBackgroundColor: c1, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 4, pointHoverRadius: 6, borderWidth: 2.5, tension: 0.4, fill: true }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { display: false },
-                tooltip: { backgroundColor: 'oklch(0.18 0.07 155)', titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 }, padding: 10, cornerRadius: 8, callbacks: { title: function(i) { return i[0].label; }, label: function(c) { return ' ' + c.parsed.y + ' evaluation' + (c.parsed.y !== 1 ? 's' : ''); } } }
-            },
-            scales: {
-                x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8', maxRotation: 0, callback: function(v,i) { return (isMobile ? i%5 : i%3) === 0 ? trendDates[i] : ''; } }, border: { display: false } },
-                y: { min: 0, beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, precision: 0, font: { size: 10 }, color: '#94a3b8' }, border: { display: false } }
-            }
-        }
-    });
-})();
-
-// Pie Chart
-(function() {
-    var ctx = document.getElementById('evalPieChart');
-    if (!ctx) return;
-    var pieData = @json($pieChartData);
-    
+    // Cache computed styles once
     var rootStyles = getComputedStyle(document.documentElement);
+    var c1 = rootStyles.getPropertyValue('--chart-color-1').trim();
+    var c1a = rootStyles.getPropertyValue('--chart-color-1-alpha').trim();
+    var c1b = rootStyles.getPropertyValue('--chart-color-1-border').trim();
+    var c2 = rootStyles.getPropertyValue('--chart-color-2').trim();
+    var c2a = rootStyles.getPropertyValue('--chart-color-2-alpha').trim();
+    var c2b = rootStyles.getPropertyValue('--chart-color-2-border').trim();
+    var c3 = rootStyles.getPropertyValue('--chart-color-3').trim();
+    var c3a = rootStyles.getPropertyValue('--chart-color-3-alpha').trim();
+    var c3b = rootStyles.getPropertyValue('--chart-color-3-border').trim();
+    var c4 = rootStyles.getPropertyValue('--chart-color-4').trim();
+    var c4a = rootStyles.getPropertyValue('--chart-color-4-alpha').trim();
+    var c4b = rootStyles.getPropertyValue('--chart-color-4-border').trim();
+    var cLineBg = rootStyles.getPropertyValue('--chart-line-bg').trim();
+
     var pieColors = [
-        rootStyles.getPropertyValue('--pie-color-1').trim(),
-        rootStyles.getPropertyValue('--pie-color-2').trim(),
-        rootStyles.getPropertyValue('--pie-color-3').trim(),
-        rootStyles.getPropertyValue('--pie-color-4').trim()
+        rootStyles.getPropertyValue('--pie-color-1').trim() || c1,
+        rootStyles.getPropertyValue('--pie-color-2').trim() || c2,
+        rootStyles.getPropertyValue('--pie-color-3').trim() || c3,
+        rootStyles.getPropertyValue('--pie-color-4').trim() || c4
     ];
 
-    new Chart(ctx, {
-        type: 'pie',
-        data: {
-            labels: pieData.map(function(item) { return item.name; }),
-            datasets: [{
-                data: pieData.map(function(item) { return item.count; }),
-                backgroundColor: pieColors,
-                borderWidth: 2,
-                borderColor: '#ffffff',
-                hoverOffset: 4
-            }]
-        },
-        options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: {
-                legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, color: '#52525b', padding: 14, usePointStyle: true, pointStyle: 'circle' } },
-                tooltip: {
-                    backgroundColor: 'oklch(0.18 0.07 155)',
-                    titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 },
-                    padding: 10, cornerRadius: 8,
-                    callbacks: {
-                        label: function(c) {
-                            return ' ' + c.label + ': ' + c.parsed + ' evaluation' + (c.parsed !== 1 ? 's' : '');
+@if($results->isNotEmpty())
+    // 1. Bar Chart
+    var stallCtx = document.getElementById('stallScoresChart');
+    if (stallCtx) {
+        new Chart(stallCtx, {
+            type: 'bar',
+            data: {
+                labels: @json($topStalls->pluck('name')),
+                datasets: [
+                    { label: 'Cleanliness', data: @json($topStalls->pluck('cleanliness')->map(fn($v) => round($v,2))), backgroundColor: c1a, borderColor: c1b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
+                    { label: 'Service',     data: @json($topStalls->pluck('service')->map(fn($v) => round($v,2))),     backgroundColor: c2a, borderColor: c2b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
+                    { label: 'Taste',       data: @json($topStalls->pluck('taste')->map(fn($v) => round($v,2))),       backgroundColor: c3a, borderColor: c3b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
+                    { label: 'Price',       data: @json($topStalls->pluck('price')->map(fn($v) => round($v,2))),       backgroundColor: c4a, borderColor: c4b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
+                ]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, color: '#52525b', padding: 14, usePointStyle: true, pointStyle: 'rectRounded' } },
+                    tooltip: { backgroundColor: 'oklch(0.18 0.07 155)', titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 }, padding: 10, cornerRadius: 8, callbacks: { label: function(c) { return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(2) + ' / 5.00'; } } }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' }, color: '#374151' }, border: { display: false } },
+                    y: { min: 0, max: 5, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, font: { size: 10 }, color: '#94a3b8' }, border: { display: false } }
+                }
+            }
+        });
+    }
+
+    // 2. Line Chart
+    var trendCtx = document.getElementById('evalTrendChart');
+    if (trendCtx) {
+        var trendDates  = @json($trendDates);
+        var trendCounts = @json($trendCounts);
+        var isMobile = window.innerWidth < 640;
+        new Chart(trendCtx, {
+            type: 'line',
+            data: {
+                labels: trendDates,
+                datasets: [{ label: 'Evaluations', data: trendCounts, borderColor: c1, backgroundColor: cLineBg, pointBackgroundColor: c1, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 3.5, pointHoverRadius: 6, borderWidth: 2, tension: 0.4, fill: true }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: 'oklch(0.18 0.07 155)', titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 }, padding: 10, cornerRadius: 8, callbacks: { title: function(i) { return i[0].label; }, label: function(c) { return ' ' + c.parsed.y + ' evaluation' + (c.parsed.y !== 1 ? 's' : ''); } } }
+                },
+                scales: {
+                    x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8', maxRotation: 0, callback: function(v,i) { return (isMobile ? i%5 : i%3) === 0 ? trendDates[i] : ''; } }, border: { display: false } },
+                    y: { min: 0, beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, precision: 0, font: { size: 10 }, color: '#94a3b8' }, border: { display: false } }
+                }
+            }
+        });
+    }
+
+    // 3. Pie Chart
+    var pieCtx = document.getElementById('evalPieChart');
+    if (pieCtx) {
+        var pieData = @json($pieChartData);
+        new Chart(pieCtx, {
+            type: 'pie',
+            data: {
+                labels: pieData.map(function(item) { return item.name; }),
+                datasets: [{
+                    data: pieData.map(function(item) { return item.count; }),
+                    backgroundColor: pieColors,
+                    borderWidth: 2,
+                    borderColor: '#ffffff',
+                    hoverOffset: 5
+                }]
+            },
+            options: {
+                responsive: true, maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, color: '#52525b', padding: 14, usePointStyle: true, pointStyle: 'circle' } },
+                    tooltip: {
+                        backgroundColor: 'oklch(0.18 0.07 155)',
+                        titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 },
+                        padding: 10, cornerRadius: 8,
+                        callbacks: {
+                            label: function(c) {
+                                return ' ' + c.label + ': ' + c.parsed + ' evaluation' + (c.parsed !== 1 ? 's' : '');
+                            }
                         }
                     }
                 }
             }
-        }
-    });
-})();
+        });
+    }
 @endif
+});
 </script>
 @endsection
 

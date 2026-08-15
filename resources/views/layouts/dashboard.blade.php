@@ -19,7 +19,7 @@
         body { background-color: var(--color-surface-alt); }
         .dashboard-layout {
             display: grid;
-            grid-template-columns: 16rem minmax(0, 1fr);
+            grid-template-columns: 15rem minmax(0, 1fr);
             min-height: 100vh;
         }
         .dashboard-sidebar {
@@ -35,8 +35,8 @@
         }
         .dashboard-header {
             background-color: var(--color-surface);
-            border-bottom: 1px solid oklch(0.84 0.10 155 / 0.5);
-            height: 4rem;
+            border-bottom: 1px solid oklch(0.84 0.10 155 / 0.35);
+            height: 3.5rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
@@ -55,14 +55,15 @@
             display: flex;
             align-items: center;
             gap: var(--space-3);
-            padding: var(--space-3) var(--space-4);
+            padding: var(--space-2) var(--space-4);
             color: oklch(0.78 0.06 155);
             text-decoration: none;
             font-weight: 500;
-            font-size: 0.925rem;
-            border-radius: var(--radius-sm);
-            margin: 0 var(--space-3) var(--space-1);
-            transition: all 0.18s ease;
+            font-size: 0.875rem;
+            border-radius: var(--radius-md);
+            margin: 0 var(--space-3) 2px;
+            transition: all 0.15s ease;
+            letter-spacing: -0.01em;
         }
         .sidebar-link:hover {
             background-color: oklch(0.30 0.09 155);
@@ -72,10 +73,10 @@
             background-color: oklch(0.48 0.15 155);
             color: #fff;
             font-weight: 600;
-            box-shadow: 0 2px 8px oklch(0.48 0.15 155 / 0.40);
+            box-shadow: 0 1px 4px oklch(0.48 0.15 155 / 0.30);
         }
         .sidebar-link .material-symbols-outlined {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
         }
         .sidebar-footer {
             border-top-color: oklch(0.30 0.10 155);
@@ -112,13 +113,13 @@
 
             .dashboard-sidebar {
                 position: fixed;
-                left: -16rem;
+                left: -15rem;
                 top: 0;
                 height: 100vh;
                 height: 100dvh;
-                transition: left 0.3s ease;
-                width: 16rem;
-                box-shadow: 0 0 40px oklch(0.14 0.01 255 / 0.35);
+                transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+                width: 15rem;
+                box-shadow: 0 0 30px oklch(0.14 0.01 255 / 0.25);
             }
             .dashboard-sidebar.open { left: 0; }
             .mobile-toggle { 

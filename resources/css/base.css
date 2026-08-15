@@ -14,8 +14,11 @@
         background-color: var(--color-surface);
         color: var(--color-ink-900);
         line-height: 1.6;
+        letter-spacing: -0.011em;
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+        font-feature-settings: 'kern' 1, 'liga' 1;
     }
 }
 
@@ -70,4 +73,33 @@
     max-width: 52rem;
     margin-inline: auto;
     padding-inline: clamp(1rem, 4vw, 2.5rem);
+}
+
+/* ─────────────────────────────────────────────────────────────────────────
+   Professional utility overrides
+───────────────────────────────────────────────────────────────────────── */
+
+/* Sharper selection highlighting */
+::selection {
+    background: oklch(0.84 0.10 155 / 0.35);
+    color: var(--color-ink-900);
+}
+
+/* Crisp focus ring for accessibility */
+:focus-visible {
+    outline: 2px solid var(--color-brand-500);
+    outline-offset: 2px;
+}
+
+/* Smooth image rendering */
+img {
+    image-rendering: auto;
+    -webkit-user-drag: none;
+}
+
+/* Tighter heading typography */
+h1, h2, h3, h4, h5, h6 {
+    text-rendering: optimizeLegibility;
+    font-feature-settings: 'kern' 1;
+    letter-spacing: -0.02em;
 }
