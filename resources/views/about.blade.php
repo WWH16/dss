@@ -44,7 +44,7 @@
           <!-- AHP Card -->
           <div class="bg-surface-alt p-6 rounded-xl border border-neutral-200/50">
             <div class="flex items-center gap-2.5 mb-3">
-              <span class="material-symbols-outlined text-brand-700">balance</span>
+              <ion-icon name="scale-outline" class="text-2xl text-brand-700"></ion-icon>
               <h3 class="text-lg font-bold text-ink-900">1. AHP Weighting</h3>
             </div>
             <p class="text-neutral-600 text-xs md:text-sm leading-relaxed">
@@ -55,7 +55,7 @@
           <!-- SAW Card -->
           <div class="bg-surface-alt p-6 rounded-xl border border-neutral-200/50">
             <div class="flex items-center gap-2.5 mb-3">
-              <span class="material-symbols-outlined text-brand-700">leaderboard</span>
+              <ion-icon name="bar-chart-outline" class="text-2xl text-brand-700"></ion-icon>
               <h3 class="text-lg font-bold text-ink-900">2. SAW Scoring</h3>
             </div>
             <p class="text-neutral-600 text-xs md:text-sm leading-relaxed">
@@ -75,7 +75,7 @@
         <div class="space-y-5">
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-700 mt-0.5 shrink-0">
-              <span class="material-symbols-outlined">restaurant</span>
+              <ion-icon name="restaurant-outline" class="text-xl text-brand-700"></ion-icon>
             </div>
             <div>
               <h4 class="text-base font-bold text-ink-900">Taste & Quality</h4>
@@ -85,7 +85,7 @@
 
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-700 mt-0.5 shrink-0">
-              <span class="material-symbols-outlined">cleaning_services</span>
+              <ion-icon name="sparkles-outline" class="text-xl text-brand-700"></ion-icon>
             </div>
             <div>
               <h4 class="text-base font-bold text-ink-900">Cleanliness & Hygiene</h4>
@@ -95,7 +95,7 @@
 
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-700 mt-0.5 shrink-0">
-              <span class="material-symbols-outlined">support_agent</span>
+              <ion-icon name="shield-checkmark-outline" class="text-xl text-brand-700"></ion-icon>
             </div>
             <div>
               <h4 class="text-base font-bold text-ink-900">Service Speed & Politeness</h4>
@@ -105,7 +105,7 @@
 
           <div class="flex items-start gap-4">
             <div class="w-10 h-10 rounded-lg bg-brand-50 flex items-center justify-center text-brand-700 mt-0.5 shrink-0">
-              <span class="material-symbols-outlined">payments</span>
+              <ion-icon name="pricetag-outline" class="text-xl text-brand-700"></ion-icon>
             </div>
             <div>
               <h4 class="text-base font-bold text-ink-900">Price & Value Fairness</h4>

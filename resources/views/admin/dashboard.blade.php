@@ -18,7 +18,7 @@
 
     @if(session('success'))
         <div class="p-4 bg-emerald-50 border border-emerald-200/80 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-sm">
-            <span class="material-symbols-outlined text-lg leading-none text-emerald-600">check_circle</span>
+            <ion-icon name="checkmark-circle" class="text-lg text-emerald-600"></ion-icon>
             {{ session('success') }}
         </div>
     @endif
@@ -26,15 +26,15 @@
     {{-- ── 2. Minimalist Stat Cards ───────────────────────────────────────── --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
         @foreach([
-            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'group',       'desc' => 'Enrolled evaluators'],
-            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront',  'desc' => 'Active food vendors'],
-            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'rate_review', 'desc' => 'Feedback submitted'],
+            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',    'desc' => 'Enrolled evaluators'],
+            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active food vendors'],
+            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'create-outline',    'desc' => 'Feedback submitted'],
         ] as $stat)
             <div class="bg-white rounded-xl border border-neutral-200/70 p-6 shadow-sm hover:border-brand-300/80 transition-all">
                 <div class="flex items-center justify-between mb-4">
                     <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">{{ $stat['label'] }}</span>
                     <div class="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
-                        <span class="material-symbols-outlined text-xl leading-none">{{ $stat['icon'] }}</span>
+                        <ion-icon name="{{ $stat['icon'] }}" class="text-xl text-brand-700"></ion-icon>
                     </div>
                 </div>
                 <div class="text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
@@ -64,36 +64,66 @@
         {{-- ── 4. Secondary Chart Cards: Top Stalls & Share ─────────────────── --}}
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7" style="content-visibility: auto; contain-intrinsic-size: auto 320px;">
             @php
-                $topStalls = collect($results)->map(function($stall) {
+                $allStallResults = collect($results)->map(function($stall) {
                     $obj = clone $stall;
-                    $obj->avg = ($obj->cleanliness + $obj->service + $obj->taste + $obj->price) / 4;
+                    $obj->cleanliness = round((float)$obj->cleanliness, 2);
+                    $obj->service = round((float)$obj->service, 2);
+                    $obj->taste = round((float)$obj->taste, 2);
+                    $obj->price = round((float)$obj->price, 2);
+                    $obj->avg = round(($obj->cleanliness + $obj->service + $obj->taste + $obj->price) / 4, 2);
                     return $obj;
-                })->sortByDesc('avg')->take(5)->values();
+                })->sortByDesc('avg')->values();
+                $stallCountTotal = $allStallResults->count();
             @endphp
 
-            {{-- Top Performing Stalls Card --}}
-            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm">
-                <div class="mb-5 pb-4 border-b border-neutral-100">
-                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Top {{ min(5, $topStalls->count()) }} Performing Stalls</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Average score breakdown across 4 criteria</p>
-                </div>
-                <div class="relative w-full" style="height: 240px;">
-                    <canvas id="stallScoresChart" role="img" aria-label="Bar chart showing the average scores per stall">
-                        <p>Bar chart showing the average scores per stall for Cleanliness, Service, Taste, and Price.</p>
-                    </canvas>
+            {{-- Stall Performance Breakdown Card --}}
+            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-neutral-100">
+                        <div>
+                            <h2 id="barChartTitle" class="text-base font-bold text-neutral-900 tracking-tight">Stall Performance Breakdown</h2>
+                            <p id="barChartSubtitle" class="text-xs text-neutral-500 mt-0.5">Top {{ min(5, $stallCountTotal) }} stalls across 4 evaluation criteria</p>
+                        </div>
+
+                        {{-- Interactive Filter Switcher for N-stalls --}}
+                        @if($stallCountTotal > 5)
+                            <div class="inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-100/80 p-0.5 text-xs font-semibold self-start sm:self-auto shrink-0" role="tablist" aria-label="Stall chart filter">
+                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all bg-white text-neutral-900 shadow-2xs font-bold" data-range="top5">Top 5</button>
+                                @if($stallCountTotal > 5)
+                                    <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium" data-range="top10">Top {{ min(10, $stallCountTotal) }}</button>
+                                @endif
+                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium" data-range="lowest5">Lowest 5</button>
+                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium" data-range="all">All ({{ $stallCountTotal }})</button>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div id="barChartWrapper" class="relative w-full overflow-x-auto" style="height: 250px;">
+                        <canvas id="stallScoresChart" role="img" aria-label="Bar chart showing average scores per stall for Cleanliness, Service, Taste, and Price">
+                            <p>Bar chart showing the average scores per stall for Cleanliness, Service, Taste, and Price.</p>
+                        </canvas>
+                    </div>
                 </div>
             </div>
 
-            {{-- Evaluation Share Card --}}
-            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm">
-                <div class="mb-5 pb-4 border-b border-neutral-100">
-                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Share</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Proportion of student submissions per stall</p>
-                </div>
-                <div class="relative w-full" style="height: 240px;">
-                    <canvas id="evalPieChart" role="img" aria-label="Pie chart showing the distribution of evaluations per stall">
-                        <p>Pie chart showing the distribution of evaluations per stall. Please use the data tables below for accessible data.</p>
-                    </canvas>
+            {{-- Evaluation Share Donut Card --}}
+            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-neutral-100">
+                        <div>
+                            <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Share</h2>
+                            <p class="text-xs text-neutral-500 mt-0.5">Distribution of student submissions per stall</p>
+                        </div>
+                        <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-800 border border-brand-200/70 text-[11px] font-bold px-2.5 py-1 rounded-full tabular-nums shrink-0">
+                            {{ $evaluationCount }} {{ Str::plural('Submission', $evaluationCount) }}
+                        </span>
+                    </div>
+
+                    <div class="relative w-full flex items-center justify-center" style="height: 250px;">
+                        <canvas id="evalPieChart" role="img" aria-label="Donut chart showing the distribution of evaluations per stall">
+                            <p>Donut chart showing the distribution of evaluations per stall. Please use the data tables below for accessible data.</p>
+                        </canvas>
+                    </div>
                 </div>
             </div>
         </div>
@@ -162,7 +192,7 @@
                     <p class="text-xs text-neutral-500 mt-0.5">Latest submitted feedback records from students</p>
                 </div>
                 <a href="{{ route('admin.evaluations') }}" class="text-xs text-brand-700 hover:text-brand-800 font-semibold inline-flex items-center gap-1 transition-colors">
-                    View All <span class="material-symbols-outlined text-[14px] leading-none" aria-hidden="true">arrow_forward</span>
+                    View All <ion-icon name="arrow-forward-outline" class="text-xs leading-none" aria-hidden="true"></ion-icon>
                 </a>
             </div>
 
@@ -212,7 +242,7 @@
                                 <p class="text-[10px] text-neutral-400 mt-0.5">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
                             </div>
                             <div class="shrink-0 inline-flex items-center gap-1 bg-neutral-100/80 px-2.5 py-1 rounded-md text-xs font-bold text-neutral-900 border border-neutral-200/60">
-                                {{ number_format($avg, 1) }} <span class="material-symbols-outlined text-[12px] text-amber-600">star</span>
+                                {{ number_format($avg, 1) }} <ion-icon name="star" class="text-amber-500 text-xs inline-block"></ion-icon>
                             </div>
                         </div>
                     @endforeach
@@ -225,7 +255,7 @@
         {{-- Empty State Card --}}
         <div class="bg-white rounded-xl border border-neutral-200/70 p-12 text-center shadow-sm">
             <div class="w-14 h-14 rounded-xl flex items-center justify-center mx-auto mb-4 bg-brand-50 text-brand-700 border border-brand-100">
-                <span class="material-symbols-outlined text-2xl">bar_chart</span>
+                <ion-icon name="bar-chart-outline" class="text-3xl text-brand-700"></ion-icon>
             </div>
             <p class="font-bold text-neutral-900 mb-1 text-base tracking-tight">No evaluation data yet</p>
             <p class="text-sm text-neutral-500 max-w-xs mx-auto leading-relaxed">
@@ -295,35 +325,158 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
 
 @if($results->isNotEmpty())
-    // 1. Bar Chart
+    // ── 1. Scalable Bar Chart with Dynamic N-Stall Range Filtering ─────────
+    var rawStallData = @json($allStallResults);
+    var stallScoresChart = null;
     var stallCtx = document.getElementById('stallScoresChart');
-    if (stallCtx) {
-        new Chart(stallCtx, {
-            type: 'bar',
-            data: {
-                labels: @json($topStalls->pluck('name')),
-                datasets: [
-                    { label: 'Cleanliness', data: @json($topStalls->pluck('cleanliness')->map(fn($v) => round($v,2))), backgroundColor: c1a, borderColor: c1b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
-                    { label: 'Service',     data: @json($topStalls->pluck('service')->map(fn($v) => round($v,2))),     backgroundColor: c2a, borderColor: c2b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
-                    { label: 'Taste',       data: @json($topStalls->pluck('taste')->map(fn($v) => round($v,2))),       backgroundColor: c3a, borderColor: c3b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
-                    { label: 'Price',       data: @json($topStalls->pluck('price')->map(fn($v) => round($v,2))),       backgroundColor: c4a, borderColor: c4b, borderWidth: 1, borderRadius: 4, borderSkipped: false },
-                ]
-            },
-            options: {
-                responsive: true, maintainAspectRatio: false,
-                plugins: {
-                    legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, color: '#52525b', padding: 14, usePointStyle: true, pointStyle: 'rectRounded' } },
-                    tooltip: { backgroundColor: 'oklch(0.18 0.07 155)', titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 }, padding: 10, cornerRadius: 8, callbacks: { label: function(c) { return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(2) + ' / 5.00'; } } }
+    var barWrapper = document.getElementById('barChartWrapper');
+    var barTitle = document.getElementById('barChartTitle');
+    var barSubtitle = document.getElementById('barChartSubtitle');
+
+    function getSliceForRange(range) {
+        var sorted = [...rawStallData];
+        if (range === 'top5') {
+            return {
+                title: 'Top ' + Math.min(5, sorted.length) + ' Performing Stalls',
+                subtitle: 'Top ' + Math.min(5, sorted.length) + ' vendors by composite rating across 4 criteria',
+                items: sorted.sort((a, b) => b.avg - a.avg).slice(0, 5)
+            };
+        } else if (range === 'top10') {
+            return {
+                title: 'Top ' + Math.min(10, sorted.length) + ' Performing Stalls',
+                subtitle: 'Top ' + Math.min(10, sorted.length) + ' vendors by composite rating across 4 criteria',
+                items: sorted.sort((a, b) => b.avg - a.avg).slice(0, 10)
+            };
+        } else if (range === 'lowest5') {
+            return {
+                title: 'Lowest 5 Performing Stalls',
+                subtitle: 'Vendors with lowest composite scores needing attention',
+                items: sorted.sort((a, b) => a.avg - b.avg).slice(0, 5)
+            };
+        } else {
+            return {
+                title: 'All ' + sorted.length + ' Canteen Stalls',
+                subtitle: 'Complete vendor performance comparison across 4 criteria',
+                items: sorted.sort((a, b) => b.avg - a.avg)
+            };
+        }
+    }
+
+    function renderBarChart(range) {
+        var configData = getSliceForRange(range);
+        var items = configData.items;
+
+        if (barTitle) barTitle.textContent = configData.title;
+        if (barSubtitle) barSubtitle.textContent = configData.subtitle;
+
+        var labels = items.map(function(s) { return s.name; });
+        var cleanData = items.map(function(s) { return s.cleanliness; });
+        var servData  = items.map(function(s) { return s.service; });
+        var tasteData = items.map(function(s) { return s.taste; });
+        var priceData = items.map(function(s) { return s.price; });
+
+        if (!stallScoresChart && stallCtx) {
+            stallScoresChart = new Chart(stallCtx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: 'Cleanliness', data: cleanData, backgroundColor: c1a, borderColor: c1b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 },
+                        { label: 'Service',     data: servData,  backgroundColor: c2a, borderColor: c2b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 },
+                        { label: 'Taste',       data: tasteData, backgroundColor: c3a, borderColor: c3b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 },
+                        { label: 'Price',       data: priceData, backgroundColor: c4a, borderColor: c4b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 }
+                    ]
                 },
-                scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 11, weight: '600' }, color: '#374151' }, border: { display: false } },
-                    y: { min: 0, max: 5, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, font: { size: 10 }, color: '#94a3b8' }, border: { display: false } }
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    datasets: {
+                        bar: {
+                            categoryPercentage: 0.82,
+                            barPercentage: 0.90
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            position: 'bottom',
+                            labels: {
+                                font: { size: 11, weight: '600' },
+                                color: '#52525b',
+                                padding: 12,
+                                usePointStyle: true,
+                                pointStyle: 'rectRounded'
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'oklch(0.18 0.07 155)',
+                            titleFont: { size: 12, weight: '700' },
+                            bodyFont: { size: 11 },
+                            padding: 10,
+                            cornerRadius: 8,
+                            callbacks: {
+                                label: function(c) {
+                                    return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(2) + ' / 5.00';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        x: {
+                            grid: { display: false },
+                            ticks: {
+                                font: { size: 11, weight: '600' },
+                                color: '#374151',
+                                maxRotation: 0,
+                                autoSkip: true,
+                                maxTicksLimit: 12,
+                                callback: function(val) {
+                                    var text = this.getLabelForValue(val) || '';
+                                    return text.length > 14 ? text.substring(0, 12) + '…' : text;
+                                }
+                            },
+                            border: { display: false }
+                        },
+                        y: {
+                            min: 0,
+                            max: 5,
+                            grid: { color: '#f1f5f9' },
+                            ticks: { stepSize: 1, font: { size: 10 }, color: '#94a3b8' },
+                            border: { display: false }
+                        }
+                    }
                 }
-            }
+            });
+        } else if (stallScoresChart) {
+            stallScoresChart.data.labels = labels;
+            stallScoresChart.data.datasets[0].data = cleanData;
+            stallScoresChart.data.datasets[1].data = servData;
+            stallScoresChart.data.datasets[2].data = tasteData;
+            stallScoresChart.data.datasets[3].data = priceData;
+            stallScoresChart.update();
+        }
+    }
+
+    if (stallCtx) {
+        renderBarChart('top5');
+
+        // Wire range filter buttons
+        document.querySelectorAll('.stall-filter-btn').forEach(function(btn) {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.stall-filter-btn').forEach(function(b) {
+                    b.classList.remove('bg-white', 'text-neutral-900', 'shadow-2xs', 'font-bold');
+                    b.classList.add('text-neutral-500', 'hover:text-neutral-900', 'font-medium');
+                });
+                btn.classList.add('bg-white', 'text-neutral-900', 'shadow-2xs', 'font-bold');
+                btn.classList.remove('text-neutral-500', 'hover:text-neutral-900', 'font-medium');
+
+                var range = btn.getAttribute('data-range');
+                renderBarChart(range);
+            });
         });
     }
 
-    // 2. Line Chart
+    // ── 2. Line Chart: 30-Day Evaluation Activity ──────────────────────────
     var trendCtx = document.getElementById('evalTrendChart');
     if (trendCtx) {
         var trendDates  = @json($trendDates);
@@ -333,49 +486,141 @@ document.addEventListener('DOMContentLoaded', function() {
             type: 'line',
             data: {
                 labels: trendDates,
-                datasets: [{ label: 'Evaluations', data: trendCounts, borderColor: c1, backgroundColor: cLineBg, pointBackgroundColor: c1, pointBorderColor: '#fff', pointBorderWidth: 2, pointRadius: 3.5, pointHoverRadius: 6, borderWidth: 2, tension: 0.4, fill: true }]
+                datasets: [{
+                    label: 'Evaluations',
+                    data: trendCounts,
+                    borderColor: c1,
+                    backgroundColor: cLineBg,
+                    pointBackgroundColor: c1,
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 3.5,
+                    pointHoverRadius: 6,
+                    borderWidth: 2,
+                    tension: 0.35,
+                    fill: true
+                }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
+                responsive: true,
+                maintainAspectRatio: false,
                 plugins: {
                     legend: { display: false },
-                    tooltip: { backgroundColor: 'oklch(0.18 0.07 155)', titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 }, padding: 10, cornerRadius: 8, callbacks: { title: function(i) { return i[0].label; }, label: function(c) { return ' ' + c.parsed.y + ' evaluation' + (c.parsed.y !== 1 ? 's' : ''); } } }
+                    tooltip: {
+                        backgroundColor: 'oklch(0.18 0.07 155)',
+                        titleFont: { size: 12, weight: '700' },
+                        bodyFont: { size: 11 },
+                        padding: 10,
+                        cornerRadius: 8,
+                        callbacks: {
+                            title: function(i) { return i[0].label; },
+                            label: function(c) {
+                                return ' ' + c.parsed.y + ' evaluation' + (c.parsed.y !== 1 ? 's' : '');
+                            }
+                        }
+                    }
                 },
                 scales: {
-                    x: { grid: { display: false }, ticks: { font: { size: 10 }, color: '#94a3b8', maxRotation: 0, callback: function(v,i) { return (isMobile ? i%5 : i%3) === 0 ? trendDates[i] : ''; } }, border: { display: false } },
-                    y: { min: 0, beginAtZero: true, grid: { color: '#f1f5f9' }, ticks: { stepSize: 1, precision: 0, font: { size: 10 }, color: '#94a3b8' }, border: { display: false } }
+                    x: {
+                        grid: { display: false },
+                        ticks: {
+                            font: { size: 10 },
+                            color: '#94a3b8',
+                            maxRotation: 0,
+                            callback: function(v, i) {
+                                return (isMobile ? i % 5 : i % 3) === 0 ? trendDates[i] : '';
+                            }
+                        },
+                        border: { display: false }
+                    },
+                    y: {
+                        min: 0,
+                        beginAtZero: true,
+                        grid: { color: '#f1f5f9' },
+                        ticks: { stepSize: 1, precision: 0, font: { size: 10 }, color: '#94a3b8' },
+                        border: { display: false }
+                    }
                 }
             }
         });
     }
 
-    // 3. Pie Chart
+    // ── 3. Evaluation Share Donut Chart with "Top 4 + Others" Cluster ────────
     var pieCtx = document.getElementById('evalPieChart');
     if (pieCtx) {
-        var pieData = @json($pieChartData);
+        var rawPie = @json($pieChartData);
+        var sortedPie = [...rawPie].sort(function(a, b) { return b.count - a.count; });
+        var totalSubmissions = sortedPie.reduce(function(sum, item) { return sum + item.count; }, 0);
+
+        var finalPieLabels = [];
+        var finalPieData   = [];
+
+        if (sortedPie.length <= 5) {
+            sortedPie.forEach(function(item) {
+                finalPieLabels.push(item.name);
+                finalPieData.push(item.count);
+            });
+        } else {
+            // Keep top 4 distinct
+            for (var k = 0; k < 4; k++) {
+                finalPieLabels.push(sortedPie[k].name);
+                finalPieData.push(sortedPie[k].count);
+            }
+            // Cluster the remainder into "Other Stalls"
+            var otherCount = 0;
+            for (var m = 4; m < sortedPie.length; m++) {
+                otherCount += sortedPie[m].count;
+            }
+            finalPieLabels.push('Other Stalls (' + (sortedPie.length - 4) + ')');
+            finalPieData.push(otherCount);
+        }
+
+        var donutColors = [
+            'oklch(0.48 0.15 155)',
+            'oklch(0.58 0.14 195)',
+            'oklch(0.72 0.16 75)',
+            'oklch(0.58 0.18 280)',
+            'oklch(0.70 0.03 240)'
+        ];
+
         new Chart(pieCtx, {
-            type: 'pie',
+            type: 'doughnut',
             data: {
-                labels: pieData.map(function(item) { return item.name; }),
+                labels: finalPieLabels,
                 datasets: [{
-                    data: pieData.map(function(item) { return item.count; }),
-                    backgroundColor: pieColors,
-                    borderWidth: 2,
+                    data: finalPieData,
+                    backgroundColor: donutColors.slice(0, finalPieLabels.length),
+                    borderWidth: 2.5,
                     borderColor: '#ffffff',
-                    hoverOffset: 5
+                    hoverOffset: 6
                 }]
             },
             options: {
-                responsive: true, maintainAspectRatio: false,
+                responsive: true,
+                maintainAspectRatio: false,
+                cutout: '68%',
                 plugins: {
-                    legend: { position: 'bottom', labels: { font: { size: 11, weight: '600' }, color: '#52525b', padding: 14, usePointStyle: true, pointStyle: 'circle' } },
+                    legend: {
+                        position: 'bottom',
+                        labels: {
+                            font: { size: 11, weight: '600' },
+                            color: '#52525b',
+                            padding: 12,
+                            usePointStyle: true,
+                            pointStyle: 'circle'
+                        }
+                    },
                     tooltip: {
                         backgroundColor: 'oklch(0.18 0.07 155)',
-                        titleFont: { size: 12, weight: '700' }, bodyFont: { size: 11 },
-                        padding: 10, cornerRadius: 8,
+                        titleFont: { size: 12, weight: '700' },
+                        bodyFont: { size: 11 },
+                        padding: 10,
+                        cornerRadius: 8,
                         callbacks: {
                             label: function(c) {
-                                return ' ' + c.label + ': ' + c.parsed + ' evaluation' + (c.parsed !== 1 ? 's' : '');
+                                var val = c.parsed;
+                                var pct = totalSubmissions > 0 ? ((val / totalSubmissions) * 100).toFixed(1) : 0;
+                                return ' ' + c.label + ': ' + val + ' (' + pct + '%)';
                             }
                         }
                     }

@@ -18,7 +18,7 @@
 
     @if(session('success'))
         <div class="p-3.5 bg-emerald-50 border border-emerald-200/70 text-emerald-800 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-            <span class="material-symbols-outlined text-lg leading-none text-emerald-600">check_circle</span>
+            <ion-icon name="checkmark-circle" class="text-lg leading-none text-emerald-600"></ion-icon>
             {{ session('success') }}
         </div>
     @endif
@@ -51,7 +51,7 @@
                 @error('email')<p class="text-red-600 text-xs mt-1 font-semibold">{{ $message }}</p>@enderror
             </div>
             <button class="btn btn-primary text-sm py-2 px-4 font-bold flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-sm leading-none">save</span>
+                <ion-icon name="save-outline" class="text-sm leading-none"></ion-icon>
                 Save Changes
             </button>
         </form>
@@ -81,7 +81,7 @@
                     class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm font-medium focus:outline-none focus:border-brand-600 focus:ring-1 focus:ring-brand-600/20">
             </div>
             <button class="btn btn-primary text-sm py-2 px-4 font-bold flex items-center gap-1.5">
-                <span class="material-symbols-outlined text-sm leading-none">lock_reset</span>
+                <ion-icon name="lock-closed-outline" class="text-sm leading-none"></ion-icon>
                 Update Password
             </button>
         </form>

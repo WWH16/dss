@@ -10,10 +10,14 @@
     {{-- Tailwind v4 + app CSS via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Fonts: Plus Jakarta Sans + Sora + Material Symbols --}}
+    {{-- Fonts: Plus Jakarta Sans + Sora --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+
+    {{-- Ionicons (iOS Icon System) --}}
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
     @yield('head')
 </head>
@@ -169,7 +173,7 @@
 <dialog id="logout-confirm-modal" class="confirm-modal">
     <div class="flex items-start gap-4 mb-4">
         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-700">
-            <span class="material-symbols-outlined" style="font-size: 1.4rem;">logout</span>
+            <ion-icon name="log-out-outline" class="text-2xl text-brand-700"></ion-icon>
         </div>
         <div>
             <h3 class="text-base font-bold text-neutral-900 leading-tight mb-1" style="font-family: var(--font-display);">Confirm Logout</h3>
@@ -220,7 +224,7 @@
         if (confirmBtn && logoutForm) {
             confirmBtn.addEventListener('click', function () {
                 confirmBtn.classList.add('btn-loading');
-                confirmBtn.innerHTML = '<span class="material-symbols-outlined btn-hourglass">hourglass_empty</span> Logging out...';
+                confirmBtn.innerHTML = '<ion-icon name="hourglass-outline" class="btn-hourglass"></ion-icon> Logging out...';
                 logoutForm.submit();
             });
         }

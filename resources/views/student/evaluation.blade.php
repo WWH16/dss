@@ -11,7 +11,7 @@
         <!-- Back to Dashboard Arrow Button -->
         <div class="mb-4 sm:mb-6">
             <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-sm font-semibold text-neutral-500 hover:text-brand-600 transition-colors bg-white px-4 py-2 rounded-lg border border-neutral-200 shadow-sm">
-                <span class="material-symbols-outlined text-lg leading-none">arrow_back</span>
+                <ion-icon name="arrow-back-outline" class="text-lg leading-none"></ion-icon>
                 Back to Dashboard
             </a>
         </div>
@@ -70,8 +70,8 @@
                 <div class="py-16 md:py-24 flex flex-col items-center justify-center text-center">
                     <div class="relative w-24 h-24 mb-8 animate-pop-in">
                         <div class="absolute inset-0 bg-brand-200 rounded-full animate-ping opacity-60" style="animation-duration: 2.5s;"></div>
-                        <div class="relative flex items-center justify-center w-full h-full bg-brand-600 rounded-full shadow-2xl shadow-brand-600/40">
-                            <span class="material-symbols-outlined text-white text-5xl">task_alt</span>
+                        <div class="relative flex items-center justify-center w-full h-full bg-brand-600 rounded-full shadow-2xl shadow-brand-600/40 p-4">
+                            <ion-icon name="checkmark-circle" class="text-5xl text-white"></ion-icon>
                         </div>
                     </div>
                     
@@ -86,14 +86,14 @@
                             Back to Dashboard
                         </a>
                         <a href="{{ route('student.evaluation') }}" class="btn btn-primary w-full sm:w-auto px-6 py-3 rounded-lg text-sm text-center flex items-center justify-center gap-2 group">
-                            <span class="material-symbols-outlined text-[18px] group-hover:-rotate-12 transition-transform">refresh</span>
+                            <ion-icon name="refresh-outline" class="text-lg group-hover:-rotate-12 transition-transform"></ion-icon>
                             <span>Evaluate Another</span>
                         </a>
                     </div>
                 </div>
             @elseif($stalls->isEmpty())
                 <div class="p-6 text-center bg-amber-50 border border-amber-100 rounded-xl text-amber-800">
-                    <span class="material-symbols-outlined text-3xl mb-2">warning</span>
+                    <ion-icon name="warning-outline" class="text-3xl mb-2"></ion-icon>
                     <p class="font-semibold">No stalls are available yet.</p>
                     <p class="text-sm">Please ask an administrator to add stall information first.</p>
                 </div>
@@ -232,13 +232,13 @@
 
                     <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-5 border-t border-neutral-200">
                         <p class="text-xs text-neutral-500 font-medium flex items-center gap-1.5">
-                            <span class="material-symbols-outlined text-[16px] text-neutral-400">lock</span>
+                            <ion-icon name="lock-closed-outline" class="text-base text-neutral-400"></ion-icon>
                             This evaluation is completely confidential.
                         </p>
                         <button type="submit" id="submitEvaluationBtn" class="btn btn-primary px-8 py-3.5 sm:py-3 w-full sm:w-auto text-sm flex items-center justify-center gap-2 group transition-all">
                             <span id="submitEvaluationText">Submit Evaluation</span>
-                            <span id="submitEvaluationIcon" class="material-symbols-outlined text-[18px] group-hover:translate-x-1 transition-transform duration-300 ease-out-quint">arrow_forward</span>
-                            <span id="submitEvaluationLoader" class="material-symbols-outlined text-[18px] animate-spin" style="display: none;">progress_activity</span>
+                            <ion-icon id="submitEvaluationIcon" name="arrow-forward-outline" class="text-lg group-hover:translate-x-1 transition-transform duration-300"></ion-icon>
+                            <ion-icon id="submitEvaluationLoader" name="hourglass-outline" class="text-lg animate-spin" style="display: none;"></ion-icon>
                         </button>
                     </div>
                 </form>

@@ -21,7 +21,7 @@
                 </h1>
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm font-medium">
                     <span class="text-neutral-500 flex items-center justify-center sm:justify-start gap-1.5">
-                        <span class="material-symbols-outlined text-[16px]">badge</span>
+                        <ion-icon name="id-card-outline" class="text-base text-neutral-400"></ion-icon>
                         Student Account
                     </span>
                 </div>
@@ -31,7 +31,7 @@
         <!-- Profile Details -->
         <div class="p-6 sm:p-8">
             <h2 class="text-base font-bold text-neutral-900 tracking-tight mb-6 flex items-center gap-2">
-                <span class="material-symbols-outlined text-[20px] text-brand-600">person_book</span>
+                <ion-icon name="school-outline" class="text-xl text-brand-700"></ion-icon>
                 Academic Information
             </h2>
             

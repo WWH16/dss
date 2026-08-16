@@ -16,14 +16,14 @@
 
     @if(session('success'))
         <div class="p-3.5 bg-emerald-50 border border-emerald-200/70 text-emerald-800 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-            <span class="material-symbols-outlined text-lg leading-none text-emerald-600">check_circle</span>
+            <ion-icon name="checkmark-circle" class="text-lg leading-none text-emerald-600"></ion-icon>
             {{ session('success') }}
         </div>
     @endif
 
     @if($errors->any())
         <div class="p-3.5 bg-red-50 border border-red-200/70 text-red-800 rounded-md text-xs font-bold flex items-start gap-2">
-            <span class="material-symbols-outlined text-lg leading-none text-red-600">error</span>
+            <ion-icon name="alert-circle" class="text-lg leading-none text-red-600"></ion-icon>
             <ul class="list-disc list-inside">
                 @foreach($errors->all() as $err)
                     <li>{{ $err }}</li>
@@ -36,7 +36,7 @@
         {{-- Create Activity --}}
         <div class="bg-white rounded-lg border border-neutral-200/80 p-5 shadow-xs lg:col-span-1 h-fit">
             <div class="flex items-center gap-2 mb-4 pb-3 border-b border-neutral-100">
-                <span class="material-symbols-outlined text-brand-600 text-lg">event_available</span>
+                <ion-icon name="calendar-outline" class="text-brand-600 text-lg"></ion-icon>
                 <h2 class="font-bold text-neutral-900 text-sm tracking-tight uppercase">Create Activity</h2>
             </div>
 
@@ -73,7 +73,7 @@
                     </div>
                 </div>
                 <button class="btn btn-primary text-sm py-2 px-4 font-bold w-full flex items-center justify-center gap-1.5">
-                    <span class="material-symbols-outlined text-sm leading-none">add</span>
+                    <ion-icon name="add-outline" class="text-base"></ion-icon>
                     Create Activity
                 </button>
             </form>
@@ -115,13 +115,13 @@
                         <button type="button"
                             onclick='openEditActivityModal(@json($activity))'
                             class="text-brand-700 hover:text-brand-800 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 bg-white px-2.5 py-1.5 rounded border border-brand-200 hover:bg-brand-50">
-                            <span class="material-symbols-outlined text-[13px] leading-none">edit</span>
+                            <ion-icon name="pencil-outline" class="text-sm"></ion-icon>
                             Edit
                         </button>
                         <form action="{{ route('admin.activities.toggle', $activity->id) }}" method="POST">
                             @csrf
                             <button type="submit" class="text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 bg-white px-2.5 py-1.5 rounded border {{ $activity->is_active ? 'text-red-600 border-red-200 hover:bg-red-50' : 'text-emerald-700 border-emerald-200 hover:bg-emerald-50' }}">
-                                <span class="material-symbols-outlined text-[13px] leading-none">{{ $activity->is_active ? 'toggle_off' : 'toggle_on' }}</span>
+                                <ion-icon name="{{ $activity->is_active ? 'toggle' : 'toggle-outline' }}" class="text-base"></ion-icon>
                                 {{ $activity->is_active ? 'Deactivate' : 'Activate' }}
                             </button>
                         </form>
@@ -130,7 +130,7 @@
             @empty
                 <div class="bg-white rounded-lg border border-neutral-200/80 p-12 text-center shadow-xs">
                     <div class="w-14 h-14 rounded-md bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-3 text-neutral-400 mx-auto">
-                        <span class="material-symbols-outlined text-2xl">event</span>
+                        <ion-icon name="calendar-outline" class="text-3xl text-neutral-400"></ion-icon>
                     </div>
                     <p class="text-base font-bold text-neutral-900 mb-1">No evaluation activities yet</p>
                     <p class="text-xs text-neutral-500">Create a schedule using the form on the left.</p>
@@ -147,7 +147,7 @@
         @method('PUT')
         <div class="flex items-start gap-3.5 mb-4">
             <div class="flex-shrink-0 w-9 h-9 rounded-md bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-700">
-                <span class="material-symbols-outlined text-lg">edit_square</span>
+                <ion-icon name="create-outline" class="text-xl text-brand-700"></ion-icon>
             </div>
             <div class="w-full space-y-3">
                 <h3 class="text-sm font-bold text-neutral-900 leading-tight">Edit Evaluation Activity</h3>
@@ -184,7 +184,7 @@
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
             <button type="button" class="btn btn-ghost btn-sm js-close-edit-activity-modal">Cancel</button>
             <button type="submit" class="btn btn-primary btn-sm font-bold flex items-center gap-1">
-                <span class="material-symbols-outlined text-sm leading-none">save</span>
+                <ion-icon name="save-outline" class="text-sm leading-none"></ion-icon>
                 Save Changes
             </button>
         </div>

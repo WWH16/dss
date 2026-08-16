@@ -170,7 +170,7 @@
         <div class="criteria-grid" role="list">
             <div class="criterion" role="listitem">
                 <div class="criterion-icon" aria-hidden="true">
-                    <span class="material-symbols-outlined text-brand-600">cleaning_services</span>
+                    <ion-icon name="sparkles-outline" class="text-2xl text-brand-700"></ion-icon>
                 </div>
                 <div>
                     <div class="criterion-title">Cleanliness</div>
@@ -182,7 +182,7 @@
 
             <div class="criterion" role="listitem">
                 <div class="criterion-icon" aria-hidden="true">
-                    <span class="material-symbols-outlined text-brand-600">support_agent</span>
+                    <ion-icon name="shield-checkmark-outline" class="text-2xl text-brand-700"></ion-icon>
                 </div>
                 <div>
                     <div class="criterion-title">Service Quality</div>
@@ -194,7 +194,7 @@
 
             <div class="criterion" role="listitem">
                 <div class="criterion-icon" aria-hidden="true">
-                    <span class="material-symbols-outlined text-brand-600">restaurant</span>
+                    <ion-icon name="restaurant-outline" class="text-2xl text-brand-700"></ion-icon>
                 </div>
                 <div>
                     <div class="criterion-title">Taste</div>
@@ -206,7 +206,7 @@
 
             <div class="criterion" role="listitem">
                 <div class="criterion-icon" aria-hidden="true">
-                    <span class="material-symbols-outlined text-brand-600">payments</span>
+                    <ion-icon name="pricetag-outline" class="text-2xl text-brand-700"></ion-icon>
                 </div>
                 <div>
                     <div class="criterion-title">Price Fairness</div>

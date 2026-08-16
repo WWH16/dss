@@ -36,7 +36,7 @@
                     <div class="space-y-3">
                         <div class="pb-2 border-b border-neutral-200">
                             <h2 class="font-bold text-amber-800 uppercase tracking-wider text-[10px] flex items-center gap-1.5">
-                                <span class="material-symbols-outlined text-sm leading-none">warning</span>
+                                <ion-icon name="warning-outline" class="text-sm leading-none"></ion-icon>
                                 Needs Attention
                             </h2>
                         </div>
@@ -66,12 +66,13 @@
                         @endphp
                         <div class="grid grid-cols-2 sm:grid-cols-4 gap-6">
                             @foreach([
-                                ['label' => 'Cleanliness', 'value' => $firstRating->cleanliness ?? 0, 'color' => 'text-emerald-600'],
-                                ['label' => 'Service', 'value' => $firstRating->service ?? 0, 'color' => 'text-blue-600'],
-                                ['label' => 'Taste', 'value' => $firstRating->taste ?? 0, 'color' => 'text-amber-600'],
-                                ['label' => 'Price', 'value' => $firstRating->price ?? 0, 'color' => 'text-purple-600']
+                                ['label' => 'Cleanliness', 'value' => $firstRating->cleanliness ?? 0, 'color' => 'text-emerald-600', 'icon' => 'sparkles-outline'],
+                                ['label' => 'Service', 'value' => $firstRating->service ?? 0, 'color' => 'text-blue-600', 'icon' => 'shield-checkmark-outline'],
+                                ['label' => 'Taste', 'value' => $firstRating->taste ?? 0, 'color' => 'text-amber-600', 'icon' => 'restaurant-outline'],
+                                ['label' => 'Price', 'value' => $firstRating->price ?? 0, 'color' => 'text-purple-600', 'icon' => 'pricetag-outline']
                             ] as $metric)
-                                <div class="bg-neutral-50/50 p-4 rounded-xl border border-neutral-100/50 text-center">
+                                <div class="bg-neutral-50/50 p-4 rounded-xl border border-neutral-100/50 text-center flex flex-col items-center">
+                                    <ion-icon name="{{ $metric['icon'] }}" class="text-xl mb-1.5 text-neutral-600"></ion-icon>
                                     <span class="text-[10px] text-neutral-400 block uppercase tracking-wider font-bold mb-1">{{ $metric['label'] }}</span>
                                     <span class="text-xl font-extrabold tabular-nums {{ $metric['color'] }}">{{ number_format($metric['value'], 2) }}</span>
                                 </div>

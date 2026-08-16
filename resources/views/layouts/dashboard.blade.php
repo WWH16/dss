@@ -10,7 +10,11 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+
+    {{-- Ionicons (iOS Icon System) --}}
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
 
     @yield('head')
 
@@ -75,8 +79,13 @@
             font-weight: 600;
             box-shadow: 0 1px 4px oklch(0.48 0.15 155 / 0.30);
         }
-        .sidebar-link .material-symbols-outlined {
-            font-size: 1.125rem;
+        .sidebar-link ion-icon {
+            font-size: 1.15rem;
+            flex-shrink: 0;
+            transition: transform 0.15s ease;
+        }
+        .sidebar-link:hover ion-icon {
+            transform: scale(1.08);
         }
         .sidebar-footer {
             border-top-color: oklch(0.30 0.10 155);
@@ -154,37 +163,37 @@
             
             @if($user && $user->role === 'student')
                 <a href="{{ route('student.dashboard') }}" class="sidebar-link {{ request()->routeIs('student.dashboard') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">dashboard</span>
+                    <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Dashboard
                 </a>
                 <a href="{{ route('student.profile') }}" class="sidebar-link {{ request()->routeIs('student.profile') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">person</span>
+                    <ion-icon name="person-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     My Profile
                 </a>
                 <a href="{{ route('student.evaluation') }}" class="sidebar-link {{ request()->routeIs('student.evaluation') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">rate_review</span>
+                    <ion-icon name="create-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Evaluate
                 </a>
                 <a href="{{ route('student.history') }}" class="sidebar-link {{ request()->routeIs('student.history') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">history</span>
+                    <ion-icon name="time-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     History
                 </a>
             @elseif($user && $user->role === 'admin')
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">dashboard</span>
+                    <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Overview
                 </a>
                 <a href="{{ route('admin.stalls') }}" class="sidebar-link {{ request()->routeIs('admin.stalls') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">storefront</span>
+                    <ion-icon name="storefront-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Stalls
                 </a>
                 <a href="{{ route('admin.evaluations') }}" class="sidebar-link {{ request()->routeIs('admin.evaluations') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">rate_review</span>
+                    <ion-icon name="create-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Evaluations
                 </a>
             @elseif($user && $user->role === 'staff')
                 <a href="{{ route('staff.dashboard') }}" class="sidebar-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
-                    <span class="material-symbols-outlined">dashboard</span>
+                    <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Dashboard
                 </a>
             @endif
@@ -196,7 +205,7 @@
                 @csrf
             </form>
             <button type="button" class="sidebar-link sidebar-logout w-full text-left js-logout-trigger !m-0 !w-full cursor-pointer bg-transparent border-0">
-                <span class="material-symbols-outlined">logout</span>
+                <ion-icon name="log-out-outline" class="sidebar-link-icon"></ion-icon>
                 Logout
             </button>
         </div>
@@ -208,7 +217,7 @@
         <header class="dashboard-header">
             <div class="flex items-center gap-4">
                 <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu">
-                    <span class="material-symbols-outlined">menu</span>
+                    <ion-icon name="menu-outline" class="text-2xl text-ink-900"></ion-icon>
                 </button>
                 <h2 class="font-display font-semibold text-lg text-ink-900">
                     @yield('header_title', 'Dashboard')
@@ -237,7 +246,7 @@
 <dialog id="logout-confirm-modal" class="confirm-modal">
     <div class="flex items-start gap-4 mb-4">
         <div class="flex-shrink-0 w-10 h-10 rounded-full bg-brand-50 flex items-center justify-center text-brand-700">
-            <span class="material-symbols-outlined" style="font-size: 1.4rem;">logout</span>
+            <ion-icon name="log-out-outline" class="text-2xl text-brand-700"></ion-icon>
         </div>
         <div>
             <h3 class="text-base font-bold text-neutral-900 leading-tight mb-1" style="font-family: var(--font-display);">Confirm Logout</h3>
@@ -307,7 +316,7 @@
         if (confirmBtn && logoutForm) {
             confirmBtn.addEventListener('click', function () {
                 confirmBtn.classList.add('btn-loading');
-                confirmBtn.innerHTML = '<span class="material-symbols-outlined btn-hourglass">hourglass_empty</span> Logging out...';
+                confirmBtn.innerHTML = '<ion-icon name="hourglass-outline" class="btn-hourglass"></ion-icon> Logging out...';
                 logoutForm.submit();
             });
         }

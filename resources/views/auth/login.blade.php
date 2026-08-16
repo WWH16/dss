@@ -9,10 +9,14 @@
     {{-- Tailwind v4 + app CSS via Vite --}}
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
-    {{-- Fonts: Plus Jakarta Sans + Sora + Material Symbols --}}
+    {{-- Fonts: Plus Jakarta Sans + Sora --}}
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:ital,wght@0,400;0,500;0,600;0,700;0,800&family=Sora:wght@700;800&display=swap" rel="stylesheet">
+
+    {{-- Ionicons (iOS Icon System) --}}
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
         @keyframes icon-pop {
             0% { transform: scale(0.5); opacity: 0.5; }
@@ -30,7 +34,7 @@
     <!-- Standalone Back Navigation Arrow -->
     <div class="absolute top-6 left-6 z-50">
         <a href="{{ url('/') }}" class="inline-flex items-center justify-center w-10 h-10 rounded-[4px] border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:border-neutral-300 shadow-sm transition-all" aria-label="Go back">
-            <span class="material-symbols-outlined text-xl leading-none">arrow_back</span>
+            <ion-icon name="arrow-back-outline" class="text-xl leading-none"></ion-icon>
         </a>
     </div>
 
@@ -49,14 +53,14 @@
         {{-- Laravel Errors/Success Alerts --}}
         @if($success)
             <div class="mb-4 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <span class="material-symbols-outlined text-lg leading-none">check_circle</span>
+                <ion-icon name="checkmark-circle" class="text-lg leading-none text-emerald-600"></ion-icon>
                 {{ $success }}
             </div>
         @endif
 
         @if($error)
             <div class="mb-4 p-4 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <span class="material-symbols-outlined text-lg leading-none">error</span>
+                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600"></ion-icon>
                 {{ $error }}
             </div>
         @endif
@@ -96,13 +100,13 @@
                     <div class="relative">
                         <input type="password" id="login_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="current-password" required>
                         <button type="button" onclick="togglePasswordVisibility('login_password', 'login_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
-                            <span id="login_password_icon" class="material-symbols-outlined text-lg leading-none">visibility</span>
+                            <ion-icon id="login_password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                         </button>
                     </div>
                 </div>
 
                 <button type="submit" id="login-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">
-                    <span id="login-btn-loader" class="material-symbols-outlined text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;">hourglass_top</span>
+                    <ion-icon id="login-btn-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                     <span id="login-btn-content">Login</span>
                 </button>
             </form>
@@ -121,7 +125,7 @@
                         <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('role')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
@@ -129,7 +133,7 @@
                     <label for="register_name" class="block text-xs font-semibold text-neutral-700 mb-1.5">Full Name</label>
                     <input type="text" id="register_name" name="name" value="{{ old('name') }}" placeholder="e.g. Juan Dela Cruz" class="w-full px-4 py-2.5 bg-white border @error('name') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="name" required>
                     @error('name')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
@@ -137,7 +141,7 @@
                     <label for="register_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
                     <input type="email" id="register_email" name="email" value="{{ old('email') }}" placeholder="e.g. student@example.com" class="w-full px-4 py-2.5 bg-white border @error('email') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="email" required>
                     @error('email')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
@@ -153,7 +157,7 @@
                                 <option value="BSHM" {{ old('course') == 'BSHM' ? 'selected' : '' }}>BSHM</option>
                             </select>
                             @error('course')
-                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                             @enderror
                         </div>
 
@@ -167,7 +171,7 @@
                                 <option value="4th year" {{ old('year_level') == '4th year' ? 'selected' : '' }}>4th year</option>
                             </select>
                             @error('year_level')
-                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -176,7 +180,7 @@
                         <label for="register_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
                         <input type="text" id="register_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @error('student_number') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username">
                         @error('student_number')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -187,7 +191,7 @@
                         <label for="register_stall_name" class="block text-xs font-semibold text-neutral-700 mb-1.5">Stall Number / Name</label>
                         <input type="text" id="register_stall_name" name="stall_name" value="{{ old('stall_name') }}" placeholder="e.g. Stall #1 - Food Hub" class="w-full px-4 py-2.5 bg-white border @error('stall_name') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400">
                         @error('stall_name')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
                     </div>
                 </div>
@@ -199,7 +203,7 @@
                         <div class="relative">
                             <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password', 'register_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
-                                <span id="register_password_icon" class="material-symbols-outlined text-lg leading-none">visibility</span>
+                                <ion-icon id="register_password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                             </button>
                         </div>
 
@@ -230,26 +234,26 @@
                             {{-- Checklist Items (Spaced 2x2 Grid) --}}
                             <div class="grid grid-cols-2 gap-x-4 gap-y-0 font-medium text-neutral-500">
                                 <div id="req-length" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
                                     <span class="text-[9px] whitespace-nowrap">8+ characters</span>
                                 </div>
                                 <div id="req-case" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
                                     <span class="text-[9px] whitespace-nowrap">Upper & lowercase</span>
                                 </div>
                                 <div id="req-number" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
                                     <span class="text-[9px] whitespace-nowrap">One number</span>
                                 </div>
                                 <div id="req-symbol" class="flex items-center gap-1 transition-colors duration-300">
-                                    <span class="material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300">radio_button_unchecked</span>
+                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
                                     <span class="text-[9px] whitespace-nowrap">One symbol</span>
                                 </div>
                             </div>
                         </div>
 
                         @error('password')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm leading-none">error</span> {{ $message }}</p>
+                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
                     </div>
 
@@ -258,7 +262,7 @@
                         <div class="relative">
                             <input type="password" id="register_password_confirmation" name="password_confirmation" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password_confirmation') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password_confirmation', 'register_password_confirm_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password confirmation visibility">
-                                <span id="register_password_confirm_icon" class="material-symbols-outlined text-lg leading-none">visibility</span>
+                                <ion-icon id="register_password_confirm_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                             </button>
                         </div>
                     </div>
@@ -266,7 +270,7 @@
 
 
                 <button type="submit" id="register-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">
-                    <span id="register-btn-loader" class="material-symbols-outlined text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;">hourglass_top</span>
+                    <ion-icon id="register-btn-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                     <span id="register-btn-content">Register</span>
                 </button>
             </form>
@@ -330,10 +334,10 @@
             const pwdIcon = document.getElementById(iconId);
             if (pwdInput.type === 'password') {
                 pwdInput.type = 'text';
-                pwdIcon.textContent = 'visibility_off';
+                pwdIcon.setAttribute('name', 'eye-off-outline');
             } else {
                 pwdInput.type = 'password';
-                pwdIcon.textContent = 'visibility';
+                pwdIcon.setAttribute('name', 'eye-outline');
             }
         }
 
@@ -382,17 +386,17 @@
                         
                         if (newState === 'empty') {
                             req.el.className = "flex items-center gap-1 text-neutral-500 transition-colors duration-300";
-                            req.icon.className = "material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
-                            req.icon.textContent = "radio_button_unchecked";
+                            req.icon.className = "text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
+                            req.icon.setAttribute('name', 'ellipse-outline');
                         } else if (newState === 'valid') {
                             req.el.className = "flex items-center gap-1 text-emerald-600 font-bold transition-colors duration-300";
                             // Add pop animation when it becomes valid
-                            req.icon.className = "material-symbols-outlined text-[12px] leading-none text-emerald-500 req-icon transition-colors duration-300 animate-icon-pop";
-                            req.icon.textContent = "check_circle";
+                            req.icon.className = "text-[12px] leading-none text-emerald-500 req-icon transition-colors duration-300 animate-icon-pop";
+                            req.icon.setAttribute('name', 'checkmark-circle');
                         } else {
                             req.el.className = "flex items-center gap-1 text-neutral-500 transition-colors duration-300";
-                            req.icon.className = "material-symbols-outlined text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
-                            req.icon.textContent = "radio_button_unchecked";
+                            req.icon.className = "text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
+                            req.icon.setAttribute('name', 'ellipse-outline');
                         }
                     }
                 }

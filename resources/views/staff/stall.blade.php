@@ -16,7 +16,7 @@
     @if(!$stall)
         <div class="bg-white rounded-lg border border-neutral-200/80 p-12 text-center shadow-xs">
             <div class="w-14 h-14 rounded-md bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-3 text-neutral-400 mx-auto">
-                <span class="material-symbols-outlined text-2xl">storefront</span>
+                <ion-icon name="storefront-outline" class="text-3xl text-neutral-400"></ion-icon>
             </div>
             <p class="text-base font-bold text-neutral-900 mb-1">No stall assigned yet</p>
             <p class="text-xs text-neutral-500 max-w-sm mx-auto">An administrator needs to link your account to a canteen stall.</p>
@@ -25,7 +25,7 @@
         <div class="bg-white rounded-lg border border-neutral-200/80 shadow-xs overflow-hidden">
             <div class="p-6 sm:p-7 border-b border-neutral-100 bg-neutral-50/40 flex items-start gap-5">
                 <div class="w-14 h-14 rounded-md bg-brand-50 border border-brand-200 flex items-center justify-center text-brand-700 shrink-0">
-                    <span class="material-symbols-outlined text-2xl">storefront</span>
+                    <ion-icon name="storefront-outline" class="text-3xl text-brand-700"></ion-icon>
                 </div>
                 <div class="pt-0.5">
                     <h2 class="text-xl font-bold text-neutral-900 tracking-tight mb-1.5">{{ $stall->name }}</h2>
@@ -37,7 +37,7 @@
 
             <div class="p-6 sm:p-7">
                 <h3 class="text-xs font-bold text-neutral-900 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <span class="material-symbols-outlined text-base text-brand-600">info</span>
+                    <ion-icon name="information-circle-outline" class="text-base text-brand-600"></ion-icon>
                     Stall Information
                 </h3>
                 <dl class="space-y-4">

@@ -34,7 +34,7 @@
                 @endforeach
             </select>
             <button type="submit" class="btn btn-primary text-sm py-2 px-4 font-bold flex items-center justify-center gap-1.5 shrink-0">
-                <span class="material-symbols-outlined text-sm leading-none">search</span>
+                <ion-icon name="search-outline" class="text-sm leading-none"></ion-icon>
                 Filter
             </button>
             @if(request('q') || request('course') || request('year_level'))
@@ -48,7 +48,7 @@
         @if($students->isEmpty())
             <div class="p-12 text-center flex flex-col items-center justify-center">
                 <div class="w-14 h-14 rounded-md bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-3 text-neutral-400">
-                    <span class="material-symbols-outlined text-2xl">groups</span>
+                    <ion-icon name="people-outline" class="text-3xl text-neutral-400"></ion-icon>
                 </div>
                 <p class="text-base font-bold text-neutral-900 mb-1">No students found</p>
                 <p class="text-xs text-neutral-500 max-w-sm">Try adjusting your search criteria or clear the filters.</p>
@@ -83,7 +83,7 @@
                                     <button type="button"
                                         onclick='openDetailsModal(@json($student))'
                                         class="text-brand-700 hover:text-brand-800 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 transition-colors bg-white px-2.5 py-1.5 rounded border border-brand-200 hover:bg-brand-50">
-                                        <span class="material-symbols-outlined text-[13px] leading-none">visibility</span>
+                                        <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
                                         View
                                     </button>
                                 </td>
@@ -103,7 +103,7 @@
                             <button type="button"
                                 onclick='openDetailsModal(@json($student))'
                                 class="shrink-0 text-brand-700 hover:text-brand-800 text-[11px] font-bold uppercase tracking-wide inline-flex items-center gap-1 bg-white px-2.5 py-1.5 rounded border border-brand-200">
-                                <span class="material-symbols-outlined text-[13px] leading-none">visibility</span>
+                                <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
                                 View
                             </button>
                         </div>
@@ -118,7 +118,7 @@
 <dialog id="details-modal" class="confirm-modal">
     <div class="flex items-start gap-3.5 mb-4">
         <div class="flex-shrink-0 w-9 h-9 rounded-md bg-brand-50 border border-brand-100 flex items-center justify-center text-brand-700">
-            <span class="material-symbols-outlined text-lg">badge</span>
+            <ion-icon name="id-card-outline" class="text-xl text-brand-700"></ion-icon>
         </div>
         <div class="w-full">
             <h3 id="details-name" class="text-sm font-bold text-neutral-900 leading-tight mb-3"></h3>
