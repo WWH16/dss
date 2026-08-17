@@ -215,7 +215,12 @@ class AdminController extends Controller
             $query->orderByDesc('users.created_at');
         }
 
-        $students = $query->get();
+        $perPage = (int) $request->get('per_page', 10);
+        if (!in_array($perPage, [10, 25, 50, 100])) {
+            $perPage = 10;
+        }
+
+        $students = $query->paginate($perPage)->withQueryString();
 
         // High-level KPI metrics
         $totalStudents = DB::table('users')->where('role', 'student')->count();

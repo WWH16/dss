@@ -178,7 +178,11 @@
             {{-- Results Count & Active Filters Indicator --}}
             <div class="flex items-center justify-between text-xs text-neutral-500 pt-1">
                 <div>
-                    Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->count() }}</strong> of <span class="tabular-nums">{{ $totalStudents }}</span> student accounts
+                    @if($hasFilters)
+                        <span>Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->total() }}</strong> of <span class="tabular-nums">{{ $totalStudents }}</span> filtered accounts</span>
+                    @else
+                        <span><strong class="text-neutral-900 font-bold tabular-nums">{{ $totalStudents }}</strong> {{ Str::plural('student account', $totalStudents) }} registered</span>
+                    @endif
                 </div>
                 @if(request('department') || request('course') || request('year_level'))
                     <div class="flex items-center gap-1.5 flex-wrap">
@@ -368,6 +372,75 @@
                     @endforeach
                 </div>
             </div>
+
+            {{-- ── Pagination Footer Bar ───────────────────────────────── --}}
+            @if($students->hasPages() || $students->total() > 10)
+                <div class="px-5 py-4 bg-neutral-50/70 border-t border-neutral-200/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+                    <div class="flex items-center gap-3 text-xs text-neutral-500 font-medium order-2 sm:order-1">
+                        <span>
+                            Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->firstItem() ?? 0 }}</strong> to <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->lastItem() ?? 0 }}</strong> of <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->total() }}</strong> accounts
+                        </span>
+
+                        {{-- Per Page Selector --}}
+                        <div class="flex items-center gap-1.5 border-l border-neutral-200 pl-3">
+                            <label for="per_page_select" class="text-[11px] font-bold text-neutral-400 uppercase">Per Page</label>
+                            <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600">
+                                @foreach([10, 25, 50] as $size)
+                                    <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" {{ $students->perPage() == $size ? 'selected' : '' }}>
+                                        {{ $size }}
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </div>
+
+                    {{-- Pagination Controls --}}
+                    @if($students->hasPages())
+                        <div class="flex items-center gap-1 order-1 sm:order-2">
+                            {{-- Previous Page Link --}}
+                            @if($students->onFirstPage())
+                                <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                                    <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
+                                    Previous
+                                </span>
+                            @else
+                                <a href="{{ $students->previousPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                                    <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
+                                    Previous
+                                </a>
+                            @endif
+
+                            {{-- Pagination Elements --}}
+                            <div class="hidden sm:flex items-center gap-1">
+                                @foreach($students->getUrlRange(max(1, $students->currentPage() - 2), min($students->lastPage(), $students->currentPage() + 2)) as $page => $url)
+                                    @if($page == $students->currentPage())
+                                        <span class="w-8 h-8 rounded-lg bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                                            {{ $page }}
+                                        </span>
+                                    @else
+                                        <a href="{{ $url }}" class="w-8 h-8 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs flex items-center justify-center transition-colors">
+                                            {{ $page }}
+                                        </a>
+                                    @endif
+                                @endforeach
+                            </div>
+
+                            {{-- Next Page Link --}}
+                            @if($students->hasMorePages())
+                                <a href="{{ $students->nextPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                                    Next
+                                    <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
+                                </a>
+                            @else
+                                <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                                    Next
+                                    <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
+                                </span>
+                            @endif
+                        </div>
+                    @endif
+                </div>
+            @endif
         @endif
     </div>
 </div>
