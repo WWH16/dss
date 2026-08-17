@@ -64,53 +64,84 @@
     @endif
 
     @if($results->isNotEmpty())
-        {{-- ── 3. DSS Benchmark Winner & Campus Health Index ──────────────── --}}
+        @php
+            $podiumFirst  = $results->get(0);
+            $podiumSecond = $results->get(1);
+            $podiumThird  = $results->get(2);
+            $firstScore   = $podiumFirst  ? (float)$podiumFirst->overall_score  : 0;
+            $secondScore  = $podiumSecond ? (float)$podiumSecond->overall_score : 0;
+            $thirdScore   = $podiumThird  ? (float)$podiumThird->overall_score  : 0;
+        @endphp
+
+        {{-- ── 3. Podium + Campus Health ──────────────────────────────────── --}}
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-            
-            {{-- Top Ranked Stall Card (DSS Decision Winner) --}}
-            <div class="lg:col-span-1 bg-gradient-to-br from-brand-900 to-brand-950 text-white rounded-xl p-5 sm:p-6 shadow-sm border border-brand-950 flex flex-col justify-between relative overflow-hidden">
-                <div class="absolute -right-6 -bottom-6 text-white/5 pointer-events-none">
-                    <ion-icon name="trophy" class="text-9xl"></ion-icon>
+
+            {{-- Stepped Podium Card --}}
+            <div class="lg:col-span-1 bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden flex flex-col">
+                <div class="px-5 pt-4 pb-1">
+                    <h2 class="text-sm font-bold text-neutral-900">Top Vendors</h2>
+                    <p class="text-[11px] text-neutral-500 mt-0.5">Ranked by DSS composite</p>
                 </div>
 
-                <div>
-                    <div class="flex items-center justify-between gap-2 mb-3">
-                        <span class="inline-flex items-center gap-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider">
-                            <ion-icon name="trophy" class="text-xs"></ion-icon>
-                            #1 DSS Benchmark Stall
-                        </span>
-                        <span class="text-[11px] text-brand-200 font-medium">
-                            {{ $topStall ? $topStall->eval_count : 0 }} {{ Str::plural('eval', $topStall ? $topStall->eval_count : 0) }}
-                        </span>
+                <div class="flex-1 flex flex-col justify-end px-3 pb-0 pt-4">
+                    {{-- Names + scores above bars --}}
+                    <div class="flex items-end justify-center gap-1">
+                        {{-- #2 label --}}
+                        @if($podiumSecond)
+                            <div class="flex-1 text-center pb-1.5">
+                                <ion-icon name="medal" class="text-slate-400 text-base"></ion-icon>
+                                <p class="text-[11px] font-bold text-neutral-900 truncate mt-0.5 px-1" title="{{ $podiumSecond->name }}">{{ $podiumSecond->name }}</p>
+                                <p class="text-sm font-black text-neutral-800 tabular-nums leading-tight">{{ number_format($secondScore, 2) }}</p>
+                                <p class="text-[9px] text-neutral-400 font-mono">{{ $podiumSecond->eval_count }} {{ Str::plural('eval', $podiumSecond->eval_count) }}</p>
+                            </div>
+                        @endif
+
+                        {{-- #1 label --}}
+                        @if($podiumFirst)
+                            <div class="flex-1 text-center pb-1.5">
+                                <ion-icon name="trophy" class="text-amber-500 text-lg"></ion-icon>
+                                <p class="text-xs font-black text-neutral-900 truncate mt-0.5 px-1" title="{{ $podiumFirst->name }}">{{ $podiumFirst->name }}</p>
+                                <p class="text-base font-black text-neutral-900 tabular-nums leading-tight">{{ number_format($firstScore, 2) }}</p>
+                                <p class="text-[9px] text-neutral-400 font-mono">{{ $podiumFirst->eval_count }} {{ Str::plural('eval', $podiumFirst->eval_count) }}</p>
+                            </div>
+                        @endif
+
+                        {{-- #3 label --}}
+                        @if($podiumThird)
+                            <div class="flex-1 text-center pb-1.5">
+                                <ion-icon name="medal" class="text-amber-700/60 text-sm"></ion-icon>
+                                <p class="text-[11px] font-bold text-neutral-900 truncate mt-0.5 px-1" title="{{ $podiumThird->name }}">{{ $podiumThird->name }}</p>
+                                <p class="text-sm font-black text-neutral-800 tabular-nums leading-tight">{{ number_format($thirdScore, 2) }}</p>
+                                <p class="text-[9px] text-neutral-400 font-mono">{{ $podiumThird->eval_count }} {{ Str::plural('eval', $podiumThird->eval_count) }}</p>
+                            </div>
+                        @else
+                            <div class="flex-1"></div>
+                        @endif
                     </div>
 
-                    <h3 class="text-xl font-extrabold text-white tracking-tight leading-tight">
-                        {{ $topStall ? $topStall->name : 'No evaluations yet' }}
-                    </h3>
+                    {{-- Podium bars --}}
+                    <div class="flex items-end justify-center gap-1">
+                        @if($podiumSecond)
+                            <div class="flex-1 h-16 bg-slate-100 border border-slate-200 border-b-0 rounded-t-lg flex items-center justify-center">
+                                <span class="text-xl font-black text-slate-300">2</span>
+                            </div>
+                        @endif
 
-                    @if($topStall)
-                        <div class="flex items-baseline gap-2 mt-2">
-                            <span class="text-3xl font-black text-white tabular-nums tracking-tight">
-                                {{ number_format($topStall->overall_score, 2) }}
-                            </span>
-                            <span class="text-amber-400 text-lg">★</span>
-                            <span class="text-xs text-brand-200 font-medium">/ 5.00 Composite Score</span>
-                        </div>
-                    @endif
+                        @if($podiumFirst)
+                            <div class="flex-1 h-24 bg-amber-50 border border-amber-200/80 border-b-0 rounded-t-lg flex items-center justify-center">
+                                <span class="text-2xl font-black text-amber-300">1</span>
+                            </div>
+                        @endif
+
+                        @if($podiumThird)
+                            <div class="flex-1 h-11 bg-orange-50/60 border border-orange-200/60 border-b-0 rounded-t-lg flex items-center justify-center">
+                                <span class="text-lg font-black text-orange-200">3</span>
+                            </div>
+                        @else
+                            <div class="flex-1"></div>
+                        @endif
+                    </div>
                 </div>
-
-                @if($topStall)
-                    <div class="mt-4 pt-3 border-t border-brand-800/80 grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-brand-800/60 p-2 rounded-md border border-brand-700/50">
-                            <span class="block text-[9px] uppercase font-bold text-brand-300">Cleanliness</span>
-                            <span class="font-bold text-white tabular-nums">{{ number_format($topStall->cleanliness, 2) }}★</span>
-                        </div>
-                        <div class="bg-brand-800/60 p-2 rounded-md border border-brand-700/50">
-                            <span class="block text-[9px] uppercase font-bold text-brand-300">Taste</span>
-                            <span class="font-bold text-white tabular-nums">{{ number_format($topStall->taste, 2) }}★</span>
-                        </div>
-                    </div>
-                @endif
             </div>
 
             {{-- Campus-Wide Criteria Health Barometer --}}
