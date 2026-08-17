@@ -199,7 +199,7 @@
                     </div>
 
                     {{-- Grouped Bar Chart --}}
-                    <div class="relative w-full pt-2" style="height: 210px;">
+                    <div class="relative w-full pt-2" style="height: 220px;">
                         <canvas id="criteriaBenchmarkChart" role="img" aria-label="Bar chart comparing your stall ratings against the campus average for each criterion"></canvas>
                     </div>
                 </div>
@@ -526,20 +526,24 @@ document.addEventListener('DOMContentLoaded', function() {
                     {
                         label: 'Your Stall',
                         data: myScores,
-                        backgroundColor: 'rgba(22, 101, 52, 0.85)',
+                        backgroundColor: 'rgba(22, 101, 52, 0.88)',
                         borderColor: 'rgb(20, 83, 45)',
                         borderWidth: 1,
-                        borderRadius: 4,
-                        maxBarThickness: 20
+                        borderRadius: 5,
+                        maxBarThickness: 36,
+                        categoryPercentage: 0.72,
+                        barPercentage: 0.88
                     },
                     {
                         label: 'Campus Avg',
                         data: campusScores,
-                        backgroundColor: 'rgba(148, 163, 184, 0.75)',
+                        backgroundColor: 'rgba(148, 163, 184, 0.80)',
                         borderColor: 'rgb(100, 116, 139)',
                         borderWidth: 1,
-                        borderRadius: 4,
-                        maxBarThickness: 20
+                        borderRadius: 5,
+                        maxBarThickness: 36,
+                        categoryPercentage: 0.72,
+                        barPercentage: 0.88
                     }
                 ]
             },
