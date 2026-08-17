@@ -40,18 +40,41 @@ class AdminController extends Controller
             ->latest()
             ->get();
 
-        // Average rating per stall
+        // Average rating per stall (Ranked by overall composite score)
         $results = DB::table('stall_evaluations')
             ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
             ->select(
+                'stalls.id as stall_id',
                 'stalls.name',
+                DB::raw('COUNT(stall_evaluations.id) as eval_count'),
                 DB::raw('AVG(cleanliness) as cleanliness'),
                 DB::raw('AVG(service) as service'),
                 DB::raw('AVG(taste) as taste'),
-                DB::raw('AVG(price) as price')
+                DB::raw('AVG(price) as price'),
+                DB::raw('(AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4 as overall_score')
             )
-            ->groupBy('stalls.name')
+            ->groupBy('stalls.id', 'stalls.name')
+            ->orderByDesc('overall_score')
             ->get();
+
+        // Top Ranked Stall (DSS Benchmark Winner)
+        $topStall = $results->first() ?? null;
+
+        // Campus-Wide Aggregate Criteria Health
+        $campusHealth = DB::table('stall_evaluations')
+            ->selectRaw('
+                AVG(cleanliness) as avg_cleanliness,
+                AVG(service) as avg_service,
+                AVG(taste) as avg_taste,
+                AVG(price) as avg_price,
+                (AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4 as avg_overall
+            ')
+            ->first();
+
+        // Stalls Needing Attention (< 3.0 in any criterion or overall)
+        $attentionStalls = $results->filter(function($stall) {
+            return (float)$stall->overall_score < 3.0 || (float)$stall->cleanliness < 3.0 || (float)$stall->service < 3.0;
+        })->values();
 
         // Daily evaluation trend (last 30 days)
         $evalTrend = DB::table('stall_evaluations')
@@ -82,7 +105,16 @@ class AdminController extends Controller
         $recentEvaluations = DB::table('stall_evaluations')
             ->join('users', 'users.id', '=', 'stall_evaluations.student_id')
             ->join('stalls', 'stalls.id', '=', 'stall_evaluations.stall_id')
-            ->select('stall_evaluations.*', 'users.name as student_name', 'stalls.name as stall_name')
+            ->select(
+                'stall_evaluations.id',
+                'stall_evaluations.cleanliness',
+                'stall_evaluations.service',
+                'stall_evaluations.taste',
+                'stall_evaluations.price',
+                'stall_evaluations.created_at',
+                'users.name as student_name',
+                'stalls.name as stall_name'
+            )
             ->orderBy('stall_evaluations.created_at', 'desc')
             ->limit(5)
             ->get();
@@ -94,6 +126,9 @@ class AdminController extends Controller
             'stalls',
             'evaluations',
             'results',
+            'topStall',
+            'campusHealth',
+            'attentionStalls',
             'trendDates',
             'trendCounts',
             'pieChartData',

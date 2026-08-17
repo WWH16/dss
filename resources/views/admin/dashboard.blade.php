@@ -3,42 +3,221 @@
 @section('head')
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
+<style>
+    @media print {
+        .site-sidebar, .site-nav, .mobile-toggle, .no-print, header { display: none !important; }
+        main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
+        .print-break-inside-avoid { break-inside: avoid; }
+        body { background: #fff !important; color: #000 !important; font-size: 12pt; }
+        .shadow-sm, .shadow-md, .shadow-2xs { box-shadow: none !important; }
+        .border { border-color: #cbd5e1 !important; }
+    }
+</style>
 @endsection
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-7">
+<div class="max-w-6xl mx-auto space-y-6">
 
-    {{-- ── 1. Page Header ─────────────────────────────────────────────────── --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+    {{-- ── 1. Page Header with Quick Actions ────────────────────────────── --}}
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200/70">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">Overview</h1>
-            <p class="text-neutral-500 text-sm mt-0.5">Welcome back, <span class="font-semibold text-brand-700">{{ Auth::user()->name }}</span></p>
+            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2">
+                <span>Overview</span>
+            </h1>
+            <p class="text-neutral-500 text-xs sm:text-sm mt-0.5">
+                Decision Support System • Campus Dining Performance & Evaluation Analytics
+            </p>
+        </div>
+
+        {{-- Action Button Group --}}
+        <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 no-print">
+            <button type="button" onclick="window.print()" class="btn btn-secondary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50 cursor-pointer">
+                <ion-icon name="print-outline" class="text-sm text-neutral-600"></ion-icon>
+                Print Report
+            </button>
+            <a href="{{ route('admin.stalls') }}" class="btn btn-primary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 shadow-2xs">
+                <ion-icon name="add-circle-outline" class="text-sm"></ion-icon>
+                Manage Stalls
+            </a>
         </div>
     </div>
 
     @if(session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200/80 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-sm">
+        <div class="p-4 bg-emerald-50 border border-emerald-200/80 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-2xs">
             <ion-icon name="checkmark-circle" class="text-lg text-emerald-600"></ion-icon>
             {{ session('success') }}
         </div>
     @endif
 
-    {{-- ── 2. Minimalist Stat Cards ───────────────────────────────────────── --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
-        @foreach([
-            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',     'desc' => 'Enrolled evaluators', 'route' => route('admin.students')],
-            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active food vendors', 'route' => route('admin.stalls')],
-            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'create-outline',     'desc' => 'Feedback submitted',  'route' => route('admin.evaluations')],
-        ] as $stat)
-            <a href="{{ $stat['route'] }}" class="group bg-white rounded-xl border border-neutral-200/70 p-6 shadow-sm hover:border-brand-300 hover:shadow-md transition-all flex flex-col justify-between">
+    {{-- ── 2. Diagnostic Warning (Only if any stall is below 3.0★) ─────── --}}
+    @if(isset($attentionStalls) && $attentionStalls->isNotEmpty())
+        <div class="p-4 bg-amber-50/90 border border-amber-200 rounded-xl text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0">
+                    <ion-icon name="warning-outline" class="text-lg"></ion-icon>
+                </div>
                 <div>
-                    <div class="flex items-center justify-between mb-4">
-                        <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider group-hover:text-brand-800 transition-colors">{{ $stat['label'] }}</span>
-                        <div class="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700 group-hover:bg-brand-600 group-hover:text-white transition-all">
-                            <ion-icon name="{{ $stat['icon'] }}" class="text-xl"></ion-icon>
+                    <h4 class="text-xs font-bold text-amber-950">Attention Required on {{ $attentionStalls->count() }} {{ Str::plural('Stall', $attentionStalls->count()) }}</h4>
+                    <p class="text-[11px] text-amber-800 mt-0.5">
+                        The following stall(s) have scored below the satisfactory 3.0★ threshold:
+                        <strong>{{ $attentionStalls->pluck('name')->join(', ') }}</strong>.
+                    </p>
+                </div>
+            </div>
+            <a href="{{ route('admin.evaluations') }}" class="btn text-[11px] font-bold px-3 py-1.5 bg-amber-200/80 hover:bg-amber-300/80 text-amber-900 border border-amber-300 rounded-md self-start sm:self-auto shrink-0">
+                Review Evaluations
+            </a>
+        </div>
+    @endif
+
+    @if($results->isNotEmpty())
+        {{-- ── 3. DSS Benchmark Winner & Campus Health Index ──────────────── --}}
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+            
+            {{-- Top Ranked Stall Card (DSS Decision Winner) --}}
+            <div class="lg:col-span-1 bg-gradient-to-br from-brand-900 to-brand-950 text-white rounded-xl p-5 sm:p-6 shadow-sm border border-brand-950 flex flex-col justify-between relative overflow-hidden">
+                <div class="absolute -right-6 -bottom-6 text-white/5 pointer-events-none">
+                    <ion-icon name="trophy" class="text-9xl"></ion-icon>
+                </div>
+
+                <div>
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <span class="inline-flex items-center gap-1 bg-amber-400/20 text-amber-300 border border-amber-400/40 text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full tracking-wider">
+                            <ion-icon name="trophy" class="text-xs"></ion-icon>
+                            #1 DSS Benchmark Stall
+                        </span>
+                        <span class="text-[11px] text-brand-200 font-medium">
+                            {{ $topStall ? $topStall->eval_count : 0 }} {{ Str::plural('eval', $topStall ? $topStall->eval_count : 0) }}
+                        </span>
+                    </div>
+
+                    <h3 class="text-xl font-extrabold text-white tracking-tight leading-tight">
+                        {{ $topStall ? $topStall->name : 'No evaluations yet' }}
+                    </h3>
+
+                    @if($topStall)
+                        <div class="flex items-baseline gap-2 mt-2">
+                            <span class="text-3xl font-black text-white tabular-nums tracking-tight">
+                                {{ number_format($topStall->overall_score, 2) }}
+                            </span>
+                            <span class="text-amber-400 text-lg">★</span>
+                            <span class="text-xs text-brand-200 font-medium">/ 5.00 Composite Score</span>
+                        </div>
+                    @endif
+                </div>
+
+                @if($topStall)
+                    <div class="mt-4 pt-3 border-t border-brand-800/80 grid grid-cols-2 gap-2 text-xs">
+                        <div class="bg-brand-800/60 p-2 rounded-md border border-brand-700/50">
+                            <span class="block text-[9px] uppercase font-bold text-brand-300">Cleanliness</span>
+                            <span class="font-bold text-white tabular-nums">{{ number_format($topStall->cleanliness, 2) }}★</span>
+                        </div>
+                        <div class="bg-brand-800/60 p-2 rounded-md border border-brand-700/50">
+                            <span class="block text-[9px] uppercase font-bold text-brand-300">Taste</span>
+                            <span class="font-bold text-white tabular-nums">{{ number_format($topStall->taste, 2) }}★</span>
                         </div>
                     </div>
-                    <div class="text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
+                @endif
+            </div>
+
+            {{-- Campus-Wide Criteria Health Barometer --}}
+            <div class="lg:col-span-2 bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+                <div>
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-4 pb-3 border-b border-neutral-100">
+                        <div>
+                            <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
+                                <ion-icon name="pulse-outline" class="text-brand-700 text-lg"></ion-icon>
+                                Campus Dining Health Index
+                            </h2>
+                            <p class="text-xs text-neutral-500 mt-0.5">Aggregate performance rating across all campus food vendors</p>
+                        </div>
+                        @if($campusHealth)
+                            <div class="inline-flex items-center gap-1 bg-brand-50 border border-brand-200 text-brand-900 font-extrabold text-xs px-2.5 py-1 rounded-md self-start sm:self-auto tabular-nums">
+                                Campus Avg: {{ number_format($campusHealth->avg_overall, 2) }}★
+                            </div>
+                        @endif
+                    </div>
+
+                    @if($campusHealth)
+                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                            {{-- Cleanliness --}}
+                            <div class="p-3 bg-neutral-50 border border-neutral-200/80 rounded-lg space-y-1">
+                                <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Cleanliness</span>
+                                <div class="flex items-baseline justify-between">
+                                    <span class="text-lg font-bold tabular-nums {{ $campusHealth->avg_cleanliness >= 4 ? 'text-emerald-700' : ($campusHealth->avg_cleanliness >= 3 ? 'text-amber-700' : 'text-rose-600') }}">
+                                        {{ number_format($campusHealth->avg_cleanliness, 2) }}
+                                    </span>
+                                    <span class="text-[10px] font-bold text-neutral-400">/ 5.0</span>
+                                </div>
+                                <div class="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
+                                    <div class="h-full {{ $campusHealth->avg_cleanliness >= 4 ? 'bg-emerald-500' : ($campusHealth->avg_cleanliness >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ ($campusHealth->avg_cleanliness / 5) * 100 }}%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Service --}}
+                            <div class="p-3 bg-neutral-50 border border-neutral-200/80 rounded-lg space-y-1">
+                                <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Service</span>
+                                <div class="flex items-baseline justify-between">
+                                    <span class="text-lg font-bold tabular-nums {{ $campusHealth->avg_service >= 4 ? 'text-emerald-700' : ($campusHealth->avg_service >= 3 ? 'text-amber-700' : 'text-rose-600') }}">
+                                        {{ number_format($campusHealth->avg_service, 2) }}
+                                    </span>
+                                    <span class="text-[10px] font-bold text-neutral-400">/ 5.0</span>
+                                </div>
+                                <div class="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
+                                    <div class="h-full {{ $campusHealth->avg_service >= 4 ? 'bg-emerald-500' : ($campusHealth->avg_service >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ ($campusHealth->avg_service / 5) * 100 }}%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Taste --}}
+                            <div class="p-3 bg-neutral-50 border border-neutral-200/80 rounded-lg space-y-1">
+                                <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Food Taste</span>
+                                <div class="flex items-baseline justify-between">
+                                    <span class="text-lg font-bold tabular-nums {{ $campusHealth->avg_taste >= 4 ? 'text-emerald-700' : ($campusHealth->avg_taste >= 3 ? 'text-amber-700' : 'text-rose-600') }}">
+                                        {{ number_format($campusHealth->avg_taste, 2) }}
+                                    </span>
+                                    <span class="text-[10px] font-bold text-neutral-400">/ 5.0</span>
+                                </div>
+                                <div class="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
+                                    <div class="h-full {{ $campusHealth->avg_taste >= 4 ? 'bg-emerald-500' : ($campusHealth->avg_taste >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ ($campusHealth->avg_taste / 5) * 100 }}%"></div>
+                                </div>
+                            </div>
+
+                            {{-- Price --}}
+                            <div class="p-3 bg-neutral-50 border border-neutral-200/80 rounded-lg space-y-1">
+                                <span class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider block">Affordability</span>
+                                <div class="flex items-baseline justify-between">
+                                    <span class="text-lg font-bold tabular-nums {{ $campusHealth->avg_price >= 4 ? 'text-emerald-700' : ($campusHealth->avg_price >= 3 ? 'text-amber-700' : 'text-rose-600') }}">
+                                        {{ number_format($campusHealth->avg_price, 2) }}
+                                    </span>
+                                    <span class="text-[10px] font-bold text-neutral-400">/ 5.0</span>
+                                </div>
+                                <div class="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
+                                    <div class="h-full {{ $campusHealth->avg_price >= 4 ? 'bg-emerald-500' : ($campusHealth->avg_price >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ ($campusHealth->avg_price / 5) * 100 }}%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+            </div>
+        </div>
+    @endif
+
+    {{-- ── 4. Minimalist Stat Cards ───────────────────────────────────────── --}}
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+        @foreach([
+            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',     'desc' => 'Registered evaluators', 'route' => route('admin.students')],
+            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active vendors',       'route' => route('admin.stalls')],
+            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'create-outline',     'desc' => 'Submissions logged',    'route' => route('admin.evaluations')],
+        ] as $stat)
+            <a href="{{ $stat['route'] }}" class="group bg-white rounded-xl border border-neutral-200/70 p-5 shadow-sm hover:border-brand-300 hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider group-hover:text-brand-800 transition-colors">{{ $stat['label'] }}</span>
+                        <div class="w-9 h-9 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700 group-hover:bg-brand-600 group-hover:text-white transition-all">
+                            <ion-icon name="{{ $stat['icon'] }}" class="text-lg"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
                         {{ $stat['value'] }}
                     </div>
                 </div>
@@ -53,23 +232,23 @@
     </div>
 
     @if($results->isNotEmpty())
-        {{-- ── 3. Primary Chart Card: Evaluation Activity ──────────────────── --}}
-        <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-6 pb-4 border-b border-neutral-100">
+        {{-- ── 5. Primary Chart Card: Evaluation Activity ──────────────────── --}}
+        <div class="bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm print-break-inside-avoid">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-5 pb-3 border-b border-neutral-100">
                 <div>
-                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Activity</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">30-day evaluation timeline across canteen stalls</p>
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Activity Timeline</h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">30-day evaluation volume submitted by students</p>
                 </div>
             </div>
-            <div class="relative w-full" style="height: 250px;">
+            <div class="relative w-full" style="height: 240px;">
                 <canvas id="evalTrendChart" role="img" aria-label="Line chart showing the number of evaluations over the last 30 days">
-                    <p>Line chart showing the number of evaluations over the last 30 days. Please use the data tables below for accessible data.</p>
+                    <p>Line chart showing the number of evaluations over the last 30 days.</p>
                 </canvas>
             </div>
         </div>
 
-        {{-- ── 4. Secondary Chart Cards: Top Stalls & Share ─────────────────── --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-7" style="content-visibility: auto; contain-intrinsic-size: auto 320px;">
+        {{-- ── 6. Secondary Chart Cards: Top Stalls & Share ─────────────────── --}}
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 print-break-inside-avoid">
             @php
                 $allStallResults = collect($results)->map(function($stall) {
                     $obj = clone $stall;
@@ -84,9 +263,9 @@
             @endphp
 
             {{-- Stall Performance Breakdown Card --}}
-            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm flex flex-col justify-between">
+            <div class="bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-4 border-b border-neutral-100">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-neutral-100">
                         <div>
                             <h2 id="barChartTitle" class="text-base font-bold text-neutral-900 tracking-tight">Stall Performance Breakdown</h2>
                             <p id="barChartSubtitle" class="text-xs text-neutral-500 mt-0.5">Top {{ min(5, $stallCountTotal) }} stalls across 4 evaluation criteria</p>
@@ -94,18 +273,18 @@
 
                         {{-- Interactive Filter Switcher for N-stalls --}}
                         @if($stallCountTotal > 5)
-                            <div class="inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-100/80 p-0.5 text-xs font-semibold self-start sm:self-auto shrink-0" role="tablist" aria-label="Stall chart filter">
-                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all bg-white text-neutral-900 shadow-2xs font-bold" data-range="top5">Top 5</button>
+                            <div class="inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-100/80 p-0.5 text-xs font-semibold self-start sm:self-auto shrink-0 no-print" role="tablist" aria-label="Stall chart filter">
+                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all bg-white text-neutral-900 shadow-2xs font-bold cursor-pointer" data-range="top5">Top 5</button>
                                 @if($stallCountTotal > 5)
-                                    <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium" data-range="top10">Top {{ min(10, $stallCountTotal) }}</button>
+                                    <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium cursor-pointer" data-range="top10">Top {{ min(10, $stallCountTotal) }}</button>
                                 @endif
-                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium" data-range="lowest5">Lowest 5</button>
-                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium" data-range="all">All ({{ $stallCountTotal }})</button>
+                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium cursor-pointer" data-range="lowest5">Lowest 5</button>
+                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium cursor-pointer" data-range="all">All ({{ $stallCountTotal }})</button>
                             </div>
                         @endif
                     </div>
 
-                    <div id="barChartWrapper" class="relative w-full overflow-x-auto" style="height: 250px;">
+                    <div id="barChartWrapper" class="relative w-full overflow-x-auto" style="height: 240px;">
                         <canvas id="stallScoresChart" role="img" aria-label="Bar chart showing average scores per stall for Cleanliness, Service, Taste, and Price">
                             <p>Bar chart showing the average scores per stall for Cleanliness, Service, Taste, and Price.</p>
                         </canvas>
@@ -114,75 +293,161 @@
             </div>
 
             {{-- Evaluation Share Donut Card --}}
-            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 sm:p-7 shadow-sm flex flex-col justify-between">
+            <div class="bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
                 <div>
-                    <div class="flex items-center justify-between gap-3 mb-5 pb-4 border-b border-neutral-100">
+                    <div class="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-neutral-100">
                         <div>
                             <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Share</h2>
-                            <p class="text-xs text-neutral-500 mt-0.5">Distribution of student submissions per stall</p>
+                            <p class="text-xs text-neutral-500 mt-0.5">Distribution of student submissions per vendor</p>
                         </div>
-                        <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-800 border border-brand-200/70 text-[11px] font-bold px-2.5 py-1 rounded-full tabular-nums shrink-0">
+                        <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-800 border border-brand-200/70 text-[11px] font-bold px-2.5 py-1 rounded-md tabular-nums shrink-0">
                             {{ $evaluationCount }} {{ Str::plural('Submission', $evaluationCount) }}
                         </span>
                     </div>
 
-                    <div class="relative w-full flex items-center justify-center" style="height: 250px;">
+                    <div class="relative w-full flex items-center justify-center" style="height: 240px;">
                         <canvas id="evalPieChart" role="img" aria-label="Donut chart showing the distribution of evaluations per stall">
-                            <p>Donut chart showing the distribution of evaluations per stall. Please use the data tables below for accessible data.</p>
+                            <p>Donut chart showing the distribution of evaluations per stall.</p>
                         </canvas>
                     </div>
                 </div>
             </div>
         </div>
 
-        {{-- ── 5. Average Stall Scores Card ────────────────────────────────── --}}
-        <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: auto 320px;">
-            <div class="p-6 pb-4">
-                <h2 class="text-base font-bold text-neutral-900 tracking-tight">Average Stall Scores</h2>
-                <p class="text-xs text-neutral-500 mt-0.5">Aggregate performance ratings per category</p>
+        {{-- ── 7. Ranked Stall Leaderboard Table ───────────────────────────── --}}
+        <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden print-break-inside-avoid">
+            <div class="p-5 sm:p-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-100">
+                <div>
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-2">
+                        <span>Ranked Stall Leaderboard</span>
+                        <span class="text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded-md">DSS Rankings</span>
+                    </h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">Stalls sorted by overall composite score across all criteria</p>
+                </div>
+                <a href="{{ route('admin.stalls') }}" class="text-xs text-brand-700 hover:text-brand-800 font-bold inline-flex items-center gap-1 transition-colors no-print">
+                    Manage All Stalls <ion-icon name="arrow-forward-outline" class="text-xs"></ion-icon>
+                </a>
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[500px] hidden md:table">
+                <table class="w-full text-left border-collapse min-w-[650px] hidden md:table">
                     <thead>
-                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/70 border-y border-neutral-100">
-                            <th class="py-3 px-6 font-semibold">Food Stall</th>
-                            <th class="py-3 px-4 text-center font-semibold">Cleanliness</th>
-                            <th class="py-3 px-4 text-center font-semibold">Service</th>
-                            <th class="py-3 px-4 text-center font-semibold">Taste</th>
-                            <th class="py-3 px-4 text-center font-semibold">Price</th>
+                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/80 border-b border-neutral-200/70">
+                            <th class="py-3.5 px-5 font-semibold text-center w-16">Rank</th>
+                            <th class="py-3.5 px-5 font-semibold">Food Stall</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Cleanliness</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Service</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Taste</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Price</th>
+                            <th class="py-3.5 px-5 text-center font-semibold">Overall Composite</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-100">
-                        @foreach($results as $result)
-                            <tr class="text-sm hover:bg-neutral-50/60 transition-colors">
-                                <td class="py-3.5 px-6 font-semibold text-neutral-900">{{ $result->name }}</td>
-                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->cleanliness >= 4 ? 'text-brand-700' : ($result->cleanliness >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->cleanliness, 2) }}</td>
-                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->service >= 4 ? 'text-brand-700' : ($result->service >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->service, 2) }}</td>
-                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->taste >= 4 ? 'text-brand-700' : ($result->taste >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->taste, 2) }}</td>
-                                <td class="py-3.5 px-4 text-center font-semibold tabular-nums {{ $result->price >= 4 ? 'text-brand-700' : ($result->price >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($result->price, 2) }}</td>
+                    <tbody class="divide-y divide-neutral-100 text-sm">
+                        @foreach($results as $index => $result)
+                            @php
+                                $rank = $index + 1;
+                                $composite = (float)$result->overall_score;
+                            @endphp
+                            <tr class="hover:bg-neutral-50/60 transition-colors {{ $rank === 1 ? 'bg-brand-50/20 font-medium' : '' }}">
+                                {{-- Rank Chip --}}
+                                <td class="py-3.5 px-5 text-center">
+                                    @if($rank === 1)
+                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-xs shadow-2xs">
+                                            👑 #1
+                                        </span>
+                                    @elseif($rank === 2)
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-neutral-200 text-neutral-800 font-bold text-xs">
+                                            #2
+                                        </span>
+                                    @elseif($rank === 3)
+                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs">
+                                            #3
+                                        </span>
+                                    @else
+                                        <span class="text-xs font-mono font-semibold text-neutral-400 tabular-nums">
+                                            #{{ $rank }}
+                                        </span>
+                                    @endif
+                                </td>
+
+                                {{-- Stall Name & Submissions --}}
+                                <td class="py-3.5 px-5">
+                                    <div class="flex items-center gap-2">
+                                        <span class="font-bold text-neutral-900">{{ $result->name }}</span>
+                                        <span class="text-[10px] font-semibold text-neutral-400 font-mono">({{ $result->eval_count }} {{ Str::plural('eval', $result->eval_count) }})</span>
+                                    </div>
+                                </td>
+
+                                {{-- Criteria Scores --}}
+                                <td class="py-3.5 px-3 text-center">
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->cleanliness >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->cleanliness <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
+                                        {{ number_format($result->cleanliness, 2) }}★
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->service >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->service <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
+                                        {{ number_format($result->service, 2) }}★
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->taste >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->taste <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
+                                        {{ number_format($result->taste, 2) }}★
+                                    </span>
+                                </td>
+                                <td class="py-3.5 px-3 text-center">
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->price >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->price <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
+                                        {{ number_format($result->price, 2) }}★
+                                    </span>
+                                </td>
+
+                                {{-- Overall Composite Score --}}
+                                <td class="py-3.5 px-5 text-center">
+                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-black {{ $composite >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200/90' : ($composite >= 3 ? 'bg-neutral-100 text-neutral-800' : 'bg-rose-50 text-rose-700 border border-rose-200') }} tabular-nums">
+                                        {{ number_format($composite, 2) }} <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
+                                    </span>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
 
                 <!-- Mobile View -->
-                <div class="md:hidden divide-y divide-neutral-100 border-t border-neutral-100">
-                    @foreach($results as $result)
-                        <div class="p-5 flex flex-col gap-2.5">
-                            <h3 class="font-semibold text-neutral-900 text-sm">{{ $result->name }}</h3>
-                            <div class="grid grid-cols-4 gap-2 text-center">
-                                @foreach([
-                                    ['label' => 'Clean', 'val' => $result->cleanliness],
-                                    ['label' => 'Serv',  'val' => $result->service],
-                                    ['label' => 'Taste', 'val' => $result->taste],
-                                    ['label' => 'Price', 'val' => $result->price],
-                                ] as $m)
-                                <div class="bg-neutral-50 rounded-lg p-2 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase tracking-widest mb-0.5">{{ $m['label'] }}</span>
-                                    <span class="block text-xs font-bold {{ $m['val'] >= 4 ? 'text-brand-700' : ($m['val'] >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($m['val'], 1) }}</span>
+                <div class="md:hidden divide-y divide-neutral-100">
+                    @foreach($results as $index => $result)
+                        @php
+                            $rank = $index + 1;
+                            $composite = (float)$result->overall_score;
+                        @endphp
+                        <div class="p-4 flex flex-col gap-2.5">
+                            <div class="flex items-center justify-between">
+                                <div class="flex items-center gap-2">
+                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-md {{ $rank === 1 ? 'bg-amber-100 text-amber-900 font-extrabold' : 'bg-neutral-100 text-neutral-700 font-bold' }} text-xs">
+                                        #{{ $rank }}
+                                    </span>
+                                    <h3 class="font-bold text-neutral-900 text-sm">{{ $result->name }}</h3>
                                 </div>
-                                @endforeach
+                                <span class="inline-flex items-center gap-1 bg-brand-50 px-2 py-0.5 rounded-md text-xs font-black text-brand-900 border border-brand-200">
+                                    {{ number_format($composite, 2) }}★
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-4 gap-1.5 text-center text-xs">
+                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Clean</span>
+                                    <span class="font-bold text-neutral-900">{{ number_format($result->cleanliness, 1) }}★</span>
+                                </div>
+                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Serv</span>
+                                    <span class="font-bold text-neutral-900">{{ number_format($result->service, 1) }}★</span>
+                                </div>
+                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Taste</span>
+                                    <span class="font-bold text-neutral-900">{{ number_format($result->taste, 1) }}★</span>
+                                </div>
+                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
+                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Price</span>
+                                    <span class="font-bold text-neutral-900">{{ number_format($result->price, 1) }}★</span>
+                                </div>
                             </div>
                         </div>
                     @endforeach
@@ -190,47 +455,49 @@
             </div>
         </div>
 
-        {{-- ── 6. Recent Evaluations Card ──────────────────────────────────── --}}
+        {{-- ── 8. Recent Evaluations Card ──────────────────────────────────── --}}
         @if($recentEvaluations->isNotEmpty())
-        <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden" style="content-visibility: auto; contain-intrinsic-size: auto 340px;">
-            <div class="p-6 pb-4 flex items-center justify-between">
+        <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden print-break-inside-avoid">
+            <div class="p-5 sm:p-6 pb-4 flex items-center justify-between border-b border-neutral-100">
                 <div>
-                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Recent Evaluations</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Latest submitted feedback records from students</p>
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Recent Submissions</h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">Latest evaluations logged across campus</p>
                 </div>
-                <a href="{{ route('admin.evaluations') }}" class="text-xs text-brand-700 hover:text-brand-800 font-semibold inline-flex items-center gap-1 transition-colors">
-                    View All <ion-icon name="arrow-forward-outline" class="text-xs leading-none" aria-hidden="true"></ion-icon>
+                <a href="{{ route('admin.evaluations') }}" class="text-xs text-brand-700 hover:text-brand-800 font-bold inline-flex items-center gap-1 transition-colors no-print">
+                    View Ledger <ion-icon name="arrow-forward-outline" class="text-xs"></ion-icon>
                 </a>
             </div>
 
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse min-w-[640px] hidden md:table">
                     <thead>
-                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/70 border-y border-neutral-100">
-                            <th class="py-3 px-6 font-semibold">Student</th>
-                            <th class="py-3 px-4 font-semibold">Stall</th>
-                            <th class="py-3 px-3 text-center font-semibold">Clean</th>
-                            <th class="py-3 px-3 text-center font-semibold">Serv</th>
-                            <th class="py-3 px-3 text-center font-semibold">Taste</th>
-                            <th class="py-3 px-3 text-center font-semibold">Price</th>
-                            <th class="py-3 px-3 text-center font-semibold">Avg</th>
-                            <th class="py-3 px-6 text-right font-semibold">Date</th>
+                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/80 border-b border-neutral-200/70">
+                            <th class="py-3.5 px-5 font-semibold">Student</th>
+                            <th class="py-3.5 px-4 font-semibold">Stall</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Clean</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Serv</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Taste</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">Price</th>
+                            <th class="py-3.5 px-4 text-center font-semibold">Average</th>
+                            <th class="py-3.5 px-5 text-right font-semibold">Date</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y divide-neutral-100">
+                    <tbody class="divide-y divide-neutral-100 text-sm">
                         @foreach($recentEvaluations as $eval)
                             @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
-                            <tr class="text-sm hover:bg-neutral-50/60 transition-colors">
-                                <td class="py-3.5 px-6 font-semibold text-neutral-900 truncate max-w-[150px]" title="{{ $eval->student_name }}">{{ $eval->student_name }}</td>
-                                <td class="py-3.5 px-4 text-neutral-600 font-medium truncate max-w-[130px]" title="{{ $eval->stall_name }}">{{ $eval->stall_name }}</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->cleanliness, 1) }}</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->service, 1) }}</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->taste, 1) }}</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-500 tabular-nums text-xs">{{ number_format($eval->price, 1) }}</td>
-                                <td class="py-3.5 px-3 text-center">
-                                    <span class="font-bold tabular-nums text-xs {{ $avg >= 4 ? 'text-brand-700' : ($avg >= 3 ? 'text-amber-700' : 'text-red-600') }}">{{ number_format($avg, 1) }}</span>
+                            <tr class="hover:bg-neutral-50/60 transition-colors">
+                                <td class="py-3.5 px-5 font-bold text-neutral-900 truncate max-w-[150px]">{{ $eval->student_name }}</td>
+                                <td class="py-3.5 px-4 text-neutral-700 font-semibold truncate max-w-[130px]">{{ $eval->stall_name }}</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->cleanliness }}★</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->service }}★</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->taste }}★</td>
+                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->price }}★</td>
+                                <td class="py-3.5 px-4 text-center">
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-bold tabular-nums {{ $avg >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200' : 'bg-neutral-100 text-neutral-800' }}">
+                                        {{ number_format($avg, 1) }}★
+                                    </span>
                                 </td>
-                                <td class="py-3.5 px-6 text-right text-neutral-400 text-xs tabular-nums whitespace-nowrap">
+                                <td class="py-3.5 px-5 text-right text-neutral-400 text-xs tabular-nums whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans(null, true, true) }}
                                 </td>
                             </tr>
@@ -239,17 +506,17 @@
                 </table>
 
                 <!-- Mobile View -->
-                <div class="md:hidden divide-y divide-neutral-100 border-t border-neutral-100">
+                <div class="md:hidden divide-y divide-neutral-100">
                     @foreach($recentEvaluations as $eval)
                         @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
-                        <div class="p-5 flex items-start justify-between gap-3">
+                        <div class="p-4 flex items-start justify-between gap-3">
                             <div class="min-w-0">
-                                <h3 class="text-sm font-semibold text-neutral-900 leading-tight truncate">{{ $eval->student_name }}</h3>
-                                <p class="text-xs font-medium text-neutral-500 mt-0.5 truncate">{{ $eval->stall_name }}</p>
+                                <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">{{ $eval->student_name }}</h3>
+                                <p class="text-xs font-medium text-brand-700 mt-0.5 truncate">{{ $eval->stall_name }}</p>
                                 <p class="text-[10px] text-neutral-400 mt-0.5">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
                             </div>
-                            <div class="shrink-0 inline-flex items-center gap-1 bg-neutral-100/80 px-2.5 py-1 rounded-md text-xs font-bold text-neutral-900 border border-neutral-200/60">
-                                {{ number_format($avg, 1) }} <ion-icon name="star" class="text-amber-500 text-xs inline-block"></ion-icon>
+                            <div class="shrink-0 inline-flex items-center gap-1 bg-brand-50 px-2 py-1 rounded-md text-xs font-bold text-brand-900 border border-brand-200">
+                                {{ number_format($avg, 1) }}★
                             </div>
                         </div>
                     @endforeach
@@ -324,19 +591,11 @@ document.addEventListener('DOMContentLoaded', function() {
     var c4b = rootStyles.getPropertyValue('--chart-color-4-border').trim();
     var cLineBg = rootStyles.getPropertyValue('--chart-line-bg').trim();
 
-    var pieColors = [
-        rootStyles.getPropertyValue('--pie-color-1').trim() || c1,
-        rootStyles.getPropertyValue('--pie-color-2').trim() || c2,
-        rootStyles.getPropertyValue('--pie-color-3').trim() || c3,
-        rootStyles.getPropertyValue('--pie-color-4').trim() || c4
-    ];
-
 @if($results->isNotEmpty())
     // ── 1. Scalable Bar Chart with Dynamic N-Stall Range Filtering ─────────
     var rawStallData = @json($allStallResults);
     var stallScoresChart = null;
     var stallCtx = document.getElementById('stallScoresChart');
-    var barWrapper = document.getElementById('barChartWrapper');
     var barTitle = document.getElementById('barChartTitle');
     var barSubtitle = document.getElementById('barChartSubtitle');
 
@@ -420,7 +679,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             titleFont: { size: 12, weight: '700' },
                             bodyFont: { size: 11 },
                             padding: 10,
-                            cornerRadius: 8,
+                            cornerRadius: 6,
                             callbacks: {
                                 label: function(c) {
                                     return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(2) + ' / 5.00';
@@ -518,7 +777,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         titleFont: { size: 12, weight: '700' },
                         bodyFont: { size: 11 },
                         padding: 10,
-                        cornerRadius: 8,
+                        cornerRadius: 6,
                         callbacks: {
                             title: function(i) { return i[0].label; },
                             label: function(c) {
@@ -622,7 +881,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         titleFont: { size: 12, weight: '700' },
                         bodyFont: { size: 11 },
                         padding: 10,
-                        cornerRadius: 8,
+                        cornerRadius: 6,
                         callbacks: {
                             label: function(c) {
                                 var val = c.parsed;
@@ -639,5 +898,4 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 </script>
 @endsection
-
 @endsection
