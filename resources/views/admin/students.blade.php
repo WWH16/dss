@@ -445,69 +445,79 @@
     </div>
 </div>
 
-{{-- ── 5. Student Account Details Modal ──────────────────────────────── --}}
-<dialog id="details-modal" class="confirm-modal max-w-lg w-full rounded-2xl p-0 overflow-hidden shadow-2xl backdrop:bg-neutral-950/40">
-    <div class="bg-neutral-900 text-white p-5 flex items-center justify-between">
+{{-- ── 5. Student Account Details Modal (Sharp Institutional Layout) ──── --}}
+<dialog id="details-modal" class="confirm-modal modal-sharp max-w-lg w-full rounded-none p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
+    {{-- Sharp Header --}}
+    <div class="bg-brand-900 text-white px-5 py-4 flex items-center justify-between border-b border-brand-950">
         <div class="flex items-center gap-3">
-            <div id="modal-avatar" class="w-10 h-10 rounded-xl bg-brand-600 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-sm">
+            <div id="modal-avatar" class="w-10 h-10 rounded-[2px] bg-brand-800 border border-brand-700/80 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-xs">
             </div>
             <div>
-                <h3 id="details-name" class="text-base font-bold text-white leading-tight"></h3>
-                <p id="details-email" class="text-xs text-neutral-300 font-mono mt-0.5"></p>
+                <h3 id="details-name" class="text-sm font-bold text-white leading-tight tracking-tight"></h3>
+                <p id="details-email" class="text-xs text-brand-200 font-mono mt-0.5"></p>
             </div>
         </div>
-        <button type="button" class="js-close-details-modal text-neutral-400 hover:text-white p-1 transition-colors" aria-label="Close modal">
-            <ion-icon name="close-outline" class="text-2xl"></ion-icon>
+        <button type="button" class="js-close-details-modal text-white/70 hover:text-white hover:bg-brand-800 p-1.5 rounded-[2px] transition-colors cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
-    <div class="p-6 space-y-5 bg-white">
+    {{-- Sharp Body --}}
+    <div class="p-5 sm:p-6 space-y-4 bg-white text-xs">
+        {{-- Section 1: Academic & Identity Profile --}}
         <div>
-            <h4 class="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2.5">Academic & Identity Information</h4>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 bg-neutral-50 p-4 rounded-xl border border-neutral-100 text-xs">
-                <div>
-                    <span class="block text-neutral-400 font-bold uppercase text-[10px]">Student Number</span>
-                    <span id="details-student-number" class="font-mono font-bold text-neutral-900 text-sm"></span>
+            <span class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                Academic & Identity Profile
+            </span>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-neutral-200 border border-neutral-200 overflow-hidden">
+                <div class="bg-white p-3 space-y-0.5">
+                    <span class="block text-neutral-400 font-bold uppercase text-[9px] tracking-wider">Student ID Number</span>
+                    <span id="details-student-number" class="font-mono font-bold text-neutral-900 text-xs"></span>
                 </div>
-                <div>
-                    <span class="block text-neutral-400 font-bold uppercase text-[10px]">Department</span>
-                    <span id="details-dept-name" class="font-bold text-neutral-900 text-sm"></span>
+                <div class="bg-white p-3 space-y-0.5">
+                    <span class="block text-neutral-400 font-bold uppercase text-[9px] tracking-wider">Department / College</span>
+                    <span id="details-dept-name" class="font-bold text-neutral-900 text-xs"></span>
                 </div>
-                <div>
-                    <span class="block text-neutral-400 font-bold uppercase text-[10px]">Course / Program</span>
-                    <span id="details-course" class="font-bold text-neutral-900 text-sm"></span>
+                <div class="bg-white p-3 space-y-0.5">
+                    <span class="block text-neutral-400 font-bold uppercase text-[9px] tracking-wider">Course / Degree</span>
+                    <span id="details-course" class="font-semibold text-neutral-900 text-xs"></span>
                 </div>
-                <div>
-                    <span class="block text-neutral-400 font-bold uppercase text-[10px]">Year Level</span>
-                    <span id="details-year" class="font-bold text-neutral-900 text-sm"></span>
+                <div class="bg-white p-3 space-y-0.5">
+                    <span class="block text-neutral-400 font-bold uppercase text-[9px] tracking-wider">Year Level</span>
+                    <span id="details-year" class="font-semibold text-neutral-900 text-xs"></span>
                 </div>
             </div>
         </div>
 
+        {{-- Section 2: Participation & Evaluation Record --}}
         <div>
-            <h4 class="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2.5">Evaluator Activity & History</h4>
-            <div class="bg-neutral-50 p-4 rounded-xl border border-neutral-100 flex items-center justify-between">
+            <span class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+                Participation & Evaluation Record
+            </span>
+            <div class="p-3.5 bg-neutral-50/80 border border-neutral-200 flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center">
-                        <ion-icon name="receipt-outline" class="text-xl"></ion-icon>
+                    <div class="w-8 h-8 rounded-[2px] bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+                        <ion-icon name="receipt-outline" class="text-base"></ion-icon>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-neutral-900">Total Evaluations Logged</p>
-                        <p class="text-[11px] text-neutral-500" id="details-last-active"></p>
+                        <p class="text-xs font-bold text-neutral-900">Total Evaluations Submitted</p>
+                        <p class="text-[11px] text-neutral-500 font-medium" id="details-last-submitted"></p>
                     </div>
                 </div>
-                <span id="details-eval-count" class="text-base font-extrabold text-brand-800 bg-brand-50 px-3 py-1 rounded-full border border-brand-200 tabular-nums"></span>
+                <span id="details-eval-count" class="text-xs font-bold font-mono text-brand-900 bg-brand-50 px-2.5 py-1 rounded-[2px] border border-brand-200 tabular-nums"></span>
             </div>
         </div>
 
-        <div class="text-[11px] text-neutral-400 flex items-center justify-between pt-2 border-t border-neutral-100">
-            <span>Account Type: <strong class="text-neutral-700">Student Client</strong></span>
-            <span>Registered: <strong id="details-created-at" class="text-neutral-700"></strong></span>
+        {{-- Section 3: Account Metadata --}}
+        <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-400">
+            <span>Account Role: <strong class="text-neutral-700 font-semibold">Student Evaluator</strong></span>
+            <span>Registered: <strong id="details-created-at" class="text-neutral-700 font-semibold"></strong></span>
         </div>
     </div>
 
-    <div class="flex items-center justify-end p-4 bg-neutral-50 border-t border-neutral-100">
-        <button type="button" class="btn btn-primary btn-sm px-4 py-2 font-bold js-close-details-modal rounded-lg">
+    {{-- Sharp Action Footer --}}
+    <div class="flex items-center justify-end px-5 py-3.5 bg-neutral-50 border-t border-neutral-200">
+        <button type="button" class="btn btn-primary text-xs px-4 py-2 font-bold rounded-[2px] js-close-details-modal cursor-pointer">
             Done
         </button>
     </div>
@@ -547,9 +557,9 @@ function openDetailsModal(student, dept) {
 
     if (student.last_evaluation_at) {
         var d = new Date(student.last_evaluation_at);
-        document.getElementById('details-last-active').textContent = 'Last active: ' + d.toLocaleDateString();
+        document.getElementById('details-last-submitted').textContent = 'Last submitted: ' + d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' });
     } else {
-        document.getElementById('details-last-active').textContent = 'No evaluation submissions yet';
+        document.getElementById('details-last-submitted').textContent = 'No submissions yet';
     }
 
     if (student.created_at) {

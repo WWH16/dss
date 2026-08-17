@@ -14,6 +14,15 @@ dialog.confirm-modal {
     margin: auto;
 }
 
+dialog.modal-sharp,
+dialog.confirm-modal.modal-sharp {
+    border-radius: 0 !important;
+    padding: 0 !important;
+    border: none !important;
+    outline: none !important;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.45) !important;
+}
+
 dialog.confirm-modal::backdrop {
     background: oklch(0.14 0.01 255 / 0.6);
     backdrop-filter: blur(8px);
