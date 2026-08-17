@@ -88,7 +88,7 @@
                 </div>
                 @if($campusCriteria)
                     <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
-                        Campus avg: <strong class="text-neutral-700">{{ number_format($campusCriteria->overall, 2) }}★</strong>
+                        Campus avg: <strong class="text-neutral-700 font-bold">{{ number_format($campusCriteria->overall, 2) }}★</strong>
                     </div>
                 @endif
             </div>
