@@ -77,11 +77,11 @@
                     </dd>
                 </div>
 
-                {{-- Email Address --}}
+                {{-- Email --}}
                 <div class="group">
                     <dt class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1 flex items-center gap-1.5">
                         <ion-icon name="mail-outline" class="text-neutral-400"></ion-icon>
-                        University Email Address
+                        Email
                     </dt>
                     <dd class="text-neutral-900 font-semibold text-sm sm:text-base break-all">
                         {{ $profile->email }}
