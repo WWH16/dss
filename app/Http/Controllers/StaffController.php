@@ -109,23 +109,81 @@ class StaffController extends Controller
             ')
             ->first();
 
-        // 6. 30-day evaluation timeline trend for this stall
-        $evalTrend = DB::table('stall_evaluations')
+        // 6. Evaluation Activity Timeline trend with Month & Year filtering
+        $availableYears = DB::table('stall_evaluations')
             ->where('stall_id', $stall->id)
-            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
-            ->where('created_at', '>=', now()->subDays(29)->startOfDay())
-            ->groupByRaw('DATE(created_at)')
-            ->orderBy('date')
-            ->get()
-            ->keyBy('date');
+            ->selectRaw('DISTINCT YEAR(created_at) as year')
+            ->orderByDesc('year')
+            ->pluck('year')
+            ->toArray();
+        if (empty($availableYears)) {
+            $availableYears = [(int)date('Y')];
+        }
+        if (!in_array((int)date('Y'), $availableYears)) {
+            array_unshift($availableYears, (int)date('Y'));
+        }
+
+        $selectedYear = (int)$request->get('activity_year', $availableYears[0] ?? date('Y'));
+        $selectedMonth = $request->get('activity_month', '30_days');
 
         $trendDates = [];
         $trendCounts = [];
-        for ($i = 29; $i >= 0; $i--) {
-            $d = now()->subDays($i)->format('Y-m-d');
-            $trendDates[] = now()->subDays($i)->format('M d');
-            $trendCounts[] = isset($evalTrend[$d]) ? (int) $evalTrend[$d]->count : 0;
+
+        if ($selectedMonth === 'all') {
+            // Full Year: Monthly aggregations (Jan - Dec)
+            $evalTrend = DB::table('stall_evaluations')
+                ->where('stall_id', $stall->id)
+                ->selectRaw('MONTH(created_at) as m, COUNT(*) as count')
+                ->whereYear('created_at', $selectedYear)
+                ->groupByRaw('MONTH(created_at)')
+                ->get()
+                ->keyBy('m');
+
+            for ($m = 1; $m <= 12; $m++) {
+                $trendDates[] = date('M', mktime(0, 0, 0, $m, 1));
+                $trendCounts[] = isset($evalTrend[$m]) ? (int)$evalTrend[$m]->count : 0;
+            }
+            $activityPeriodLabel = "Full Year {$selectedYear}";
+        } elseif (is_numeric($selectedMonth) && (int)$selectedMonth >= 1 && (int)$selectedMonth <= 12) {
+            // Specific Month: Day-by-Day (Day 1 to Days in Month)
+            $m = (int)$selectedMonth;
+            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $m, $selectedYear);
+
+            $evalTrend = DB::table('stall_evaluations')
+                ->where('stall_id', $stall->id)
+                ->selectRaw('DAY(created_at) as d, COUNT(*) as count')
+                ->whereYear('created_at', $selectedYear)
+                ->whereMonth('created_at', $m)
+                ->groupByRaw('DAY(created_at)')
+                ->get()
+                ->keyBy('d');
+
+            $monthShort = date('M', mktime(0, 0, 0, $m, 1));
+            for ($d = 1; $d <= $daysInMonth; $d++) {
+                $trendDates[] = sprintf('%s %02d', $monthShort, $d);
+                $trendCounts[] = isset($evalTrend[$d]) ? (int)$evalTrend[$d]->count : 0;
+            }
+            $activityPeriodLabel = date('F Y', mktime(0, 0, 0, $m, 1, $selectedYear));
+        } else {
+            // Default: Rolling Last 30 Days
+            $selectedMonth = '30_days';
+            $evalTrend = DB::table('stall_evaluations')
+                ->where('stall_id', $stall->id)
+                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->where('created_at', '>=', now()->subDays(29)->startOfDay())
+                ->groupByRaw('DATE(created_at)')
+                ->orderBy('date')
+                ->get()
+                ->keyBy('date');
+
+            for ($i = 29; $i >= 0; $i--) {
+                $d = now()->subDays($i)->format('Y-m-d');
+                $trendDates[] = now()->subDays($i)->format('M d');
+                $trendCounts[] = isset($evalTrend[$d]) ? (int) $evalTrend[$d]->count : 0;
+            }
+            $activityPeriodLabel = 'Last 30 Days';
         }
+        $activityTotalCount = array_sum($trendCounts);
 
         // 7. Paginated evaluations list for this stall (STRICT PRIVACY: zero student names or IDs)
         $evaluationsQuery = DB::table('stall_evaluations')
@@ -169,6 +227,11 @@ class StaffController extends Controller
             'ratingDistribution' => $ratingDistribution,
             'trendDates' => $trendDates,
             'trendCounts' => $trendCounts,
+            'availableYears' => $availableYears,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+            'activityPeriodLabel' => $activityPeriodLabel,
+            'activityTotalCount' => $activityTotalCount,
             'evaluations' => $evaluations,
             'stallRank' => $stallRank,
             'totalStalls' => $totalStalls,

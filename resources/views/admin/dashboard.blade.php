@@ -258,15 +258,44 @@
     @if($results->isNotEmpty())
         {{-- ── 5. Primary Chart Card: Evaluation Activity ──────────────────── --}}
         <div class="bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm print-break-inside-avoid">
-            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-5 pb-3 border-b border-neutral-100">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-neutral-100">
                 <div>
                     <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Activity Timeline</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">30-day evaluation volume submitted by students</p>
+                    <p class="text-xs text-neutral-500 mt-0.5">
+                        {{ $activityPeriodLabel }} • <strong class="text-neutral-800 font-semibold tabular-nums">{{ $activityTotalCount }}</strong> total {{ $activityTotalCount === 1 ? 'submission' : 'submissions' }}
+                    </p>
                 </div>
+
+                {{-- Month / Year Filter Controls --}}
+                <form method="GET" action="{{ route('admin.dashboard') }}" class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                    <div class="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/90 rounded-lg p-1">
+                        <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
+                            class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
+                            <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
+                            <option value="all" {{ $selectedMonth === 'all' ? 'selected' : '' }}>Whole Year</option>
+                            <optgroup label="Month">
+                                @foreach([
+                                    1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+                                    5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+                                    9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+                                ] as $mNum => $mName)
+                                    <option value="{{ $mNum }}" {{ (string)$selectedMonth === (string)$mNum ? 'selected' : '' }}>{{ $mName }}</option>
+                                @endforeach
+                            </optgroup>
+                        </select>
+
+                        <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
+                            class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
+                            @foreach($availableYears as $y)
+                                <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </form>
             </div>
             <div class="relative w-full" style="height: 240px;">
-                <canvas id="evalTrendChart" role="img" aria-label="Line chart showing the number of evaluations over the last 30 days">
-                    <p>Line chart showing the number of evaluations over the last 30 days.</p>
+                <canvas id="evalTrendChart" role="img" aria-label="Line chart showing evaluation submissions for {{ $activityPeriodLabel }}">
+                    <p>Line chart showing evaluation submissions for {{ $activityPeriodLabel }}.</p>
                 </canvas>
             </div>
         </div>

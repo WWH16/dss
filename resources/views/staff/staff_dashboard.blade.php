@@ -251,18 +251,48 @@
 
                     {{-- Activity Timeline --}}
                     <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs flex-1 flex flex-col justify-between">
-                        <div class="flex items-center justify-between pb-2 mb-2 border-b border-neutral-100">
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 mb-2 border-b border-neutral-100 gap-2">
                             <div>
                                 <h2 class="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
                                     <ion-icon name="pulse-outline" class="text-brand-700 text-sm"></ion-icon>
                                     Activity Timeline
                                 </h2>
-                                <p class="text-xs text-neutral-500 mt-0.5">30-day submissions</p>
+                                <p class="text-[11px] text-neutral-500 mt-0.5">
+                                    {{ $activityPeriodLabel }} • <strong class="text-neutral-700 font-semibold tabular-nums">{{ $activityTotalCount }}</strong> {{ $activityTotalCount === 1 ? 'review' : 'reviews' }}
+                                </p>
                             </div>
+
+                            {{-- Month / Year Filter --}}
+                            <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-1.5 shrink-0">
+                                @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
+                                @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
+                                
+                                <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
+                                    class="px-2 py-1 bg-neutral-50 border border-neutral-300 rounded text-[11px] font-medium text-neutral-700 focus:outline-none focus:border-brand-700">
+                                    <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
+                                    <option value="all" {{ $selectedMonth === 'all' ? 'selected' : '' }}>Whole Year</option>
+                                    <optgroup label="Month">
+                                        @foreach([
+                                            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
+                                            5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug',
+                                            9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
+                                        ] as $mNum => $mName)
+                                            <option value="{{ $mNum }}" {{ (string)$selectedMonth === (string)$mNum ? 'selected' : '' }}>{{ $mName }}</option>
+                                        @endforeach
+                                    </optgroup>
+                                </select>
+
+                                <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
+                                    class="px-2 py-1 bg-neutral-50 border border-neutral-300 rounded text-[11px] font-medium text-neutral-700 focus:outline-none focus:border-brand-700">
+                                    @foreach($availableYears as $y)
+                                        <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
+                                    @endforeach
+                                </select>
+                            </form>
                         </div>
 
                         <div class="relative w-full pt-1" style="height: 135px;">
-                            <canvas id="stallTrendChart" role="img" aria-label="Line chart showing evaluation submissions for your stall over the last 30 days"></canvas>
+                            <canvas id="stallTrendChart" role="img" aria-label="Line chart showing evaluation submissions for your stall for {{ $activityPeriodLabel }}"></canvas>
                         </div>
                     </div>
 
