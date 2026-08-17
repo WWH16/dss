@@ -2,8 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
 
 class StudentDashboardController extends Controller
 {
@@ -100,7 +103,75 @@ class StudentDashboardController extends Controller
             ->where('id', $user->id)
             ->first();
 
-        return view('student.profile', compact('profile'));
+        // Evaluation Summary for profile
+        $totalEvals = DB::table('stall_evaluations')->where('student_id', $user->id)->count();
+        $uniqueStalls = DB::table('stall_evaluations')->where('student_id', $user->id)->distinct('stall_id')->count('stall_id');
+        $avgGiven = $totalEvals > 0
+            ? DB::table('stall_evaluations')
+                ->where('student_id', $user->id)
+                ->selectRaw('AVG((cleanliness + service + taste + price) / 4) as avg_rating')
+                ->value('avg_rating')
+            : 0;
+
+        return view('student.profile', compact(
+            'profile',
+            'totalEvals',
+            'uniqueStalls',
+            'avgGiven'
+        ));
+    }
+
+    public function updateProfile(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'student') {
+            return redirect('/login');
+        }
+
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'course' => 'nullable|string|max:100',
+            'year_level' => 'nullable|string|max:50',
+        ]);
+
+        DB::table('users')->where('id', $user->id)->update([
+            'name' => trim($request->name),
+            'course' => $request->course ? trim($request->course) : null,
+            'year_level' => $request->year_level ? trim($request->year_level) : null,
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Profile information updated successfully!');
+    }
+
+    public function updatePassword(Request $request)
+    {
+        $user = Auth::user();
+
+        if (!$user || $user->role !== 'student') {
+            return redirect('/login');
+        }
+
+        $request->validate([
+            'current_password' => 'required',
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)->letters()->mixedCase()->numbers()->symbols()
+            ],
+        ]);
+
+        if (!Hash::check($request->current_password, $user->password)) {
+            return redirect()->back()->withErrors(['current_password' => 'The current password provided is incorrect.']);
+        }
+
+        DB::table('users')->where('id', $user->id)->update([
+            'password' => Hash::make($request->password),
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Password updated successfully!');
     }
 
     public function history()

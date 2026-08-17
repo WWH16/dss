@@ -52,6 +52,10 @@ Route::middleware('auth')->group(function () {
     // Profile
     Route::get('/student/profile', [StudentDashboardController::class, 'profile'])
         ->name('student.profile');
+    Route::post('/student/profile', [StudentDashboardController::class, 'updateProfile'])
+        ->name('student.profile.update');
+    Route::post('/student/profile/password', [StudentDashboardController::class, 'updatePassword'])
+        ->name('student.profile.password');
 
     // Evaluation History
     Route::get('/student/history', [StudentDashboardController::class, 'history'])
