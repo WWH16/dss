@@ -17,22 +17,7 @@
         </div>
     </div>
 
-    {{-- ── 2. Flash Messages ──────────────────────────────────────────────── --}}
-    @if(session('success'))
-        <div class="px-4 py-3 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-md text-xs font-semibold flex items-center gap-2" role="alert">
-            <ion-icon name="checkmark-circle" class="text-base text-emerald-600" aria-hidden="true"></ion-icon>
-            <span>{{ session('success') }}</span>
-        </div>
-    @endif
-
-    @if(session('error'))
-        <div class="px-4 py-3 bg-red-50 border border-red-200 text-red-800 rounded-md text-xs font-semibold flex items-center gap-2" role="alert">
-            <ion-icon name="alert-circle" class="text-base text-red-600" aria-hidden="true"></ion-icon>
-            <span>{{ session('error') }}</span>
-        </div>
-    @endif
-
-    {{-- ── 3. Main 2-Column Layout ────────────────────────────────────────── --}}
+    {{-- ── 2. Main 2-Column Layout ────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
         {{-- Left Column: Creation Form & Guidelines (4 cols) --}}

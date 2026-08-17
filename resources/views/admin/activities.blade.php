@@ -14,13 +14,6 @@
         </span>
     </div>
 
-    @if(session('success'))
-        <div class="p-3.5 bg-emerald-50 border border-emerald-200/70 text-emerald-800 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-            <ion-icon name="checkmark-circle" class="text-lg leading-none text-emerald-600"></ion-icon>
-            {{ session('success') }}
-        </div>
-    @endif
-
     @if($errors->any())
         <div class="p-3.5 bg-red-50 border border-red-200/70 text-red-800 rounded-md text-xs font-bold flex items-start gap-2">
             <ion-icon name="alert-circle" class="text-lg leading-none text-red-600"></ion-icon>

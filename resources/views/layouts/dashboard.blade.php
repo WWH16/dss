@@ -333,6 +333,22 @@
             });
         }
     })();
+
+    // Auto-trigger Toast Notifications from Laravel session flash
+    document.addEventListener('DOMContentLoaded', function() {
+        @if(session('success'))
+            if (window.showToast) window.showToast(@json(session('success')), 'success', 4000);
+        @endif
+        @if(session('error'))
+            if (window.showToast) window.showToast(@json(session('error')), 'error', 5000);
+        @endif
+        @if(session('warning'))
+            if (window.showToast) window.showToast(@json(session('warning')), 'warning', 4500);
+        @endif
+        @if(session('info') || session('status'))
+            if (window.showToast) window.showToast(@json(session('info') ?? session('status')), 'info', 4000);
+        @endif
+    });
 </script>
 
 @yield('scripts')

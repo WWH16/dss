@@ -16,13 +16,6 @@
         </span>
     </div>
 
-    @if(session('success'))
-        <div class="p-3.5 bg-emerald-50 border border-emerald-200/70 text-emerald-800 rounded-md text-xs font-bold uppercase tracking-wider flex items-center gap-2">
-            <ion-icon name="checkmark-circle" class="text-lg leading-none text-emerald-600"></ion-icon>
-            {{ session('success') }}
-        </div>
-    @endif
-
     {{-- Profile Details --}}
     <div class="bg-white rounded-lg border border-neutral-200/80 shadow-xs p-6">
         <div class="flex items-center justify-between gap-4 mb-6 pb-5 border-b border-neutral-100 flex-wrap">

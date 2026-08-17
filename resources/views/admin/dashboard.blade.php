@@ -42,13 +42,6 @@
         </div>
     </div>
 
-    @if(session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200/80 text-emerald-800 rounded-xl text-xs font-semibold flex items-center gap-2.5 shadow-2xs">
-            <ion-icon name="checkmark-circle" class="text-lg text-emerald-600"></ion-icon>
-            {{ session('success') }}
-        </div>
-    @endif
-
     {{-- ── 2. Diagnostic Warning (Only if any stall is below 3.0★) ─────── --}}
     @if(isset($attentionStalls) && $attentionStalls->isNotEmpty())
         <div class="p-4 bg-amber-50/90 border border-amber-200 rounded-xl text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
