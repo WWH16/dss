@@ -118,178 +118,96 @@
         </div>
     @endif
 
-    {{-- ── 3. Top Tier Podium Showcase (Top 3 Stalls) ─────────────────────── --}}
-    @if($standings->isNotEmpty())
-        <div>
-            <div class="flex items-center justify-between mb-3">
-                <h2 class="text-xs font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5">
-                    <ion-icon name="trophy-outline" class="text-amber-600 text-sm"></ion-icon>
-                    <span>Top Performing Vendors</span>
-                </h2>
-                <span class="text-[11px] text-neutral-400 font-medium">Ranked by overall DSS composite</span>
+    {{-- ── 3. Stepped Podium ──────────────────────────────────────────────── --}}
+    @if($standings->count() >= 2)
+        @php
+            $isMeFirst  = $podiumFirst  && $myStall && $myStall->id == $podiumFirst->id;
+            $isMeSecond = $podiumSecond && $myStall && $myStall->id == $podiumSecond->id;
+            $isMeThird  = $podiumThird  && $myStall && $myStall->id == $podiumThird->id;
+            $firstScore  = $podiumFirst  ? (float)$podiumFirst->overall_score  : 0;
+            $secondScore = $podiumSecond ? (float)$podiumSecond->overall_score : 0;
+            $thirdScore  = $podiumThird  ? (float)$podiumThird->overall_score  : 0;
+        @endphp
+
+        <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs overflow-hidden">
+            <div class="px-5 pt-4 pb-2">
+                <h2 class="text-sm font-bold text-neutral-900">Campus Top Vendors</h2>
+                <p class="text-[11px] text-neutral-500 mt-0.5">Ranked by overall DSS composite score</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 items-stretch">
-                {{-- #1 First Place Card (Hero) --}}
-                @if($podiumFirst)
-                    @php
-                        $isMeFirst = $myStall && $myStall->id == $podiumFirst->id;
-                        $firstScore = (float)$podiumFirst->overall_score;
-                    @endphp
-                    <div class="bg-white rounded-xl border border-amber-200/80 shadow-2xs p-5 flex flex-col justify-between group hover:border-amber-300 transition-all">
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-lg bg-amber-50 text-amber-950 border border-amber-300 font-black text-xs shadow-2xs">
-                                    <ion-icon name="trophy" class="text-amber-600 text-sm"></ion-icon>
-                                    1st Place
-                                </span>
-                                @if($isMeFirst)
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-900 border border-brand-200">Your Stall</span>
-                                @endif
-                            </div>
+            {{-- ── Podium visual ── --}}
+            <div class="px-4 sm:px-6 pt-6 pb-0">
 
-                            <div>
-                                <h3 class="text-lg font-black text-neutral-900 tracking-tight">{{ $podiumFirst->name }}</h3>
-                                <p class="text-[11px] text-neutral-400 font-mono mt-0.5">{{ $podiumFirst->eval_count }} {{ Str::plural('evaluation', $podiumFirst->eval_count) }}</p>
-                            </div>
+                {{-- Names + scores floating above the bars --}}
+                <div class="flex items-end justify-center gap-1 sm:gap-2">
 
-                            {{-- Composite Score Pill --}}
-                            <div class="p-3 bg-amber-50/60 rounded-lg border border-amber-200/70 flex items-center justify-between">
-                                <span class="text-xs font-bold text-amber-950">Overall Composite</span>
-                                <div class="flex items-center gap-1">
-                                    <span class="text-lg font-black text-amber-950 tabular-nums">{{ number_format($firstScore, 2) }}</span>
-                                    <ion-icon name="star" class="text-amber-500 text-sm"></ion-icon>
-                                </div>
-                            </div>
-
-                            {{-- Criteria Breakdown Mini-Meter --}}
-                            <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Cleanliness</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumFirst->cleanliness ? number_format($podiumFirst->cleanliness, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Service</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumFirst->service ? number_format($podiumFirst->service, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Taste</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumFirst->taste ? number_format($podiumFirst->taste, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Price</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumFirst->price ? number_format($podiumFirst->price, 1) : '-' }}★</span>
-                                </div>
-                            </div>
+                    {{-- #2 label --}}
+                    @if($podiumSecond)
+                        <div class="flex-1 max-w-[200px] text-center pb-2">
+                            <ion-icon name="medal" class="text-slate-400 text-lg"></ion-icon>
+                            <p class="text-xs font-bold text-neutral-900 truncate mt-1" title="{{ $podiumSecond->name }}">{{ $podiumSecond->name }}</p>
+                            <p class="text-lg font-black text-neutral-800 tabular-nums leading-tight mt-0.5">{{ number_format($secondScore, 2) }}</p>
+                            <p class="text-[10px] text-neutral-400 font-mono">{{ $podiumSecond->eval_count }} {{ Str::plural('eval', $podiumSecond->eval_count) }}</p>
+                            @if($isMeSecond)
+                                <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-50 text-brand-800 border border-brand-200">You</span>
+                            @endif
                         </div>
-                    </div>
-                @endif
+                    @endif
 
-                {{-- #2 Second Place Card --}}
-                @if($podiumSecond)
-                    @php
-                        $isMeSecond = $myStall && $myStall->id == $podiumSecond->id;
-                        $secondScore = (float)$podiumSecond->overall_score;
-                    @endphp
-                    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs p-5 flex flex-col justify-between group hover:border-neutral-300 transition-all">
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-slate-100 text-slate-900 border border-slate-300 font-extrabold text-xs shadow-2xs">
-                                    <ion-icon name="medal" class="text-slate-600 text-sm"></ion-icon>
-                                    2nd Place
-                                </span>
-                                @if($isMeSecond)
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-900 border border-brand-200">Your Stall</span>
-                                @endif
-                            </div>
-
-                            <div>
-                                <h3 class="text-base font-bold text-neutral-900 tracking-tight">{{ $podiumSecond->name }}</h3>
-                                <p class="text-[11px] text-neutral-400 font-mono mt-0.5">{{ $podiumSecond->eval_count }} {{ Str::plural('evaluation', $podiumSecond->eval_count) }}</p>
-                            </div>
-
-                            <div class="p-2.5 bg-slate-50/80 rounded-lg border border-slate-200/70 flex items-center justify-between">
-                                <span class="text-xs font-semibold text-slate-800">Overall Composite</span>
-                                <div class="flex items-center gap-1">
-                                    <span class="text-base font-black text-slate-900 tabular-nums">{{ number_format($secondScore, 2) }}</span>
-                                    <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Clean</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumSecond->cleanliness ? number_format($podiumSecond->cleanliness, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Service</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumSecond->service ? number_format($podiumSecond->service, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Taste</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumSecond->taste ? number_format($podiumSecond->taste, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Price</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumSecond->price ? number_format($podiumSecond->price, 1) : '-' }}★</span>
-                                </div>
-                            </div>
+                    {{-- #1 label --}}
+                    @if($podiumFirst)
+                        <div class="flex-1 max-w-[200px] text-center pb-2">
+                            <ion-icon name="trophy" class="text-amber-500 text-xl"></ion-icon>
+                            <p class="text-sm font-black text-neutral-900 truncate mt-1" title="{{ $podiumFirst->name }}">{{ $podiumFirst->name }}</p>
+                            <p class="text-xl font-black text-neutral-900 tabular-nums leading-tight mt-0.5">{{ number_format($firstScore, 2) }}</p>
+                            <p class="text-[10px] text-neutral-400 font-mono">{{ $podiumFirst->eval_count }} {{ Str::plural('eval', $podiumFirst->eval_count) }}</p>
+                            @if($isMeFirst)
+                                <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-50 text-brand-800 border border-brand-200">You</span>
+                            @endif
                         </div>
-                    </div>
-                @endif
+                    @endif
 
-                {{-- #3 Third Place Card --}}
-                @if($podiumThird)
-                    @php
-                        $isMeThird = $myStall && $myStall->id == $podiumThird->id;
-                        $thirdScore = (float)$podiumThird->overall_score;
-                    @endphp
-                    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs p-5 flex flex-col justify-between group hover:border-neutral-300 transition-all">
-                        <div class="space-y-3">
-                            <div class="flex items-center justify-between">
-                                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-amber-50/70 text-amber-900 border border-amber-600/30 font-extrabold text-xs shadow-2xs">
-                                    <ion-icon name="medal" class="text-amber-700 text-sm"></ion-icon>
-                                    3rd Place
-                                </span>
-                                @if($isMeThird)
-                                    <span class="px-2 py-0.5 rounded text-[10px] font-extrabold bg-brand-50 text-brand-900 border border-brand-200">Your Stall</span>
-                                @endif
-                            </div>
-
-                            <div>
-                                <h3 class="text-base font-bold text-neutral-900 tracking-tight">{{ $podiumThird->name }}</h3>
-                                <p class="text-[11px] text-neutral-400 font-mono mt-0.5">{{ $podiumThird->eval_count }} {{ Str::plural('evaluation', $podiumThird->eval_count) }}</p>
-                            </div>
-
-                            <div class="p-2.5 bg-amber-50/40 rounded-lg border border-amber-600/20 flex items-center justify-between">
-                                <span class="text-xs font-semibold text-amber-950">Overall Composite</span>
-                                <div class="flex items-center gap-1">
-                                    <span class="text-base font-black text-amber-950 tabular-nums">{{ number_format($thirdScore, 2) }}</span>
-                                    <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-2 gap-2 text-[11px] pt-1">
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Clean</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumThird->cleanliness ? number_format($podiumThird->cleanliness, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Service</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumThird->service ? number_format($podiumThird->service, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Taste</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumThird->taste ? number_format($podiumThird->taste, 1) : '-' }}★</span>
-                                </div>
-                                <div class="flex items-center justify-between px-2 py-1 bg-neutral-50 rounded border border-neutral-100">
-                                    <span class="text-neutral-500 font-medium">Price</span>
-                                    <span class="font-bold text-neutral-800">{{ $podiumThird->price ? number_format($podiumThird->price, 1) : '-' }}★</span>
-                                </div>
-                            </div>
+                    {{-- #3 label --}}
+                    @if($podiumThird)
+                        <div class="flex-1 max-w-[200px] text-center pb-2">
+                            <ion-icon name="medal" class="text-amber-700/60 text-base"></ion-icon>
+                            <p class="text-xs font-bold text-neutral-900 truncate mt-1" title="{{ $podiumThird->name }}">{{ $podiumThird->name }}</p>
+                            <p class="text-lg font-black text-neutral-800 tabular-nums leading-tight mt-0.5">{{ number_format($thirdScore, 2) }}</p>
+                            <p class="text-[10px] text-neutral-400 font-mono">{{ $podiumThird->eval_count }} {{ Str::plural('eval', $podiumThird->eval_count) }}</p>
+                            @if($isMeThird)
+                                <span class="inline-block mt-1 px-1.5 py-0.5 rounded text-[9px] font-bold bg-brand-50 text-brand-800 border border-brand-200">You</span>
+                            @endif
                         </div>
-                    </div>
-                @endif
+                    @else
+                        <div class="flex-1 max-w-[200px]"></div>
+                    @endif
+                </div>
+
+                {{-- The actual podium bars --}}
+                <div class="flex items-end justify-center gap-1 sm:gap-2">
+                    {{-- #2 bar (medium — silver) --}}
+                    @if($podiumSecond)
+                        <div class="flex-1 max-w-[200px] h-20 sm:h-24 bg-slate-100 border border-slate-200 border-b-0 rounded-t-lg flex items-center justify-center">
+                            <span class="text-2xl font-black text-slate-300">2</span>
+                        </div>
+                    @endif
+
+                    {{-- #1 bar (tallest — gold) --}}
+                    @if($podiumFirst)
+                        <div class="flex-1 max-w-[200px] h-28 sm:h-36 bg-amber-50 border border-amber-200/80 border-b-0 rounded-t-lg flex items-center justify-center">
+                            <span class="text-3xl font-black text-amber-300">1</span>
+                        </div>
+                    @endif
+
+                    {{-- #3 bar (shortest — bronze) --}}
+                    @if($podiumThird)
+                        <div class="flex-1 max-w-[200px] h-14 sm:h-16 bg-orange-50/60 border border-orange-200/60 border-b-0 rounded-t-lg flex items-center justify-center">
+                            <span class="text-xl font-black text-orange-200">3</span>
+                        </div>
+                    @else
+                        <div class="flex-1 max-w-[200px]"></div>
+                    @endif
+                </div>
             </div>
         </div>
     @endif
