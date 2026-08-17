@@ -349,19 +349,22 @@
                                 $composite = (float)$result->overall_score;
                             @endphp
                             <tr class="hover:bg-neutral-50/60 transition-colors {{ $rank === 1 ? 'bg-brand-50/20 font-medium' : '' }}">
-                                {{-- Rank Chip --}}
+                                {{-- Rank Chip (Stepped Hierarchy) --}}
                                 <td class="py-3.5 px-5 text-center">
                                     @if($rank === 1)
-                                        <span class="inline-flex items-center justify-center w-7 h-7 rounded-md bg-amber-100 text-amber-900 border border-amber-300 font-extrabold text-xs shadow-2xs">
-                                            👑 #1
+                                        <span class="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-amber-100 to-amber-50 text-amber-950 border border-amber-300 font-black text-sm shadow-xs">
+                                            <ion-icon name="trophy" class="text-amber-600 text-base"></ion-icon>
+                                            <span>#1</span>
                                         </span>
                                     @elseif($rank === 2)
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-neutral-200 text-neutral-800 font-bold text-xs">
-                                            #2
+                                        <span class="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-slate-100 text-slate-900 border border-slate-300 font-extrabold text-xs shadow-2xs">
+                                            <ion-icon name="medal" class="text-slate-500 text-xs"></ion-icon>
+                                            <span>#2</span>
                                         </span>
                                     @elseif($rank === 3)
-                                        <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-amber-50 text-amber-800 border border-amber-200 font-bold text-xs">
-                                            #3
+                                        <span class="inline-flex items-center justify-center gap-1 px-2 py-0.5 rounded-md bg-amber-50/90 text-amber-900 border border-amber-600/30 font-bold text-xs shadow-2xs">
+                                            <ion-icon name="medal" class="text-amber-700 text-xs"></ion-icon>
+                                            <span>#3</span>
                                         </span>
                                     @else
                                         <span class="text-xs font-mono font-semibold text-neutral-400 tabular-nums">
@@ -373,7 +376,7 @@
                                 {{-- Stall Name & Submissions --}}
                                 <td class="py-3.5 px-5">
                                     <div class="flex items-center gap-2">
-                                        <span class="font-bold text-neutral-900">{{ $result->name }}</span>
+                                        <span class="{{ $rank === 1 ? 'font-black text-neutral-900 text-base' : 'font-bold text-neutral-900 text-sm' }}">{{ $result->name }}</span>
                                         <span class="text-[10px] font-semibold text-neutral-400 font-mono">({{ $result->eval_count }} {{ Str::plural('eval', $result->eval_count) }})</span>
                                     </div>
                                 </td>
@@ -421,10 +424,24 @@
                         <div class="p-4 flex flex-col gap-2.5">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2">
-                                    <span class="inline-flex items-center justify-center w-6 h-6 rounded-md {{ $rank === 1 ? 'bg-amber-100 text-amber-900 font-extrabold' : 'bg-neutral-100 text-neutral-700 font-bold' }} text-xs">
-                                        #{{ $rank }}
-                                    </span>
-                                    <h3 class="font-bold text-neutral-900 text-sm">{{ $result->name }}</h3>
+                                    @if($rank === 1)
+                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-gradient-to-r from-amber-100 to-amber-50 text-amber-950 border border-amber-300 font-black text-xs shadow-2xs">
+                                            <ion-icon name="trophy" class="text-amber-600 text-sm"></ion-icon> #1
+                                        </span>
+                                    @elseif($rank === 2)
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-slate-100 text-slate-900 border border-slate-300 font-extrabold text-[11px]">
+                                            <ion-icon name="medal" class="text-slate-500 text-xs"></ion-icon> #2
+                                        </span>
+                                    @elseif($rank === 3)
+                                        <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-md bg-amber-50/90 text-amber-900 border border-amber-600/30 font-bold text-[11px]">
+                                            <ion-icon name="medal" class="text-amber-700 text-xs"></ion-icon> #3
+                                        </span>
+                                    @else
+                                        <span class="inline-flex items-center justify-center w-5 h-5 rounded bg-neutral-100 text-neutral-500 font-semibold text-[10px] tabular-nums">
+                                            #{{ $rank }}
+                                        </span>
+                                    @endif
+                                    <h3 class="{{ $rank === 1 ? 'font-black text-neutral-900 text-base' : 'font-bold text-neutral-900 text-sm' }}">{{ $result->name }}</h3>
                                 </div>
                                 <span class="inline-flex items-center gap-1 bg-brand-50 px-2 py-0.5 rounded-md text-xs font-black text-brand-900 border border-brand-200">
                                     {{ number_format($composite, 2) }}★
