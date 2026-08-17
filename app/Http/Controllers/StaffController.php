@@ -86,7 +86,48 @@ class StaffController extends Controller
             }
         }
 
-        // 4. Paginated evaluations list for this stall (STRICT PRIVACY: zero student names or IDs)
+        // 4. Compute campus-wide benchmark criteria averages for comparison
+        $campusCriteria = DB::table('stall_evaluations')
+            ->selectRaw('
+                AVG(cleanliness) as cleanliness,
+                AVG(service) as service,
+                AVG(taste) as taste,
+                AVG(price) as price,
+                COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall
+            ')
+            ->first();
+
+        // 5. Rating breakdown distribution (1 to 5 stars) for this stall
+        $ratingDistribution = DB::table('stall_evaluations')
+            ->where('stall_id', $stall->id)
+            ->selectRaw('
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 5 THEN 1 ELSE 0 END), 0) as stars_5,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 4 THEN 1 ELSE 0 END), 0) as stars_4,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 3 THEN 1 ELSE 0 END), 0) as stars_3,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 2 THEN 1 ELSE 0 END), 0) as stars_2,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 1 THEN 1 ELSE 0 END), 0) as stars_1
+            ')
+            ->first();
+
+        // 6. 30-day evaluation timeline trend for this stall
+        $evalTrend = DB::table('stall_evaluations')
+            ->where('stall_id', $stall->id)
+            ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+            ->where('created_at', '>=', now()->subDays(29)->startOfDay())
+            ->groupByRaw('DATE(created_at)')
+            ->orderBy('date')
+            ->get()
+            ->keyBy('date');
+
+        $trendDates = [];
+        $trendCounts = [];
+        for ($i = 29; $i >= 0; $i--) {
+            $d = now()->subDays($i)->format('Y-m-d');
+            $trendDates[] = now()->subDays($i)->format('M d');
+            $trendCounts[] = isset($evalTrend[$d]) ? (int) $evalTrend[$d]->count : 0;
+        }
+
+        // 7. Paginated evaluations list for this stall (STRICT PRIVACY: zero student names or IDs)
         $evaluationsQuery = DB::table('stall_evaluations')
             ->where('stall_id', $stall->id)
             ->select(
@@ -124,6 +165,10 @@ class StaffController extends Controller
             'totalEvaluations' => $totalEvaluations,
             'uniqueStudents' => $uniqueStudents,
             'averages' => $averages,
+            'campusCriteria' => $campusCriteria,
+            'ratingDistribution' => $ratingDistribution,
+            'trendDates' => $trendDates,
+            'trendCounts' => $trendCounts,
             'evaluations' => $evaluations,
             'stallRank' => $stallRank,
             'totalStalls' => $totalStalls,
