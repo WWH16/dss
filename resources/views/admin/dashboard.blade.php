@@ -26,22 +26,29 @@
     {{-- ── 2. Minimalist Stat Cards ───────────────────────────────────────── --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-5 sm:gap-6">
         @foreach([
-            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',    'desc' => 'Enrolled evaluators'],
-            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active food vendors'],
-            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'create-outline',    'desc' => 'Feedback submitted'],
+            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',     'desc' => 'Enrolled evaluators', 'route' => route('admin.students')],
+            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active food vendors', 'route' => route('admin.stalls')],
+            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'create-outline',     'desc' => 'Feedback submitted',  'route' => route('admin.evaluations')],
         ] as $stat)
-            <div class="bg-white rounded-xl border border-neutral-200/70 p-6 shadow-sm hover:border-brand-300/80 transition-all">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider">{{ $stat['label'] }}</span>
-                    <div class="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
-                        <ion-icon name="{{ $stat['icon'] }}" class="text-xl text-brand-700"></ion-icon>
+            <a href="{{ $stat['route'] }}" class="group bg-white rounded-xl border border-neutral-200/70 p-6 shadow-sm hover:border-brand-300 hover:shadow-md transition-all flex flex-col justify-between">
+                <div>
+                    <div class="flex items-center justify-between mb-4">
+                        <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider group-hover:text-brand-800 transition-colors">{{ $stat['label'] }}</span>
+                        <div class="w-10 h-10 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700 group-hover:bg-brand-600 group-hover:text-white transition-all">
+                            <ion-icon name="{{ $stat['icon'] }}" class="text-xl"></ion-icon>
+                        </div>
+                    </div>
+                    <div class="text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
+                        {{ $stat['value'] }}
                     </div>
                 </div>
-                <div class="text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
-                    {{ $stat['value'] }}
+                <div class="flex items-center justify-between mt-3 pt-2 border-t border-neutral-100/70 text-xs">
+                    <span class="text-neutral-400 font-medium">{{ $stat['desc'] }}</span>
+                    <span class="text-brand-700 font-bold opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5">
+                        Manage <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
+                    </span>
                 </div>
-                <p class="text-xs text-neutral-400 mt-2 font-medium">{{ $stat['desc'] }}</p>
-            </div>
+            </a>
         @endforeach
     </div>
 

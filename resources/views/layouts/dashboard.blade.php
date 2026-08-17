@@ -191,6 +191,10 @@
                     <ion-icon name="create-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Evaluations
                 </a>
+                <a href="{{ route('admin.students') }}" class="sidebar-link {{ request()->routeIs('admin.students') ? 'active' : '' }}">
+                    <ion-icon name="people-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                    Students
+                </a>
             @elseif($user && $user->role === 'staff')
                 <a href="{{ route('staff.dashboard') }}" class="sidebar-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
                     <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>

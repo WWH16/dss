@@ -90,6 +90,10 @@ Route::middleware('auth')->group(function () {
         [AdminController::class,'evaluations'])
         ->name('admin.evaluations');
 
+    Route::get('/admin/students',
+        [AdminController::class,'students'])
+        ->name('admin.students');
+
     Route::post('/admin/stall/add',
         [AdminController::class,'addStall'])
         ->name('admin.stall.add');

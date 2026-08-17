@@ -140,6 +140,136 @@ class AdminController extends Controller
         return view('admin.evaluations', compact('evaluations'));
     }
 
+    public function students(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $deptCourseMap = [
+            'CCSICT' => ['BSIT', 'BSCS', 'BSIS', 'ACT', 'MIT'],
+            'CHM'    => ['BSHM', 'BSTM', 'HRM'],
+            'CBA'    => ['BSBA', 'BSA', 'BSMA', 'BSEntrep', 'BSENTREP'],
+            'CED'    => ['BSED', 'BEED', 'BPED', 'BTLED'],
+            'CCJE'   => ['BSCRIM', 'BSCrim', 'BSLE'],
+            'CAS'    => ['BA Comm', 'BS Psych', 'BS Bio', 'BACOMM', 'BSPSYCH'],
+        ];
+
+        $query = DB::table('users')
+            ->leftJoin('stall_evaluations', 'stall_evaluations.student_id', '=', 'users.id')
+            ->where('users.role', 'student')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.student_number',
+                'users.course',
+                'users.year_level',
+                'users.created_at',
+                DB::raw('COUNT(stall_evaluations.id) as evaluations_count'),
+                DB::raw('MAX(stall_evaluations.created_at) as last_evaluation_at')
+            )
+            ->groupBy(
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.student_number',
+                'users.course',
+                'users.year_level',
+                'users.created_at'
+            );
+
+        // Search filter
+        if ($request->filled('q')) {
+            $q = trim($request->q);
+            $query->where(function ($w) use ($q) {
+                $w->where('users.name', 'like', "%{$q}%")
+                  ->orWhere('users.email', 'like', "%{$q}%")
+                  ->orWhere('users.student_number', 'like', "%{$q}%");
+            });
+        }
+
+        // Department filter
+        $selectedDept = $request->get('department');
+        if ($selectedDept && isset($deptCourseMap[$selectedDept])) {
+            $query->whereIn('users.course', $deptCourseMap[$selectedDept]);
+        }
+
+        // Course filter
+        if ($request->filled('course')) {
+            $query->where('users.course', $request->course);
+        }
+
+        // Year level filter
+        if ($request->filled('year_level')) {
+            $query->where('users.year_level', $request->year_level);
+        }
+
+        // Sort order
+        $sortBy = $request->get('sort', 'latest');
+        if ($sortBy === 'name_asc') {
+            $query->orderBy('users.name', 'asc');
+        } elseif ($sortBy === 'evaluations_desc') {
+            $query->orderByDesc('evaluations_count');
+        } elseif ($sortBy === 'oldest') {
+            $query->orderBy('users.created_at', 'asc');
+        } else {
+            $query->orderByDesc('users.created_at');
+        }
+
+        $students = $query->get();
+
+        // High-level KPI metrics
+        $totalStudents = DB::table('users')->where('role', 'student')->count();
+        $activeEvaluators = DB::table('users')
+            ->join('stall_evaluations', 'stall_evaluations.student_id', '=', 'users.id')
+            ->where('users.role', 'student')
+            ->distinct('users.id')
+            ->count('users.id');
+
+        $totalEvaluations = DB::table('stall_evaluations')->count();
+
+        // Department counts for filter badges
+        $departmentStats = [];
+        foreach ($deptCourseMap as $code => $courses) {
+            $departmentStats[$code] = DB::table('users')
+                ->where('role', 'student')
+                ->whereIn('course', $courses)
+                ->count();
+        }
+
+        $departments = [
+            ['code' => 'CCSICT', 'name' => 'Computing Studies (CCSICT)', 'courses' => ['BSIT', 'BSCS', 'BSIS', 'ACT']],
+            ['code' => 'CHM',    'name' => 'Hospitality Management (CHM)', 'courses' => ['BSHM', 'BSTM', 'HRM']],
+            ['code' => 'CBA',    'name' => 'Business & Accountancy (CBA)', 'courses' => ['BSBA', 'BSA', 'BSMA', 'BSENTREP']],
+            ['code' => 'CED',    'name' => 'Teacher Education (CED)', 'courses' => ['BSED', 'BEED', 'BPED', 'BTLED']],
+            ['code' => 'CCJE',   'name' => 'Criminal Justice (CCJE)', 'courses' => ['BSCRIM', 'BSCrim', 'BSLE']],
+            ['code' => 'CAS',    'name' => 'Arts & Sciences (CAS)', 'courses' => ['BA Comm', 'BS Psych', 'BS Bio']],
+        ];
+
+        // Available distinct courses from DB or standard list
+        $dbCourses = DB::table('users')
+            ->where('role', 'student')
+            ->whereNotNull('course')
+            ->where('course', '!=', '')
+            ->distinct()
+            ->pluck('course')
+            ->toArray();
+        $courseOptions = array_values(array_unique(array_merge(['BSIT', 'BSCS', 'BSHM', 'BSBA', 'BSED', 'BEED', 'BSCRIM'], $dbCourses)));
+
+        $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
+
+        return view('admin.students', compact(
+            'students',
+            'totalStudents',
+            'activeEvaluators',
+            'totalEvaluations',
+            'departmentStats',
+            'departments',
+            'courseOptions',
+            'yearOptions',
+            'selectedDept'
+        ));
+    }
+
     // Add Stall
     public function addStall(Request $request)
     {
