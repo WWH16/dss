@@ -185,15 +185,15 @@
                     </div>
                 </div>
 
-                {{-- STAFF FIELD --}}
-                <div id="register_staff_field" style="display:none;">
-                    <div>
-                        <label for="register_stall_name" class="block text-xs font-semibold text-neutral-700 mb-1.5">Stall Number / Name</label>
-                        <input type="text" id="register_stall_name" name="stall_name" value="{{ old('stall_name') }}" placeholder="e.g. Stall #1 - Food Hub" class="w-full px-4 py-2.5 bg-white border @error('stall_name') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400">
-                        @error('stall_name')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
-                        @enderror
+                {{-- STAFF ONBOARDING INFO --}}
+                <div id="register_staff_field" style="display:none;" class="p-3 bg-neutral-50 border border-neutral-200 rounded-[4px] text-xs text-neutral-600 space-y-1">
+                    <div class="flex items-center gap-1.5 font-bold text-neutral-800 text-[11px] uppercase tracking-wider">
+                        <ion-icon name="shield-checkmark" class="text-brand-700 text-sm" aria-hidden="true"></ion-icon>
+                        <span>Staff Security Verification</span>
                     </div>
+                    <p class="text-[11px] leading-relaxed text-neutral-500">
+                        Once registered, your account will be verified and assigned to your designated food stall by an Administrator.
+                    </p>
                 </div>
 
                 {{-- PASSWORDS --}}
@@ -324,9 +324,8 @@
             document.getElementById('register_year').required = isStudent;
             document.getElementById('register_student_number').required = isStudent;
 
-            // Toggle staff fields visibility and required state
+            // Toggle staff fields visibility
             document.getElementById('register_staff_field').style.display = isStaff ? 'block' : 'none';
-            document.getElementById('register_stall_name').required = isStaff;
         }
 
         function togglePasswordVisibility(fieldId, iconId) {
@@ -343,7 +342,7 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             let initialTab = "{{ $activeTab ?? 'login' }}";
-            @if($errors->any() && ($errors->has('name') || $errors->has('email') || $errors->has('student_number') || $errors->has('stall_name') || $errors->has('password') || $errors->has('course') || $errors->has('year_level')))
+            @if($errors->any() && ($errors->has('name') || $errors->has('email') || $errors->has('student_number') || $errors->has('stall_id') || $errors->has('password') || $errors->has('course') || $errors->has('year_level')))
                 initialTab = 'register';
             @endif
             switchTab(initialTab);
