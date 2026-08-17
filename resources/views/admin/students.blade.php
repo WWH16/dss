@@ -445,31 +445,31 @@
     </div>
 </div>
 
-{{-- ── 5. Student Account Details Modal (Sharp Institutional Layout) ──── --}}
-<dialog id="details-modal" class="confirm-modal modal-sharp max-w-lg w-full rounded-none p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    {{-- Sharp Header --}}
+{{-- ── 5. Student Account Details Modal (Refined Balanced Radius) ────── --}}
+<dialog id="details-modal" class="confirm-modal modal-sharp max-w-lg w-full rounded-lg p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
+    {{-- Header --}}
     <div class="bg-brand-900 text-white px-5 py-4 flex items-center justify-between border-b border-brand-950">
         <div class="flex items-center gap-3">
-            <div id="modal-avatar" class="w-10 h-10 rounded-[2px] bg-brand-800 border border-brand-700/80 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-xs">
+            <div id="modal-avatar" class="w-10 h-10 rounded-md bg-brand-800 border border-brand-700/80 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-xs">
             </div>
             <div>
                 <h3 id="details-name" class="text-sm font-bold text-white leading-tight tracking-tight"></h3>
                 <p id="details-email" class="text-xs text-brand-200 font-mono mt-0.5"></p>
             </div>
         </div>
-        <button type="button" class="js-close-details-modal text-white/70 hover:text-white hover:bg-brand-800 p-1.5 rounded-[2px] transition-colors cursor-pointer" aria-label="Close modal">
+        <button type="button" class="js-close-details-modal text-white/70 hover:text-white hover:bg-brand-800 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
-    {{-- Sharp Body --}}
+    {{-- Body --}}
     <div class="p-5 sm:p-6 space-y-4 bg-white text-xs">
         {{-- Section 1: Academic & Identity Profile --}}
         <div>
             <span class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
                 Academic & Identity Profile
             </span>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-neutral-200 border border-neutral-200 overflow-hidden">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-neutral-200 border border-neutral-200 rounded-md overflow-hidden">
                 <div class="bg-white p-3 space-y-0.5">
                     <span class="block text-neutral-400 font-bold uppercase text-[9px] tracking-wider">Student ID Number</span>
                     <span id="details-student-number" class="font-mono font-bold text-neutral-900 text-xs"></span>
@@ -494,9 +494,9 @@
             <span class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
                 Participation & Evaluation Record
             </span>
-            <div class="p-3.5 bg-neutral-50/80 border border-neutral-200 flex items-center justify-between">
+            <div class="p-3.5 bg-neutral-50/80 border border-neutral-200 rounded-md flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-[2px] bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
+                    <div class="w-8 h-8 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
                         <ion-icon name="receipt-outline" class="text-base"></ion-icon>
                     </div>
                     <div>
@@ -504,7 +504,7 @@
                         <p class="text-[11px] text-neutral-500 font-medium" id="details-last-submitted"></p>
                     </div>
                 </div>
-                <span id="details-eval-count" class="text-xs font-bold font-mono text-brand-900 bg-brand-50 px-2.5 py-1 rounded-[2px] border border-brand-200 tabular-nums"></span>
+                <span id="details-eval-count" class="text-xs font-bold font-mono text-brand-900 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-200 tabular-nums"></span>
             </div>
         </div>
 
@@ -515,9 +515,9 @@
         </div>
     </div>
 
-    {{-- Sharp Action Footer --}}
+    {{-- Action Footer --}}
     <div class="flex items-center justify-end px-5 py-3.5 bg-neutral-50 border-t border-neutral-200">
-        <button type="button" class="btn btn-primary text-xs px-4 py-2 font-bold rounded-[2px] js-close-details-modal cursor-pointer">
+        <button type="button" class="btn btn-primary text-xs px-4 py-2 font-bold rounded-md js-close-details-modal cursor-pointer">
             Done
         </button>
     </div>
