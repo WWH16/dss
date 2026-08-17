@@ -174,7 +174,7 @@ class StudentDashboardController extends Controller
         return redirect()->back()->with('success', 'Password updated successfully!');
     }
 
-    public function history()
+    public function history(Request $request)
     {
         $user = Auth::user();
 
@@ -182,16 +182,37 @@ class StudentDashboardController extends Controller
             return redirect('/login');
         }
 
-        $myStudentEvals = DB::table('stall_evaluations')
+        $query = DB::table('stall_evaluations')
             ->join('stalls', 'stall_evaluations.stall_id', '=', 'stalls.id')
             ->where('stall_evaluations.student_id', $user->id)
             ->select(
                 'stall_evaluations.*',
-                'stalls.name as stall_name'
-            )
-            ->orderByDesc('stall_evaluations.created_at')
-            ->get();
+                'stalls.name as stall_name',
+                'stalls.description as stall_description'
+            );
 
-        return view('student.history', compact('myStudentEvals'));
+        if ($request->filled('q')) {
+            $q = '%' . trim($request->q) . '%';
+            $query->where(function ($w) use ($q) {
+                $w->where('stalls.name', 'like', $q)
+                  ->orWhere('stall_evaluations.comment', 'like', $q);
+            });
+        }
+
+        $sort = $request->get('sort', 'latest');
+        if ($sort === 'oldest') {
+            $query->orderBy('stall_evaluations.created_at', 'asc');
+        } elseif ($sort === 'rating_high') {
+            $query->orderByRaw('(cleanliness + service + taste + price) DESC');
+        } elseif ($sort === 'rating_low') {
+            $query->orderByRaw('(cleanliness + service + taste + price) ASC');
+        } else {
+            $query->orderByDesc('stall_evaluations.created_at');
+        }
+
+        $totalEvaluations = (clone $query)->count();
+        $myStudentEvals = $query->paginate(12)->withQueryString();
+
+        return view('student.history', compact('myStudentEvals', 'totalEvaluations'));
     }
 }
