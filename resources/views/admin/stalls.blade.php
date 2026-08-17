@@ -60,7 +60,7 @@
                     <p class="text-[11px] text-neutral-500 mt-0.5">Register a vendor &amp; optionally assign staff members.</p>
                 </div>
 
-                <form action="{{ route('admin.stall.add') }}" method="POST" class="space-y-3.5">
+                <form id="add-stall-form" action="{{ route('admin.stall.add') }}" method="POST" class="space-y-3.5">
                     @csrf
                     <div>
                         <label for="add-stall-name" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
@@ -132,9 +132,9 @@
                             placeholder="Short description of offerings or location">{{ old('description') }}</textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary text-xs py-2 px-4 font-semibold flex items-center justify-center gap-1.5 w-full rounded-md shadow-2xs cursor-pointer">
+                    <button type="submit" id="add-stall-submit-btn" class="btn btn-primary text-xs py-2 px-4 font-semibold flex items-center justify-center gap-1.5 w-full rounded-md shadow-2xs cursor-pointer transition-all">
                         <ion-icon name="add-outline" class="text-base"></ion-icon>
-                        Create Stall
+                        <span>Create Stall</span>
                     </button>
                 </form>
             </div>
@@ -311,7 +311,12 @@
 </div>
 
 {{-- ── 4. Edit Stall Modal (Scalable Searchable Multi-Staff Picker) ──────── --}}
-<dialog id="edit-modal" class="confirm-modal max-w-lg" aria-labelledby="edit-modal-title">
+<dialog id="edit-modal" class="confirm-modal max-w-lg relative" aria-labelledby="edit-modal-title">
+    {{-- Indeterminate Modal Progress Bar --}}
+    <div id="edit-modal-loader" class="modal-loading-bar hidden">
+        <div class="modal-loading-bar-inner"></div>
+    </div>
+
     <form id="edit-form" method="POST" class="space-y-4">
         @csrf
         @method('PUT')
@@ -325,7 +330,7 @@
                     <p class="text-[11px] text-neutral-500">Update vendor details &amp; assigned staff members</p>
                 </div>
             </div>
-            <button type="button" class="text-neutral-400 hover:text-neutral-600 js-close-edit-modal p-1 cursor-pointer" aria-label="Close modal">
+            <button type="button" id="edit-modal-close-btn" class="text-neutral-400 hover:text-neutral-600 js-close-edit-modal p-1 cursor-pointer" aria-label="Close modal">
                 <ion-icon name="close-outline" class="text-xl"></ion-icon>
             </button>
         </div>
@@ -423,17 +428,22 @@
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-            <button type="button" class="btn btn-ghost btn-sm text-xs rounded-md js-close-edit-modal cursor-pointer">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1 shadow-2xs cursor-pointer">
+            <button type="button" id="edit-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-edit-modal cursor-pointer">Cancel</button>
+            <button type="submit" id="edit-modal-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all">
                 <ion-icon name="save-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
-                Save Changes
+                <span>Save Changes</span>
             </button>
         </div>
     </form>
 </dialog>
 
 {{-- ── 5. Dedicated Stall Staff Roster Modal (Scrollable at Scale) ───────── --}}
-<dialog id="roster-modal" class="confirm-modal max-w-md" aria-labelledby="roster-modal-title">
+<dialog id="roster-modal" class="confirm-modal max-w-md relative" aria-labelledby="roster-modal-title">
+    {{-- Indeterminate Modal Progress Bar --}}
+    <div id="roster-modal-loader" class="modal-loading-bar hidden">
+        <div class="modal-loading-bar-inner"></div>
+    </div>
+
     <div class="space-y-4">
         <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
             <div class="flex items-center gap-3">
@@ -445,7 +455,7 @@
                     <p id="roster-modal-subtitle" class="text-[11px] text-neutral-500">Assigned members for this vendor</p>
                 </div>
             </div>
-            <button type="button" class="text-neutral-400 hover:text-neutral-600 js-close-roster-modal p-1 cursor-pointer" aria-label="Close roster">
+            <button type="button" id="roster-modal-close-btn" class="text-neutral-400 hover:text-neutral-600 js-close-roster-modal p-1 cursor-pointer" aria-label="Close roster">
                 <ion-icon name="close-outline" class="text-xl"></ion-icon>
             </button>
         </div>
@@ -469,7 +479,7 @@
         </form>
 
         <div class="flex items-center justify-between pt-3 border-t border-neutral-100">
-            <button type="button" class="btn btn-ghost btn-sm text-xs rounded-md js-close-roster-modal cursor-pointer">Close</button>
+            <button type="button" id="roster-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-roster-modal cursor-pointer">Close</button>
             <button type="button" id="roster-edit-stall-btn"
                 class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1 shadow-2xs cursor-pointer">
                 <ion-icon name="pencil-outline" class="text-sm"></ion-icon>
@@ -480,17 +490,27 @@
 </dialog>
 
 {{-- ── 6. Quick Assign Staff Modal ───────────────────────────────────────── --}}
-<dialog id="quick-assign-modal" class="confirm-modal" aria-labelledby="quick-assign-title">
-    <form action="{{ route('admin.staff.assign') }}" method="POST" class="space-y-4">
+<dialog id="quick-assign-modal" class="confirm-modal relative" aria-labelledby="quick-assign-title">
+    {{-- Indeterminate Modal Progress Bar --}}
+    <div id="quick-modal-loader" class="modal-loading-bar hidden">
+        <div class="modal-loading-bar-inner"></div>
+    </div>
+
+    <form id="quick-assign-form" action="{{ route('admin.staff.assign') }}" method="POST" class="space-y-4">
         @csrf
-        <div class="flex items-center gap-3 pb-3 border-b border-neutral-100">
-            <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
-                <ion-icon name="person-add-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
+        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
+                    <ion-icon name="person-add-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
+                </div>
+                <div>
+                    <h3 id="quick-assign-title" class="text-sm font-bold text-neutral-900 leading-tight">Quick Assign Staff</h3>
+                    <p class="text-[11px] text-neutral-500">Link unassigned staff directly to a food stall</p>
+                </div>
             </div>
-            <div>
-                <h3 id="quick-assign-title" class="text-sm font-bold text-neutral-900 leading-tight">Quick Assign Staff</h3>
-                <p class="text-[11px] text-neutral-500">Link unassigned staff directly to a food stall</p>
-            </div>
+            <button type="button" id="quick-modal-close-btn" class="text-neutral-400 hover:text-neutral-600 js-close-quick-modal p-1 cursor-pointer" aria-label="Close modal">
+                <ion-icon name="close-outline" class="text-xl"></ion-icon>
+            </button>
         </div>
 
         <div class="space-y-3 text-left">
@@ -525,17 +545,22 @@
         </div>
 
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-            <button type="button" class="btn btn-ghost btn-sm text-xs rounded-md js-close-quick-modal cursor-pointer">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1 shadow-2xs cursor-pointer">
+            <button type="button" id="quick-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-quick-modal cursor-pointer">Cancel</button>
+            <button type="submit" id="quick-modal-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all">
                 <ion-icon name="checkmark-outline" class="text-sm leading-none"></ion-icon>
-                Assign Staff
+                <span>Assign Staff</span>
             </button>
         </div>
     </form>
 </dialog>
 
 {{-- ── 7. Delete Confirmation Modal ─────────────────────────────────────── --}}
-<dialog id="delete-confirm-modal" class="confirm-modal" aria-labelledby="delete-modal-title">
+<dialog id="delete-confirm-modal" class="confirm-modal relative" aria-labelledby="delete-modal-title">
+    {{-- Indeterminate Modal Progress Bar --}}
+    <div id="delete-modal-loader" class="modal-loading-bar hidden">
+        <div class="modal-loading-bar-inner"></div>
+    </div>
+
     <div class="flex items-start gap-3.5 mb-4">
         <div class="flex-shrink-0 w-9 h-9 rounded-md bg-red-50 border border-red-200/80 flex items-center justify-center text-red-700">
             <ion-icon name="trash-outline" class="text-lg text-red-700" aria-hidden="true"></ion-icon>
@@ -549,17 +574,28 @@
         </div>
     </div>
     <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-        <button type="button" class="btn btn-ghost btn-sm text-xs rounded-md js-close-delete-modal cursor-pointer">Cancel</button>
+        <button type="button" id="delete-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-delete-modal cursor-pointer">Cancel</button>
         <button type="button" id="confirm-delete-btn"
-            class="btn btn-sm text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 rounded-md flex items-center gap-1 shadow-2xs transition-colors cursor-pointer">
+            class="btn btn-sm text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 rounded-md flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
             <ion-icon name="trash-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
-            Yes, Delete
+            <span>Yes, Delete</span>
         </button>
     </div>
 </dialog>
 
 @section('scripts')
 <script>
+// Helper for spinning SVG icon
+function makeSpinnerSvg(sizeClass = 'h-3.5 w-3.5') {
+    return `<svg class="animate-spin ${sizeClass} inline" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+    </svg>`;
+}
+
+// ── Global Flag to Prevent Modal Closing During Active Requests ──────────
+var isSubmittingAction = false;
+
 // ── Quick Filter Stalls in Directory ──────────────────────────────────────
 var searchInput = document.getElementById('stall-search-input');
 var stallItems  = document.querySelectorAll('.stall-item');
@@ -586,7 +622,9 @@ if (searchInput) {
     });
 }
 
-// ── Search & Counter in Add Stall Form ────────────────────────────────────
+// ── Add Stall Form Submission with Loader ─────────────────────────────────
+var addStallForm   = document.getElementById('add-stall-form');
+var addStallBtn    = document.getElementById('add-stall-submit-btn');
 var addStaffSearch = document.getElementById('add-staff-search');
 var addStaffItems  = document.querySelectorAll('.add-staff-item');
 var addStaffCbs    = document.querySelectorAll('.add-staff-checkbox');
@@ -610,6 +648,21 @@ addStaffCbs.forEach(function(cb) {
     });
 });
 
+if (addStallForm) {
+    addStallForm.addEventListener('submit', function(e) {
+        if (isSubmittingAction) {
+            e.preventDefault();
+            return;
+        }
+        isSubmittingAction = true;
+        if (addStallBtn) {
+            addStallBtn.disabled = true;
+            addStallBtn.classList.add('btn-loading');
+            addStallBtn.innerHTML = makeSpinnerSvg('h-3.5 w-3.5 text-white') + ' <span>Creating Stall…</span>';
+        }
+    });
+}
+
 // ── Edit Modal & Scalable Staff Selector ─────────────────────────────────
 var editModal       = document.getElementById('edit-modal');
 var editForm        = document.getElementById('edit-form');
@@ -617,13 +670,29 @@ var editNameInput   = document.getElementById('edit-stall-name-input');
 var editDescInput   = document.getElementById('edit-stall-desc-input');
 var editActiveInput = document.getElementById('edit-stall-active-input');
 var editStaffSearch = document.getElementById('edit-staff-search');
+var editSubmitBtn   = document.getElementById('edit-modal-submit-btn');
+var editCancelBtn   = document.getElementById('edit-modal-cancel-btn');
+var editCloseBtn    = document.getElementById('edit-modal-close-btn');
+var editLoader      = document.getElementById('edit-modal-loader');
 var currentFilterTab = 'all';
 
 function openEditModal(stallId, stallName, staffIdsArray, desc, isActive) {
+    if (isSubmittingAction) return;
+
     editForm.action = '/admin/stall/' + stallId;
     editNameInput.value = stallName;
     editDescInput.value = desc || '';
     editActiveInput.checked = isActive === 1;
+
+    // Reset loader & buttons
+    if (editLoader) editLoader.classList.add('hidden');
+    if (editSubmitBtn) {
+        editSubmitBtn.disabled = false;
+        editSubmitBtn.classList.remove('btn-loading');
+        editSubmitBtn.innerHTML = '<ion-icon name="save-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon> <span>Save Changes</span>';
+    }
+    if (editCancelBtn) editCancelBtn.disabled = false;
+    if (editCloseBtn) editCloseBtn.disabled = false;
 
     // Reset search & filter tabs
     if (editStaffSearch) editStaffSearch.value = '';
@@ -697,14 +766,44 @@ if (editStaffSearch) {
     editStaffSearch.addEventListener('input', applyModalStaffVisibility);
 }
 
+// Handle Form Submit on Edit Modal
+if (editForm) {
+    editForm.addEventListener('submit', function(e) {
+        if (isSubmittingAction) {
+            e.preventDefault();
+            return;
+        }
+        isSubmittingAction = true;
+
+        // Show Loader & Lock Modal
+        if (editLoader) editLoader.classList.remove('hidden');
+        if (editSubmitBtn) {
+            editSubmitBtn.disabled = true;
+            editSubmitBtn.classList.add('btn-loading');
+            editSubmitBtn.innerHTML = makeSpinnerSvg('h-3.5 w-3.5 text-white') + ' <span>Saving Changes…</span>';
+        }
+        if (editCancelBtn) editCancelBtn.disabled = true;
+        if (editCloseBtn) editCloseBtn.disabled = true;
+    });
+}
+
 document.querySelectorAll('.js-close-edit-modal').forEach(function(b) {
-    b.addEventListener('click', function() { editModal.close(); });
+    b.addEventListener('click', function() {
+        if (!isSubmittingAction) editModal.close();
+    });
 });
 
 editModal.addEventListener('click', function(e) {
+    if (isSubmittingAction) return; // Prevent closing while loader is running
     var r = editModal.getBoundingClientRect();
     if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
         editModal.close();
+    }
+});
+
+editModal.addEventListener('cancel', function(e) {
+    if (isSubmittingAction) {
+        e.preventDefault(); // Prevent ESC dismissal while loading
     }
 });
 
@@ -715,6 +814,9 @@ var rosterSubtitle    = document.getElementById('roster-modal-subtitle');
 var rosterList        = document.getElementById('roster-staff-list');
 var rosterSearch      = document.getElementById('roster-search-input');
 var rosterEditBtn     = document.getElementById('roster-edit-stall-btn');
+var rosterCancelBtn   = document.getElementById('roster-modal-cancel-btn');
+var rosterCloseBtn    = document.getElementById('roster-modal-close-btn');
+var rosterLoader      = document.getElementById('roster-modal-loader');
 var unassignForm      = document.getElementById('unassign-staff-form');
 var unassignStaffIdEl = document.getElementById('unassign-staff-id');
 var currentRosterStallId = null;
@@ -722,9 +824,16 @@ var currentRosterStallName = '';
 var currentRosterStaffData = [];
 
 function openRosterModal(stallId, stallName, staffMembersArray) {
+    if (isSubmittingAction) return;
+
     currentRosterStallId = stallId;
     currentRosterStallName = stallName;
     currentRosterStaffData = Array.isArray(staffMembersArray) ? staffMembersArray : [];
+
+    if (rosterLoader) rosterLoader.classList.add('hidden');
+    if (rosterCancelBtn) rosterCancelBtn.disabled = false;
+    if (rosterCloseBtn) rosterCloseBtn.disabled = false;
+    if (rosterEditBtn) rosterEditBtn.disabled = false;
 
     rosterTitle.textContent = stallName + ' — Staff Roster';
     rosterSubtitle.textContent = currentRosterStaffData.length + ' assigned ' + (currentRosterStaffData.length === 1 ? 'member' : 'members');
@@ -733,6 +842,7 @@ function openRosterModal(stallId, stallName, staffMembersArray) {
     renderRosterItems(currentRosterStaffData);
 
     rosterEditBtn.onclick = function() {
+        if (isSubmittingAction) return;
         rosterModal.close();
         var staffIds = currentRosterStaffData.map(function(s) { return s.id; });
         openEditModal(stallId, stallName, staffIds, '', 1);
@@ -763,8 +873,8 @@ function renderRosterItems(list) {
                     <p class="text-[10px] text-neutral-400 truncate font-mono">${member.email}</p>
                 </div>
             </div>
-            <button type="button" onclick="triggerUnassignStaff(${member.id}, '${escapeQuotes(member.name)}')"
-                class="text-neutral-500 hover:text-red-700 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-200 px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+            <button type="button" id="unassign-btn-${member.id}" onclick="triggerUnassignStaff(${member.id}, '${escapeQuotes(member.name)}')"
+                class="roster-remove-btn text-neutral-500 hover:text-red-700 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-200 px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                 title="Remove staff from this stall">
                 <ion-icon name="close-circle-outline" class="text-xs"></ion-icon>
                 <span>Remove</span>
@@ -779,9 +889,30 @@ function escapeQuotes(str) {
 }
 
 function triggerUnassignStaff(staffId, staffName) {
+    if (isSubmittingAction) return;
+
     if (!confirm('Remove ' + staffName + ' from ' + currentRosterStallName + '? The staff account will become unassigned.')) {
         return;
     }
+
+    isSubmittingAction = true;
+
+    // Show Roster Loader & Disable Controls
+    if (rosterLoader) rosterLoader.classList.remove('hidden');
+    if (rosterCancelBtn) rosterCancelBtn.disabled = true;
+    if (rosterCloseBtn) rosterCloseBtn.disabled = true;
+    if (rosterEditBtn) rosterEditBtn.disabled = true;
+
+    var clickedBtn = document.getElementById('unassign-btn-' + staffId);
+    if (clickedBtn) {
+        clickedBtn.disabled = true;
+        clickedBtn.innerHTML = makeSpinnerSvg('h-3 w-3 text-red-600') + ' <span>Removing…</span>';
+    }
+
+    document.querySelectorAll('.roster-remove-btn').forEach(function(b) {
+        b.disabled = true;
+    });
+
     if (unassignStaffIdEl && unassignForm) {
         unassignStaffIdEl.value = staffId;
         unassignForm.submit();
@@ -799,67 +930,149 @@ if (rosterSearch) {
 }
 
 document.querySelectorAll('.js-close-roster-modal').forEach(function(b) {
-    b.addEventListener('click', function() { rosterModal.close(); });
+    b.addEventListener('click', function() {
+        if (!isSubmittingAction) rosterModal.close();
+    });
 });
 
 if (rosterModal) {
     rosterModal.addEventListener('click', function(e) {
+        if (isSubmittingAction) return;
         var r = rosterModal.getBoundingClientRect();
         if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
             rosterModal.close();
         }
     });
+
+    rosterModal.addEventListener('cancel', function(e) {
+        if (isSubmittingAction) {
+            e.preventDefault();
+        }
+    });
 }
 
 // ── Quick Assign Modal ───────────────────────────────────────────────────
-var quickModal = document.getElementById('quick-assign-modal');
+var quickModal     = document.getElementById('quick-assign-modal');
+var quickForm      = document.getElementById('quick-assign-form');
+var quickSubmitBtn = document.getElementById('quick-modal-submit-btn');
+var quickCancelBtn = document.getElementById('quick-modal-cancel-btn');
+var quickCloseBtn  = document.getElementById('quick-modal-close-btn');
+var quickLoader    = document.getElementById('quick-modal-loader');
 
 function openQuickAssignModal() {
+    if (isSubmittingAction) return;
+    if (quickLoader) quickLoader.classList.add('hidden');
+    if (quickSubmitBtn) {
+        quickSubmitBtn.disabled = false;
+        quickSubmitBtn.classList.remove('btn-loading');
+        quickSubmitBtn.innerHTML = '<ion-icon name="checkmark-outline" class="text-sm leading-none"></ion-icon> <span>Assign Staff</span>';
+    }
+    if (quickCancelBtn) quickCancelBtn.disabled = false;
+    if (quickCloseBtn) quickCloseBtn.disabled = false;
     if (quickModal) quickModal.showModal();
 }
 
+if (quickForm) {
+    quickForm.addEventListener('submit', function(e) {
+        if (isSubmittingAction) {
+            e.preventDefault();
+            return;
+        }
+        isSubmittingAction = true;
+
+        if (quickLoader) quickLoader.classList.remove('hidden');
+        if (quickSubmitBtn) {
+            quickSubmitBtn.disabled = true;
+            quickSubmitBtn.classList.add('btn-loading');
+            quickSubmitBtn.innerHTML = makeSpinnerSvg('h-3.5 w-3.5 text-white') + ' <span>Assigning Staff…</span>';
+        }
+        if (quickCancelBtn) quickCancelBtn.disabled = true;
+        if (quickCloseBtn) quickCloseBtn.disabled = true;
+    });
+}
+
 document.querySelectorAll('.js-close-quick-modal').forEach(function(b) {
-    b.addEventListener('click', function() { quickModal.close(); });
+    b.addEventListener('click', function() {
+        if (!isSubmittingAction) quickModal.close();
+    });
 });
 
 if (quickModal) {
     quickModal.addEventListener('click', function(e) {
+        if (isSubmittingAction) return;
         var r = quickModal.getBoundingClientRect();
         if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
             quickModal.close();
         }
     });
+
+    quickModal.addEventListener('cancel', function(e) {
+        if (isSubmittingAction) {
+            e.preventDefault();
+        }
+    });
 }
 
 // ── Delete Modal ─────────────────────────────────────────────────────────
-var deleteModal    = document.getElementById('delete-confirm-modal');
-var stallNameEl    = document.getElementById('delete-stall-name');
-var confirmDelBtn  = document.getElementById('confirm-delete-btn');
-var pendingFormId  = null;
+var deleteModal     = document.getElementById('delete-confirm-modal');
+var stallNameEl     = document.getElementById('delete-stall-name');
+var confirmDelBtn   = document.getElementById('confirm-delete-btn');
+var deleteCancelBtn = document.getElementById('delete-modal-cancel-btn');
+var deleteLoader    = document.getElementById('delete-modal-loader');
+var pendingFormId   = null;
 
 function openDeleteModal(stallId, stallName) {
+    if (isSubmittingAction) return;
     pendingFormId = 'delete-form-' + stallId;
     stallNameEl.textContent = stallName;
+
+    if (deleteLoader) deleteLoader.classList.add('hidden');
+    if (confirmDelBtn) {
+        confirmDelBtn.disabled = false;
+        confirmDelBtn.classList.remove('btn-loading');
+        confirmDelBtn.innerHTML = '<ion-icon name="trash-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon> <span>Yes, Delete</span>';
+    }
+    if (deleteCancelBtn) deleteCancelBtn.disabled = false;
+
     deleteModal.showModal();
 }
 
 document.querySelectorAll('.js-close-delete-modal').forEach(function(b) {
-    b.addEventListener('click', function() { deleteModal.close(); });
+    b.addEventListener('click', function() {
+        if (!isSubmittingAction) deleteModal.close();
+    });
 });
 
-deleteModal.addEventListener('click', function(e) {
-    var r = deleteModal.getBoundingClientRect();
-    if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
-        deleteModal.close();
-    }
-});
+if (deleteModal) {
+    deleteModal.addEventListener('click', function(e) {
+        if (isSubmittingAction) return;
+        var r = deleteModal.getBoundingClientRect();
+        if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+            deleteModal.close();
+        }
+    });
 
-confirmDelBtn.addEventListener('click', function() {
-    if (!pendingFormId) return;
-    confirmDelBtn.disabled = true;
-    confirmDelBtn.innerHTML = '<ion-icon name="hourglass-outline" class="text-xs leading-none"></ion-icon> Deleting…';
-    document.getElementById(pendingFormId).submit();
-});
+    deleteModal.addEventListener('cancel', function(e) {
+        if (isSubmittingAction) {
+            e.preventDefault();
+        }
+    });
+}
+
+if (confirmDelBtn) {
+    confirmDelBtn.addEventListener('click', function() {
+        if (!pendingFormId || isSubmittingAction) return;
+        isSubmittingAction = true;
+
+        if (deleteLoader) deleteLoader.classList.remove('hidden');
+        confirmDelBtn.disabled = true;
+        confirmDelBtn.classList.add('btn-loading');
+        confirmDelBtn.innerHTML = makeSpinnerSvg('h-3.5 w-3.5 text-white') + ' <span>Deleting Stall…</span>';
+        if (deleteCancelBtn) deleteCancelBtn.disabled = true;
+
+        document.getElementById(pendingFormId).submit();
+    });
+}
 </script>
 @endsection
 @endsection
