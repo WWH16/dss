@@ -126,8 +126,57 @@
             </div>
         </div>
 
-        {{-- ── 4. Main Analytics Dashboard (2:1 Asymmetric Split) ────────── --}}
+        {{-- ── 4. Primary Chart Card: Evaluation Activity Timeline (Full Width) ──── --}}
         @if($totalEvaluations > 0 && $averages)
+            <div class="bg-white rounded-xl border border-neutral-200/80 p-5 sm:p-6 shadow-xs">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-neutral-100 gap-3">
+                    <div>
+                        <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
+                            <ion-icon name="pulse-outline" class="text-brand-700 text-base"></ion-icon>
+                            Evaluation Activity Timeline
+                        </h2>
+                        <p class="text-xs text-neutral-500 mt-0.5">
+                            {{ $activityPeriodLabel }} • <strong class="text-neutral-800 font-semibold tabular-nums">{{ $activityTotalCount }}</strong> {{ $activityTotalCount === 1 ? 'submission logged' : 'submissions logged' }}
+                        </p>
+                    </div>
+
+                    {{-- Month / Year Filter Controls --}}
+                    <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                        @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
+                        @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
+
+                        <div class="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/90 rounded-lg p-1">
+                            <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
+                                class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
+                                <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
+                                <option value="all" {{ $selectedMonth === 'all' ? 'selected' : '' }}>Whole Year</option>
+                                <optgroup label="Month">
+                                    @foreach([
+                                        1 => 'January', 2 => 'February', 3 => 'March', 4 => 'April',
+                                        5 => 'May', 6 => 'June', 7 => 'July', 8 => 'August',
+                                        9 => 'September', 10 => 'October', 11 => 'November', 12 => 'December'
+                                    ] as $mNum => $mName)
+                                        <option value="{{ $mNum }}" {{ (string)$selectedMonth === (string)$mNum ? 'selected' : '' }}>{{ $mName }}</option>
+                                    @endforeach
+                                </optgroup>
+                            </select>
+
+                            <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
+                                class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
+                                @foreach($availableYears as $y)
+                                    <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
+                                @endforeach
+                            </select>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="relative w-full" style="height: 220px;">
+                    <canvas id="stallTrendChart" role="img" aria-label="Line chart showing evaluation submissions for your stall for {{ $activityPeriodLabel }}"></canvas>
+                </div>
+            </div>
+
+            {{-- ── 5. Secondary Analytics Grid: Benchmark Comparison & Rating Breakdown ── --}}
             @php
                 $cleanVal = (float)$averages->cleanliness;
                 $servVal  = (float)$averages->service;
@@ -145,10 +194,10 @@
                 $lowestCritName = array_key_last($critMap);
             @endphp
 
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-stretch">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 items-stretch">
 
-                {{-- LEFT: Criteria Benchmark Comparison (2 Cols) --}}
-                <div class="lg:col-span-2 bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs space-y-4 flex flex-col justify-between">
+                {{-- LEFT: Criteria Benchmark Comparison (3 Cols) --}}
+                <div class="lg:col-span-3 bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs flex flex-col justify-between space-y-4">
                     <div>
                         <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
                             <div>
@@ -204,99 +253,57 @@
                     </div>
                 </div>
 
-                {{-- RIGHT: Rating Distribution & Timeline (1 Col) --}}
-                <div class="flex flex-col justify-between gap-5">
-
-                    {{-- Rating Breakdown --}}
-                    <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs flex-1 flex flex-col justify-between">
-                        <div>
-                            <div class="flex items-center justify-between pb-3 mb-3 border-b border-neutral-100">
-                                <div>
-                                    <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Rating Breakdown</h2>
-                                    <p class="text-xs text-neutral-500 mt-0.5">Score distribution</p>
-                                </div>
-                                <span class="text-xs font-black text-neutral-800 tabular-nums bg-neutral-100 px-2 py-0.5 rounded">{{ number_format($averages ? (float)$averages->overall : 0, 2) }}★</span>
-                            </div>
-
-                            @php
-                                $s5 = $ratingDistribution ? (int)$ratingDistribution->stars_5 : 0;
-                                $s4 = $ratingDistribution ? (int)$ratingDistribution->stars_4 : 0;
-                                $s3 = $ratingDistribution ? (int)$ratingDistribution->stars_3 : 0;
-                                $s2 = $ratingDistribution ? (int)$ratingDistribution->stars_2 : 0;
-                                $s1 = $ratingDistribution ? (int)$ratingDistribution->stars_1 : 0;
-                            @endphp
-
-                            <div class="space-y-2">
-                                @foreach([
-                                    ['label' => '5★', 'count' => $s5, 'color' => 'bg-emerald-500'],
-                                    ['label' => '4★', 'count' => $s4, 'color' => 'bg-emerald-400'],
-                                    ['label' => '3★', 'count' => $s3, 'color' => 'bg-amber-400'],
-                                    ['label' => '2★', 'count' => $s2, 'color' => 'bg-orange-400'],
-                                    ['label' => '1★', 'count' => $s1, 'color' => 'bg-rose-400'],
-                                ] as $starRow)
-                                    @php
-                                        $pct = $totalEvaluations > 0 ? round(($starRow['count'] / $totalEvaluations) * 100) : 0;
-                                    @endphp
-                                    <div class="flex items-center gap-2 text-xs">
-                                        <span class="w-5 font-bold text-neutral-600 shrink-0 text-right tabular-nums text-[11px]">{{ $starRow['label'] }}</span>
-                                        <div class="flex-1 bg-neutral-100 h-1.5 rounded-full overflow-hidden">
-                                            <div class="h-full {{ $starRow['color'] }}" style="width: {{ $pct }}%"></div>
-                                        </div>
-                                        <span class="w-6 font-mono text-[10px] text-neutral-400 text-right shrink-0 tabular-nums">{{ $starRow['count'] }}</span>
-                                    </div>
-                                @endforeach
-                            </div>
-                        </div>
-                    </div>
-
-                    {{-- Activity Timeline --}}
-                    <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs flex-1 flex flex-col justify-between">
-                        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-2 mb-2 border-b border-neutral-100 gap-2">
+                {{-- RIGHT: Rating Distribution (2 Cols) --}}
+                <div class="lg:col-span-2 bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between pb-3 mb-3.5 border-b border-neutral-100">
                             <div>
-                                <h2 class="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
-                                    <ion-icon name="pulse-outline" class="text-brand-700 text-sm"></ion-icon>
-                                    Activity Timeline
-                                </h2>
-                                <p class="text-[11px] text-neutral-500 mt-0.5">
-                                    {{ $activityPeriodLabel }} • <strong class="text-neutral-700 font-semibold tabular-nums">{{ $activityTotalCount }}</strong> {{ $activityTotalCount === 1 ? 'review' : 'reviews' }}
-                                </p>
+                                <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Rating Breakdown</h2>
+                                <p class="text-xs text-neutral-500 mt-0.5">Score distribution from 5★ to 1★</p>
                             </div>
-
-                            {{-- Month / Year Filter --}}
-                            <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-1.5 shrink-0">
-                                @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
-                                @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
-                                
-                                <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
-                                    class="px-2 py-1 bg-neutral-50 border border-neutral-300 rounded text-[11px] font-medium text-neutral-700 focus:outline-none focus:border-brand-700">
-                                    <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
-                                    <option value="all" {{ $selectedMonth === 'all' ? 'selected' : '' }}>Whole Year</option>
-                                    <optgroup label="Month">
-                                        @foreach([
-                                            1 => 'Jan', 2 => 'Feb', 3 => 'Mar', 4 => 'Apr',
-                                            5 => 'May', 6 => 'Jun', 7 => 'Jul', 8 => 'Aug',
-                                            9 => 'Sep', 10 => 'Oct', 11 => 'Nov', 12 => 'Dec'
-                                        ] as $mNum => $mName)
-                                            <option value="{{ $mNum }}" {{ (string)$selectedMonth === (string)$mNum ? 'selected' : '' }}>{{ $mName }}</option>
-                                        @endforeach
-                                    </optgroup>
-                                </select>
-
-                                <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
-                                    class="px-2 py-1 bg-neutral-50 border border-neutral-300 rounded text-[11px] font-medium text-neutral-700 focus:outline-none focus:border-brand-700">
-                                    @foreach($availableYears as $y)
-                                        <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
-                                    @endforeach
-                                </select>
-                            </form>
+                            <span class="text-xs font-black text-neutral-800 tabular-nums bg-neutral-100 px-2 py-0.5 rounded">{{ number_format($averages ? (float)$averages->overall : 0, 2) }}★</span>
                         </div>
 
-                        <div class="relative w-full pt-1" style="height: 135px;">
-                            <canvas id="stallTrendChart" role="img" aria-label="Line chart showing evaluation submissions for your stall for {{ $activityPeriodLabel }}"></canvas>
+                        @php
+                            $s5 = $ratingDistribution ? (int)$ratingDistribution->stars_5 : 0;
+                            $s4 = $ratingDistribution ? (int)$ratingDistribution->stars_4 : 0;
+                            $s3 = $ratingDistribution ? (int)$ratingDistribution->stars_3 : 0;
+                            $s2 = $ratingDistribution ? (int)$ratingDistribution->stars_2 : 0;
+                            $s1 = $ratingDistribution ? (int)$ratingDistribution->stars_1 : 0;
+                        @endphp
+
+                        <div class="space-y-3 pt-1">
+                            @foreach([
+                                ['label' => '5 Stars', 'stars' => '5★', 'count' => $s5, 'color' => 'bg-emerald-500'],
+                                ['label' => '4 Stars', 'stars' => '4★', 'count' => $s4, 'color' => 'bg-emerald-400'],
+                                ['label' => '3 Stars', 'stars' => '3★', 'count' => $s3, 'color' => 'bg-amber-400'],
+                                ['label' => '2 Stars', 'stars' => '2★', 'count' => $s2, 'color' => 'bg-orange-400'],
+                                ['label' => '1 Star',  'stars' => '1★', 'count' => $s1, 'color' => 'bg-rose-400'],
+                            ] as $starRow)
+                                @php
+                                    $pct = $totalEvaluations > 0 ? round(($starRow['count'] / $totalEvaluations) * 100) : 0;
+                                @endphp
+                                <div class="space-y-1">
+                                    <div class="flex items-center justify-between text-xs">
+                                        <span class="font-bold text-neutral-700 text-xs">{{ $starRow['label'] }}</span>
+                                        <div class="flex items-center gap-1.5">
+                                            <span class="font-mono text-[11px] text-neutral-400 tabular-nums">{{ $starRow['count'] }} ({{ $pct }}%)</span>
+                                        </div>
+                                    </div>
+                                    <div class="w-full bg-neutral-100 h-2 rounded-full overflow-hidden">
+                                        <div class="h-full {{ $starRow['color'] }} transition-all duration-500" style="width: {{ $pct }}%"></div>
+                                    </div>
+                                </div>
+                            @endforeach
                         </div>
                     </div>
 
+                    <div class="mt-4 pt-3 border-t border-neutral-100 text-[11px] text-neutral-500 flex items-center justify-between">
+                        <span>Total student reviews:</span>
+                        <strong class="text-neutral-800 tabular-nums font-semibold">{{ $totalEvaluations }}</strong>
+                    </div>
                 </div>
+
             </div>
         @endif
 
