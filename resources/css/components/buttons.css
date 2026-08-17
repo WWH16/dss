@@ -9,7 +9,7 @@
     padding: 0.5625rem 1.25rem;
     font-size: 0.8125rem;
     font-weight: 600;
-    border-radius: var(--radius-sm);
+    border-radius: var(--radius-md);
     border: 1px solid transparent;
     text-decoration: none;
     cursor: pointer;

@@ -3,7 +3,7 @@
 ───────────────────────────────────────────────────────────────────────── */
 dialog.confirm-modal {
     border: 1px solid oklch(0.84 0.10 155 / 0.35);
-    border-radius: var(--radius-sm, 2px);
+    border-radius: var(--radius-xl, 0.5rem);
     background-color: var(--color-surface);
     color: var(--color-ink-900);
     padding: var(--space-6);
@@ -16,7 +16,7 @@ dialog.confirm-modal {
 
 dialog.modal-sharp,
 dialog.confirm-modal.modal-sharp {
-    border-radius: var(--radius-sm, 2px) !important;
+    border-radius: var(--radius-xl, 0.5rem) !important;
     padding: 0 !important;
     border: none !important;
     outline: none !important;
