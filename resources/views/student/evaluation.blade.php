@@ -82,6 +82,14 @@
             <form id="evaluationForm" action="{{ route('student.evaluation.store') }}" method="POST" class="p-5 sm:p-8 space-y-6">
                 @csrf
 
+                {{-- Validation Error Alert --}}
+                <div id="formValidationAlert" class="hidden p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs">
+                    <p class="font-bold mb-1 flex items-center gap-1.5">
+                        <ion-icon name="alert-circle" class="text-base text-rose-600"></ion-icon>
+                        <span id="formValidationErrorMsg">Please answer all survey statements before submitting.</span>
+                    </p>
+                </div>
+
                 @if($errors->any())
                     <div class="p-4 bg-rose-50 border border-rose-200/80 rounded-xl text-rose-800 text-xs">
                         <p class="font-bold mb-1">Please correct the following errors:</p>
@@ -157,21 +165,21 @@
 
                 {{-- ── DESKTOP TABLE LAYOUT (hidden on mobile) ─────────────────── --}}
                 <div class="hidden sm:block">
-                    <div class="rounded-xl border border-neutral-200/80 shadow-xs overflow-hidden">
+                    <div class="rounded-xl border border-neutral-200/80 shadow-xs overflow-hidden bg-white">
                         <table class="w-full text-left border-collapse min-w-[620px]">
                             <thead>
                                 <tr class="bg-neutral-50/80 border-b border-neutral-200 text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
                                     <th class="py-3.5 px-5">Survey Statement</th>
-                                    <th class="py-3.5 px-2 text-center w-14 font-black text-neutral-800 text-xs">5</th>
-                                    <th class="py-3.5 px-2 text-center w-14 font-black text-neutral-800 text-xs">4</th>
-                                    <th class="py-3.5 px-2 text-center w-14 font-black text-neutral-800 text-xs">3</th>
-                                    <th class="py-3.5 px-2 text-center w-14 font-black text-neutral-800 text-xs">2</th>
-                                    <th class="py-3.5 px-2 text-center w-14 font-black text-neutral-800 text-xs">1</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">5★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">4★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">3★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">2★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">1★</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-100 text-xs">
                                 @foreach($displayStatements as $index => $statement)
-                                    <tr class="survey-row group hover:bg-neutral-50/70 transition-colors" data-index="{{ $index }}">
+                                    <tr class="survey-row group hover:bg-neutral-50/50 transition-colors" id="desktop_row_{{ $statement['id'] }}">
                                         <td class="py-4 px-5">
                                             <div class="flex items-start gap-2.5">
                                                 <span class="w-5 h-5 rounded-full bg-neutral-100 text-neutral-600 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
@@ -189,13 +197,18 @@
                                         </td>
                                         @for($val = 5; $val >= 1; $val--)
                                             <td class="p-0 text-center align-middle border-l border-neutral-100">
-                                                <label class="flex items-center justify-center w-full h-full min-h-[54px] cursor-pointer hover:bg-brand-50/50 transition-colors group-hover/cell:bg-brand-50/30">
+                                                <label for="dt_q{{ $statement['id'] }}_v{{ $val }}" class="flex items-center justify-center w-full h-full min-h-[58px] cursor-pointer hover:bg-brand-50/50 transition-colors">
                                                     <input type="radio" 
+                                                        id="dt_q{{ $statement['id'] }}_v{{ $val }}"
                                                         name="responses[{{ $statement['id'] }}]" 
                                                         value="{{ $val }}" 
-                                                        required 
-                                                        class="survey-radio appearance-auto w-4 h-4 cursor-pointer accent-brand-600"
-                                                        data-question-index="{{ $index }}">
+                                                        class="peer sr-only survey-radio-dt"
+                                                        data-statement-id="{{ $statement['id'] }}"
+                                                        data-val="{{ $val }}">
+                                                    {{-- Custom Styled Circle --}}
+                                                    <div class="w-6 h-6 rounded-full border-2 border-neutral-300 bg-white peer-checked:border-brand-600 peer-checked:bg-brand-600 flex items-center justify-center transition-all duration-150 shadow-2xs">
+                                                        <div class="w-2 h-2 rounded-full bg-white opacity-0 peer-checked:opacity-100 transition-opacity"></div>
+                                                    </div>
                                                 </label>
                                             </td>
                                         @endfor
@@ -209,7 +222,7 @@
                 {{-- ── MOBILE CARD LAYOUT (hidden on sm+) ─────────────────────── --}}
                 <div class="sm:hidden space-y-3" id="mobileQuestions">
                     @foreach($displayStatements as $index => $statement)
-                        <div class="mobile-question-card bg-white border border-neutral-200/80 rounded-xl overflow-hidden shadow-2xs transition-colors" data-question="{{ $index }}">
+                        <div class="mobile-question-card bg-white border border-neutral-200/80 rounded-xl overflow-hidden shadow-2xs transition-colors" id="mobile_card_{{ $statement['id'] }}">
                             <div class="p-3.5 bg-neutral-50/70 border-b border-neutral-100 flex items-start gap-2">
                                 <span class="shrink-0 w-5 h-5 rounded-full bg-neutral-200 text-neutral-700 text-[10px] font-bold flex items-center justify-center tabular-nums mt-0.5">
                                     {{ $index + 1 }}
@@ -226,15 +239,15 @@
 
                             <div class="p-3 flex gap-1.5">
                                 @for($val = 5; $val >= 1; $val--)
-                                    <label class="flex-1 relative cursor-pointer" for="mob_q{{ $statement['id'] }}_v{{ $val }}">
+                                    <label for="mb_q{{ $statement['id'] }}_v{{ $val }}" class="flex-1 relative cursor-pointer">
                                         <input
                                             type="radio"
-                                            id="mob_q{{ $statement['id'] }}_v{{ $val }}"
-                                            name="responses[{{ $statement['id'] }}]"
+                                            id="mb_q{{ $statement['id'] }}_v{{ $val }}"
+                                            name="responses_mobile[{{ $statement['id'] }}]"
                                             value="{{ $val }}"
-                                            required
-                                            class="survey-radio sr-only peer"
-                                            data-question-index="{{ $index }}">
+                                            class="peer sr-only survey-radio-mb"
+                                            data-statement-id="{{ $statement['id'] }}"
+                                            data-val="{{ $val }}">
                                         <div class="peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 peer-checked:shadow-2xs flex flex-col items-center justify-center min-h-[46px] rounded-lg border border-neutral-200 bg-neutral-50/50 transition-all active:scale-95 select-none">
                                             <span class="text-xs font-bold leading-none">{{ $val }}★</span>
                                             <span class="text-[8px] font-medium leading-tight mt-0.5 opacity-70 peer-checked:opacity-100">
@@ -287,49 +300,109 @@ document.addEventListener('DOMContentLoaded', () => {
     const totalStatements = {{ count($displayStatements ?? []) }};
     const progressBar = document.getElementById('surveyProgressBar');
     const progressText = document.getElementById('progressText');
-    const allRadios = document.querySelectorAll('.survey-radio');
     const form = document.getElementById('evaluationForm');
     const submitBtn = document.getElementById('submitEvaluationBtn');
     const submitText = document.getElementById('submitText');
     const submitIcon = document.getElementById('submitIcon');
     const submitLoader = document.getElementById('submitLoader');
+    const alertBox = document.getElementById('formValidationAlert');
+    const alertMsg = document.getElementById('formValidationErrorMsg');
+
+    // Sync state between desktop radio and mobile radio
+    function updateRating(statementId, val) {
+        // Desktop radio
+        const dtRadio = document.getElementById('dt_q' + statementId + '_v' + val);
+        if (dtRadio) dtRadio.checked = true;
+
+        // Mobile radio
+        const mbRadio = document.getElementById('mb_q' + statementId + '_v' + val);
+        if (mbRadio) mbRadio.checked = true;
+
+        // Update progress counter
+        updateProgress();
+    }
 
     function updateProgress() {
-        const answeredGroups = new Set();
-        document.querySelectorAll('input[type="radio"]:checked').forEach(r => {
-            if (r.name.startsWith('responses[')) {
-                answeredGroups.add(r.name);
-            }
+        const answeredIds = new Set();
+        document.querySelectorAll('.survey-radio-dt:checked').forEach(r => {
+            answeredIds.add(r.dataset.statementId);
         });
 
-        const count = answeredGroups.size;
+        const count = answeredIds.size;
         const pct = totalStatements > 0 ? Math.round((count / totalStatements) * 100) : 0;
 
         if (progressBar) progressBar.style.width = pct + '%';
         if (progressText) progressText.textContent = count + ' / ' + totalStatements + ' answered (' + pct + '%)';
     }
 
-    allRadios.forEach(radio => {
+    // Attach listeners to Desktop radios
+    document.querySelectorAll('.survey-radio-dt').forEach(radio => {
         radio.addEventListener('change', (e) => {
-            // Sync desktop and mobile matching inputs
-            const name = e.target.name;
-            const val = e.target.value;
-            document.querySelectorAll(`input[name="${name}"][value="${val}"]`).forEach(match => {
-                match.checked = true;
-            });
+            const sid = e.target.dataset.statementId;
+            const val = e.target.dataset.val;
+            const mbRadio = document.getElementById('mb_q' + sid + '_v' + val);
+            if (mbRadio) mbRadio.checked = true;
             updateProgress();
         });
     });
 
+    // Attach listeners to Mobile radios
+    document.querySelectorAll('.survey-radio-mb').forEach(radio => {
+        radio.addEventListener('change', (e) => {
+            const sid = e.target.dataset.statementId;
+            const val = e.target.dataset.val;
+            const dtRadio = document.getElementById('dt_q' + sid + '_v' + val);
+            if (dtRadio) dtRadio.checked = true;
+            updateProgress();
+        });
+    });
+
+    // Form Submission Validation
     if (form && submitBtn) {
-        form.addEventListener('submit', () => {
-            if (form.checkValidity()) {
-                submitBtn.disabled = true;
-                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
-                if (submitText) submitText.textContent = 'Submitting...';
-                if (submitIcon) submitIcon.classList.add('hidden');
-                if (submitLoader) submitLoader.classList.remove('hidden');
+        form.addEventListener('submit', (e) => {
+            // Check stall
+            const stallSelect = document.getElementById('stall_id');
+            if (!stallSelect || !stallSelect.value) {
+                e.preventDefault();
+                if (alertBox && alertMsg) {
+                    alertMsg.textContent = 'Please select a Food Stall to evaluate.';
+                    alertBox.classList.remove('hidden');
+                    stallSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    stallSelect.focus();
+                }
+                return false;
             }
+
+            // Check that all statements are answered in the canonical desktop inputs
+            const missingStatementIds = [];
+            @foreach($displayStatements as $statement)
+                if (!document.querySelector('input[name="responses[{{ $statement['id'] }}]"]:checked')) {
+                    missingStatementIds.push({{ $statement['id'] }});
+                }
+            @endforeach
+
+            if (missingStatementIds.length > 0) {
+                e.preventDefault();
+                if (alertBox && alertMsg) {
+                    alertMsg.textContent = 'Please answer all ' + totalStatements + ' statements before submitting (' + (totalStatements - missingStatementIds.length) + ' of ' + totalStatements + ' completed).';
+                    alertBox.classList.remove('hidden');
+
+                    const firstMissing = missingStatementIds[0];
+                    const targetEl = document.getElementById('desktop_row_' + firstMissing) || document.getElementById('mobile_card_' + firstMissing);
+                    if (targetEl) {
+                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    }
+                }
+                return false;
+            }
+
+            // If valid, hide alert and show loading state
+            if (alertBox) alertBox.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+            if (submitText) submitText.textContent = 'Submitting...';
+            if (submitIcon) submitIcon.classList.add('hidden');
+            if (submitLoader) submitLoader.classList.remove('hidden');
         });
     }
 
