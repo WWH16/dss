@@ -88,24 +88,40 @@
                 </div>
             </div>
 
-            {{-- Results Count & Active Filters Indicator --}}
-            <div class="flex items-center justify-between text-xs text-neutral-500 pt-1">
-                <div>
-                    @if($hasFilters)
-                        <span>Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $evaluations->total() }}</strong> of <span class="tabular-nums">{{ $totalEvaluationsCount }}</span> filtered evaluations</span>
-                    @else
-                        <span><strong class="text-neutral-900 font-bold tabular-nums">{{ $totalEvaluationsCount }}</strong> {{ Str::plural('evaluation', $totalEvaluationsCount) }} recorded</span>
-                    @endif
-                </div>
-                @if(request('stall_id'))
-                    @php $activeStall = $stalls->firstWhere('id', request('stall_id')); @endphp
-                    @if($activeStall)
-                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 border border-brand-200/60 text-brand-800 text-[10px] font-bold">
-                            Stall: {{ $activeStall->name }}
+            {{-- Active Filter Chips (Only shown when filters are applied) --}}
+            @if($hasFilters)
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-neutral-100 text-xs">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-neutral-400 font-medium">Active filters:</span>
+                        @if(request('q'))
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                Search: "{{ request('q') }}"
+                            </span>
+                        @endif
+                        @if(request('stall_id'))
+                            @php $activeStall = $stalls->firstWhere('id', request('stall_id')); @endphp
+                            @if($activeStall)
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 border border-brand-200 text-brand-800 text-[11px] font-semibold">
+                                    Stall: {{ $activeStall->name }}
+                                </span>
+                            @endif
+                        @endif
+                        @if(request('sort') && request('sort') !== 'latest')
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                Sort: {{ request('sort') === 'rating_high' ? 'Highest Rating' : (request('sort') === 'rating_low' ? 'Lowest Rating' : 'Oldest') }}
+                            </span>
+                        @endif
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                            {{ $evaluations->total() }} results
                         </span>
-                    @endif
-                @endif
-            </div>
+                    </div>
+
+                    <a href="{{ route('admin.evaluations') }}" class="text-neutral-500 hover:text-neutral-900 font-semibold text-xs inline-flex items-center gap-1">
+                        <ion-icon name="close-circle-outline" class="text-sm"></ion-icon>
+                        Clear filters
+                    </a>
+                </div>
+            @endif
         </form>
     </div>
 

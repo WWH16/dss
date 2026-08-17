@@ -173,37 +173,50 @@
                         </select>
                     </div>
                 </div>
-            </div>
 
-            {{-- Results Count & Active Filters Indicator --}}
-            <div class="flex items-center justify-between text-xs text-neutral-500 pt-1">
-                <div>
-                    @if($hasFilters)
-                        <span>Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->total() }}</strong> of <span class="tabular-nums">{{ $totalStudents }}</span> filtered accounts</span>
-                    @else
-                        <span><strong class="text-neutral-900 font-bold tabular-nums">{{ $totalStudents }}</strong> {{ Str::plural('student account', $totalStudents) }} registered</span>
-                    @endif
-                </div>
-                @if(request('department') || request('course') || request('year_level'))
-                    <div class="flex items-center gap-1.5 flex-wrap">
-                        @if(request('department'))
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 border border-brand-200/60 text-brand-800 text-[10px] font-bold">
-                                Dept: {{ request('department') }}
+                {{-- Active Filter Chips (Only shown when filters are applied) --}}
+                @if($hasFilters)
+                    <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-neutral-100 text-xs">
+                        <div class="flex flex-wrap items-center gap-1.5">
+                            <span class="text-neutral-400 font-medium">Active filters:</span>
+                            @if(request('q'))
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                    Search: "{{ request('q') }}"
+                                </span>
+                            @endif
+                            @if(request('department'))
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 border border-brand-200 text-brand-800 text-[11px] font-semibold">
+                                    Dept: {{ request('department') }}
+                                </span>
+                            @endif
+                            @if(request('course'))
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                    Course: {{ request('course') }}
+                                </span>
+                            @endif
+                            @if(request('year_level'))
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                    Year: {{ request('year_level') }}
+                                </span>
+                            @endif
+                            @if(request('sort') && request('sort') !== 'latest')
+                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                    Sort: {{ request('sort') === 'name_asc' ? 'Name (A-Z)' : (request('sort') === 'evaluations_desc' ? 'Most Evaluations' : 'Oldest') }}
+                                </span>
+                            @endif
+                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                                {{ $students->total() }} results
                             </span>
-                        @endif
-                        @if(request('course'))
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-800 text-[10px] font-bold">
-                                Course: {{ request('course') }}
-                            </span>
-                        @endif
-                        @if(request('year_level'))
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-800 text-[10px] font-bold">
-                                Year: {{ request('year_level') }}
-                            </span>
-                        @endif
+                        </div>
+
+                        <a href="{{ route('admin.students') }}" class="text-neutral-500 hover:text-neutral-900 font-semibold text-xs inline-flex items-center gap-1">
+                            <ion-icon name="close-circle-outline" class="text-sm"></ion-icon>
+                            Clear filters
+                        </a>
                     </div>
                 @endif
             </div>
+
         </form>
     </div>
 

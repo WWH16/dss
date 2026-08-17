@@ -130,17 +130,23 @@ class AdminController extends Controller
             ->join('users','users.id','=','stall_evaluations.student_id')
             ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
             ->select(
-                'stall_evaluations.*',
+                'stall_evaluations.id',
+                'stall_evaluations.stall_id',
+                'stall_evaluations.student_id',
+                'stall_evaluations.cleanliness',
+                'stall_evaluations.service',
+                'stall_evaluations.taste',
+                'stall_evaluations.price',
+                'stall_evaluations.comment',
+                'stall_evaluations.created_at',
                 'users.name as student_name',
-                'users.email as student_email',
                 'stalls.name as stall_name'
             );
 
         if ($request->filled('q')) {
-            $q = '%' . $request->q . '%';
+            $q = '%' . trim($request->q) . '%';
             $query->where(function($sub) use ($q) {
                 $sub->where('users.name', 'like', $q)
-                    ->orWhere('users.email', 'like', $q)
                     ->orWhere('stalls.name', 'like', $q)
                     ->orWhere('stall_evaluations.comment', 'like', $q);
             });
@@ -154,9 +160,9 @@ class AdminController extends Controller
         if ($sortBy === 'oldest') {
             $query->orderBy('stall_evaluations.created_at', 'asc');
         } elseif ($sortBy === 'rating_high') {
-            $query->orderByRaw('(cleanliness + service + taste + price) DESC');
+            $query->orderByRaw('(stall_evaluations.cleanliness + stall_evaluations.service + stall_evaluations.taste + stall_evaluations.price) DESC');
         } elseif ($sortBy === 'rating_low') {
-            $query->orderByRaw('(cleanliness + service + taste + price) ASC');
+            $query->orderByRaw('(stall_evaluations.cleanliness + stall_evaluations.service + stall_evaluations.taste + stall_evaluations.price) ASC');
         } else {
             $query->latest('stall_evaluations.created_at');
         }
@@ -167,10 +173,9 @@ class AdminController extends Controller
         }
 
         $evaluations = $query->paginate($perPage)->withQueryString();
-        $totalEvaluationsCount = DB::table('stall_evaluations')->count();
-        $stalls = DB::table('stalls')->orderBy('name')->get();
+        $stalls = DB::table('stalls')->select('id', 'name')->orderBy('name')->get();
 
-        return view('admin.evaluations', compact('evaluations', 'totalEvaluationsCount', 'stalls'));
+        return view('admin.evaluations', compact('evaluations', 'stalls'));
     }
 
     public function students(Request $request)
@@ -192,7 +197,6 @@ class AdminController extends Controller
             ->select(
                 'users.id',
                 'users.name',
-                'users.email',
                 'users.student_number',
                 'users.course',
                 'users.year_level',
@@ -203,7 +207,6 @@ class AdminController extends Controller
             ->groupBy(
                 'users.id',
                 'users.name',
-                'users.email',
                 'users.student_number',
                 'users.course',
                 'users.year_level',
@@ -215,7 +218,6 @@ class AdminController extends Controller
             $q = trim($request->q);
             $query->where(function ($w) use ($q) {
                 $w->where('users.name', 'like', "%{$q}%")
-                  ->orWhere('users.email', 'like', "%{$q}%")
                   ->orWhere('users.student_number', 'like', "%{$q}%");
             });
         }
@@ -255,17 +257,7 @@ class AdminController extends Controller
 
         $students = $query->paginate($perPage)->withQueryString();
 
-        // High-level KPI metrics
-        $totalStudents = DB::table('users')->where('role', 'student')->count();
-        $activeEvaluators = DB::table('users')
-            ->join('stall_evaluations', 'stall_evaluations.student_id', '=', 'users.id')
-            ->where('users.role', 'student')
-            ->distinct('users.id')
-            ->count('users.id');
-
-        $totalEvaluations = DB::table('stall_evaluations')->count();
-
-        // Department counts for filter badges
+        // Department counts for filter dropdown options
         $departmentStats = [];
         foreach ($deptCourseMap as $code => $courses) {
             $departmentStats[$code] = DB::table('users')
@@ -297,9 +289,6 @@ class AdminController extends Controller
 
         return view('admin.students', compact(
             'students',
-            'totalStudents',
-            'activeEvaluators',
-            'totalEvaluations',
             'departmentStats',
             'departments',
             'courseOptions',
