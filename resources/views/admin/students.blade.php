@@ -64,24 +64,15 @@
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
 
-    {{-- ── 1. Page Header & Key Metrics Strip ───────────────────────────── --}}
-    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 pb-2 border-b border-neutral-200/70">
-        <div>
-            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
-                <ion-icon name="people-outline" class="text-brand-700 text-2xl"></ion-icon>
-                Student Accounts & Evaluators
-            </h1>
-            <p class="text-xs sm:text-sm font-medium text-neutral-500 mt-0.5">
-                Directory, evaluator activity records, and academic department distributions across campus.
-            </p>
-        </div>
-
-        <div class="flex items-center gap-2">
-            <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 border border-brand-200/70 rounded-[4px] text-xs font-bold text-brand-800 uppercase tracking-wider tabular-nums">
-                <ion-icon name="person-circle-outline" class="text-sm text-brand-700"></ion-icon>
-                {{ $totalStudents }} Registered Students
-            </span>
-        </div>
+    {{-- ── 1. Page Header ─────────────────────────────────────────────── --}}
+    <div class="pb-2 border-b border-neutral-200/70">
+        <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
+            <ion-icon name="people-outline" class="text-brand-700 text-2xl"></ion-icon>
+            Student Accounts & Evaluators
+        </h1>
+        <p class="text-xs sm:text-sm font-medium text-neutral-500 mt-0.5">
+            Directory, evaluator activity records, and academic department distributions across campus.
+        </p>
     </div>
 
 
