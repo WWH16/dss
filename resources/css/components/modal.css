@@ -8,10 +8,47 @@ dialog.confirm-modal {
     color: var(--color-ink-900);
     padding: var(--space-6);
     max-width: 24rem;
+    max-height: calc(100vh - 3rem);
+    overflow-y: auto;
     width: 90%;
     box-shadow: var(--shadow-lg), 0 0 0 1px oklch(0.14 0.01 255 / 0.03);
     outline: none;
     margin: auto;
+}
+
+/* Custom smooth scrollbars for lists and modals */
+dialog.confirm-modal::-webkit-scrollbar,
+.custom-scrollbar::-webkit-scrollbar,
+#edit-staff-list::-webkit-scrollbar,
+#add-staff-list::-webkit-scrollbar,
+#roster-staff-list::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+}
+
+dialog.confirm-modal::-webkit-scrollbar-track,
+.custom-scrollbar::-webkit-scrollbar-track,
+#edit-staff-list::-webkit-scrollbar-track,
+#add-staff-list::-webkit-scrollbar-track,
+#roster-staff-list::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+dialog.confirm-modal::-webkit-scrollbar-thumb,
+.custom-scrollbar::-webkit-scrollbar-thumb,
+#edit-staff-list::-webkit-scrollbar-thumb,
+#add-staff-list::-webkit-scrollbar-thumb,
+#roster-staff-list::-webkit-scrollbar-thumb {
+    background: oklch(0.80 0.01 250);
+    border-radius: 9999px;
+}
+
+dialog.confirm-modal::-webkit-scrollbar-thumb:hover,
+.custom-scrollbar::-webkit-scrollbar-thumb:hover,
+#edit-staff-list::-webkit-scrollbar-thumb:hover,
+#add-staff-list::-webkit-scrollbar-thumb:hover,
+#roster-staff-list::-webkit-scrollbar-thumb:hover {
+    background: oklch(0.60 0.02 250);
 }
 
 dialog.modal-sharp,

@@ -6,7 +6,7 @@
     {{-- ── 1. Page Header ─────────────────────────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200/80">
         <div>
-            <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Manage Stalls</h1>
+            <h1 class="text-xl font-bold text-neutral-900 tracking-tight">Manage Stalls &amp; Staff</h1>
             <p class="text-xs text-neutral-500 mt-0.5">Add, rename, assign staff accounts, and monitor canteen food vendors across campus.</p>
         </div>
         <div class="flex items-center gap-2 self-start sm:self-auto">
@@ -14,10 +14,40 @@
                 <ion-icon name="storefront-outline" class="text-sm" aria-hidden="true"></ion-icon>
                 {{ $stalls->count() }} {{ Str::plural('Stall', $stalls->count()) }} Total
             </span>
+            @if($unassignedStaff->isNotEmpty())
+                <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-300">
+                    <ion-icon name="alert-circle" class="text-sm text-amber-600" aria-hidden="true"></ion-icon>
+                    {{ $unassignedStaff->count() }} Unassigned Staff
+                </span>
+            @endif
         </div>
     </div>
 
-    {{-- ── 2. Main 2-Column Layout ────────────────────────────────────────── --}}
+    {{-- ── 2. Pending Staff Assignment Banner (Quick Onboarding) ───────────── --}}
+    @if($unassignedStaff->isNotEmpty())
+        <div class="p-4 bg-amber-50/90 border border-amber-200/90 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+            <div class="flex items-start sm:items-center gap-3">
+                <div class="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                    <ion-icon name="people" class="text-lg text-amber-700"></ion-icon>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold text-amber-950">
+                        {{ $unassignedStaff->count() }} {{ Str::plural('Staff Account', $unassignedStaff->count()) }} Pending Assignment
+                    </h3>
+                    <p class="text-[11px] text-amber-800/90 mt-0.5">
+                        These registered staff members cannot view their stall evaluations or rankings until assigned to an active stall.
+                    </p>
+                </div>
+            </div>
+            <button type="button" onclick="openQuickAssignModal()"
+                class="btn btn-primary text-xs font-bold px-3 py-1.5 rounded-md self-start sm:self-auto shrink-0 shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
+                <span>Assign Staff</span>
+            </button>
+        </div>
+    @endif
+
+    {{-- ── 3. Main 2-Column Layout ────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
         {{-- Left Column: Creation Form & Guidelines (4 cols) --}}
@@ -48,21 +78,44 @@
                         @enderror
                     </div>
 
+                    {{-- Scalable Staff Selector (Add Modal) --}}
                     <div>
-                        <label class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
-                            Assign Staff Members (Multiple allowed)
-                        </label>
+                        <div class="flex items-center justify-between mb-1">
+                            <label class="block text-[11px] font-semibold text-neutral-700 uppercase tracking-wider">
+                                Assign Staff Members
+                            </label>
+                            <span id="add-staff-selected-count" class="text-[10px] font-bold text-brand-700">0 selected</span>
+                        </div>
+
                         @if($staffUsers->isEmpty())
                             <div class="p-3 bg-neutral-50 border border-neutral-200 rounded-md text-center">
                                 <p class="text-[11px] text-neutral-500">No staff accounts registered yet.</p>
                             </div>
                         @else
-                            <div class="max-h-32 overflow-y-auto p-2 bg-neutral-50 border border-neutral-300 rounded-md space-y-1.5 divide-y divide-neutral-200/50">
+                            {{-- Search in Add Form --}}
+                            <div class="relative mb-1.5">
+                                <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></ion-icon>
+                                <input type="text" id="add-staff-search" placeholder="Search staff…"
+                                    class="w-full pl-7 pr-3 py-1 bg-white border border-neutral-300 rounded text-[11px] font-medium focus:outline-none focus:border-brand-700">
+                            </div>
+
+                            <div id="add-staff-list" class="max-h-36 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-300 rounded-md space-y-1 custom-scrollbar">
                                 @foreach($staffUsers as $staff)
-                                    <label class="flex items-center gap-2 text-xs text-neutral-800 cursor-pointer pt-1 first:pt-0">
-                                        <input type="checkbox" name="staff_ids[]" value="{{ $staff->id }}"
-                                            class="rounded border-neutral-300 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5">
-                                        <span class="font-medium truncate">{{ $staff->name }}</span>
+                                    <label class="add-staff-item flex items-center justify-between p-1.5 rounded hover:bg-white border border-transparent hover:border-neutral-200 transition-colors cursor-pointer text-xs"
+                                        data-staff-name="{{ strtolower($staff->name) }}" data-staff-email="{{ strtolower($staff->email) }}">
+                                        <div class="flex items-center gap-2 min-w-0">
+                                            <input type="checkbox" name="staff_ids[]" value="{{ $staff->id }}"
+                                                class="add-staff-checkbox rounded border-neutral-300 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5">
+                                            <div class="min-w-0">
+                                                <span class="font-bold text-neutral-900 truncate block text-[11px]">{{ $staff->name }}</span>
+                                                <span class="text-[10px] text-neutral-400 truncate block font-mono">{{ $staff->email }}</span>
+                                            </div>
+                                        </div>
+                                        @if(!$staff->stall_id)
+                                            <span class="px-1.5 py-0.2 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[9px] font-bold shrink-0">Unassigned</span>
+                                        @else
+                                            <span class="px-1.5 py-0.2 rounded bg-neutral-100 text-neutral-500 border border-neutral-200 text-[9px] font-medium shrink-0 truncate max-w-[80px]" title="Currently in {{ $staff->current_stall_name }}">{{ $staff->current_stall_name }}</span>
+                                        @endif
                                     </label>
                                 @endforeach
                             </div>
@@ -79,7 +132,7 @@
                             placeholder="Short description of offerings or location">{{ old('description') }}</textarea>
                     </div>
 
-                    <button type="submit" class="btn btn-primary text-xs py-2 px-4 font-semibold flex items-center justify-center gap-1.5 w-full rounded-md shadow-2xs">
+                    <button type="submit" class="btn btn-primary text-xs py-2 px-4 font-semibold flex items-center justify-center gap-1.5 w-full rounded-md shadow-2xs cursor-pointer">
                         <ion-icon name="add-outline" class="text-base"></ion-icon>
                         Create Stall
                     </button>
@@ -99,11 +152,11 @@
                     </li>
                     <li class="flex items-start gap-1.5">
                         <span class="text-neutral-400 mt-0.5">•</span>
-                        <span>All assigned staff see detailed evaluations for their stall.</span>
+                        <span>Click any staff badge to view the full scrollable roster &amp; manage assignments.</span>
                     </li>
                     <li class="flex items-start gap-1.5">
                         <span class="text-neutral-400 mt-0.5">•</span>
-                        <span>Student names are strictly protected and hidden across all staff dashboards.</span>
+                        <span>Unassigned staff are blocked from viewing campus standings until assigned.</span>
                     </li>
                 </ul>
             </div>
@@ -141,7 +194,10 @@
                                 $avgRating = ($stallScore->cleanliness + $stallScore->service + $stallScore->taste + $stallScore->price) / 4;
                             }
                             $assignedStaffList = $stallStaffMap->get($stall->id, collect());
+                            $staffCount = $assignedStaffList->count();
                             $staffIdsJson = json_encode($assignedStaffList->pluck('id')->toArray());
+                            $staffRosterJson = json_encode($assignedStaffList->map(fn($s) => ['id' => $s->id, 'name' => $s->name, 'email' => $s->email])->toArray());
+                            $allStaffNames = $assignedStaffList->pluck('name')->join(', ');
                         @endphp
                         <div class="stall-item flex flex-col sm:flex-row sm:items-center justify-between py-3.5 px-5 gap-3 hover:bg-neutral-50/70 transition-colors" data-stall-name="{{ strtolower($stall->name) }}">
                             <div class="flex items-center gap-3 min-w-0">
@@ -171,14 +227,35 @@
 
                                         <span class="text-neutral-300">•</span>
 
-                                        {{-- Assigned Staff Count/List --}}
-                                        @if($assignedStaffList->isNotEmpty())
-                                            <span class="inline-flex items-center gap-1 font-semibold text-brand-800 bg-brand-50 px-2 py-0.5 rounded text-[10px] border border-brand-200/60" title="{{ $assignedStaffList->pluck('name')->join(', ') }}">
+                                        {{-- Scalable Compact Staff Presentation with Interactive Roster --}}
+                                        @if($staffCount === 0)
+                                            <button type="button" onclick="openEditModal({{ $stall->id }}, '{{ addslashes($stall->name) }}', {{ $staffIdsJson }}, '{{ addslashes($stall->description ?? '') }}', {{ $stall->is_active ? 1 : 0 }})"
+                                                class="text-[10px] text-neutral-400 hover:text-brand-700 font-medium inline-flex items-center gap-1 cursor-pointer transition-colors">
+                                                <ion-icon name="person-add-outline" class="text-xs"></ion-icon>
+                                                <span>Assign staff</span>
+                                            </button>
+                                        @elseif($staffCount === 1)
+                                            <button type="button" onclick="openRosterModal({{ $stall->id }}, '{{ addslashes($stall->name) }}', {{ $staffRosterJson }})"
+                                                class="inline-flex items-center gap-1 font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-0.5 rounded text-[10px] border border-brand-200/60 transition-colors cursor-pointer"
+                                                title="Click to view staff roster for {{ $stall->name }}">
+                                                <ion-icon name="person-outline" class="text-xs"></ion-icon>
+                                                Staff: {{ $assignedStaffList->first()->name }}
+                                            </button>
+                                        @elseif($staffCount === 2)
+                                            <button type="button" onclick="openRosterModal({{ $stall->id }}, '{{ addslashes($stall->name) }}', {{ $staffRosterJson }})"
+                                                class="inline-flex items-center gap-1 font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-0.5 rounded text-[10px] border border-brand-200/60 transition-colors cursor-pointer"
+                                                title="Click to view staff roster for {{ $stall->name }}">
                                                 <ion-icon name="people-outline" class="text-xs"></ion-icon>
-                                                Staff: {{ $assignedStaffList->pluck('name')->join(', ') }} ({{ $assignedStaffList->count() }})
-                                            </span>
+                                                Staff: {{ Str::limit($assignedStaffList[0]->name, 12) }}, {{ Str::limit($assignedStaffList[1]->name, 12) }}
+                                            </button>
                                         @else
-                                            <span class="text-[10px] text-neutral-400 font-medium">No staff assigned</span>
+                                            <button type="button" onclick="openRosterModal({{ $stall->id }}, '{{ addslashes($stall->name) }}', {{ $staffRosterJson }})"
+                                                class="inline-flex items-center gap-1 font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-0.5 rounded text-[10px] border border-brand-200/60 transition-colors cursor-pointer"
+                                                title="Click to view all {{ $staffCount }} staff members">
+                                                <ion-icon name="people-outline" class="text-xs"></ion-icon>
+                                                Staff: {{ Str::limit($assignedStaffList[0]->name, 10) }}, {{ Str::limit($assignedStaffList[1]->name, 10) }}
+                                                <span class="bg-brand-200/70 text-brand-900 px-1 rounded text-[9px] font-bold">+{{ $staffCount - 2 }} more</span>
+                                            </button>
                                         @endif
                                     </div>
                                 </div>
@@ -233,22 +310,27 @@
 
 </div>
 
-{{-- ── 4. Edit Stall Modal (Multi-Staff Assignment) ─────────────────────── --}}
-<dialog id="edit-modal" class="confirm-modal" aria-labelledby="edit-modal-title">
+{{-- ── 4. Edit Stall Modal (Scalable Searchable Multi-Staff Picker) ──────── --}}
+<dialog id="edit-modal" class="confirm-modal max-w-lg" aria-labelledby="edit-modal-title">
     <form id="edit-form" method="POST" class="space-y-4">
         @csrf
         @method('PUT')
-        <div class="flex items-center gap-3 pb-3 border-b border-neutral-100">
-            <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
-                <ion-icon name="create-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
+        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
+                    <ion-icon name="create-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
+                </div>
+                <div>
+                    <h3 id="edit-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Edit Food Stall</h3>
+                    <p class="text-[11px] text-neutral-500">Update vendor details &amp; assigned staff members</p>
+                </div>
             </div>
-            <div>
-                <h3 id="edit-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Edit Food Stall</h3>
-                <p class="text-[11px] text-neutral-500">Update vendor name, staff assignments, and status</p>
-            </div>
+            <button type="button" class="text-neutral-400 hover:text-neutral-600 js-close-edit-modal p-1 cursor-pointer" aria-label="Close modal">
+                <ion-icon name="close-outline" class="text-xl"></ion-icon>
+            </button>
         </div>
 
-        <div class="space-y-3 text-left">
+        <div class="space-y-3.5 text-left">
             <div>
                 <label for="edit-stall-name-input" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
                     Stall Name <span class="text-red-500">*</span>
@@ -258,26 +340,68 @@
                     required>
             </div>
 
+            {{-- Searchable Staff Picker in Modal --}}
             <div>
-                <label class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
-                    Assigned Staff Members
-                </label>
+                <div class="flex items-center justify-between mb-1.5">
+                    <label class="block text-[11px] font-semibold text-neutral-700 uppercase tracking-wider">
+                        Assigned Staff Members
+                    </label>
+                    <span id="edit-staff-count" class="text-[10px] font-bold text-brand-700">0 selected</span>
+                </div>
+
                 @if($staffUsers->isEmpty())
-                    <div class="p-2.5 bg-neutral-50 border border-neutral-200 rounded-md text-center">
+                    <div class="p-3 bg-neutral-50 border border-neutral-200 rounded-md text-center">
                         <p class="text-[11px] text-neutral-500">No staff accounts registered yet.</p>
                     </div>
                 @else
-                    <div class="max-h-36 overflow-y-auto p-2 bg-neutral-50 border border-neutral-300 rounded-md space-y-1.5 divide-y divide-neutral-200/50">
+                    {{-- Search Bar & Filter Chips in Modal --}}
+                    <div class="space-y-2 mb-2">
+                        <div class="relative">
+                            <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></ion-icon>
+                            <input type="text" id="edit-staff-search" placeholder="Filter staff by name or email…"
+                                class="w-full pl-7 pr-3 py-1.5 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+                        </div>
+
+                        {{-- Filter Tabs --}}
+                        <div class="flex items-center gap-1.5 text-[10px]">
+                            <button type="button" id="tab-all-staff" onclick="filterModalStaff('all')" class="px-2 py-0.5 rounded font-bold bg-neutral-900 text-white transition-colors cursor-pointer">All ({{ $staffUsers->count() }})</button>
+                            <button type="button" id="tab-unassigned-staff" onclick="filterModalStaff('unassigned')" class="px-2 py-0.5 rounded font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer">⭐ Unassigned ({{ $unassignedStaff->count() }})</button>
+                            <button type="button" id="tab-selected-staff" onclick="filterModalStaff('selected')" class="px-2 py-0.5 rounded font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer">Selected Only</button>
+                        </div>
+                    </div>
+
+                    {{-- Scrollable Staff Checkbox List --}}
+                    <div id="edit-staff-list" class="max-h-48 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-300 rounded-md space-y-1 divide-y divide-neutral-200/40 custom-scrollbar">
                         @foreach($staffUsers as $staff)
-                            <label class="flex items-center gap-2 text-xs text-neutral-800 cursor-pointer pt-1 first:pt-0">
-                                <input type="checkbox" name="staff_ids[]" value="{{ $staff->id }}" id="edit-staff-{{ $staff->id }}"
-                                    class="edit-staff-checkbox rounded border-neutral-300 text-brand-600 focus:ring-brand-500 h-3.5 w-3.5">
-                                <span class="font-medium truncate">{{ $staff->name }}</span>
+                            <label class="edit-staff-item flex items-center justify-between p-2 rounded hover:bg-white border border-transparent hover:border-neutral-200 transition-colors cursor-pointer text-xs"
+                                id="edit-staff-label-{{ $staff->id }}"
+                                data-staff-id="{{ $staff->id }}"
+                                data-staff-name="{{ strtolower($staff->name) }}"
+                                data-staff-email="{{ strtolower($staff->email) }}"
+                                data-is-unassigned="{{ $staff->stall_id ? '0' : '1' }}">
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <input type="checkbox" name="staff_ids[]" value="{{ $staff->id }}" id="edit-staff-{{ $staff->id }}"
+                                        onchange="updateEditStaffCount()"
+                                        class="edit-staff-checkbox rounded border-neutral-300 text-brand-600 focus:ring-brand-500 h-4 w-4">
+                                    <div class="min-w-0">
+                                        <span class="font-bold text-neutral-900 truncate block text-xs">{{ $staff->name }}</span>
+                                        <span class="text-[11px] text-neutral-400 truncate block font-mono">{{ $staff->email }}</span>
+                                    </div>
+                                </div>
+                                <div class="shrink-0 text-right">
+                                    @if(!$staff->stall_id)
+                                        <span class="px-2 py-0.5 rounded bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px] font-bold">Unassigned</span>
+                                    @else
+                                        <span id="staff-stall-tag-{{ $staff->id }}" class="px-2 py-0.5 rounded bg-neutral-100 text-neutral-600 border border-neutral-200 text-[10px] font-medium truncate max-w-[110px] inline-block" title="{{ $staff->current_stall_name }}">
+                                            {{ $staff->current_stall_name }}
+                                        </span>
+                                    @endif
+                                </div>
                             </label>
                         @endforeach
                     </div>
                 @endif
-                <p class="text-[10px] text-neutral-400 mt-1">Select one or more staff accounts to assign to this stall.</p>
+                <p class="text-[10px] text-neutral-400 mt-1">Checking a staff member assigned elsewhere will reassign them to this stall.</p>
             </div>
 
             <div>
@@ -308,7 +432,109 @@
     </form>
 </dialog>
 
-{{-- ── 5. Delete Confirmation Modal ─────────────────────────────────────── --}}
+{{-- ── 5. Dedicated Stall Staff Roster Modal (Scrollable at Scale) ───────── --}}
+<dialog id="roster-modal" class="confirm-modal max-w-md" aria-labelledby="roster-modal-title">
+    <div class="space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
+            <div class="flex items-center gap-3">
+                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
+                    <ion-icon name="people-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
+                </div>
+                <div>
+                    <h3 id="roster-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Staff Roster</h3>
+                    <p id="roster-modal-subtitle" class="text-[11px] text-neutral-500">Assigned members for this vendor</p>
+                </div>
+            </div>
+            <button type="button" class="text-neutral-400 hover:text-neutral-600 js-close-roster-modal p-1 cursor-pointer" aria-label="Close roster">
+                <ion-icon name="close-outline" class="text-xl"></ion-icon>
+            </button>
+        </div>
+
+        {{-- Filter within Roster --}}
+        <div class="relative">
+            <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></ion-icon>
+            <input type="text" id="roster-search-input" placeholder="Search members in roster…"
+                class="w-full pl-7 pr-3 py-1.5 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+        </div>
+
+        {{-- Scrollable List of Assigned Staff --}}
+        <div id="roster-staff-list" class="max-h-60 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-300 rounded-md space-y-1.5 custom-scrollbar">
+            <!-- Rendered dynamically by JavaScript -->
+        </div>
+
+        {{-- Hidden Form for Unassign Action --}}
+        <form id="unassign-staff-form" action="{{ route('admin.staff.unassign') }}" method="POST" class="hidden">
+            @csrf
+            <input type="hidden" name="staff_id" id="unassign-staff-id">
+        </form>
+
+        <div class="flex items-center justify-between pt-3 border-t border-neutral-100">
+            <button type="button" class="btn btn-ghost btn-sm text-xs rounded-md js-close-roster-modal cursor-pointer">Close</button>
+            <button type="button" id="roster-edit-stall-btn"
+                class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1 shadow-2xs cursor-pointer">
+                <ion-icon name="pencil-outline" class="text-sm"></ion-icon>
+                <span>Edit All Assignments</span>
+            </button>
+        </div>
+    </div>
+</dialog>
+
+{{-- ── 6. Quick Assign Staff Modal ───────────────────────────────────────── --}}
+<dialog id="quick-assign-modal" class="confirm-modal" aria-labelledby="quick-assign-title">
+    <form action="{{ route('admin.staff.assign') }}" method="POST" class="space-y-4">
+        @csrf
+        <div class="flex items-center gap-3 pb-3 border-b border-neutral-100">
+            <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
+                <ion-icon name="person-add-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
+            </div>
+            <div>
+                <h3 id="quick-assign-title" class="text-sm font-bold text-neutral-900 leading-tight">Quick Assign Staff</h3>
+                <p class="text-[11px] text-neutral-500">Link unassigned staff directly to a food stall</p>
+            </div>
+        </div>
+
+        <div class="space-y-3 text-left">
+            <div>
+                <label for="quick-staff-id" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
+                    Staff Member <span class="text-red-500">*</span>
+                </label>
+                <select id="quick-staff-id" name="staff_id" required
+                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+                    <option value="">-- Select Staff Account --</option>
+                    @foreach($unassignedStaff as $unStaff)
+                        <option value="{{ $unStaff->id }}">{{ $unStaff->name }} ({{ $unStaff->email }})</option>
+                    @endforeach
+                    @foreach($staffUsers->whereNotNull('stall_id') as $asStaff)
+                        <option value="{{ $asStaff->id }}">{{ $asStaff->name }} (Currently: {{ $asStaff->current_stall_name }})</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="quick-stall-id" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
+                    Target Food Stall <span class="text-red-500">*</span>
+                </label>
+                <select id="quick-stall-id" name="stall_id" required
+                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+                    <option value="">-- Select Food Stall --</option>
+                    @foreach($stalls as $st)
+                        <option value="{{ $st->id }}">{{ $st->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
+            <button type="button" class="btn btn-ghost btn-sm text-xs rounded-md js-close-quick-modal cursor-pointer">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1 shadow-2xs cursor-pointer">
+                <ion-icon name="checkmark-outline" class="text-sm leading-none"></ion-icon>
+                Assign Staff
+            </button>
+        </div>
+    </form>
+</dialog>
+
+{{-- ── 7. Delete Confirmation Modal ─────────────────────────────────────── --}}
 <dialog id="delete-confirm-modal" class="confirm-modal" aria-labelledby="delete-modal-title">
     <div class="flex items-start gap-3.5 mb-4">
         <div class="flex-shrink-0 w-9 h-9 rounded-md bg-red-50 border border-red-200/80 flex items-center justify-center text-red-700">
@@ -334,7 +560,7 @@
 
 @section('scripts')
 <script>
-// ── Quick Filter Stalls ───────────────────────────────────────────────────
+// ── Quick Filter Stalls in Directory ──────────────────────────────────────
 var searchInput = document.getElementById('stall-search-input');
 var stallItems  = document.querySelectorAll('.stall-item');
 var noResults   = document.getElementById('no-search-results');
@@ -360,18 +586,48 @@ if (searchInput) {
     });
 }
 
-// ── Edit Modal ───────────────────────────────────────────────────────────
+// ── Search & Counter in Add Stall Form ────────────────────────────────────
+var addStaffSearch = document.getElementById('add-staff-search');
+var addStaffItems  = document.querySelectorAll('.add-staff-item');
+var addStaffCbs    = document.querySelectorAll('.add-staff-checkbox');
+var addCountEl     = document.getElementById('add-staff-selected-count');
+
+if (addStaffSearch) {
+    addStaffSearch.addEventListener('input', function(e) {
+        var q = e.target.value.toLowerCase().trim();
+        addStaffItems.forEach(function(item) {
+            var name = item.getAttribute('data-staff-name') || '';
+            var email = item.getAttribute('data-staff-email') || '';
+            item.style.display = (name.includes(q) || email.includes(q)) ? 'flex' : 'none';
+        });
+    });
+}
+
+addStaffCbs.forEach(function(cb) {
+    cb.addEventListener('change', function() {
+        var checked = document.querySelectorAll('.add-staff-checkbox:checked').length;
+        if (addCountEl) addCountEl.textContent = checked + ' selected';
+    });
+});
+
+// ── Edit Modal & Scalable Staff Selector ─────────────────────────────────
 var editModal       = document.getElementById('edit-modal');
 var editForm        = document.getElementById('edit-form');
 var editNameInput   = document.getElementById('edit-stall-name-input');
 var editDescInput   = document.getElementById('edit-stall-desc-input');
 var editActiveInput = document.getElementById('edit-stall-active-input');
+var editStaffSearch = document.getElementById('edit-staff-search');
+var currentFilterTab = 'all';
 
 function openEditModal(stallId, stallName, staffIdsArray, desc, isActive) {
     editForm.action = '/admin/stall/' + stallId;
     editNameInput.value = stallName;
     editDescInput.value = desc || '';
     editActiveInput.checked = isActive === 1;
+
+    // Reset search & filter tabs
+    if (editStaffSearch) editStaffSearch.value = '';
+    filterModalStaff('all');
 
     // Reset all staff checkboxes
     document.querySelectorAll('.edit-staff-checkbox').forEach(function(cb) {
@@ -386,7 +642,59 @@ function openEditModal(stallId, stallName, staffIdsArray, desc, isActive) {
         });
     }
 
+    updateEditStaffCount();
     editModal.showModal();
+}
+
+function updateEditStaffCount() {
+    var checked = document.querySelectorAll('.edit-staff-checkbox:checked').length;
+    var countEl = document.getElementById('edit-staff-count');
+    if (countEl) countEl.textContent = checked + ' selected';
+}
+
+function filterModalStaff(tab) {
+    currentFilterTab = tab;
+    
+    // Tab button styles
+    var btnAll = document.getElementById('tab-all-staff');
+    var btnUn = document.getElementById('tab-unassigned-staff');
+    var btnSel = document.getElementById('tab-selected-staff');
+
+    if (btnAll && btnUn && btnSel) {
+        btnAll.className = tab === 'all' ? 'px-2 py-0.5 rounded font-bold bg-neutral-900 text-white transition-colors cursor-pointer' : 'px-2 py-0.5 rounded font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
+        btnUn.className = tab === 'unassigned' ? 'px-2 py-0.5 rounded font-bold bg-neutral-900 text-white transition-colors cursor-pointer' : 'px-2 py-0.5 rounded font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
+        btnSel.className = tab === 'selected' ? 'px-2 py-0.5 rounded font-bold bg-neutral-900 text-white transition-colors cursor-pointer' : 'px-2 py-0.5 rounded font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
+    }
+
+    applyModalStaffVisibility();
+}
+
+function applyModalStaffVisibility() {
+    var q = editStaffSearch ? editStaffSearch.value.toLowerCase().trim() : '';
+    var items = document.querySelectorAll('.edit-staff-item');
+
+    items.forEach(function(item) {
+        var name = item.getAttribute('data-staff-name') || '';
+        var email = item.getAttribute('data-staff-email') || '';
+        var isUn = item.getAttribute('data-is-unassigned') === '1';
+        var cb = item.querySelector('.edit-staff-checkbox');
+        var isChecked = cb && cb.checked;
+
+        var matchesQuery = name.includes(q) || email.includes(q);
+        var matchesTab = true;
+
+        if (currentFilterTab === 'unassigned') {
+            matchesTab = isUn || isChecked;
+        } else if (currentFilterTab === 'selected') {
+            matchesTab = isChecked;
+        }
+
+        item.style.display = (matchesQuery && matchesTab) ? 'flex' : 'none';
+    });
+}
+
+if (editStaffSearch) {
+    editStaffSearch.addEventListener('input', applyModalStaffVisibility);
 }
 
 document.querySelectorAll('.js-close-edit-modal').forEach(function(b) {
@@ -399,6 +707,129 @@ editModal.addEventListener('click', function(e) {
         editModal.close();
     }
 });
+
+// ── Stall Staff Roster Modal ─────────────────────────────────────────────
+var rosterModal       = document.getElementById('roster-modal');
+var rosterTitle       = document.getElementById('roster-modal-title');
+var rosterSubtitle    = document.getElementById('roster-modal-subtitle');
+var rosterList        = document.getElementById('roster-staff-list');
+var rosterSearch      = document.getElementById('roster-search-input');
+var rosterEditBtn     = document.getElementById('roster-edit-stall-btn');
+var unassignForm      = document.getElementById('unassign-staff-form');
+var unassignStaffIdEl = document.getElementById('unassign-staff-id');
+var currentRosterStallId = null;
+var currentRosterStallName = '';
+var currentRosterStaffData = [];
+
+function openRosterModal(stallId, stallName, staffMembersArray) {
+    currentRosterStallId = stallId;
+    currentRosterStallName = stallName;
+    currentRosterStaffData = Array.isArray(staffMembersArray) ? staffMembersArray : [];
+
+    rosterTitle.textContent = stallName + ' — Staff Roster';
+    rosterSubtitle.textContent = currentRosterStaffData.length + ' assigned ' + (currentRosterStaffData.length === 1 ? 'member' : 'members');
+    if (rosterSearch) rosterSearch.value = '';
+
+    renderRosterItems(currentRosterStaffData);
+
+    rosterEditBtn.onclick = function() {
+        rosterModal.close();
+        var staffIds = currentRosterStaffData.map(function(s) { return s.id; });
+        openEditModal(stallId, stallName, staffIds, '', 1);
+    };
+
+    rosterModal.showModal();
+}
+
+function renderRosterItems(list) {
+    if (!rosterList) return;
+    rosterList.innerHTML = '';
+
+    if (list.length === 0) {
+        rosterList.innerHTML = '<div class="p-6 text-center text-neutral-400 text-xs font-medium">No staff members found matching criteria.</div>';
+        return;
+    }
+
+    list.forEach(function(member) {
+        var card = document.createElement('div');
+        card.className = 'flex items-center justify-between p-2.5 bg-white rounded-md border border-neutral-200 shadow-2xs';
+        card.innerHTML = `
+            <div class="flex items-center gap-2.5 min-w-0">
+                <div class="w-8 h-8 rounded-full bg-brand-50 border border-brand-200 text-brand-800 flex items-center justify-center font-bold text-xs shrink-0">
+                    ${(member.name || 'U').charAt(0).toUpperCase()}
+                </div>
+                <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-neutral-900 truncate">${member.name}</h4>
+                    <p class="text-[10px] text-neutral-400 truncate font-mono">${member.email}</p>
+                </div>
+            </div>
+            <button type="button" onclick="triggerUnassignStaff(${member.id}, '${escapeQuotes(member.name)}')"
+                class="text-neutral-500 hover:text-red-700 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-200 px-2 py-1 rounded text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                title="Remove staff from this stall">
+                <ion-icon name="close-circle-outline" class="text-xs"></ion-icon>
+                <span>Remove</span>
+            </button>
+        `;
+        rosterList.appendChild(card);
+    });
+}
+
+function escapeQuotes(str) {
+    return (str || '').replace(/'/g, "\\'");
+}
+
+function triggerUnassignStaff(staffId, staffName) {
+    if (!confirm('Remove ' + staffName + ' from ' + currentRosterStallName + '? The staff account will become unassigned.')) {
+        return;
+    }
+    if (unassignStaffIdEl && unassignForm) {
+        unassignStaffIdEl.value = staffId;
+        unassignForm.submit();
+    }
+}
+
+if (rosterSearch) {
+    rosterSearch.addEventListener('input', function(e) {
+        var q = e.target.value.toLowerCase().trim();
+        var filtered = currentRosterStaffData.filter(function(m) {
+            return (m.name || '').toLowerCase().includes(q) || (m.email || '').toLowerCase().includes(q);
+        });
+        renderRosterItems(filtered);
+    });
+}
+
+document.querySelectorAll('.js-close-roster-modal').forEach(function(b) {
+    b.addEventListener('click', function() { rosterModal.close(); });
+});
+
+if (rosterModal) {
+    rosterModal.addEventListener('click', function(e) {
+        var r = rosterModal.getBoundingClientRect();
+        if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+            rosterModal.close();
+        }
+    });
+}
+
+// ── Quick Assign Modal ───────────────────────────────────────────────────
+var quickModal = document.getElementById('quick-assign-modal');
+
+function openQuickAssignModal() {
+    if (quickModal) quickModal.showModal();
+}
+
+document.querySelectorAll('.js-close-quick-modal').forEach(function(b) {
+    b.addEventListener('click', function() { quickModal.close(); });
+});
+
+if (quickModal) {
+    quickModal.addEventListener('click', function(e) {
+        var r = quickModal.getBoundingClientRect();
+        if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+            quickModal.close();
+        }
+    });
+}
 
 // ── Delete Modal ─────────────────────────────────────────────────────────
 var deleteModal    = document.getElementById('delete-confirm-modal');

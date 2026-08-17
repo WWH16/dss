@@ -145,11 +145,19 @@ class AdminController extends Controller
             ->get();
 
         $staffUsers = DB::table('users')
-            ->where('role', 'staff')
-            ->select('id', 'name', 'email', 'stall_id')
-            ->orderBy('name')
+            ->leftJoin('stalls', 'users.stall_id', '=', 'stalls.id')
+            ->where('users.role', 'staff')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.stall_id',
+                'stalls.name as current_stall_name'
+            )
+            ->orderBy('users.name')
             ->get();
 
+        $unassignedStaff = $staffUsers->whereNull('stall_id')->values();
         $stallStaffMap = $staffUsers->whereNotNull('stall_id')->groupBy('stall_id');
 
         $results = DB::table('stall_evaluations')
@@ -164,7 +172,7 @@ class AdminController extends Controller
             ->groupBy('stalls.name')
             ->get();
 
-        return view('admin.stalls', compact('stalls', 'staffUsers', 'stallStaffMap', 'results'));
+        return view('admin.stalls', compact('stalls', 'staffUsers', 'unassignedStaff', 'stallStaffMap', 'results'));
     }
 
     public function evaluations(Request $request)
@@ -416,5 +424,44 @@ class AdminController extends Controller
             ->delete();
 
         return back()->with('success','Stall deleted.');
+    }
+
+    // Quick Assign Staff
+    public function assignStaff(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $request->validate([
+            'staff_id' => 'required|exists:users,id',
+            'stall_id' => 'required|exists:stalls,id',
+        ]);
+
+        $stall = DB::table('stalls')->where('id', $request->stall_id)->first();
+
+        DB::table('users')->where('id', $request->staff_id)->where('role', 'staff')->update([
+            'stall_id' => $request->stall_id,
+            'stall_name' => $stall ? $stall->name : null,
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Staff member assigned to ' . ($stall ? $stall->name : 'stall') . ' successfully!');
+    }
+
+    // Unassign Staff
+    public function unassignStaff(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $request->validate([
+            'staff_id' => 'required|exists:users,id',
+        ]);
+
+        DB::table('users')->where('id', $request->staff_id)->where('role', 'staff')->update([
+            'stall_id' => null,
+            'stall_name' => null,
+            'updated_at' => now(),
+        ]);
+
+        return redirect()->back()->with('success', 'Staff member unassigned from stall successfully.');
     }
 }

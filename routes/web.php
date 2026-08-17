@@ -106,6 +106,14 @@ Route::middleware('auth')->group(function () {
         [AdminController::class,'deleteStall'])
         ->name('admin.stall.delete');
 
+    Route::post('/admin/staff/assign',
+        [AdminController::class, 'assignStaff'])
+        ->name('admin.staff.assign');
+
+    Route::post('/admin/staff/unassign',
+        [AdminController::class, 'unassignStaff'])
+        ->name('admin.staff.unassign');
+
 });
 /*
 |--------------------------------------------------------------------------
