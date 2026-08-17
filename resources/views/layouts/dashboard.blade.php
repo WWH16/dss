@@ -196,14 +196,19 @@
                     Students
                 </a>
             @elseif($user && $user->role === 'staff')
+                @php
+                    $isStaffAssigned = !empty($user->stall_id) || \Illuminate\Support\Facades\DB::table('stalls')->where('staff_id', $user->id)->exists();
+                @endphp
                 <a href="{{ route('staff.dashboard') }}" class="sidebar-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
                     <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Dashboard
                 </a>
-                <a href="{{ route('staff.standings') }}" class="sidebar-link {{ request()->routeIs('staff.standings') ? 'active' : '' }}">
-                    <ion-icon name="podium-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
-                    Standings
-                </a>
+                @if($isStaffAssigned)
+                    <a href="{{ route('staff.standings') }}" class="sidebar-link {{ request()->routeIs('staff.standings') ? 'active' : '' }}">
+                        <ion-icon name="podium-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                        Standings
+                    </a>
+                @endif
                 <a href="{{ route('staff.profile') }}" class="sidebar-link {{ request()->routeIs('staff.profile*') ? 'active' : '' }}">
                     <ion-icon name="person-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     My Profile

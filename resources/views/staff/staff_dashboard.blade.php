@@ -9,20 +9,16 @@
     @if(!$hasStall || !$stall)
         <div class="bg-white rounded-xl border border-neutral-200/80 p-8 sm:p-12 text-center shadow-xs">
             <div class="w-16 h-16 rounded-xl bg-amber-50 border border-amber-200/80 flex items-center justify-center mb-4 text-amber-700 mx-auto">
-                <ion-icon name="storefront-outline" class="text-3xl"></ion-icon>
+                <ion-icon name="shield-outline" class="text-3xl"></ion-icon>
             </div>
-            <h2 class="text-xl font-bold text-neutral-900 tracking-tight mb-2">No Canteen Stall Assigned</h2>
+            <h2 class="text-xl font-bold text-neutral-900 tracking-tight mb-2">Account Pending Stall Assignment</h2>
             <p class="text-xs sm:text-sm text-neutral-500 max-w-md mx-auto leading-relaxed mb-6">
-                Your staff account is currently not linked to any active food stall. Detailed evaluations and performance metrics are scoped to assigned stalls.
+                Your staff account is pending verification and assignment to a food stall by an Administrator. Evaluation records and campus performance standings are restricted until your stall assignment is active.
             </p>
             <div class="flex items-center justify-center gap-3 flex-wrap">
                 <a href="{{ route('staff.profile') }}" class="btn btn-secondary text-xs px-4 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 shadow-2xs border border-neutral-200">
                     <ion-icon name="person-outline" class="text-sm"></ion-icon>
                     View Account Profile
-                </a>
-                <a href="{{ route('staff.standings') }}" class="btn btn-primary text-xs px-4 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 shadow-2xs">
-                    <ion-icon name="podium-outline" class="text-sm"></ion-icon>
-                    View Campus Standings
                 </a>
             </div>
         </div>

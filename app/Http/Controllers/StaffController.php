@@ -147,8 +147,9 @@ class StaffController extends Controller
         if ($user->stall_id) {
             $myStall = DB::table('stalls')->where('id', $user->stall_id)->first();
         }
+        // Strict Security Guard: Unassigned staff MUST NOT view campus rankings or performance
         if (!$myStall) {
-            $myStall = DB::table('stalls')->where('staff_id', $user->id)->first();
+            return redirect()->route('staff.dashboard')->with('error', 'Access restricted. You must be assigned to a food stall by an Administrator to view campus standings.');
         }
 
         // Fetch aggregate standing data only (no student evaluations or comments)
