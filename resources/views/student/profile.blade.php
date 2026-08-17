@@ -166,7 +166,7 @@
             <div>
                 <label for="modal-name" class="block text-xs font-bold text-neutral-700 mb-1.5">Full Name</label>
                 <input type="text" id="modal-name" name="name" value="{{ old('name', $profile->name) }}" required
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('name') border-rose-500 bg-rose-50/20 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border @error('name') border-rose-500 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 @error('name')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -247,7 +247,7 @@
                 <label for="modal-current-password" class="block text-xs font-bold text-neutral-700 mb-1.5">Current Password</label>
                 <input type="password" id="modal-current-password" name="current_password" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('current_password') border-rose-500 bg-rose-50/20 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 @error('current_password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -258,7 +258,7 @@
                 <label for="modal-new-password" class="block text-xs font-bold text-neutral-700 mb-1.5">New Password</label>
                 <input type="password" id="modal-new-password" name="password" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('password') border-rose-500 bg-rose-50/20 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 <p class="text-[10px] text-neutral-400 mt-1">Minimum 8 characters with letters, numbers, and symbols.</p>
                 @error('password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
