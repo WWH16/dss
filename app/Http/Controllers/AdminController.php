@@ -122,22 +122,55 @@ class AdminController extends Controller
         return view('admin.stalls', compact('stalls', 'results'));
     }
 
-    public function evaluations()
+    public function evaluations(Request $request)
     {
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
-        $evaluations = DB::table('stall_evaluations')
+        $query = DB::table('stall_evaluations')
             ->join('users','users.id','=','stall_evaluations.student_id')
             ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
             ->select(
                 'stall_evaluations.*',
                 'users.name as student_name',
+                'users.email as student_email',
                 'stalls.name as stall_name'
-            )
-            ->latest('stall_evaluations.created_at')
-            ->get();
+            );
 
-        return view('admin.evaluations', compact('evaluations'));
+        if ($request->filled('q')) {
+            $q = '%' . $request->q . '%';
+            $query->where(function($sub) use ($q) {
+                $sub->where('users.name', 'like', $q)
+                    ->orWhere('users.email', 'like', $q)
+                    ->orWhere('stalls.name', 'like', $q)
+                    ->orWhere('stall_evaluations.comment', 'like', $q);
+            });
+        }
+
+        if ($request->filled('stall_id')) {
+            $query->where('stall_evaluations.stall_id', $request->stall_id);
+        }
+
+        $sortBy = $request->get('sort', 'latest');
+        if ($sortBy === 'oldest') {
+            $query->orderBy('stall_evaluations.created_at', 'asc');
+        } elseif ($sortBy === 'rating_high') {
+            $query->orderByRaw('(cleanliness + service + taste + price) DESC');
+        } elseif ($sortBy === 'rating_low') {
+            $query->orderByRaw('(cleanliness + service + taste + price) ASC');
+        } else {
+            $query->latest('stall_evaluations.created_at');
+        }
+
+        $perPage = (int) $request->get('per_page', 10);
+        if (!in_array($perPage, [10, 25, 50, 100])) {
+            $perPage = 10;
+        }
+
+        $evaluations = $query->paginate($perPage)->withQueryString();
+        $totalEvaluationsCount = DB::table('stall_evaluations')->count();
+        $stalls = DB::table('stalls')->orderBy('name')->get();
+
+        return view('admin.evaluations', compact('evaluations', 'totalEvaluationsCount', 'stalls'));
     }
 
     public function students(Request $request)

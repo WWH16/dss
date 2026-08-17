@@ -252,7 +252,6 @@
                                         </div>
                                         <div class="min-w-0">
                                             <p class="font-bold text-neutral-900 leading-tight truncate">{{ $student->name }}</p>
-                                            <p class="text-[11px] text-neutral-500 font-mono mt-0.5">{{ $student->email }}</p>
                                         </div>
                                     </div>
                                 </td>
@@ -331,7 +330,6 @@
                                     </div>
                                     <div class="min-w-0">
                                         <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">{{ $student->name }}</h3>
-                                        <p class="text-[11px] text-neutral-500 font-mono truncate">{{ $student->email }}</p>
                                     </div>
                                 </div>
                                 <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-bold border {{ $dept['badge'] }} shrink-0">
@@ -454,7 +452,7 @@
             </div>
             <div>
                 <h3 id="details-name" class="text-sm font-bold text-white leading-tight tracking-tight"></h3>
-                <p id="details-email" class="text-xs text-brand-200 font-mono mt-0.5"></p>
+                <p id="details-student-number-badge" class="text-[11px] text-brand-200 font-mono mt-0.5"></p>
             </div>
         </div>
         <button type="button" class="js-close-details-modal text-white/70 hover:text-white hover:bg-brand-800 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
@@ -544,7 +542,7 @@ function toggleFilterDrawer() {
 
 function openDetailsModal(student, dept) {
     document.getElementById('details-name').textContent = student.name;
-    document.getElementById('details-email').textContent = student.email;
+    document.getElementById('details-student-number-badge').textContent = 'ID: ' + (student.student_number || 'N/A');
     document.getElementById('modal-avatar').textContent = (student.name || 'S').charAt(0).toUpperCase();
 
     document.getElementById('details-student-number').textContent = student.student_number || 'Not Set';
