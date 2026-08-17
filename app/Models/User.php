@@ -27,7 +27,13 @@ class User extends Authenticatable
         'year_level',
         'student_number',
         'stall_name',
+        'stall_id',
     ];
+
+    public function stall(): \Illuminate\Database\Eloquent\Relations\BelongsTo
+    {
+        return $this->belongsTo(Stall::class, 'stall_id');
+    }
 
     /**
      * The attributes that should be hidden for serialization.

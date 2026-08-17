@@ -200,6 +200,14 @@
                     <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Dashboard
                 </a>
+                <a href="{{ route('staff.standings') }}" class="sidebar-link {{ request()->routeIs('staff.standings') ? 'active' : '' }}">
+                    <ion-icon name="podium-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                    Standings
+                </a>
+                <a href="{{ route('staff.profile') }}" class="sidebar-link {{ request()->routeIs('staff.profile*') ? 'active' : '' }}">
+                    <ion-icon name="person-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                    My Profile
+                </a>
             @endif
         </nav>
 

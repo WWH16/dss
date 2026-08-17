@@ -118,6 +118,18 @@ Route::middleware('auth')->group(function () {
     Route::get('/staff/dashboard', [StaffController::class, 'dashboard'])
         ->name('staff.dashboard');
 
+    Route::get('/staff/standings', [StaffController::class, 'standings'])
+        ->name('staff.standings');
+
+    Route::get('/staff/profile', [StaffController::class, 'profile'])
+        ->name('staff.profile');
+
+    Route::post('/staff/profile/update', [StaffController::class, 'updateProfile'])
+        ->name('staff.profile.update');
+
+    Route::post('/staff/profile/password', [StaffController::class, 'updatePassword'])
+        ->name('staff.profile.password');
+
 });
 
 /*

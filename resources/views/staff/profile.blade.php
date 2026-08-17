@@ -25,13 +25,27 @@
 
     {{-- Profile Details --}}
     <div class="bg-white rounded-lg border border-neutral-200/80 shadow-xs p-6">
-        <div class="flex items-center gap-4 mb-6 pb-5 border-b border-neutral-100">
-            <div class="w-14 h-14 rounded-md bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold text-xl shrink-0">
-                {{ substr($profile->name ?? 'U', 0, 1) }}
+        <div class="flex items-center justify-between gap-4 mb-6 pb-5 border-b border-neutral-100 flex-wrap">
+            <div class="flex items-center gap-4">
+                <div class="w-14 h-14 rounded-md bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center font-bold text-xl shrink-0">
+                    {{ substr($profile->name ?? 'U', 0, 1) }}
+                </div>
+                <div>
+                    <h2 class="text-lg font-bold text-neutral-900 tracking-tight">{{ $profile->name }}</h2>
+                    <p class="text-xs font-mono text-neutral-500 mt-0.5">{{ $profile->email }}</p>
+                </div>
             </div>
             <div>
-                <h2 class="text-lg font-bold text-neutral-900 tracking-tight">{{ $profile->name }}</h2>
-                <p class="text-xs font-mono text-neutral-500 mt-0.5">{{ $profile->email }}</p>
+                @if(isset($stall) && $stall)
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-brand-50 border border-brand-200 rounded-md text-xs font-bold text-brand-800">
+                        <ion-icon name="storefront-outline" class="text-sm"></ion-icon>
+                        {{ $stall->name }}
+                    </span>
+                @else
+                    <span class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-neutral-100 border border-neutral-200 rounded-md text-xs font-semibold text-neutral-600">
+                        No Stall Assigned
+                    </span>
+                @endif
             </div>
         </div>
 

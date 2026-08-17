@@ -23,9 +23,9 @@ class Stall extends Model
         ];
     }
 
-    public function staff(): BelongsTo
+    public function staff(): HasMany
     {
-        return $this->belongsTo(User::class, 'staff_id');
+        return $this->hasMany(User::class, 'stall_id')->where('role', 'staff');
     }
 
     public function evaluations(): HasMany

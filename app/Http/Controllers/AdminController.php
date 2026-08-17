@@ -140,7 +140,17 @@ class AdminController extends Controller
     {
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
-        $stalls = DB::table('stalls')->orderBy('name')->get();
+        $stalls = DB::table('stalls')
+            ->orderBy('name')
+            ->get();
+
+        $staffUsers = DB::table('users')
+            ->where('role', 'staff')
+            ->select('id', 'name', 'email', 'stall_id')
+            ->orderBy('name')
+            ->get();
+
+        $stallStaffMap = $staffUsers->whereNotNull('stall_id')->groupBy('stall_id');
 
         $results = DB::table('stall_evaluations')
             ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
@@ -154,7 +164,7 @@ class AdminController extends Controller
             ->groupBy('stalls.name')
             ->get();
 
-        return view('admin.stalls', compact('stalls', 'results'));
+        return view('admin.stalls', compact('stalls', 'staffUsers', 'stallStaffMap', 'results'));
     }
 
     public function evaluations(Request $request)
@@ -338,14 +348,27 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
+            'staff_ids' => 'nullable|array',
+            'staff_ids.*' => 'exists:users,id',
+            'description' => 'nullable|string|max:500',
         ]);
 
-        DB::table('stalls')->insert([
+        $stallId = DB::table('stalls')->insertGetId([
             'name' => trim($request->name),
+            'description' => $request->filled('description') ? trim($request->description) : null,
+            'is_active' => true,
             'created_at' => now(),
             'updated_at' => now(),
         ]);
+
+        // Assign multiple selected staff members
+        if ($request->has('staff_ids') && is_array($request->staff_ids)) {
+            DB::table('users')
+                ->whereIn('id', $request->staff_ids)
+                ->where('role', 'staff')
+                ->update(['stall_id' => $stallId, 'updated_at' => now()]);
+        }
 
         return redirect()->back()->with('success', 'Stall added successfully!');
     }
@@ -356,13 +379,31 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
         $request->validate([
-            'name' => 'required|string|max:255'
+            'name' => 'required|string|max:255',
+            'staff_ids' => 'nullable|array',
+            'staff_ids.*' => 'exists:users,id',
+            'description' => 'nullable|string|max:500',
+            'is_active' => 'nullable|boolean',
         ]);
 
         DB::table('stalls')->where('id', $id)->update([
             'name' => trim($request->name),
+            'description' => $request->filled('description') ? trim($request->description) : null,
+            'is_active' => $request->has('is_active') ? (bool)$request->is_active : true,
             'updated_at' => now(),
         ]);
+
+        // Sync staff assignments:
+        // 1. Unassign all staff currently attached to this stall
+        DB::table('users')->where('stall_id', $id)->update(['stall_id' => null, 'updated_at' => now()]);
+
+        // 2. Assign the newly selected staff members
+        if ($request->has('staff_ids') && is_array($request->staff_ids)) {
+            DB::table('users')
+                ->whereIn('id', $request->staff_ids)
+                ->where('role', 'staff')
+                ->update(['stall_id' => $id, 'updated_at' => now()]);
+        }
 
         return redirect()->back()->with('success', 'Stall updated successfully!');
     }
