@@ -499,7 +499,6 @@ class AdminController extends Controller
 
         DB::table('users')->where('id', $request->staff_id)->where('role', 'staff')->update([
             'stall_id' => $request->stall_id,
-            'stall_name' => $stall ? $stall->name : null,
             'updated_at' => now(),
         ]);
 
@@ -517,7 +516,6 @@ class AdminController extends Controller
 
         DB::table('users')->where('id', $request->staff_id)->where('role', 'staff')->update([
             'stall_id' => null,
-            'stall_name' => null,
             'updated_at' => now(),
         ]);
 

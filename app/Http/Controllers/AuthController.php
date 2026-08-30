@@ -59,7 +59,6 @@ class AuthController extends Controller
             'year_level'     => $request->role === 'student' ? $request->year_level : null,
             'student_number' => $request->role === 'student' ? $request->student_number : null,
             'stall_id'       => null,
-            'stall_name'     => null,
             'password'       => Hash::make($request->password),
         ];
 
