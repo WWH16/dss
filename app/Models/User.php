@@ -27,7 +27,6 @@ class User extends Authenticatable implements MustVerifyEmail
         'course',
         'year_level',
         'student_number',
-        'stall_name',
         'stall_id',
     ];
 
