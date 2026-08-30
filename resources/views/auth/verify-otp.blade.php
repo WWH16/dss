@@ -63,6 +63,16 @@
         @media (prefers-reduced-motion: reduce) {
             .shake, .countdown-active { animation: none; }
         }
+
+        /* Disabled button state */
+        .btn:disabled,
+        .btn[disabled] {
+            opacity: 0.45 !important;
+            cursor: not-allowed !important;
+            pointer-events: none !important;
+            box-shadow: none !important;
+            transform: none !important;
+        }
     </style>
 </head>
 <body class="bg-neutral-50/50 min-h-screen flex items-center justify-center px-4 relative antialiased">
@@ -147,7 +157,7 @@
             <button
                 type="submit"
                 id="verify-btn"
-                class="btn btn-primary w-full py-2.5 font-bold tracking-wide rounded-[4px] border-0 cursor-pointer flex items-center justify-center gap-2"
+                class="btn btn-primary w-full py-2.5 font-bold tracking-wide rounded-[4px] border-0 flex items-center justify-center gap-2 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none transition-all"
                 disabled
             >
                 <ion-icon id="verify-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
@@ -168,7 +178,7 @@
             <button
                 type="submit"
                 id="resend-btn"
-                class="w-full py-2 text-sm font-semibold text-neutral-500 hover:text-neutral-800 transition-colors rounded-[4px] border border-neutral-200 bg-white hover:border-neutral-300 disabled:opacity-40 disabled:cursor-not-allowed"
+                class="w-full py-2 text-sm font-semibold text-neutral-500 hover:text-neutral-800 transition-colors rounded-[4px] border border-neutral-200 bg-white hover:border-neutral-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:pointer-events-none"
                 disabled
             >
                 <span id="resend-label">Resend code</span>
@@ -180,8 +190,6 @@
             Wrong email?
             <a href="{{ url('/login?tab=register') }}" class="text-brand-700 font-semibold hover:underline">Go back and register again</a>
         </p>
-
-
 
     </div>
 
@@ -203,11 +211,11 @@
         }
 
         function isComplete() {
-            return inputs.every(i => i.value.length === 1);
+            return inputs.every(i => i.value.trim().length === 1);
         }
 
         function updateVerifyBtn() {
-            verifyBtn.disabled = !isComplete();
+            verifyBtn.disabled = !isComplete() || (typeof totalSeconds !== 'undefined' && totalSeconds <= 0);
         }
 
         inputs.forEach((input, idx) => {
@@ -256,8 +264,9 @@
             });
         });
 
-        // Focus first box on load
+        // Focus first box on load & sync initial state
         inputs[0].focus();
+        updateVerifyBtn();
 
         // Shake on server error
         @if($errors->any())
@@ -266,12 +275,18 @@
             setTimeout(() => otpBoxes.classList.remove('shake'), 400);
         @endif
 
-        // ── Submit loader ─────────────────────────────────────────────────
-        otpForm.addEventListener('submit', () => {
+        // ── Submit loader & duplicate click protection ────────────────────
+        otpForm.addEventListener('submit', (e) => {
+            if (!isComplete() || otpForm.dataset.submitting === 'true') {
+                e.preventDefault();
+                return false;
+            }
+            otpForm.dataset.submitting = 'true';
+            verifyBtn.disabled = true;
             document.getElementById('verify-loader').style.display = '';
             document.getElementById('verify-btn-text').textContent = 'Verifying…';
-            verifyBtn.disabled = true;
         });
+
 
         // ── 15-minute expiry countdown ────────────────────────────────────
         let totalSeconds = {{ $expiresSeconds ?? 900 }};
