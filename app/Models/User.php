@@ -28,6 +28,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'year_level',
         'student_number',
         'stall_id',
+        'email_verified_at',
     ];
 
     public function stall(): \Illuminate\Database\Eloquent\Relations\BelongsTo
