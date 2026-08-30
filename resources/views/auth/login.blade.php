@@ -138,11 +138,48 @@
                 </div>
 
                 <div>
-                    <label for="register_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
-                    <input type="email" id="register_email" name="email" value="{{ old('email') }}" placeholder="e.g. student@example.com" class="w-full px-4 py-2.5 bg-white border @error('email') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="email" required>
+                    <label for="register_email_prefix" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
+
+                    {{-- Student: split input (prefix + @isu.edu.ph locked) --}}
+                    {{-- Student: split input with locked _cyn@isu.edu.ph suffix --}}
+                    <div id="register_email_student" class="flex rounded-[4px] overflow-hidden border @error('email') border-red-500 @else border-neutral-300 @enderror focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/15 transition-all">
+                        <input
+                            type="text"
+                            id="register_email_prefix"
+                            name="email_prefix"
+                            value="{{ old('email_prefix', old('email') ? explode('_cyn@', old('email'))[0] : '') }}"
+                            placeholder="yourname"
+                            class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium text-neutral-800 placeholder:text-neutral-400 bg-white focus:outline-none"
+                            autocomplete="off"
+                        >
+                        <span class="flex items-center px-3 bg-neutral-100 border-l border-neutral-300 text-sm font-semibold text-neutral-500 whitespace-nowrap select-none">
+                            _cyn@isu.edu.ph
+                        </span>
+                    </div>
+
+                    {{-- Hidden full email sent to server --}}
+                    <input type="hidden" name="email" id="register_email_hidden">
+
+                    {{-- Staff/Admin: plain email input --}}
+                    <div id="register_email_other" style="display: none;">
+                        <input
+                            type="email"
+                            id="register_email_plain"
+                            name="email_other"
+                            value="{{ old('email_other') }}"
+                            placeholder="e.g. user@example.com"
+                            class="w-full px-4 py-2.5 bg-white border @error('email') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400"
+                            autocomplete="email"
+                        >
+                    </div>
+
                     @error('email')
                         <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
+
+                    <p id="register_email_hint" class="text-[11px] text-neutral-400 mt-1.5 font-medium">
+                        Use your official ISU email. A verification code will be sent after registration.
+                    </p>
                 </div>
 
                 {{-- STUDENT FIELDS --}}
@@ -324,6 +361,12 @@
             document.getElementById('register_year').required = isStudent;
             document.getElementById('register_student_number').required = isStudent;
 
+            // Toggle email input style (split for students, plain for staff/admin)
+            document.getElementById('register_email_student').style.display = isStudent ? 'flex' : 'none';
+            document.getElementById('register_email_other').style.display = isStudent ? 'none' : 'block';
+            document.getElementById('register_email_hint').style.display = isStudent ? 'block' : 'none';
+            document.getElementById('register_email_plain').required = !isStudent;
+
             // Toggle staff fields visibility
             document.getElementById('register_staff_field').style.display = isStaff ? 'block' : 'none';
         }
@@ -460,6 +503,15 @@
 
             if (registerForm) {
                 registerForm.addEventListener('submit', (e) => {
+                    const role = document.getElementById('register_role').value;
+                    const hiddenEmail = document.getElementById('register_email_hidden');
+                    if (role === 'student') {
+                        const prefix = document.getElementById('register_email_prefix').value.trim();
+                        hiddenEmail.value = prefix + '_cyn@isu.edu.ph';
+                    } else {
+                        hiddenEmail.value = document.getElementById('register_email_plain').value.trim();
+                    }
+
                     if (!handleFormSubmit(registerForm, 'register-submit-btn', 'register-btn-content', 'register-btn-loader', 'Registering…')) {
                         e.preventDefault();
                     }
