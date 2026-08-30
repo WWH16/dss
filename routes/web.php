@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\OtpController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentEvaluationController;
 use App\Http\Controllers\AdminController;
@@ -37,13 +38,18 @@ Route::post('/login', [LoginController::class, 'login']);
 Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
 Route::post('/register', [AuthController::class, 'register']);
 
+// OTP email verification (student registration flow)
+Route::get('/verify-otp', [OtpController::class, 'show'])->name('otp.show');
+Route::post('/verify-otp', [OtpController::class, 'verify'])->name('otp.verify');
+Route::post('/verify-otp/resend', [OtpController::class, 'resend'])->name('otp.resend');
+
 /*
 |--------------------------------------------------------------------------
 | Student
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'verified'])->group(function () {
 
     // Dashboard
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
