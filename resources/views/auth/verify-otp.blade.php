@@ -132,13 +132,18 @@
 
                 {{-- 6 individual digit boxes --}}
                 <div class="flex justify-center gap-2" id="otp-boxes" role="group" aria-label="6-digit verification code">
+                    @php
+                        $presetChars = isset($presetOtp) && strlen($presetOtp) === 6 ? str_split($presetOtp) : [];
+                    @endphp
                     @for($i = 1; $i <= 6; $i++)
+                        @php $val = $presetChars[$i - 1] ?? ''; @endphp
                         <input
                             type="text"
                             inputmode="numeric"
                             maxlength="1"
-                            class="otp-input"
+                            class="otp-input {{ $val !== '' ? 'filled' : '' }}"
                             id="otp-{{ $i }}"
+                            value="{{ $val }}"
                             aria-label="Digit {{ $i }}"
                             autocomplete="{{ $i === 1 ? 'one-time-code' : 'off' }}"
                         >
@@ -264,8 +269,14 @@
             });
         });
 
-        // Focus first box on load & sync initial state
-        inputs[0].focus();
+        // Focus appropriate box on load & sync initial state
+        syncHidden();
+        const emptyInput = inputs.find(i => !i.value);
+        if (emptyInput) {
+            emptyInput.focus();
+        } else {
+            inputs[5].focus();
+        }
         updateVerifyBtn();
 
         // Shake on server error

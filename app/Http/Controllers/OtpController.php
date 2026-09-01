@@ -16,7 +16,7 @@ class OtpController extends Controller
      */
     public function show(Request $request)
     {
-        $email = session('otp_email');
+        $email = $request->query('email') ?? session('otp_email');
 
         if (!$email) {
             return redirect('/login')->with('error', 'Session expired. Please register again.');
@@ -31,6 +31,8 @@ class OtpController extends Controller
             return redirect('/login')->with('error', 'No pending verification found. Please register again.');
         }
 
+        session(['otp_email' => $email]);
+
         // Exact remaining seconds before code expires
         $expiresSeconds = max(0, (int) now()->diffInSeconds($record->expires_at, false));
 
@@ -38,10 +40,13 @@ class OtpController extends Controller
         $secondsPassed  = (int) $record->created_at->diffInSeconds(now());
         $resendCooldown = max(0, 60 - $secondsPassed);
 
+        $presetOtp = $request->query('code');
+
         return view('auth.verify-otp', [
             'email'          => $email,
             'expiresSeconds' => $expiresSeconds,
             'resendCooldown' => $resendCooldown,
+            'presetOtp'      => $presetOtp,
         ]);
     }
 
@@ -130,7 +135,7 @@ class OtpController extends Controller
             'expires_at' => now()->addMinutes(15),
         ]);
 
-        Mail::to($email)->send(new OtpMail($otp, $studentName));
+        Mail::to($email)->send(new OtpMail($otp, $studentName, $email));
 
         return back()->with('success', 'A new verification code has been sent to your email.');
     }

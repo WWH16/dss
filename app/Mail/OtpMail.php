@@ -15,6 +15,7 @@ class OtpMail extends Mailable
     public function __construct(
         public string $otp,
         public string $studentName,
+        public ?string $email = null,
     ) {}
 
     public function envelope(): Envelope
@@ -31,6 +32,7 @@ class OtpMail extends Mailable
             with: [
                 'otp'         => $this->otp,
                 'studentName' => $this->studentName,
+                'email'       => $this->email,
             ],
         );
     }
