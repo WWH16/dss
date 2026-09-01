@@ -112,9 +112,10 @@ class StaffController extends Controller
         // 6. Evaluation Activity Timeline trend with Month & Year filtering
         $availableYears = DB::table('stall_evaluations')
             ->where('stall_id', $stall->id)
-            ->selectRaw('DISTINCT YEAR(created_at) as year')
+            ->selectRaw('DISTINCT EXTRACT(YEAR FROM created_at) as year')
             ->orderByDesc('year')
             ->pluck('year')
+            ->map(fn ($y) => (int) $y)
             ->toArray();
         if (empty($availableYears)) {
             $availableYears = [(int)date('Y')];
@@ -133,11 +134,11 @@ class StaffController extends Controller
             // Full Year: Monthly aggregations (Jan - Dec)
             $evalTrend = DB::table('stall_evaluations')
                 ->where('stall_id', $stall->id)
-                ->selectRaw('MONTH(created_at) as m, COUNT(*) as count')
+                ->selectRaw('EXTRACT(MONTH FROM created_at) as m, COUNT(*) as count')
                 ->whereYear('created_at', $selectedYear)
-                ->groupByRaw('MONTH(created_at)')
+                ->groupByRaw('EXTRACT(MONTH FROM created_at)')
                 ->get()
-                ->keyBy('m');
+                ->keyBy(fn ($row) => (int) $row->m);
 
             for ($m = 1; $m <= 12; $m++) {
                 $trendDates[] = date('M', mktime(0, 0, 0, $m, 1));
@@ -151,12 +152,12 @@ class StaffController extends Controller
 
             $evalTrend = DB::table('stall_evaluations')
                 ->where('stall_id', $stall->id)
-                ->selectRaw('DAY(created_at) as d, COUNT(*) as count')
+                ->selectRaw('EXTRACT(DAY FROM created_at) as d, COUNT(*) as count')
                 ->whereYear('created_at', $selectedYear)
                 ->whereMonth('created_at', $m)
-                ->groupByRaw('DAY(created_at)')
+                ->groupByRaw('EXTRACT(DAY FROM created_at)')
                 ->get()
-                ->keyBy('d');
+                ->keyBy(fn ($row) => (int) $row->d);
 
             $monthShort = date('M', mktime(0, 0, 0, $m, 1));
             for ($d = 1; $d <= $daysInMonth; $d++) {
