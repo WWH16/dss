@@ -22,6 +22,12 @@ class OtpController extends Controller
             return redirect('/login')->with('error', 'Session expired. Please register again.');
         }
 
+        // If account is already created & verified, redirect to login directly
+        if (User::where('email', $email)->whereNotNull('email_verified_at')->exists()) {
+            session()->forget('otp_email');
+            return redirect('/login')->with('success', 'Your email address is already verified! You may now log in.');
+        }
+
         $record = EmailVerification::where('email', $email)
             ->where('used', false)
             ->latest()
@@ -33,14 +39,28 @@ class OtpController extends Controller
 
         session(['otp_email' => $email]);
 
-        // Exact remaining seconds before code expires
-        $expiresSeconds = max(0, (int) now()->diffInSeconds($record->expires_at, false));
+        $presetOtp = $request->query('code');
+        $expiredMessage = null;
+
+        // Check if latest OTP is expired
+        if ($record->expires_at->isPast()) {
+            $expiresSeconds = 0;
+            $presetOtp = null; // Do not pre-fill expired code
+            session()->flash('error', 'Your verification code has expired (valid for 15 minutes). Please click "Resend code" below.');
+        } else {
+            // Exact remaining seconds before code expires
+            $expiresSeconds = max(0, (int) now()->diffInSeconds($record->expires_at, false));
+
+            // Check if preset code from link matches the active code in DB
+            if ($presetOtp && $presetOtp !== $record->otp) {
+                $presetOtp = null; // Do not pre-fill outdated code from an old email
+                session()->flash('error', 'This verification link is outdated. Please check your inbox for the newest code or click "Resend code".');
+            }
+        }
 
         // Exact remaining seconds before resend is allowed (60s throttle)
         $secondsPassed  = (int) $record->created_at->diffInSeconds(now());
         $resendCooldown = max(0, 60 - $secondsPassed);
-
-        $presetOtp = $request->query('code');
 
         return view('auth.verify-otp', [
             'email'          => $email,
@@ -63,6 +83,11 @@ class OtpController extends Controller
 
         if (!$email) {
             return redirect('/login')->with('error', 'Session expired. Please register again.');
+        }
+
+        if (User::where('email', $email)->whereNotNull('email_verified_at')->exists()) {
+            session()->forget('otp_email');
+            return redirect('/login')->with('success', 'Your email address is already verified! You may now log in.');
         }
 
         $record = EmailVerification::where('email', $email)
@@ -109,6 +134,11 @@ class OtpController extends Controller
 
         if (!$email) {
             return redirect('/login')->with('error', 'Session expired. Please register again.');
+        }
+
+        if (User::where('email', $email)->whereNotNull('email_verified_at')->exists()) {
+            session()->forget('otp_email');
+            return redirect('/login')->with('success', 'Your email address is already verified! You may now log in.');
         }
 
         // Throttle: check if a valid OTP was sent in the last 60 seconds

@@ -269,6 +269,34 @@
             });
         });
 
+        // ── 15-minute expiry countdown ────────────────────────────────────
+        let totalSeconds = {{ $expiresSeconds ?? 900 }};
+        const countdownEl = document.getElementById('countdown');
+
+        function updateExpiryDisplay() {
+            if (totalSeconds <= 0) {
+                countdownEl.textContent = 'Expired';
+                countdownEl.classList.add('text-red-500');
+                verifyBtn.disabled = true;
+                return false;
+            }
+            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
+            const s = String(totalSeconds % 60).padStart(2, '0');
+            countdownEl.textContent = `${m}:${s}`;
+
+            if (totalSeconds <= 60) countdownEl.classList.add('countdown-active', 'text-red-500');
+            return true;
+        }
+
+        if (updateExpiryDisplay()) {
+            const expiryTimer = setInterval(() => {
+                totalSeconds--;
+                if (!updateExpiryDisplay()) {
+                    clearInterval(expiryTimer);
+                }
+            }, 1000);
+        }
+
         // Focus appropriate box on load & sync initial state
         syncHidden();
         const emptyInput = inputs.find(i => !i.value);
@@ -298,34 +326,14 @@
             document.getElementById('verify-btn-text').textContent = 'Verifying…';
         });
 
-
-        // ── 15-minute expiry countdown ────────────────────────────────────
-        let totalSeconds = {{ $expiresSeconds ?? 900 }};
-        const countdownEl = document.getElementById('countdown');
-
-        function updateExpiryDisplay() {
-            if (totalSeconds <= 0) {
-                countdownEl.textContent = 'Expired';
-                countdownEl.classList.add('text-red-500');
-                verifyBtn.disabled = true;
-                return false;
+        // ── Auto-submit when code is pre-filled from email link ──────────
+        @if(isset($presetOtp) && strlen($presetOtp ?? '') === 6)
+            if (isComplete() && totalSeconds > 0) {
+                setTimeout(() => {
+                    otpForm.requestSubmit();
+                }, 600);
             }
-            const m = String(Math.floor(totalSeconds / 60)).padStart(2, '0');
-            const s = String(totalSeconds % 60).padStart(2, '0');
-            countdownEl.textContent = `${m}:${s}`;
-
-            if (totalSeconds <= 60) countdownEl.classList.add('countdown-active', 'text-red-500');
-            return true;
-        }
-
-        if (updateExpiryDisplay()) {
-            const expiryTimer = setInterval(() => {
-                totalSeconds--;
-                if (!updateExpiryDisplay()) {
-                    clearInterval(expiryTimer);
-                }
-            }, 1000);
-        }
+        @endif
 
         // ── Resend 60-second cooldown ─────────────────────────────────────
         let cooldown = {{ $resendCooldown ?? 0 }};
