@@ -74,7 +74,7 @@ class AuthController extends Controller
             ]);
 
             \Illuminate\Support\Facades\Mail::to($userData['email'])
-                ->send(new \App\Mail\OtpMail($otp, $userData['name']));
+                ->send(new \App\Mail\OtpMail($otp, $userData['name'], $userData['email']));
 
             session(['otp_email' => $userData['email']]);
 

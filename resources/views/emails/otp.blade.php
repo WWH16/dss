@@ -65,7 +65,7 @@
                         <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:24px;">
                             <tr>
                                 <td align="center">
-                                    <a href="{{ url('/verify-otp') }}" target="_blank" class="cta-btn font-display" style="display:inline-block;width:100%;background-color:#166534;color:#ffffff;font-family:'Sora','Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;text-align:center;padding:14px 24px;border-radius:4px;text-decoration:none;box-shadow:0 1px 2px rgba(22,101,52,0.15);">
+                                    <a href="{{ url('/verify-otp') . (!empty($email) ? '?email=' . urlencode($email) . '&code=' . urlencode($otp) : '') }}" target="_blank" class="cta-btn font-display" style="display:inline-block;width:100%;background-color:#166534;color:#ffffff;font-family:'Sora','Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;text-align:center;padding:14px 24px;border-radius:4px;text-decoration:none;box-shadow:0 1px 2px rgba(22,101,52,0.15);">
                                         Verify Email Address &rarr;
                                     </a>
                                 </td>
