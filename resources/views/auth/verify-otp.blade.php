@@ -234,6 +234,14 @@
                     input.classList.remove('filled');
                     syncHidden();
                     updateVerifyBtn();
+                } else if (e.key === 'ArrowLeft' && idx > 0) {
+                    e.preventDefault();
+                    inputs[idx - 1].focus();
+                    inputs[idx - 1].select();
+                } else if (e.key === 'ArrowRight' && idx < inputs.length - 1) {
+                    e.preventDefault();
+                    inputs[idx + 1].focus();
+                    inputs[idx + 1].select();
                 }
             });
 
@@ -246,6 +254,15 @@
 
                 if (val && idx < inputs.length - 1) {
                     inputs[idx + 1].focus();
+                }
+
+                // Instant auto-submit when user completes typing all 6 digits
+                if (isComplete() && typeof totalSeconds !== 'undefined' && totalSeconds > 0) {
+                    setTimeout(() => {
+                        if (isComplete() && otpForm.dataset.submitting !== 'true') {
+                            otpForm.requestSubmit();
+                        }
+                    }, 250);
                 }
             });
 
@@ -261,11 +278,23 @@
                 syncHidden();
                 updateVerifyBtn();
                 const next = inputs[Math.min(pasted.length, 5)];
-                if (next) next.focus();
+                if (next) {
+                    next.focus();
+                }
+
+                // Auto-submit on paste if 6 digits pasted
+                if (isComplete() && typeof totalSeconds !== 'undefined' && totalSeconds > 0) {
+                    setTimeout(() => {
+                        if (isComplete() && otpForm.dataset.submitting !== 'true') {
+                            otpForm.requestSubmit();
+                        }
+                    }, 250);
+                }
             });
 
             input.addEventListener('focus', () => {
                 input.classList.remove('error');
+                input.select();
             });
         });
 
@@ -330,8 +359,10 @@
         @if(isset($presetOtp) && strlen($presetOtp ?? '') === 6)
             if (isComplete() && totalSeconds > 0) {
                 setTimeout(() => {
-                    otpForm.requestSubmit();
-                }, 600);
+                    if (otpForm.dataset.submitting !== 'true') {
+                        otpForm.requestSubmit();
+                    }
+                }, 500);
             }
         @endif
 
@@ -341,13 +372,15 @@
         function startResendCooldown() {
             if (cooldown <= 0) {
                 resendBtn.disabled = false;
+                resendLabel.textContent = 'Resend code';
                 resendLabel.classList.remove('hidden');
                 resendCountdown.classList.add('hidden');
                 return;
             }
 
             resendBtn.disabled = true;
-            resendLabel.classList.add('hidden');
+            resendLabel.textContent = 'Resend code';
+            resendLabel.classList.remove('hidden');
             resendCountdown.classList.remove('hidden');
             resendSecs.textContent = cooldown;
 
@@ -368,6 +401,8 @@
         document.getElementById('resend-form').addEventListener('submit', () => {
             cooldown = 60;
             startResendCooldown();
+            resendBtn.disabled = true;
+            resendLabel.textContent = 'Sending code…';
         });
     });
     </script>
