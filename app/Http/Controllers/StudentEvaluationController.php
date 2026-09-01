@@ -16,11 +16,10 @@ class StudentEvaluationController extends Controller
             return redirect('/login');
         }
 
-        $profile = DB::table('users')
-            ->where('id', $user->id)
-            ->first();
+        $profile = $user;
 
         $stalls = DB::table('stalls')
+            ->select('id', 'name')
             ->orderBy('name')
             ->get();
 

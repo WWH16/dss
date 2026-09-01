@@ -19,12 +19,11 @@ class StudentDashboardController extends Controller
         }
 
         // Student profile
-        $profile = DB::table('users')
-            ->where('id', $user->id)
-            ->first();
+        $profile = $user;
 
-        // Food stalls
+        // Food stalls (selecting essential columns)
         $stalls = DB::table('stalls')
+            ->select('id', 'name', 'description')
             ->orderBy('name')
             ->get();
 
@@ -33,7 +32,13 @@ class StudentDashboardController extends Controller
             ->join('stalls', 'stall_evaluations.stall_id', '=', 'stalls.id')
             ->where('stall_evaluations.student_id', $user->id)
             ->select(
-                'stall_evaluations.*',
+                'stall_evaluations.id',
+                'stall_evaluations.stall_id',
+                'stall_evaluations.cleanliness',
+                'stall_evaluations.service',
+                'stall_evaluations.taste',
+                'stall_evaluations.price',
+                'stall_evaluations.created_at',
                 'stalls.name as stall_name'
             )
             ->orderByDesc('stall_evaluations.created_at')
@@ -70,7 +75,7 @@ class StudentDashboardController extends Controller
                 'stalls.name',
                 'stalls.description',
                 DB::raw('COUNT(stall_evaluations.id) as eval_count'),
-                DB::raw('(AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4 as overall_score')
+                DB::raw('COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall_score')
             )
             ->groupBy('stalls.id', 'stalls.name', 'stalls.description')
             ->havingRaw('COUNT(stall_evaluations.id) > 0')
@@ -99,19 +104,17 @@ class StudentDashboardController extends Controller
             return redirect('/login');
         }
 
-        $profile = DB::table('users')
-            ->where('id', $user->id)
+        $profile = $user;
+
+        // Single aggregated SQL query for profile metrics
+        $stats = DB::table('stall_evaluations')
+            ->where('student_id', $user->id)
+            ->selectRaw('COUNT(*) as total_evals, COUNT(DISTINCT stall_id) as unique_stalls, AVG((cleanliness + service + taste + price) / 4) as avg_given')
             ->first();
 
-        // Evaluation Summary for profile
-        $totalEvals = DB::table('stall_evaluations')->where('student_id', $user->id)->count();
-        $uniqueStalls = DB::table('stall_evaluations')->where('student_id', $user->id)->distinct('stall_id')->count('stall_id');
-        $avgGiven = $totalEvals > 0
-            ? DB::table('stall_evaluations')
-                ->where('student_id', $user->id)
-                ->selectRaw('AVG((cleanliness + service + taste + price) / 4) as avg_rating')
-                ->value('avg_rating')
-            : 0;
+        $totalEvals = $stats->total_evals ?? 0;
+        $uniqueStalls = $stats->unique_stalls ?? 0;
+        $avgGiven = $stats->avg_given ? (float)$stats->avg_given : 0;
 
         return view('student.profile', compact(
             'profile',
@@ -186,7 +189,15 @@ class StudentDashboardController extends Controller
             ->join('stalls', 'stall_evaluations.stall_id', '=', 'stalls.id')
             ->where('stall_evaluations.student_id', $user->id)
             ->select(
-                'stall_evaluations.*',
+                'stall_evaluations.id',
+                'stall_evaluations.student_id',
+                'stall_evaluations.stall_id',
+                'stall_evaluations.cleanliness',
+                'stall_evaluations.service',
+                'stall_evaluations.taste',
+                'stall_evaluations.price',
+                'stall_evaluations.comment',
+                'stall_evaluations.created_at',
                 'stalls.name as stall_name',
                 'stalls.description as stall_description'
             );
@@ -210,8 +221,8 @@ class StudentDashboardController extends Controller
             $query->orderByDesc('stall_evaluations.created_at');
         }
 
-        $totalEvaluations = (clone $query)->count();
         $myStudentEvals = $query->paginate(12)->withQueryString();
+        $totalEvaluations = $myStudentEvals->total();
 
         return view('student.history', compact('myStudentEvals', 'totalEvaluations'));
     }
