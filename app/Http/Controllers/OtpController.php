@@ -98,7 +98,7 @@ class OtpController extends Controller
             ->first();
 
         if (!$record) {
-            return back()->with('error', 'Invalid or expired code. Please try again or request a new one.');
+            return back()->with('error', 'Invalid verification code. Please check your code and try again.');
         }
 
         // Mark OTP as used

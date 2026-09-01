@@ -336,10 +336,17 @@
         }
         updateVerifyBtn();
 
-        // Shake on server error
-        @if($errors->any())
+        // Shake & reset inputs on server error or wrong code attempt
+        @if(session('error') || $errors->any())
             otpBoxes.classList.add('shake');
-            inputs.forEach(i => i.classList.add('error'));
+            inputs.forEach(i => {
+                i.value = '';
+                i.classList.remove('filled');
+                i.classList.add('error');
+            });
+            syncHidden();
+            updateVerifyBtn();
+            inputs[0].focus();
             setTimeout(() => otpBoxes.classList.remove('shake'), 400);
         @endif
 
