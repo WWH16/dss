@@ -112,7 +112,7 @@ class AdminController extends Controller
         } elseif (is_numeric($selectedMonth) && (int)$selectedMonth >= 1 && (int)$selectedMonth <= 12) {
             // Specific Month: Day-by-Day (Day 1 to Days in Month)
             $m = (int)$selectedMonth;
-            $daysInMonth = cal_days_in_month(CAL_GREGORIAN, $m, $selectedYear);
+            $daysInMonth = (int) date('t', mktime(0, 0, 0, $m, 1, $selectedYear));
 
             $evalTrend = DB::table('stall_evaluations')
                 ->selectRaw('DAY(created_at) as d, COUNT(*) as count')
