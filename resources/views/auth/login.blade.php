@@ -489,6 +489,20 @@
                 evaluatePassword();
             }
 
+            // Student Email Prefix Input Auto-Sanitization (strip pasted domain suffix)
+            const emailPrefixInput = document.getElementById('register_email_prefix');
+            if (emailPrefixInput) {
+                emailPrefixInput.addEventListener('input', (e) => {
+                    let val = e.target.value.trim().toLowerCase();
+                    // If user pastes full email or domain, clean it automatically
+                    val = val.replace(/_cyn@isu\.edu\.ph$/i, '')
+                             .replace(/@isu\.edu\.ph$/i, '')
+                             .replace(/@.*$/, '')
+                             .replace(/\s+/g, '');
+                    e.target.value = val;
+                });
+            }
+
             // Intercept form submissions
             const loginForm = document.querySelector('#login-form-block form');
             const registerForm = document.querySelector('#register-form-block form');
@@ -520,6 +534,11 @@
         });
 
         function handleFormSubmit(formElement, btnId, contentId, loaderId, loadingText) {
+            // Check HTML5 validity first before locking
+            if (formElement.checkValidity && !formElement.checkValidity()) {
+                return true; // Let browser trigger native error tooltips
+            }
+
             const btn = document.getElementById(btnId);
             const content = document.getElementById(contentId);
             const loader = document.getElementById(loaderId);
