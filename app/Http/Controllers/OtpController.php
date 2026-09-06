@@ -6,6 +6,7 @@ use App\Mail\OtpMail;
 use App\Models\EmailVerification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
 class OtpController extends Controller
@@ -76,14 +77,17 @@ class OtpController extends Controller
     public function verify(Request $request)
     {
         $request->validate([
-            'otp' => 'required|string|size:6',
+            'otp'   => 'required|string|size:6',
+            'email' => 'nullable|email',
         ]);
 
-        $email = session('otp_email');
+        $email = $request->input('email') ?? session('otp_email');
 
         if (!$email) {
             return redirect('/login')->with('error', 'Session expired. Please register again.');
         }
+
+        session(['otp_email' => $email]);
 
         if (User::where('email', $email)->whereNotNull('email_verified_at')->exists()) {
             session()->forget('otp_email');
@@ -101,24 +105,23 @@ class OtpController extends Controller
             return back()->with('error', 'Invalid verification code. Please check your code and try again.');
         }
 
-        // Mark OTP as used
-        $record->update(['used' => true]);
+        // Atomically mark OTP as used and create/verify user
+        DB::transaction(function () use ($record, $email) {
+            $record->update(['used' => true]);
 
-        // Create the user now if payload exists
-        if ($record->payload) {
-            $userData = $record->payload;
-            $userData['email_verified_at'] = now();
+            if ($record->payload) {
+                $userData = $record->payload;
+                $userData['email_verified_at'] = now();
 
-            // Prevent duplicate creation if user already exists
-            if (!User::where('email', $email)->exists()) {
-                User::create($userData);
+                if (!User::where('email', $email)->exists()) {
+                    User::create($userData);
+                }
+            } else {
+                User::where('email', $email)->update([
+                    'email_verified_at' => now(),
+                ]);
             }
-        } else {
-            // Fallback for existing user records
-            User::where('email', $email)->update([
-                'email_verified_at' => now(),
-            ]);
-        }
+        });
 
         session()->forget('otp_email');
 
@@ -130,11 +133,13 @@ class OtpController extends Controller
      */
     public function resend(Request $request)
     {
-        $email = session('otp_email');
+        $email = $request->input('email') ?? session('otp_email');
 
         if (!$email) {
             return redirect('/login')->with('error', 'Session expired. Please register again.');
         }
+
+        session(['otp_email' => $email]);
 
         if (User::where('email', $email)->whereNotNull('email_verified_at')->exists()) {
             session()->forget('otp_email');

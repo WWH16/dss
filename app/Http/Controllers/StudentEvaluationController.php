@@ -17,14 +17,6 @@ class StudentEvaluationController extends Controller
             return redirect('/login');
         }
 
-        // If a specific stall was requested via query param, verify it is active
-        if ($request->filled('stall')) {
-            $requestedStall = DB::table('stalls')->where('id', $request->stall)->first();
-            if ($requestedStall && !$requestedStall->is_active) {
-                return redirect()->route('student.evaluation')->with('error', "{$requestedStall->name} is currently closed for student evaluations.");
-            }
-        }
-
         $profile = $user;
 
         $stalls = DB::table('stalls')
@@ -32,6 +24,17 @@ class StudentEvaluationController extends Controller
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
+
+        // If a specific stall was requested via query param, verify it is in the active list
+        if ($request->filled('stall')) {
+            $stallId = (int) $request->stall;
+            if (!$stalls->contains('id', $stallId)) {
+                $requestedStall = DB::table('stalls')->where('id', $stallId)->first();
+                if ($requestedStall) {
+                    return redirect()->route('student.evaluation')->with('error', "{$requestedStall->name} is currently closed for student evaluations.");
+                }
+            }
+        }
 
         $displayStatements = [
             [

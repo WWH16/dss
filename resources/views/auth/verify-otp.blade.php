@@ -126,6 +126,7 @@
         {{-- OTP Form --}}
         <form method="POST" action="{{ route('otp.verify') }}" id="otp-form" class="space-y-5">
             @csrf
+            <input type="hidden" name="email" value="{{ $email }}">
 
             <div>
                 <label class="block text-xs font-semibold text-neutral-700 mb-3 text-center">Enter verification code</label>
@@ -180,6 +181,7 @@
         {{-- Resend --}}
         <form method="POST" action="{{ route('otp.resend') }}" id="resend-form">
             @csrf
+            <input type="hidden" name="email" value="{{ $email }}">
             <button
                 type="submit"
                 id="resend-btn"
