@@ -21,14 +21,10 @@ class StaffController extends Controller
 
         $user = Auth::user();
 
-        // 1. Look up assigned food stall for this staff member (via users.stall_id or legacy stalls.staff_id)
-        $stall = null;
-        if ($user->stall_id) {
-            $stall = DB::table('stalls')->where('id', $user->stall_id)->first();
-        }
-        if (!$stall) {
-            $stall = DB::table('stalls')->where('staff_id', $user->id)->first();
-        }
+        // 1. Look up assigned food stall for this staff member (via users.stall_id)
+        $stall = $user->stall_id
+            ? DB::table('stalls')->where('id', $user->stall_id)->first()
+            : null;
 
         // If not assigned to any stall, render the unassigned state with zero stall data
         if (!$stall) {
@@ -296,13 +292,9 @@ class StaffController extends Controller
         }
 
         $user = Auth::user();
-        $stall = null;
-        if ($user->stall_id) {
-            $stall = DB::table('stalls')->where('id', $user->stall_id)->first();
-        }
-        if (!$stall) {
-            $stall = DB::table('stalls')->where('staff_id', $user->id)->first();
-        }
+        $stall = $user->stall_id
+            ? DB::table('stalls')->where('id', $user->stall_id)->first()
+            : null;
 
         return view('staff.profile', [
             'profile' => $user,

@@ -199,7 +199,7 @@
                 </a>
             @elseif($user && $user->role === 'staff')
                 @php
-                    $isStaffAssigned = !empty($user->stall_id) || \Illuminate\Support\Facades\DB::table('stalls')->where('staff_id', $user->id)->exists();
+                    $isStaffAssigned = !empty($user->stall_id);
                 @endphp
                 <a href="{{ route('staff.dashboard') }}" class="sidebar-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
                     <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>

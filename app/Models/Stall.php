@@ -11,7 +11,6 @@ class Stall extends Model
         'name',
         'is_active',
         'description',
-        'staff_id',
     ];
 
     protected function casts(): array
