@@ -32,9 +32,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            @if(session('success'))
-                if (window.showToast) window.showToast(@json(session('success')), 'success', 4000);
-            @endif
+            {{-- Note: success toast is suppressed here because views using focused layout display a dedicated full-page success screen --}}
             @if(session('error'))
                 if (window.showToast) window.showToast(@json(session('error')), 'error', 5000);
             @endif

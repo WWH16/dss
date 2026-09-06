@@ -3,6 +3,22 @@
 @section('title', 'Evaluate Food Stall | DSS')
 @section('header_title', 'Evaluate Food Stall')
 
+@section('head')
+<style>
+    @keyframes error-pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.02); }
+    }
+    .error-pulse {
+        animation: error-pulse 0.35s ease-in-out 2;
+    }
+    .rating-touch-pill {
+        -webkit-tap-highlight-color: transparent;
+        touch-action: manipulation;
+    }
+</style>
+@endsection
+
 @section('content')
 <div class="max-w-4xl mx-auto space-y-5">
     
@@ -79,7 +95,7 @@
             </div>
 
             {{-- ── Evaluation Survey Form ──────────────────────────────────── --}}
-            <form id="evaluationForm" action="{{ route('student.evaluation.store') }}" method="POST" class="p-5 sm:p-8 space-y-6">
+            <form id="evaluationForm" action="{{ route('student.evaluation.store') }}" method="POST" class="p-3.5 sm:p-8 space-y-5 sm:space-y-6">
                 @csrf
 
                 {{-- Validation Error Alert --}}
@@ -109,7 +125,7 @@
                 @endif
 
                 {{-- 1. Stall Selection Section --}}
-                <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-2xs space-y-2.5">
+                <div class="bg-white rounded-xl border border-neutral-200/80 p-3.5 sm:p-5 shadow-2xs space-y-2.5" id="stallSelectCard">
                     <label for="stall_id" class="block text-xs font-bold uppercase tracking-wider text-neutral-700">
                         1. Select Food Stall to Evaluate <span class="text-rose-500">*</span>
                     </label>
@@ -129,8 +145,8 @@
                 </div>
 
                 {{-- 2. Rating Scale Legend --}}
-                <div class="bg-neutral-50/70 rounded-xl border border-neutral-200/70 p-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-2 mb-3 border-b border-neutral-200/60">
+                <div class="bg-neutral-50/70 rounded-xl border border-neutral-200/70 p-3.5 sm:p-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 mb-2.5 border-b border-neutral-200/60">
                         <span class="text-xs font-bold text-neutral-700 uppercase tracking-wider">Rating Scale Reference</span>
                         <div class="flex items-center gap-2 text-xs font-bold text-neutral-600" id="progressIndicator">
                             <span>Completion:</span>
@@ -139,31 +155,31 @@
                     </div>
 
                     {{-- Scale Badges --}}
-                    <div class="grid grid-cols-5 gap-2 text-center text-xs">
-                        <div class="bg-white p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-sm">5★</span>
-                            <span class="text-[10px] font-semibold text-neutral-500">Excellent</span>
+                    <div class="grid grid-cols-5 gap-1.5 sm:gap-2 text-center text-xs">
+                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
+                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">5★</span>
+                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Excellent</span>
                         </div>
-                        <div class="bg-white p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-sm">4★</span>
-                            <span class="text-[10px] font-semibold text-neutral-500">Very Good</span>
+                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
+                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">4★</span>
+                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Very Good</span>
                         </div>
-                        <div class="bg-white p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-sm">3★</span>
-                            <span class="text-[10px] font-semibold text-neutral-500">Good</span>
+                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
+                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">3★</span>
+                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Good</span>
                         </div>
-                        <div class="bg-white p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-sm">2★</span>
-                            <span class="text-[10px] font-semibold text-neutral-500">Fair</span>
+                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
+                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">2★</span>
+                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Fair</span>
                         </div>
-                        <div class="bg-white p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-sm">1★</span>
-                            <span class="text-[10px] font-semibold text-neutral-500">Poor</span>
+                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
+                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">1★</span>
+                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Poor</span>
                         </div>
                     </div>
 
                     {{-- Progress Bar --}}
-                    <div class="mt-3">
+                    <div class="mt-2.5">
                         <div class="w-full bg-neutral-200/80 h-1.5 rounded-full overflow-hidden">
                             <div id="surveyProgressBar" class="bg-brand-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
@@ -229,47 +245,57 @@
                 {{-- ── MOBILE CARD LAYOUT (hidden on sm+) ─────────────────────── --}}
                 <div class="sm:hidden space-y-3" id="mobileQuestions">
                     @foreach($displayStatements as $index => $statement)
-                        <div class="mobile-question-card bg-white border border-neutral-200/80 rounded-xl overflow-hidden shadow-2xs transition-colors" id="mobile_card_{{ $statement['id'] }}">
-                            <div class="p-3.5 bg-neutral-50/70 border-b border-neutral-100 flex items-start gap-2">
-                                <span class="shrink-0 w-5 h-5 rounded-full bg-neutral-200 text-neutral-700 text-[10px] font-bold flex items-center justify-center tabular-nums mt-0.5">
+                        <div class="mobile-question-card bg-white border border-neutral-200/90 rounded-xl overflow-hidden shadow-2xs transition-all duration-200" id="mobile_card_{{ $statement['id'] }}">
+                            {{-- Card Header --}}
+                            <div class="p-3 bg-neutral-50/80 border-b border-neutral-100 flex items-start gap-2.5">
+                                <span class="shrink-0 w-6 h-6 rounded-full bg-neutral-200 text-neutral-700 text-xs font-bold flex items-center justify-center tabular-nums">
                                     {{ $index + 1 }}
                                 </span>
                                 <div>
-                                    <p class="text-xs font-medium text-neutral-800 leading-snug">
+                                    <p class="text-xs font-semibold text-neutral-900 leading-snug">
                                         {{ $statement['statement'] }}
                                     </p>
-                                    <span class="text-[9px] font-bold uppercase tracking-wider text-neutral-400">
-                                        {{ ucfirst($statement['criterion_key']) }}
+                                    <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-neutral-400 mt-1">
+                                        Criterion: {{ ucfirst($statement['criterion_key']) }}
                                     </span>
                                 </div>
                             </div>
 
-                            <div class="p-3 flex gap-1.5">
-                                @for($val = 5; $val >= 1; $val--)
-                                    <label for="mb_q{{ $statement['id'] }}_v{{ $val }}" class="flex-1 relative cursor-pointer">
-                                        <input
-                                            type="radio"
-                                            id="mb_q{{ $statement['id'] }}_v{{ $val }}"
-                                            name="responses_mobile[{{ $statement['id'] }}]"
-                                            value="{{ $val }}"
-                                            class="peer sr-only survey-radio-mb"
-                                            data-statement-id="{{ $statement['id'] }}"
-                                            data-val="{{ $val }}">
-                                        <div class="peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 peer-checked:shadow-2xs flex flex-col items-center justify-center min-h-[46px] rounded-lg border border-neutral-200 bg-neutral-50/50 transition-all active:scale-95 select-none">
-                                            <span class="text-xs font-bold leading-none">{{ $val }}★</span>
-                                            <span class="text-[8px] font-medium leading-tight mt-0.5 opacity-70 peer-checked:opacity-100">
-                                                @if($val === 5) Excel @elseif($val === 4) V.Good @elseif($val === 3) Good @elseif($val === 2) Fair @else Poor @endif
-                                            </span>
-                                        </div>
-                                    </label>
-                                @endfor
+                            {{-- 5-Rating Segmented Buttons --}}
+                            <div class="p-3">
+                                <div class="grid grid-cols-5 gap-1.5" role="radiogroup" aria-label="Rating for statement {{ $index + 1 }}">
+                                    @for($val = 5; $val >= 1; $val--)
+                                        <label for="mb_q{{ $statement['id'] }}_v{{ $val }}" class="relative cursor-pointer select-none rating-touch-pill">
+                                            <input
+                                                type="radio"
+                                                id="mb_q{{ $statement['id'] }}_v{{ $val }}"
+                                                name="responses_mobile[{{ $statement['id'] }}]"
+                                                value="{{ $val }}"
+                                                class="peer sr-only survey-radio-mb"
+                                                data-statement-id="{{ $statement['id'] }}"
+                                                data-val="{{ $val }}">
+                                            <div class="peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 peer-checked:shadow-2xs flex flex-col items-center justify-center min-h-[46px] rounded-lg border border-neutral-200 bg-neutral-50/50 transition-all active:scale-95 select-none text-center">
+                                                <span class="text-xs font-bold leading-none">{{ $val }}★</span>
+                                                <span class="text-[8px] font-medium leading-tight mt-0.5 opacity-70 peer-checked:opacity-100">
+                                                    @if($val === 5) Excel @elseif($val === 4) V.Good @elseif($val === 3) Good @elseif($val === 2) Fair @else Poor @endif
+                                                </span>
+                                            </div>
+                                        </label>
+                                    @endfor
+                                </div>
+
+                                {{-- Inline Error Message --}}
+                                <div id="mb_error_msg_{{ $statement['id'] }}" class="hidden mt-2.5 px-2.5 py-1.5 bg-rose-50 border border-rose-200 rounded-md text-[11px] font-semibold text-rose-800 items-center gap-1.5">
+                                    <ion-icon name="alert-circle" class="text-sm text-rose-600 shrink-0"></ion-icon>
+                                    <span>Please choose a rating for statement #{{ $index + 1 }}.</span>
+                                </div>
                             </div>
                         </div>
                     @endforeach
                 </div>
 
                 {{-- 3. Comments & Suggestions --}}
-                <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-2xs space-y-2">
+                <div class="bg-white rounded-xl border border-neutral-200/80 p-3.5 sm:p-5 shadow-2xs space-y-2">
                     <label for="comment" class="block text-xs font-bold uppercase tracking-wider text-neutral-700">
                         Comments / Suggestions / Compliments <span class="text-neutral-400 font-normal">(Optional)</span>
                     </label>
@@ -287,10 +313,10 @@
                     </div>
 
                     <button type="submit" id="submitEvaluationBtn" 
-                        class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                        class="btn btn-primary w-full sm:w-auto text-xs px-6 py-2.5 shadow-2xs flex items-center justify-center gap-2">
                         <span id="submitText">Submit Evaluation</span>
                         <ion-icon id="submitIcon" name="paper-plane-outline" class="text-sm"></ion-icon>
-                        <ion-icon id="submitLoader" name="sync-outline" class="text-sm animate-spin hidden"></ion-icon>
+                        <ion-icon id="submitLoader" name="hourglass-outline" class="text-sm leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                     </button>
                 </div>
 
@@ -305,6 +331,12 @@
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const totalStatements = {{ count($displayStatements ?? []) }};
+    const statementIds = [
+        @foreach($displayStatements as $s)
+            {{ $s['id'] }},
+        @endforeach
+    ];
+
     const progressBar = document.getElementById('surveyProgressBar');
     const progressText = document.getElementById('progressText');
     const form = document.getElementById('evaluationForm');
@@ -314,6 +346,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const submitLoader = document.getElementById('submitLoader');
     const alertBox = document.getElementById('formValidationAlert');
     const alertMsg = document.getElementById('formValidationErrorMsg');
+
+    function markStatementAnswered(statementId, val) {
+        // Mobile card border & clear error
+        const card = document.getElementById('mobile_card_' + statementId);
+        if (card) {
+            card.classList.remove('border-rose-400', 'ring-2', 'ring-rose-300', 'bg-rose-50/20');
+            card.classList.add('border-neutral-200/90');
+        }
+
+        // Hide inline error message
+        const errMsg = document.getElementById('mb_error_msg_' + statementId);
+        if (errMsg) {
+            errMsg.classList.add('hidden');
+            errMsg.classList.remove('flex');
+        }
+
+        // Desktop row clean
+        const dtRow = document.getElementById('desktop_row_' + statementId);
+        if (dtRow) {
+            dtRow.classList.remove('bg-rose-50/40');
+        }
+    }
 
     // Sync state between desktop radio and mobile radio
     function updateRating(statementId, val) {
@@ -325,7 +379,7 @@ document.addEventListener('DOMContentLoaded', () => {
         const mbRadio = document.getElementById('mb_q' + statementId + '_v' + val);
         if (mbRadio) mbRadio.checked = true;
 
-        // Update progress counter
+        markStatementAnswered(statementId, val);
         updateProgress();
     }
 
@@ -347,9 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.addEventListener('change', (e) => {
             const sid = e.target.dataset.statementId;
             const val = e.target.dataset.val;
-            const mbRadio = document.getElementById('mb_q' + sid + '_v' + val);
-            if (mbRadio) mbRadio.checked = true;
-            updateProgress();
+            updateRating(sid, val);
         });
     });
 
@@ -358,9 +410,7 @@ document.addEventListener('DOMContentLoaded', () => {
         radio.addEventListener('change', (e) => {
             const sid = e.target.dataset.statementId;
             const val = e.target.dataset.val;
-            const dtRadio = document.getElementById('dt_q' + sid + '_v' + val);
-            if (dtRadio) dtRadio.checked = true;
-            updateProgress();
+            updateRating(sid, val);
         });
     });
 
@@ -382,23 +432,49 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Check that all statements are answered in the canonical desktop inputs
             const missingStatementIds = [];
-            @foreach($displayStatements as $statement)
-                if (!document.querySelector('input[name="responses[{{ $statement['id'] }}]"]:checked')) {
-                    missingStatementIds.push({{ $statement['id'] }});
+            statementIds.forEach(id => {
+                if (!document.querySelector('input[name="responses[' + id + ']"]:checked')) {
+                    missingStatementIds.push(id);
                 }
-            @endforeach
+            });
 
             if (missingStatementIds.length > 0) {
                 e.preventDefault();
+
+                // Highlight all missing statements
+                missingStatementIds.forEach(id => {
+                    const card = document.getElementById('mobile_card_' + id);
+                    const errMsg = document.getElementById('mb_error_msg_' + id);
+                    if (card) {
+                        card.classList.add('border-rose-400', 'ring-2', 'ring-rose-300', 'bg-rose-50/20');
+                    }
+                    if (errMsg) {
+                        errMsg.classList.remove('hidden');
+                        errMsg.classList.add('flex');
+                    }
+
+                    const dtRow = document.getElementById('desktop_row_' + id);
+                    if (dtRow) {
+                        dtRow.classList.add('bg-rose-50/40');
+                    }
+                });
+
                 if (alertBox && alertMsg) {
                     alertMsg.textContent = 'Please answer all ' + totalStatements + ' statements before submitting (' + (totalStatements - missingStatementIds.length) + ' of ' + totalStatements + ' completed).';
                     alertBox.classList.remove('hidden');
+                }
 
-                    const firstMissing = missingStatementIds[0];
-                    const targetEl = document.getElementById('desktop_row_' + firstMissing) || document.getElementById('mobile_card_' + firstMissing);
-                    if (targetEl) {
-                        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    }
+                // Identify the first missing statement
+                const firstMissing = missingStatementIds[0];
+                const isMobile = window.matchMedia('(max-width: 639px)').matches;
+                const targetEl = isMobile
+                    ? document.getElementById('mobile_card_' + firstMissing)
+                    : document.getElementById('desktop_row_' + firstMissing);
+
+                if (targetEl) {
+                    targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    targetEl.classList.add('error-pulse');
+                    setTimeout(() => targetEl.classList.remove('error-pulse'), 1500);
                 }
                 return false;
             }
@@ -406,12 +482,17 @@ document.addEventListener('DOMContentLoaded', () => {
             // If valid, hide alert and show loading state
             if (alertBox) alertBox.classList.add('hidden');
             submitBtn.disabled = true;
-            submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
-            if (submitText) submitText.textContent = 'Submitting...';
-            if (submitIcon) submitIcon.classList.add('hidden');
-            if (submitLoader) submitLoader.classList.remove('hidden');
+            submitBtn.classList.add('btn-loading');
+            if (submitText) submitText.textContent = 'Submitting…';
+            if (submitIcon) submitIcon.style.display = 'none';
+            if (submitLoader) submitLoader.style.display = 'inline-flex';
         });
     }
+
+    // Sync any initial state (e.g. on page restore)
+    document.querySelectorAll('.survey-radio-dt:checked').forEach(r => {
+        updateRating(r.dataset.statementId, r.dataset.val);
+    });
 
     updateProgress();
 });
