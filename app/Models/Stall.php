@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Stall extends Model
@@ -30,10 +29,5 @@ class Stall extends Model
     public function evaluations(): HasMany
     {
         return $this->hasMany(StallEvaluation::class);
-    }
-
-    public function activities(): BelongsToMany
-    {
-        return $this->belongsToMany(EvaluationActivity::class, 'evaluation_activity_stall');
     }
 }

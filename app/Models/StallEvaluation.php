@@ -10,7 +10,6 @@ class StallEvaluation extends Model
     protected $fillable = [
         'student_id',
         'stall_id',
-        'evaluation_activity_id',
         'cleanliness',
         'service',
         'taste',
@@ -26,10 +25,5 @@ class StallEvaluation extends Model
     public function stall(): BelongsTo
     {
         return $this->belongsTo(Stall::class);
-    }
-
-    public function activity(): BelongsTo
-    {
-        return $this->belongsTo(EvaluationActivity::class, 'evaluation_activity_id');
     }
 }
