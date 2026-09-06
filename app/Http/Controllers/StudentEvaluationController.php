@@ -5,10 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 class StudentEvaluationController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
         $user = Auth::user();
 
@@ -16,9 +17,18 @@ class StudentEvaluationController extends Controller
             return redirect('/login');
         }
 
+        // If a specific stall was requested via query param, verify it is active
+        if ($request->filled('stall')) {
+            $requestedStall = DB::table('stalls')->where('id', $request->stall)->first();
+            if ($requestedStall && !$requestedStall->is_active) {
+                return redirect()->route('student.evaluation')->with('error', "{$requestedStall->name} is currently closed for student evaluations.");
+            }
+        }
+
         $profile = $user;
 
         $stalls = DB::table('stalls')
+            ->where('is_active', true)
             ->select('id', 'name')
             ->orderBy('name')
             ->get();
@@ -88,8 +98,15 @@ class StudentEvaluationController extends Controller
         $user = Auth::user();
 
         $request->validate([
-            'stall_id' => 'required|exists:stalls,id',
+            'stall_id' => [
+                'required',
+                Rule::exists('stalls', 'id')->where(function ($query) {
+                    $query->where('is_active', true);
+                }),
+            ],
             'comment' => 'nullable|string',
+        ], [
+            'stall_id.exists' => 'The selected food stall is currently closed for student evaluations.',
         ]);
 
         $responses = $request->responses;

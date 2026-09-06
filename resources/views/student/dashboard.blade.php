@@ -155,8 +155,8 @@
                     <div class="w-12 h-12 rounded-xl bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto mb-3">
                         <ion-icon name="storefront-outline" class="text-2xl"></ion-icon>
                     </div>
-                    <h3 class="text-sm font-bold text-neutral-900">No Food Stalls Available</h3>
-                    <p class="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">There are currently no food stalls registered in the system for evaluation.</p>
+                    <h3 class="text-sm font-bold text-neutral-900">No Food Stalls Open for Evaluation</h3>
+                    <p class="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">There are currently no active food stalls open for student evaluations.</p>
                 </div>
             @else
                 <div id="stallsGrid" class="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -53,8 +53,8 @@
                 <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-3">
                     <ion-icon name="alert-circle-outline" class="text-2xl"></ion-icon>
                 </div>
-                <h3 class="text-sm font-bold text-neutral-900">No Food Stalls Available</h3>
-                <p class="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">There are currently no food stalls registered in the system for evaluation.</p>
+                <h3 class="text-sm font-bold text-neutral-900">No Food Stalls Open for Evaluation</h3>
+                <p class="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">There are currently no active food stalls open for student evaluations.</p>
             </div>
         @else
             {{-- ── Form Header & Institutional Identity ────────────────────── --}}
@@ -89,6 +89,13 @@
                         <span id="formValidationErrorMsg">Please answer all survey statements before submitting.</span>
                     </p>
                 </div>
+
+                @if(session('error'))
+                    <div class="p-4 bg-rose-50 border border-rose-200/80 rounded-xl text-rose-800 text-xs flex items-center gap-2">
+                        <ion-icon name="alert-circle" class="text-base text-rose-600 shrink-0"></ion-icon>
+                        <p class="font-bold">{{ session('error') }}</p>
+                    </div>
+                @endif
 
                 @if($errors->any())
                     <div class="p-4 bg-rose-50 border border-rose-200/80 rounded-xl text-rose-800 text-xs">

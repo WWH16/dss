@@ -21,8 +21,9 @@ class StudentDashboardController extends Controller
         // Student profile
         $profile = $user;
 
-        // Food stalls (selecting essential columns)
+        // Food stalls (selecting active stalls open for evaluation)
         $stalls = DB::table('stalls')
+            ->where('is_active', true)
             ->select('id', 'name', 'description')
             ->orderBy('name')
             ->get();
@@ -57,7 +58,9 @@ class StudentDashboardController extends Controller
 
         // Summary Stats
         $totalStallsCount = $stalls->count();
-        $uniqueEvaluatedCount = $evaluatedStallsMap->count();
+        $uniqueEvaluatedCount = $stalls->filter(function ($s) use ($evaluatedStallsMap) {
+            return $evaluatedStallsMap->has($s->id);
+        })->count();
         $coveragePct = $totalStallsCount > 0 ? round(($uniqueEvaluatedCount / $totalStallsCount) * 100) : 0;
         $totalEvalsCount = $myStudentEvals->count();
 
@@ -67,8 +70,9 @@ class StudentDashboardController extends Controller
             }) / $totalEvalsCount, 2)
             : 0;
 
-        // Top Ranked Stall on Campus (DSS Composite Benchmark)
+        // Top Ranked Stall on Campus (DSS Composite Benchmark among active stalls)
         $topCampusStall = DB::table('stalls')
+            ->where('stalls.is_active', true)
             ->leftJoin('stall_evaluations', 'stalls.id', '=', 'stall_evaluations.stall_id')
             ->select(
                 'stalls.id',
