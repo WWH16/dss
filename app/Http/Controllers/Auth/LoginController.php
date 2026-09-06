@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -34,6 +35,12 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
+        $request->validate([
+            'role' => 'required|in:student,staff,admin',
+            'password' => 'required|string',
+            'g_recaptcha_response' => [new Recaptcha('login')],
+        ]);
+
         $role = $request->role;
         $password = $request->password;
 

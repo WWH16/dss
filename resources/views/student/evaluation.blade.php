@@ -17,6 +17,10 @@
         touch-action: manipulation;
     }
 </style>
+
+@if(config('services.recaptcha.site_key'))
+    <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+@endif
 @endsection
 
 @section('content')
@@ -97,6 +101,7 @@
             {{-- ── Evaluation Survey Form ──────────────────────────────────── --}}
             <form id="evaluationForm" action="{{ route('student.evaluation.store') }}" method="POST" class="p-3.5 sm:p-8 space-y-5 sm:space-y-6">
                 @csrf
+                <input type="hidden" name="g_recaptcha_response" id="evaluation_g_recaptcha_response">
 
                 {{-- Validation Error Alert --}}
                 <div id="formValidationAlert" class="hidden p-4 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs">
@@ -312,12 +317,19 @@
                         Your evaluation response is confidential.
                     </div>
 
-                    <button type="submit" id="submitEvaluationBtn" 
-                        class="btn btn-primary w-full sm:w-auto text-xs px-6 py-2.5 shadow-2xs flex items-center justify-center gap-2">
-                        <span id="submitText">Submit Evaluation</span>
-                        <ion-icon id="submitIcon" name="paper-plane-outline" class="text-sm"></ion-icon>
-                        <ion-icon id="submitLoader" name="hourglass-outline" class="text-sm leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
-                    </button>
+                    <div class="flex flex-col items-center sm:items-end gap-1 w-full sm:w-auto">
+                        <button type="submit" id="submitEvaluationBtn" 
+                            class="btn btn-primary w-full sm:w-auto text-xs px-6 py-2.5 shadow-2xs flex items-center justify-center gap-2">
+                            <span id="submitText">Submit Evaluation</span>
+                            <ion-icon id="submitIcon" name="paper-plane-outline" class="text-sm"></ion-icon>
+                            <ion-icon id="submitLoader" name="hourglass-outline" class="text-sm leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
+                        </button>
+                        @if(config('services.recaptcha.site_key'))
+                            <span class="text-[10px] text-neutral-400 text-center sm:text-right">
+                                Protected by reCAPTCHA (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Privacy</a> & <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Terms</a>)
+                            </span>
+                        @endif
+                    </div>
                 </div>
 
             </form>
@@ -486,6 +498,22 @@ document.addEventListener('DOMContentLoaded', () => {
             if (submitText) submitText.textContent = 'Submitting…';
             if (submitIcon) submitIcon.style.display = 'none';
             if (submitLoader) submitLoader.style.display = 'inline-flex';
+
+            const siteKey = "{{ config('services.recaptcha.site_key') }}";
+            if (siteKey && typeof grecaptcha !== 'undefined') {
+                e.preventDefault();
+                grecaptcha.ready(function() {
+                    grecaptcha.execute(siteKey, { action: 'evaluation' }).then(function(token) {
+                        const tokenInput = document.getElementById('evaluation_g_recaptcha_response');
+                        if (tokenInput) tokenInput.value = token;
+                        form.submit();
+                    }).catch(function(err) {
+                        console.warn('reCAPTCHA execution error:', err);
+                        form.submit();
+                    });
+                });
+                return false;
+            }
         });
     }
 

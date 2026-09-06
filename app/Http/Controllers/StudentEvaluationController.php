@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\Rule;
+use App\Rules\Recaptcha;
 
 class StudentEvaluationController extends Controller
 {
@@ -108,6 +109,7 @@ class StudentEvaluationController extends Controller
                 }),
             ],
             'comment' => 'nullable|string',
+            'g_recaptcha_response' => [new Recaptcha('evaluation')],
         ], [
             'stall_id.exists' => 'The selected food stall is currently closed for student evaluations.',
         ]);

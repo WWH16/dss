@@ -17,6 +17,11 @@
     {{-- Ionicons (iOS Icon System) --}}
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    {{-- Google reCAPTCHA v3 --}}
+    @if(config('services.recaptcha.site_key'))
+        <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
+    @endif
     <style>
         @keyframes icon-pop {
             0% { transform: scale(0.5); opacity: 0.5; }
@@ -105,10 +110,18 @@
                     </div>
                 </div>
 
+                <input type="hidden" name="g_recaptcha_response" id="login_g_recaptcha_response">
+
                 <button type="submit" id="login-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">
                     <ion-icon id="login-btn-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                     <span id="login-btn-content">Login</span>
                 </button>
+
+                @if(config('services.recaptcha.site_key'))
+                    <p class="text-[10px] text-neutral-400 text-center mt-2 leading-tight">
+                        Protected by reCAPTCHA (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Privacy</a> & <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Terms</a>)
+                    </p>
+                @endif
             </form>
         </div>
 
@@ -306,10 +319,18 @@
                 </div>
 
 
+                <input type="hidden" name="g_recaptcha_response" id="register_g_recaptcha_response">
+
                 <button type="submit" id="register-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">
                     <ion-icon id="register-btn-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                     <span id="register-btn-content">Register</span>
                 </button>
+
+                @if(config('services.recaptcha.site_key'))
+                    <p class="text-[10px] text-neutral-400 text-center mt-2 leading-tight">
+                        Protected by reCAPTCHA (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Privacy</a> & <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Terms</a>)
+                    </p>
+                @endif
             </form>
         </div>
 
@@ -509,14 +530,31 @@
 
             if (loginForm) {
                 loginForm.addEventListener('submit', (e) => {
-                    if (!handleFormSubmit(loginForm, 'login-submit-btn', 'login-btn-content', 'login-btn-loader', 'Logging in…')) {
+                    if (loginForm.dataset.submitting === 'true') {
                         e.preventDefault();
+                        return;
+                    }
+                    if (loginForm.checkValidity && !loginForm.checkValidity()) {
+                        return; // Let browser trigger native error tooltips
+                    }
+                    e.preventDefault();
+                    if (handleFormSubmit(loginForm, 'login-submit-btn', 'login-btn-content', 'login-btn-loader', 'Logging in…')) {
+                        submitWithRecaptcha(loginForm, 'login', 'login_g_recaptcha_response');
                     }
                 });
             }
 
             if (registerForm) {
                 registerForm.addEventListener('submit', (e) => {
+                    if (registerForm.dataset.submitting === 'true') {
+                        e.preventDefault();
+                        return;
+                    }
+                    if (registerForm.checkValidity && !registerForm.checkValidity()) {
+                        return;
+                    }
+                    e.preventDefault();
+
                     const role = document.getElementById('register_role').value;
                     const hiddenEmail = document.getElementById('register_email_hidden');
                     if (role === 'student') {
@@ -526,12 +564,30 @@
                         hiddenEmail.value = document.getElementById('register_email_plain').value.trim();
                     }
 
-                    if (!handleFormSubmit(registerForm, 'register-submit-btn', 'register-btn-content', 'register-btn-loader', 'Registering…')) {
-                        e.preventDefault();
+                    if (handleFormSubmit(registerForm, 'register-submit-btn', 'register-btn-content', 'register-btn-loader', 'Registering…')) {
+                        submitWithRecaptcha(registerForm, 'register', 'register_g_recaptcha_response');
                     }
                 });
             }
         });
+
+        function submitWithRecaptcha(formElement, actionName, tokenInputId) {
+            const siteKey = "{{ config('services.recaptcha.site_key') }}";
+            if (siteKey && typeof grecaptcha !== 'undefined') {
+                grecaptcha.ready(function() {
+                    grecaptcha.execute(siteKey, { action: actionName }).then(function(token) {
+                        const tokenInput = document.getElementById(tokenInputId);
+                        if (tokenInput) tokenInput.value = token;
+                        formElement.submit();
+                    }).catch(function(err) {
+                        console.warn('reCAPTCHA execution error:', err);
+                        formElement.submit();
+                    });
+                });
+            } else {
+                formElement.submit();
+            }
+        }
 
         function handleFormSubmit(formElement, btnId, contentId, loaderId, loadingText) {
             // Check HTML5 validity first before locking

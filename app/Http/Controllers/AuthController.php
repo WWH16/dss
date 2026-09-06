@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\User;
+use App\Rules\Recaptcha;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
@@ -25,10 +26,10 @@ class AuthController extends Controller
     public function register(Request $request)
     {
         $rules = [
-            'role'           => 'required|in:student,staff,admin',
-            'name'           => 'required|string|max:255',
-            'email'          => ['required', 'email', 'max:255', 'unique:users,email'],
-            'password'       => [
+            'role'                 => 'required|in:student,staff,admin',
+            'name'                 => 'required|string|max:255',
+            'email'                => ['required', 'email', 'max:255', 'unique:users,email'],
+            'password'             => [
                 'required',
                 'confirmed',
                 Password::min(8)
@@ -37,9 +38,10 @@ class AuthController extends Controller
                     ->numbers()
                     ->symbols()
             ],
-            'course'         => 'required_if:role,student|nullable|string|max:255',
-            'year_level'     => 'required_if:role,student|nullable|string|max:255',
-            'student_number' => 'required_if:role,student|nullable|string|max:255|unique:users,student_number',
+            'course'               => 'required_if:role,student|nullable|string|max:255',
+            'year_level'           => 'required_if:role,student|nullable|string|max:255',
+            'student_number'       => 'required_if:role,student|nullable|string|max:255|unique:users,student_number',
+            'g_recaptcha_response' => [new Recaptcha('register')],
         ];
 
         // Students must use an official ISU Cauayan email (format: name_cyn@isu.edu.ph)
