@@ -148,3 +148,31 @@ test('staff dashboard consolidates stall evaluation metrics into single query', 
     });
     expect(count($metricQueries))->toBe(1);
 });
+
+test('admin dashboard renders successfully across all activity trend filters', function () {
+    // 30 days filter
+    $res30 = $this->actingAs($this->admin)->get(route('admin.dashboard', ['activity_month' => '30_days']));
+    $res30->assertStatus(200);
+
+    // Full year filter
+    $resAll = $this->actingAs($this->admin)->get(route('admin.dashboard', ['activity_month' => 'all', 'activity_year' => 2026]));
+    $resAll->assertStatus(200);
+
+    // Specific month filter
+    $resMonth = $this->actingAs($this->admin)->get(route('admin.dashboard', ['activity_month' => '9', 'activity_year' => 2026]));
+    $resMonth->assertStatus(200);
+});
+
+test('staff dashboard renders successfully across all activity trend filters', function () {
+    // 30 days filter
+    $res30 = $this->actingAs($this->staff)->get(route('staff.dashboard', ['activity_month' => '30_days']));
+    $res30->assertStatus(200);
+
+    // Full year filter
+    $resAll = $this->actingAs($this->staff)->get(route('staff.dashboard', ['activity_month' => 'all', 'activity_year' => 2026]));
+    $resAll->assertStatus(200);
+
+    // Specific month filter
+    $resMonth = $this->actingAs($this->staff)->get(route('staff.dashboard', ['activity_month' => '9', 'activity_year' => 2026]));
+    $resMonth->assertStatus(200);
+});

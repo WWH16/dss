@@ -3,18 +3,7 @@
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
 
-    {{-- ── Flash Messages ──────────────────────────────────────────────── --}}
-    @if(session('success'))
-        <div class="p-4 bg-emerald-50 border border-emerald-200/80 text-emerald-800 rounded-xl text-xs font-semibold flex items-center justify-between gap-3 shadow-2xs">
-            <div class="flex items-center gap-2">
-                <ion-icon name="checkmark-circle" class="text-lg text-emerald-600 shrink-0"></ion-icon>
-                <span>{{ session('success') }}</span>
-            </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-emerald-700 hover:text-emerald-900 transition-colors p-1" aria-label="Dismiss">
-                <ion-icon name="close-outline" class="text-base"></ion-icon>
-            </button>
-        </div>
-    @endif
+    {{-- ── Flash Messages (Success handled via layout toast) ────────────── --}}
     @if(session('error'))
         <div class="p-4 bg-red-50 border border-red-200/80 text-red-800 rounded-xl text-xs font-semibold flex items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-2">
@@ -511,201 +500,245 @@
 </div>
 
 {{-- ── 5. CREATE ACCOUNT MODAL ─────────────────────────────────────────── --}}
-<dialog id="create-user-modal" class="confirm-modal max-w-md w-full relative p-0 overflow-hidden" aria-labelledby="create-modal-title">
+<dialog id="create-user-modal" class="confirm-modal modal-sharp max-w-[400px] w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60" aria-labelledby="create-modal-title">
     <div id="create-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    <div class="p-6">
-        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-lg bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center">
-                    <ion-icon name="person-add-outline" class="text-lg"></ion-icon>
-                </div>
-                <div>
-                    <h3 id="create-modal-title" class="text-base font-bold font-display text-neutral-900 leading-tight">Create New Account</h3>
-                    <p class="text-[11px] text-neutral-500">Add a new administrator or canteen staff member</p>
-                </div>
+    {{-- Modal Header --}}
+    <div class="px-5 py-3.5 bg-neutral-50/80 border-b border-neutral-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-brand-50 border border-brand-200/80 text-brand-700 flex items-center justify-center shrink-0">
+                <ion-icon name="person-add-outline" class="text-base"></ion-icon>
             </div>
-            <button type="button" onclick="closeCreateUserModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors p-1" aria-label="Close">
-                <ion-icon name="close-outline" class="text-xl leading-none"></ion-icon>
-            </button>
+            <h3 id="create-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Create Account</h3>
         </div>
+        <button type="button" onclick="closeCreateUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg transition-colors cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-lg"></ion-icon>
+        </button>
+    </div>
 
-        <form id="create-user-form" method="POST" action="{{ route('admin.users.create') }}" class="space-y-4 mt-4">
-            @csrf
+    <form id="create-user-form" method="POST" action="{{ route('admin.users.create') }}">
+        @csrf
 
-            {{-- Role Selection Radio Cards --}}
+        <div class="p-5 space-y-3.5">
+            {{-- General Error Box --}}
+            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-lg text-xs text-rose-800 flex items-center gap-2">
+                <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
+                <span class="leading-tight font-medium"></span>
+            </div>
+
+            {{-- Role Selection Segmented Control --}}
             <div>
-                <label class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1.5">
+                <label class="block text-xs font-bold text-neutral-700 mb-1.5">
                     Account Role <span class="text-red-500">*</span>
                 </label>
-                <div class="grid grid-cols-2 gap-2.5">
-                    <label class="relative flex flex-col p-3 border rounded-lg cursor-pointer transition-all role-card" id="create-role-admin-card">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs font-bold text-neutral-900">Administrator</span>
-                            <input type="radio" name="role" value="admin" checked onchange="toggleCreateRole('admin')" class="accent-brand-600">
-                        </div>
-                        <p class="text-[10px] text-neutral-500 leading-tight">Full access to stalls, evaluations, and system settings.</p>
-                    </label>
-
-                    <label class="relative flex flex-col p-3 border rounded-lg cursor-pointer transition-all role-card" id="create-role-staff-card">
-                        <div class="flex items-center justify-between mb-1">
-                            <span class="text-xs font-bold text-neutral-900">Canteen Staff</span>
-                            <input type="radio" name="role" value="staff" onchange="toggleCreateRole('staff')" class="accent-brand-600">
-                        </div>
-                        <p class="text-[10px] text-neutral-500 leading-tight">Access to feedback, analytics, and ratings for assigned stall.</p>
-                    </label>
+                <div class="grid grid-cols-2 p-1 bg-neutral-100/90 rounded-lg border border-neutral-200/80 gap-1 text-xs">
+                    <button type="button" id="create-role-admin-btn" onclick="toggleCreateRole('admin')"
+                        class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer">
+                        <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
+                        <span>Administrator</span>
+                    </button>
+                    <button type="button" id="create-role-staff-btn" onclick="toggleCreateRole('staff')"
+                        class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer">
+                        <ion-icon name="restaurant-outline" class="text-sm"></ion-icon>
+                        <span>Canteen Staff</span>
+                    </button>
                 </div>
-            </div>
-
-            {{-- Dynamic Stall Assignment Selector (for staff) --}}
-            <div id="create-stall-container" class="hidden p-3 bg-neutral-50 border border-neutral-200/80 rounded-lg space-y-1.5 transition-all">
-                <label for="create_stall_id" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider">
-                    Assign to Canteen Stall <span class="text-neutral-400 font-normal">(Optional)</span>
-                </label>
-                <select id="create_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-600">
-                    <option value="">-- Assign Later (Unassigned) --</option>
-                    @foreach($stalls as $s)
-                        <option value="{{ $s->id }}">{{ $s->name }}</option>
-                    @endforeach
-                </select>
-            </div>
-
-            {{-- Full Name --}}
-            <div>
-                <label for="create_name" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Full Name <span class="text-red-500">*</span>
-                </label>
-                <input type="text" id="create_name" name="name" placeholder="e.g. Maria Santos" required
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
-            </div>
-
-            {{-- Email Address --}}
-            <div>
-                <label for="create_email" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Email Address <span class="text-red-500">*</span>
-                </label>
-                <input type="email" id="create_email" name="email" placeholder="e.g. maria@isu.edu.ph" required
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
-            </div>
-
-            {{-- Password Fields --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                    <label for="create_password" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                        Password <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <input type="password" id="create_password" name="password" placeholder="••••••••" required
-                            class="w-full pl-3 pr-8 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
-                        <button type="button" onclick="togglePasswordVisibility('create_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
-                            <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
-                        </button>
-                    </div>
-                </div>
-                <div>
-                    <label for="create_password_confirmation" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                        Confirm Password <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <input type="password" id="create_password_confirmation" name="password_confirmation" placeholder="••••••••" required
-                            class="w-full pl-3 pr-8 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
-                        <button type="button" onclick="togglePasswordVisibility('create_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
-                            <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
-                        </button>
-                    </div>
-                </div>
-            </div>
-            <p class="text-[10px] text-neutral-400">Minimum 8 characters with letters, numbers, and symbols.</p>
-
-            {{-- Form Buttons --}}
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-                <button type="button" onclick="closeCreateUserModal()" class="btn btn-ghost btn-sm text-xs font-semibold px-3 py-2 rounded-lg text-neutral-600 hover:text-neutral-900 border border-neutral-200">
-                    Cancel
-                </button>
-                <button type="submit" id="create-user-submit-btn" class="btn btn-primary btn-sm text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                    <ion-icon name="person-add" class="text-sm"></ion-icon>
-                    <span>Create Account</span>
-                </button>
-            </div>
-        </form>
-    </div>
-</dialog>
-
-{{-- ── 6. EDIT ACCOUNT MODAL ───────────────────────────────────────────── --}}
-<dialog id="edit-user-modal" class="confirm-modal max-w-md w-full relative p-0 overflow-hidden" aria-labelledby="edit-modal-title">
-    <div id="edit-modal-loader" class="modal-loading-bar hidden">
-        <div class="modal-loading-bar-inner"></div>
-    </div>
-
-    <div class="p-6">
-        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-lg bg-neutral-100 text-neutral-700 flex items-center justify-center">
-                    <ion-icon name="create-outline" class="text-lg"></ion-icon>
-                </div>
-                <div>
-                    <h3 id="edit-modal-title" class="text-base font-bold font-display text-neutral-900 leading-tight">Edit Account</h3>
-                    <p class="text-[11px] text-neutral-500">Update account details, role, or password</p>
-                </div>
-            </div>
-            <button type="button" onclick="closeEditUserModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors p-1" aria-label="Close">
-                <ion-icon name="close-outline" class="text-xl leading-none"></ion-icon>
-            </button>
-        </div>
-
-        <form id="edit-user-form" method="POST" action="" class="space-y-4 mt-4">
-            @csrf
-            @method('PUT')
-
-            {{-- Role Selection --}}
-            <div>
-                <label for="edit_role" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                    Role <span class="text-red-500">*</span>
-                </label>
-                <select id="edit_role" name="role" onchange="toggleEditRole(this.value)"
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:border-brand-600">
-                    <option value="admin">Administrator</option>
-                    <option value="staff">Canteen Staff</option>
-                </select>
-                <p id="edit-self-warning" class="hidden text-[10px] text-amber-700 mt-1 font-medium flex items-center gap-1">
-                    <ion-icon name="information-circle" class="text-xs"></ion-icon>
-                    You are editing your own account. Administrator role cannot be changed.
+                <input type="hidden" name="role" id="create-role-input" value="admin">
+                <p data-error-for="role" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
                 </p>
             </div>
 
             {{-- Dynamic Stall Assignment Selector (for staff) --}}
-            <div id="edit-stall-container" class="hidden p-3 bg-neutral-50 border border-neutral-200/80 rounded-lg space-y-1.5">
-                <label for="edit_stall_id" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider">
+            <div id="create-stall-container" class="hidden space-y-1.5">
+                <label for="create_stall_id" class="block text-xs font-bold text-neutral-700">
+                    Assigned Stall <span class="text-neutral-400 font-normal">(Optional)</span>
+                </label>
+                <select id="create_stall_id" name="stall_id"
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    <option value="">-- Unassigned (Assign Later) --</option>
+                    @foreach($stalls as $s)
+                        <option value="{{ $s->id }}">{{ $s->name }}</option>
+                    @endforeach
+                </select>
+                <p data-error-for="stall_id" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
+                </p>
+            </div>
+
+            {{-- Full Name --}}
+            <div>
+                <label for="create_name" class="block text-xs font-bold text-neutral-700 mb-1.5">
+                    Full Name <span class="text-red-500">*</span>
+                </label>
+                <input type="text" id="create_name" name="name" placeholder="e.g. Maria Santos" required
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
+                </p>
+            </div>
+
+            {{-- Email Address --}}
+            <div>
+                <label for="create_email" class="block text-xs font-bold text-neutral-700 mb-1.5">
+                    Email Address <span class="text-red-500">*</span>
+                </label>
+                <input type="email" id="create_email" name="email" placeholder="e.g. maria@isu.edu.ph" required
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
+                </p>
+            </div>
+
+            {{-- Password Fields --}}
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div>
+                    <label for="create_password" class="block text-xs font-bold text-neutral-700 mb-1.5">
+                        Password <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="create_password" name="password" placeholder="••••••••" required
+                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                        <button type="button" onclick="togglePasswordVisibility('create_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Toggle password visibility">
+                            <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
+                        </button>
+                    </div>
+                    <p data-error-for="password" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                        <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                        <span></span>
+                    </p>
+                </div>
+                <div>
+                    <label for="create_password_confirmation" class="block text-xs font-bold text-neutral-700 mb-1.5">
+                        Confirm <span class="text-red-500">*</span>
+                    </label>
+                    <div class="relative">
+                        <input type="password" id="create_password_confirmation" name="password_confirmation" placeholder="••••••••" required
+                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                        <button type="button" onclick="togglePasswordVisibility('create_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Toggle password visibility">
+                            <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
+                        </button>
+                    </div>
+                    <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                        <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                        <span></span>
+                    </p>
+                </div>
+            </div>
+            <p class="text-[10px] text-neutral-400 -mt-1">Min. 8 characters with letters, numbers & symbols.</p>
+        </div>
+
+        {{-- Form Footer Actions --}}
+        <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeCreateUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+                Cancel
+            </button>
+            <button type="submit" id="create-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                <ion-icon name="person-add" class="text-sm"></ion-icon>
+                <span>Create Account</span>
+            </button>
+        </div>
+    </form>
+</dialog>
+
+{{-- ── 6. EDIT ACCOUNT MODAL ───────────────────────────────────────────── --}}
+<dialog id="edit-user-modal" class="confirm-modal modal-sharp max-w-[400px] w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60" aria-labelledby="edit-modal-title">
+    <div id="edit-modal-loader" class="modal-loading-bar hidden">
+        <div class="modal-loading-bar-inner"></div>
+    </div>
+
+    {{-- Modal Header --}}
+    <div class="px-5 py-3.5 bg-neutral-50/80 border-b border-neutral-100 flex items-center justify-between">
+        <div class="flex items-center gap-2.5">
+            <div class="w-8 h-8 rounded-lg bg-neutral-100 border border-neutral-200/80 text-neutral-700 flex items-center justify-center shrink-0">
+                <ion-icon name="create-outline" class="text-base"></ion-icon>
+            </div>
+            <h3 id="edit-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Edit Account</h3>
+        </div>
+        <button type="button" onclick="closeEditUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg transition-colors cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-lg"></ion-icon>
+        </button>
+    </div>
+
+    <form id="edit-user-form" method="POST" action="">
+        @csrf
+        @method('PUT')
+
+        <div class="p-5 space-y-3.5">
+            {{-- General Error Box --}}
+            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-lg text-xs text-rose-800 flex items-center gap-2">
+                <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
+                <span class="leading-tight font-medium"></span>
+            </div>
+
+            {{-- Role Selection --}}
+            <div>
+                <label for="edit_role" class="block text-xs font-bold text-neutral-700 mb-1.5">
+                    Role <span class="text-red-500">*</span>
+                </label>
+                <select id="edit_role" name="role" onchange="toggleEditRole(this.value)"
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    <option value="admin">Administrator</option>
+                    <option value="staff">Canteen Staff</option>
+                </select>
+                <p data-error-for="role" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
+                </p>
+                <div id="edit-self-warning" class="hidden mt-2 p-2 bg-amber-50 border border-amber-200/80 rounded-lg text-[11px] text-amber-800 flex items-center gap-1.5">
+                    <ion-icon name="information-circle" class="text-sm shrink-0 text-amber-600"></ion-icon>
+                    <span>You are editing your own account. Role cannot be changed.</span>
+                </div>
+            </div>
+
+            {{-- Dynamic Stall Assignment Selector (for staff) --}}
+            <div id="edit-stall-container" class="hidden space-y-1.5">
+                <label for="edit_stall_id" class="block text-xs font-bold text-neutral-700">
                     Assigned Canteen Stall
                 </label>
                 <select id="edit_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-600">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="">-- Unassigned (No Stall) --</option>
                     @foreach($stalls as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
                     @endforeach
                 </select>
+                <p data-error-for="stall_id" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
+                </p>
             </div>
 
             {{-- Full Name --}}
             <div>
-                <label for="edit_name" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
+                <label for="edit_name" class="block text-xs font-bold text-neutral-700 mb-1.5">
                     Full Name <span class="text-red-500">*</span>
                 </label>
                 <input type="text" id="edit_name" name="name" required
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:border-brand-600">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
+                </p>
             </div>
 
             {{-- Email Address --}}
             <div>
-                <label for="edit_email" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
+                <label for="edit_email" class="block text-xs font-bold text-neutral-700 mb-1.5">
                     Email Address <span class="text-red-500">*</span>
                 </label>
                 <input type="email" id="edit_email" name="email" required
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-lg text-xs font-medium focus:outline-none focus:border-brand-600">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                    <span></span>
+                </p>
             </div>
 
             {{-- Optional Password Reset Section --}}
@@ -715,71 +748,95 @@
                     <span id="edit-pwd-toggle-text">Change Account Password</span>
                 </button>
 
-                <div id="edit-password-fields" class="hidden space-y-3 mt-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
+                <div id="edit-password-fields" class="hidden space-y-2.5 mt-2.5 p-3 bg-neutral-50 rounded-lg border border-neutral-200/80">
                     <p class="text-[10px] text-neutral-400">Leave blank to keep existing password.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
                             <label for="edit_password" class="block text-[10px] font-bold text-neutral-600 uppercase mb-1">New Password</label>
-                            <input type="password" id="edit_password" name="password" placeholder="••••••••"
-                                class="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded text-xs font-medium focus:outline-none focus:border-brand-600">
+                            <div class="relative">
+                                <input type="password" id="edit_password" name="password" placeholder="••••••••"
+                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded text-xs font-medium focus:outline-none focus:border-brand-700">
+                                <button type="button" onclick="togglePasswordVisibility('edit_password', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
+                                    <ion-icon name="eye-outline" class="text-xs leading-none"></ion-icon>
+                                </button>
+                            </div>
+                            <p data-error-for="password" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                                <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                                <span></span>
+                            </p>
                         </div>
                         <div>
-                            <label for="edit_password_confirmation" class="block text-[10px] font-bold text-neutral-600 uppercase mb-1">Confirm Password</label>
-                            <input type="password" id="edit_password_confirmation" name="password_confirmation" placeholder="••••••••"
-                                class="w-full px-2.5 py-1.5 bg-white border border-neutral-300 rounded text-xs font-medium focus:outline-none focus:border-brand-600">
+                            <label for="edit_password_confirmation" class="block text-[10px] font-bold text-neutral-600 uppercase mb-1">Confirm</label>
+                            <div class="relative">
+                                <input type="password" id="edit_password_confirmation" name="password_confirmation" placeholder="••••••••"
+                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded text-xs font-medium focus:outline-none focus:border-brand-700">
+                                <button type="button" onclick="togglePasswordVisibility('edit_password_confirmation', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
+                                    <ion-icon name="eye-outline" class="text-xs leading-none"></ion-icon>
+                                </button>
+                            </div>
+                            <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
+                                <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
+                                <span></span>
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            {{-- Form Buttons --}}
-            <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-                <button type="button" onclick="closeEditUserModal()" class="btn btn-ghost btn-sm text-xs font-semibold px-3 py-2 rounded-lg text-neutral-600 hover:text-neutral-900 border border-neutral-200">
-                    Cancel
-                </button>
-                <button type="submit" id="edit-user-submit-btn" class="btn btn-primary btn-sm text-xs font-bold px-4 py-2 rounded-lg flex items-center gap-1.5 shadow-2xs cursor-pointer">
-                    <ion-icon name="save-outline" class="text-sm"></ion-icon>
-                    <span>Save Changes</span>
-                </button>
-            </div>
-        </form>
-    </div>
+        {{-- Form Footer Actions --}}
+        <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeEditUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+                Cancel
+            </button>
+            <button type="submit" id="edit-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                <ion-icon name="save-outline" class="text-sm"></ion-icon>
+                <span>Save Changes</span>
+            </button>
+        </div>
+    </form>
 </dialog>
 
 {{-- ── 7. DELETE CONFIRMATION MODAL ───────────────────────────────────── --}}
-<dialog id="delete-user-modal" class="confirm-modal max-w-sm w-full relative p-0 overflow-hidden" aria-labelledby="delete-modal-title">
-    <div class="p-6">
-        <div class="flex items-start gap-3.5 mb-3">
-            <div class="w-10 h-10 rounded-full bg-red-50 border border-red-200 text-red-600 flex items-center justify-center shrink-0">
+<dialog id="delete-user-modal" class="confirm-modal modal-sharp max-w-[380px] w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60" aria-labelledby="delete-modal-title">
+    <div class="p-5">
+        <div class="flex items-start gap-3.5">
+            <div class="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
                 <ion-icon name="trash-outline" class="text-xl"></ion-icon>
             </div>
             <div>
-                <h3 id="delete-modal-title" class="text-base font-bold font-display text-neutral-900 leading-tight">Delete Account</h3>
+                <h3 id="delete-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Delete Account</h3>
                 <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
-                    Are you sure you want to delete <strong id="delete-modal-name" class="text-neutral-900"></strong>'s account?
+                    Are you sure you want to delete <strong id="delete-modal-name" class="text-neutral-900"></strong>?
                 </p>
             </div>
         </div>
 
-        <div class="p-3 bg-red-50/70 border border-red-200/80 rounded-lg text-[11px] text-red-800 leading-relaxed mb-4">
+        <div class="mt-4 p-3 bg-rose-50/70 border border-rose-200/70 rounded-lg text-xs text-rose-800 leading-relaxed">
             This will permanently delete the account and revoke all access. This action cannot be undone.
         </div>
 
-        <form id="delete-user-form" method="POST" action="">
-            @csrf
-            @method('DELETE')
-
-            <div class="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
-                <button type="button" onclick="closeDeleteUserModal()" class="btn btn-ghost btn-sm text-xs font-semibold px-3 py-2 rounded-lg text-neutral-600 hover:text-neutral-900 border border-neutral-200">
-                    Cancel
-                </button>
-                <button type="submit" class="btn btn-sm text-xs font-bold px-4 py-2 rounded-lg bg-red-600 hover:bg-red-700 text-white border border-red-600 shadow-2xs flex items-center gap-1.5 cursor-pointer">
-                    <ion-icon name="trash" class="text-sm"></ion-icon>
-                    <span>Delete Account</span>
-                </button>
-            </div>
-        </form>
+        {{-- General Error Box for Delete --}}
+        <div data-general-error class="general-error-box hidden mt-3 p-2.5 bg-rose-100/90 border border-rose-300 rounded-lg text-xs text-rose-900 flex items-center gap-2">
+            <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
+            <span class="leading-tight font-medium"></span>
+        </div>
     </div>
+
+    <form id="delete-user-form" method="POST" action="">
+        @csrf
+        @method('DELETE')
+
+        <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
+            <button type="button" onclick="closeDeleteUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+                Cancel
+            </button>
+            <button type="submit" id="delete-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                <ion-icon name="trash-outline" class="text-sm"></ion-icon>
+                <span>Delete Account</span>
+            </button>
+        </div>
+    </form>
 </dialog>
 
 {{-- ── 8. Client-Side Polish & Filtering Script ───────────────────────── --}}
@@ -803,52 +860,295 @@
         });
     }
 
+    // ── Reusable Modal Helpers & Error Management ─────────────────────────
+    var spinnerSvg = '<svg class="animate-spin h-3.5 w-3.5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
+
+    function clearFormErrors(form) {
+        if (!form) return;
+        form.querySelectorAll('.field-error').forEach(function(el) {
+            el.classList.add('hidden');
+            var span = el.querySelector('span');
+            if (span) span.textContent = '';
+        });
+        form.querySelectorAll('input, select').forEach(function(input) {
+            input.classList.remove('border-rose-500', 'bg-rose-50/20', 'focus:border-rose-600');
+            input.classList.add('border-neutral-200');
+        });
+        var generalBox = form.querySelector('[data-general-error]');
+        if (generalBox) {
+            generalBox.classList.add('hidden');
+            var span = generalBox.querySelector('span');
+            if (span) span.textContent = '';
+        }
+    }
+
+    function showFieldError(form, fieldName, message) {
+        if (!form) return;
+        var inputEl = form.querySelector('[name="' + fieldName + '"]');
+        var errorEl = form.querySelector('[data-error-for="' + fieldName + '"]');
+
+        if (inputEl) {
+            inputEl.classList.remove('border-neutral-200');
+            inputEl.classList.add('border-rose-500', 'bg-rose-50/20', 'focus:border-rose-600');
+        }
+
+        if (errorEl) {
+            errorEl.classList.remove('hidden');
+            var span = errorEl.querySelector('span');
+            if (span) span.textContent = message;
+        }
+    }
+
+    function showGeneralError(form, message) {
+        if (!form) return;
+        var generalBox = form.querySelector('[data-general-error]');
+        if (generalBox) {
+            generalBox.classList.remove('hidden');
+            var span = generalBox.querySelector('span');
+            if (span) span.textContent = message;
+        }
+    }
+
+    function applyFormValidationErrors(form, errors) {
+        var hasFieldErrors = false;
+        var pwdFields = form.querySelector('#edit-password-fields');
+
+        // Extract and separate password errors:
+        // Confirmation mismatch -> route to password_confirmation field
+        // Password rule violations (length, letters, numbers, symbols, required) -> route to password field
+        var rawPasswordMessages = errors.password ? [].concat(errors.password) : [];
+        var confirmMessages = errors.password_confirmation ? [].concat(errors.password_confirmation) : [];
+        var passwordRuleMessages = [];
+
+        rawPasswordMessages.forEach(function(msg) {
+            var lower = msg.toLowerCase();
+            if (lower.includes('confirm') || lower.includes('match')) {
+                confirmMessages.push(msg);
+            } else {
+                passwordRuleMessages.push(msg);
+            }
+        });
+
+        for (var field in errors) {
+            if (!errors.hasOwnProperty(field)) continue;
+            if (field === 'password' || field === 'password_confirmation') continue;
+
+            if (errors[field].length > 0) {
+                showFieldError(form, field, errors[field][0]);
+                hasFieldErrors = true;
+            }
+        }
+
+        // Route password rule errors to password field
+        if (passwordRuleMessages.length > 0) {
+            if (pwdFields && pwdFields.classList.contains('hidden')) {
+                toggleEditPasswordSection();
+            }
+            showFieldError(form, 'password', passwordRuleMessages[0]);
+            hasFieldErrors = true;
+        }
+
+        // Route confirmation mismatch error to password_confirmation field
+        if (confirmMessages.length > 0) {
+            if (pwdFields && pwdFields.classList.contains('hidden')) {
+                toggleEditPasswordSection();
+            }
+            showFieldError(form, 'password_confirmation', confirmMessages[0]);
+            hasFieldErrors = true;
+        }
+
+        return hasFieldErrors;
+    }
+
     // ── Create Modal Controls ─────────────────────────────────────────────
     var createModal = document.getElementById('create-user-modal');
+    var createForm = document.getElementById('create-user-form');
+
+    function resetCreateModal() {
+        if (!createForm) return;
+        createForm.reset();
+        clearFormErrors(createForm);
+
+        // Explicitly clear all text and selection inputs
+        ['create_name', 'create_email', 'create_password', 'create_password_confirmation', 'create_stall_id'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) {
+                el.value = '';
+                if (id === 'create_password' || id === 'create_password_confirmation') {
+                    el.type = 'password';
+                }
+            }
+        });
+
+        // Reset eye toggle icons
+        createForm.querySelectorAll('button[onclick*="togglePasswordVisibility"] ion-icon').forEach(function(icon) {
+            icon.setAttribute('name', 'eye-outline');
+        });
+
+        // Reset role to default Administrator
+        toggleCreateRole('admin');
+
+        // Reset submit button and loader if in loading state
+        var submitBtn = document.getElementById('create-user-submit-btn');
+        if (submitBtn) {
+            submitBtn.disabled = false;
+            submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+            submitBtn.innerHTML = '<ion-icon name="person-add" class="text-sm"></ion-icon><span>Create Account</span>';
+        }
+        var loader = document.getElementById('create-modal-loader');
+        if (loader) loader.classList.add('hidden');
+    }
 
     function openCreateUserModal() {
         if (!createModal) return;
-        toggleCreateRole('admin');
+        resetCreateModal();
         createModal.showModal();
+        setTimeout(function() {
+            var firstInput = document.getElementById('create_name');
+            if (firstInput) firstInput.focus();
+        }, 50);
     }
 
     function closeCreateUserModal() {
-        if (createModal) createModal.close();
+        if (createModal) {
+            resetCreateModal();
+            createModal.close();
+        }
+    }
+
+    if (createModal) {
+        // Native close event (covers ESC key, backdrop click, or close() calls)
+        createModal.addEventListener('close', function() {
+            resetCreateModal();
+        });
     }
 
     function toggleCreateRole(role) {
         var stallContainer = document.getElementById('create-stall-container');
-        var adminCard = document.getElementById('create-role-admin-card');
-        var staffCard = document.getElementById('create-role-staff-card');
+        var adminBtn = document.getElementById('create-role-admin-btn');
+        var staffBtn = document.getElementById('create-role-staff-btn');
+        var roleInput = document.getElementById('create-role-input');
+
+        if (roleInput) roleInput.value = role;
+
+        // Clear role error if displayed
+        if (createForm) {
+            var roleErr = createForm.querySelector('[data-error-for="role"]');
+            if (roleErr) {
+                roleErr.classList.add('hidden');
+                var span = roleErr.querySelector('span');
+                if (span) span.textContent = '';
+            }
+        }
 
         if (role === 'staff') {
             if (stallContainer) stallContainer.classList.remove('hidden');
-            if (staffCard) staffCard.className = "relative flex flex-col p-3 border-2 border-brand-600 bg-brand-50/20 rounded-lg cursor-pointer transition-all role-card";
-            if (adminCard) adminCard.className = "relative flex flex-col p-3 border border-neutral-200 rounded-lg cursor-pointer transition-all role-card";
+            if (staffBtn) {
+                staffBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer";
+            }
+            if (adminBtn) {
+                adminBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer";
+            }
         } else {
             if (stallContainer) stallContainer.classList.add('hidden');
-            if (adminCard) adminCard.className = "relative flex flex-col p-3 border-2 border-brand-600 bg-brand-50/20 rounded-lg cursor-pointer transition-all role-card";
-            if (staffCard) staffCard.className = "relative flex flex-col p-3 border border-neutral-200 rounded-lg cursor-pointer transition-all role-card";
+            if (adminBtn) {
+                adminBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer";
+            }
+            if (staffBtn) {
+                staffBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer";
+            }
         }
+    }
+
+    if (createForm) {
+        createForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearFormErrors(createForm);
+
+            var loader = document.getElementById('create-modal-loader');
+            var submitBtn = document.getElementById('create-user-submit-btn');
+            var originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+            if (loader) loader.classList.remove('hidden');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                submitBtn.innerHTML = spinnerSvg + '<span>Creating...</span>';
+            }
+
+            var formData = new FormData(createForm);
+
+            fetch(createForm.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { ok: res.ok, status: res.status, data: data };
+                }).catch(function() {
+                    return { ok: res.ok, status: res.status, data: {} };
+                });
+            })
+            .then(function(result) {
+                if (result.ok) {
+                    window.location.reload();
+                    return;
+                }
+
+                if (loader) loader.classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+
+                if (result.status === 422 && result.data && result.data.errors) {
+                    var hasFieldErrors = applyFormValidationErrors(createForm, result.data.errors);
+                    if (!hasFieldErrors && result.data.message) {
+                        showGeneralError(createForm, result.data.message);
+                    }
+                } else {
+                    var msg = (result.data && result.data.message) ? result.data.message : 'Unable to create account. Please check inputs.';
+                    showGeneralError(createForm, msg);
+                }
+            })
+            .catch(function(err) {
+                if (loader) loader.classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+                showGeneralError(createForm, 'A network error occurred. Please try again.');
+            });
+        });
     }
 
     // ── Edit Modal Controls ───────────────────────────────────────────────
     var editModal = document.getElementById('edit-user-modal');
     var editForm = document.getElementById('edit-user-form');
+    var roleSelect = document.getElementById('edit_role');
+    var isEditingSelf = false;
 
     function openEditUserModal(id, name, email, role, stallId, isSelf) {
         if (!editModal || !editForm) return;
 
+        clearFormErrors(editForm);
+        isEditingSelf = isSelf;
+
         editForm.action = "/admin/users/" + id;
         document.getElementById('edit_name').value = name;
         document.getElementById('edit_email').value = email;
-        document.getElementById('edit_role').value = role;
+        if (roleSelect) roleSelect.value = role;
 
         var stallSelect = document.getElementById('edit_stall_id');
         if (stallSelect) stallSelect.value = stallId ? stallId : '';
 
         var selfWarning = document.getElementById('edit-self-warning');
-        var roleSelect = document.getElementById('edit_role');
         if (isSelf) {
             if (selfWarning) selfWarning.classList.remove('hidden');
             if (roleSelect) roleSelect.disabled = true;
@@ -862,16 +1162,40 @@
         // Reset password fields
         var pwdFields = document.getElementById('edit-password-fields');
         if (pwdFields) pwdFields.classList.add('hidden');
+        var pwdToggleText = document.getElementById('edit-pwd-toggle-text');
+        if (pwdToggleText) pwdToggleText.textContent = 'Change Account Password';
         var pwdInput = document.getElementById('edit_password');
         var pwdConfirm = document.getElementById('edit_password_confirmation');
-        if (pwdInput) pwdInput.value = '';
-        if (pwdConfirm) pwdConfirm.value = '';
+        if (pwdInput) {
+            pwdInput.value = '';
+            pwdInput.type = 'password';
+        }
+        if (pwdConfirm) {
+            pwdConfirm.value = '';
+            pwdConfirm.type = 'password';
+        }
+        editForm.querySelectorAll('button[onclick*="togglePasswordVisibility"] ion-icon').forEach(function(icon) {
+            icon.setAttribute('name', 'eye-outline');
+        });
 
         editModal.showModal();
+        setTimeout(function() {
+            var nameInput = document.getElementById('edit_name');
+            if (nameInput) nameInput.focus();
+        }, 50);
     }
 
     function closeEditUserModal() {
-        if (editModal) editModal.close();
+        if (editModal) {
+            clearFormErrors(editForm);
+            var pwdInput = document.getElementById('edit_password');
+            var pwdConfirm = document.getElementById('edit_password_confirmation');
+            if (pwdInput) pwdInput.value = '';
+            if (pwdConfirm) pwdConfirm.value = '';
+            var pwdFields = document.getElementById('edit-password-fields');
+            if (pwdFields) pwdFields.classList.add('hidden');
+            editModal.close();
+        }
     }
 
     function toggleEditRole(role) {
@@ -881,6 +1205,83 @@
         } else {
             if (stallContainer) stallContainer.classList.add('hidden');
         }
+    }
+
+    if (editForm) {
+        editForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearFormErrors(editForm);
+
+            var wasDisabled = roleSelect && roleSelect.disabled;
+            if (wasDisabled) {
+                roleSelect.disabled = false;
+            }
+
+            var loader = document.getElementById('edit-modal-loader');
+            var submitBtn = document.getElementById('edit-user-submit-btn');
+            var originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+            if (loader) loader.classList.remove('hidden');
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                submitBtn.innerHTML = spinnerSvg + '<span>Saving...</span>';
+            }
+
+            var formData = new FormData(editForm);
+
+            if (wasDisabled) {
+                roleSelect.disabled = true;
+            }
+
+            fetch(editForm.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { ok: res.ok, status: res.status, data: data };
+                }).catch(function() {
+                    return { ok: res.ok, status: res.status, data: {} };
+                });
+            })
+            .then(function(result) {
+                if (result.ok) {
+                    window.location.reload();
+                    return;
+                }
+
+                if (loader) loader.classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+
+                if (result.status === 422 && result.data && result.data.errors) {
+                    var hasFieldErrors = applyFormValidationErrors(editForm, result.data.errors);
+                    if (!hasFieldErrors && result.data.message) {
+                        showGeneralError(editForm, result.data.message);
+                    }
+                } else {
+                    var msg = (result.data && result.data.message) ? result.data.message : 'Unable to update account.';
+                    showGeneralError(editForm, msg);
+                }
+            })
+            .catch(function(err) {
+                if (loader) loader.classList.add('hidden');
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+                showGeneralError(editForm, 'A network error occurred. Please try again.');
+            });
+        });
     }
 
     function toggleEditPasswordSection() {
@@ -895,6 +1296,97 @@
         }
     }
 
+    // ── Real-time Input Error Clearing ────────────────────────────────────
+    [createForm, editForm].forEach(function(form) {
+        if (!form) return;
+        form.querySelectorAll('input, select').forEach(function(field) {
+            var clearHandler = function() {
+                field.classList.remove('border-rose-500', 'bg-rose-50/20', 'focus:border-rose-600');
+                field.classList.add('border-neutral-200');
+                var errorEl = form.querySelector('[data-error-for="' + field.name + '"]');
+                if (errorEl) {
+                    errorEl.classList.add('hidden');
+                    var span = errorEl.querySelector('span');
+                    if (span) span.textContent = '';
+                }
+
+                // If editing password, also clear any confirmation error reactively
+                if (field.name === 'password') {
+                    var confirmInput = form.querySelector('[name="password_confirmation"]');
+                    var confirmErr = form.querySelector('[data-error-for="password_confirmation"]');
+                    if (confirmInput) {
+                        confirmInput.classList.remove('border-rose-500', 'bg-rose-50/20', 'focus:border-rose-600');
+                        confirmInput.classList.add('border-neutral-200');
+                    }
+                    if (confirmErr) {
+                        confirmErr.classList.add('hidden');
+                        var cSpan = confirmErr.querySelector('span');
+                        if (cSpan) cSpan.textContent = '';
+                    }
+                }
+            };
+            field.addEventListener('input', clearHandler);
+            field.addEventListener('change', clearHandler);
+        });
+    });
+
+    // ── Enter Key Navigation Between Modal Fields ─────────────────────────
+    function wireEnterKeyNavigation(sequence) {
+        sequence.forEach(function(item) {
+            var currentEl = document.getElementById(item.from);
+            if (!currentEl) return;
+            currentEl.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter' && !e.shiftKey && !e.isComposing) {
+                    e.preventDefault();
+                    var triggerAction = function(target) {
+                        if (!target) return;
+                        if (target.tagName === 'BUTTON' || target.type === 'submit') {
+                            if (target.disabled) return;
+                            if (target.form && typeof target.form.requestSubmit === 'function') {
+                                target.form.requestSubmit(target);
+                            } else {
+                                target.click();
+                            }
+                        } else if (typeof target.focus === 'function') {
+                            target.focus();
+                        }
+                    };
+
+                    if (typeof item.to === 'function') {
+                        triggerAction(item.to());
+                    } else if (typeof item.to === 'string') {
+                        triggerAction(document.getElementById(item.to));
+                    }
+                }
+            });
+        });
+    }
+
+    wireEnterKeyNavigation([
+        { from: 'create_stall_id', to: 'create_name' },
+        { from: 'create_name', to: 'create_email' },
+        { from: 'create_email', to: 'create_password' },
+        { from: 'create_password', to: 'create_password_confirmation' },
+        { from: 'create_password_confirmation', to: 'create-user-submit-btn' },
+    ]);
+
+    wireEnterKeyNavigation([
+        { from: 'edit_stall_id', to: 'edit_name' },
+        { from: 'edit_name', to: 'edit_email' },
+        {
+            from: 'edit_email',
+            to: function() {
+                var pwdFields = document.getElementById('edit-password-fields');
+                if (pwdFields && !pwdFields.classList.contains('hidden')) {
+                    return document.getElementById('edit_password');
+                }
+                return document.getElementById('edit-user-submit-btn');
+            }
+        },
+        { from: 'edit_password', to: 'edit_password_confirmation' },
+        { from: 'edit_password_confirmation', to: 'edit-user-submit-btn' },
+    ]);
+
     // ── Delete Modal Controls ─────────────────────────────────────────────
     var deleteModal = document.getElementById('delete-user-modal');
     var deleteForm = document.getElementById('delete-user-form');
@@ -902,13 +1394,74 @@
 
     function openDeleteUserModal(id, name, role) {
         if (!deleteModal || !deleteForm) return;
+        clearFormErrors(deleteForm);
         deleteForm.action = "/admin/users/" + id;
         if (deleteName) deleteName.textContent = name + ' (' + (role === 'admin' ? 'Administrator' : 'Staff') + ')';
         deleteModal.showModal();
     }
 
     function closeDeleteUserModal() {
-        if (deleteModal) deleteModal.close();
+        if (deleteModal) {
+            clearFormErrors(deleteForm);
+            deleteModal.close();
+        }
+    }
+
+    if (deleteForm) {
+        deleteForm.addEventListener('submit', function(e) {
+            e.preventDefault();
+            clearFormErrors(deleteForm);
+
+            var submitBtn = document.getElementById('delete-user-submit-btn');
+            var originalBtnHtml = submitBtn ? submitBtn.innerHTML : '';
+
+            if (submitBtn) {
+                submitBtn.disabled = true;
+                submitBtn.classList.add('opacity-75', 'cursor-not-allowed');
+                submitBtn.innerHTML = spinnerSvg + '<span>Deleting...</span>';
+            }
+
+            var formData = new FormData(deleteForm);
+
+            fetch(deleteForm.action, {
+                method: 'POST',
+                headers: {
+                    'Accept': 'application/json',
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                body: formData
+            })
+            .then(function(res) {
+                return res.json().then(function(data) {
+                    return { ok: res.ok, status: res.status, data: data };
+                }).catch(function() {
+                    return { ok: res.ok, status: res.status, data: {} };
+                });
+            })
+            .then(function(result) {
+                if (result.ok) {
+                    window.location.reload();
+                    return;
+                }
+
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+
+                var msg = (result.data && result.data.message) ? result.data.message : 'Unable to delete account.';
+                showGeneralError(deleteForm, msg);
+            })
+            .catch(function(err) {
+                if (submitBtn) {
+                    submitBtn.disabled = false;
+                    submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
+                    submitBtn.innerHTML = originalBtnHtml;
+                }
+                showGeneralError(deleteForm, 'A network error occurred. Please try again.');
+            });
+        });
     }
 
     // ── Password Visibility Toggle Helper ─────────────────────────────────

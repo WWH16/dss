@@ -104,7 +104,11 @@ class StaffController extends Controller
 
         // 6. Evaluation Activity Timeline trend with Month & Year filtering
         $driver = DB::connection()->getDriverName();
-        $yearSql = $driver === 'sqlite' ? "DISTINCT strftime('%Y', created_at) as year" : "DISTINCT YEAR(created_at) as year";
+        $yearSql = match ($driver) {
+            'sqlite' => "DISTINCT strftime('%Y', created_at) as year",
+            'pgsql'  => "DISTINCT CAST(EXTRACT(YEAR FROM created_at) AS INTEGER) as year",
+            default  => "DISTINCT YEAR(created_at) as year",
+        };
         $availableYears = DB::table('stall_evaluations')
             ->where('stall_id', $stall->id)
             ->selectRaw($yearSql)
@@ -127,8 +131,16 @@ class StaffController extends Controller
 
         if ($selectedMonth === 'all') {
             // Full Year: Monthly aggregations (Jan - Dec)
-            $monthSql = $driver === 'sqlite' ? "strftime('%m', created_at) as m, COUNT(*) as count" : "MONTH(created_at) as m, COUNT(*) as count";
-            $monthGroup = $driver === 'sqlite' ? "strftime('%m', created_at)" : "MONTH(created_at)";
+            $monthSql = match ($driver) {
+                'sqlite' => "strftime('%m', created_at) as m, COUNT(*) as count",
+                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER) as m, COUNT(*) as count",
+                default  => "MONTH(created_at) as m, COUNT(*) as count",
+            };
+            $monthGroup = match ($driver) {
+                'sqlite' => "strftime('%m', created_at)",
+                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER)",
+                default  => "MONTH(created_at)",
+            };
             $evalTrend = DB::table('stall_evaluations')
                 ->where('stall_id', $stall->id)
                 ->selectRaw($monthSql)
@@ -147,8 +159,16 @@ class StaffController extends Controller
             $m = (int)$selectedMonth;
             $daysInMonth = (int) date('t', mktime(0, 0, 0, $m, 1, $selectedYear));
 
-            $daySql = $driver === 'sqlite' ? "strftime('%d', created_at) as d, COUNT(*) as count" : "DAY(created_at) as d, COUNT(*) as count";
-            $dayGroup = $driver === 'sqlite' ? "strftime('%d', created_at)" : "DAY(created_at)";
+            $daySql = match ($driver) {
+                'sqlite' => "strftime('%d', created_at) as d, COUNT(*) as count",
+                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER) as d, COUNT(*) as count",
+                default  => "DAY(created_at) as d, COUNT(*) as count",
+            };
+            $dayGroup = match ($driver) {
+                'sqlite' => "strftime('%d', created_at)",
+                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER)",
+                default  => "DAY(created_at)",
+            };
             $evalTrend = DB::table('stall_evaluations')
                 ->where('stall_id', $stall->id)
                 ->selectRaw($daySql)
@@ -167,11 +187,19 @@ class StaffController extends Controller
         } else {
             // Default: Rolling Last 30 Days
             $selectedMonth = '30_days';
+            $dateSql = match ($driver) {
+                'pgsql'  => "CAST(created_at AS DATE) as date, COUNT(*) as count",
+                default  => "DATE(created_at) as date, COUNT(*) as count",
+            };
+            $dateGroup = match ($driver) {
+                'pgsql'  => "CAST(created_at AS DATE)",
+                default  => "DATE(created_at)",
+            };
             $evalTrend = DB::table('stall_evaluations')
                 ->where('stall_id', $stall->id)
-                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->selectRaw($dateSql)
                 ->where('created_at', '>=', now()->subDays(29)->startOfDay())
-                ->groupByRaw('DATE(created_at)')
+                ->groupByRaw($dateGroup)
                 ->orderBy('date')
                 ->get()
                 ->keyBy('date');

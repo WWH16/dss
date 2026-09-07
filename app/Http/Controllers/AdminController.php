@@ -64,7 +64,11 @@ class AdminController extends Controller
 
         // Evaluation Activity Trend (with Month & Year filtering)
         $driver = DB::connection()->getDriverName();
-        $yearSql = $driver === 'sqlite' ? "DISTINCT strftime('%Y', created_at) as year" : "DISTINCT YEAR(created_at) as year";
+        $yearSql = match ($driver) {
+            'sqlite' => "DISTINCT strftime('%Y', created_at) as year",
+            'pgsql'  => "DISTINCT CAST(EXTRACT(YEAR FROM created_at) AS INTEGER) as year",
+            default  => "DISTINCT YEAR(created_at) as year",
+        };
         $availableYears = DB::table('stall_evaluations')
             ->selectRaw($yearSql)
             ->orderByDesc('year')
@@ -86,8 +90,16 @@ class AdminController extends Controller
 
         if ($selectedMonth === 'all') {
             // Full Year: Monthly aggregations (Jan - Dec)
-            $monthSql = $driver === 'sqlite' ? "strftime('%m', created_at) as m, COUNT(*) as count" : "MONTH(created_at) as m, COUNT(*) as count";
-            $monthGroup = $driver === 'sqlite' ? "strftime('%m', created_at)" : "MONTH(created_at)";
+            $monthSql = match ($driver) {
+                'sqlite' => "strftime('%m', created_at) as m, COUNT(*) as count",
+                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER) as m, COUNT(*) as count",
+                default  => "MONTH(created_at) as m, COUNT(*) as count",
+            };
+            $monthGroup = match ($driver) {
+                'sqlite' => "strftime('%m', created_at)",
+                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER)",
+                default  => "MONTH(created_at)",
+            };
             $evalTrend = DB::table('stall_evaluations')
                 ->selectRaw($monthSql)
                 ->whereYear('created_at', $selectedYear)
@@ -105,8 +117,16 @@ class AdminController extends Controller
             $m = (int)$selectedMonth;
             $daysInMonth = (int) date('t', mktime(0, 0, 0, $m, 1, $selectedYear));
 
-            $daySql = $driver === 'sqlite' ? "strftime('%d', created_at) as d, COUNT(*) as count" : "DAY(created_at) as d, COUNT(*) as count";
-            $dayGroup = $driver === 'sqlite' ? "strftime('%d', created_at)" : "DAY(created_at)";
+            $daySql = match ($driver) {
+                'sqlite' => "strftime('%d', created_at) as d, COUNT(*) as count",
+                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER) as d, COUNT(*) as count",
+                default  => "DAY(created_at) as d, COUNT(*) as count",
+            };
+            $dayGroup = match ($driver) {
+                'sqlite' => "strftime('%d', created_at)",
+                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER)",
+                default  => "DAY(created_at)",
+            };
             $evalTrend = DB::table('stall_evaluations')
                 ->selectRaw($daySql)
                 ->whereYear('created_at', $selectedYear)
@@ -124,10 +144,18 @@ class AdminController extends Controller
         } else {
             // Default: Rolling Last 30 Days
             $selectedMonth = '30_days';
+            $dateSql = match ($driver) {
+                'pgsql'  => "CAST(created_at AS DATE) as date, COUNT(*) as count",
+                default  => "DATE(created_at) as date, COUNT(*) as count",
+            };
+            $dateGroup = match ($driver) {
+                'pgsql'  => "CAST(created_at AS DATE)",
+                default  => "DATE(created_at)",
+            };
             $evalTrend = DB::table('stall_evaluations')
-                ->selectRaw('DATE(created_at) as date, COUNT(*) as count')
+                ->selectRaw($dateSql)
                 ->where('created_at', '>=', now()->subDays(29)->startOfDay())
-                ->groupByRaw('DATE(created_at)')
+                ->groupByRaw($dateGroup)
                 ->orderBy('date')
                 ->get()
                 ->keyBy('date');
@@ -603,6 +631,13 @@ class AdminController extends Controller
         ]);
 
         $label = $request->role === 'admin' ? 'Administrator' : 'Staff';
+        if ($request->wantsJson()) {
+            session()->flash('success', "{$label} account created successfully!");
+            return response()->json([
+                'success' => true,
+                'message' => "{$label} account created successfully!",
+            ]);
+        }
         return redirect()->back()->with('success', "{$label} account created successfully!");
     }
 
@@ -613,6 +648,9 @@ class AdminController extends Controller
         $target = User::findOrFail($id);
 
         if (!in_array($target->role, ['admin', 'staff'])) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Invalid operation for this user type.'], 422);
+            }
             return redirect()->back()->with('error', 'Invalid operation for this user type.');
         }
 
@@ -634,6 +672,14 @@ class AdminController extends Controller
 
         // Safeguard: Do not allow logged-in admin to demote themselves if they are the only admin
         if ($target->id === Auth::id() && $request->role !== 'admin') {
+            if ($request->wantsJson()) {
+                return response()->json([
+                    'message' => 'You cannot remove your own administrator privileges.',
+                    'errors' => [
+                        'role' => ['You cannot remove your own administrator privileges.']
+                    ]
+                ], 422);
+            }
             return redirect()->back()->with('error', 'You cannot remove your own administrator privileges.');
         }
 
@@ -648,10 +694,17 @@ class AdminController extends Controller
 
         $target->save();
 
+        if ($request->wantsJson()) {
+            session()->flash('success', "Account for {$target->name} updated successfully.");
+            return response()->json([
+                'success' => true,
+                'message' => "Account for {$target->name} updated successfully.",
+            ]);
+        }
         return redirect()->back()->with('success', "Account for {$target->name} updated successfully.");
     }
 
-    public function deleteUser($id)
+    public function deleteUser(Request $request, $id)
     {
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
@@ -659,6 +712,9 @@ class AdminController extends Controller
 
         // Prevent self-deletion
         if ($target->id === Auth::id()) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'You cannot delete your own account.'], 422);
+            }
             return redirect()->back()->with('error', 'You cannot delete your own account.');
         }
 
@@ -666,18 +722,31 @@ class AdminController extends Controller
         if ($target->role === 'admin') {
             $adminCount = User::where('role', 'admin')->count();
             if ($adminCount <= 1) {
+                if ($request->wantsJson()) {
+                    return response()->json(['message' => 'Cannot delete the last remaining administrator account in the system.'], 422);
+                }
                 return redirect()->back()->with('error', 'Cannot delete the last remaining administrator account in the system.');
             }
         }
 
         // Only allow deleting admin/staff from this page (students managed elsewhere)
         if (!in_array($target->role, ['admin', 'staff'])) {
+            if ($request->wantsJson()) {
+                return response()->json(['message' => 'Invalid operation.'], 422);
+            }
             return redirect()->back()->with('error', 'Invalid operation.');
         }
 
         $targetName = $target->name;
         $target->delete();
 
+        if ($request->wantsJson()) {
+            session()->flash('success', "{$targetName}'s account has been deleted.");
+            return response()->json([
+                'success' => true,
+                'message' => "{$targetName}'s account has been deleted.",
+            ]);
+        }
         return redirect()->back()->with('success', "{$targetName}'s account has been deleted.");
     }
 }
