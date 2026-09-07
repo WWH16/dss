@@ -33,13 +33,13 @@
                         Go to Dashboard
                     </a>
                 @else
-                    <a href="{{ url('/register') }}" class="btn btn-primary btn-lg" id="hero-register-btn">
+                    <a href="{{ url('/login?role=student') }}" class="btn btn-primary btn-lg" id="hero-register-btn">
                         Start Evaluating
                         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
                             <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round"/>
                         </svg>
                     </a>
-                    <a href="{{ url('/login') }}" class="btn btn-outline-white btn-lg" id="hero-login-btn">Login to Dashboard</a>
+                    <a href="{{ url('/login?role=admin') }}" class="btn btn-outline-white btn-lg" id="hero-login-btn">Login to Dashboard</a>
                 @endauth
             </div>
         </div>

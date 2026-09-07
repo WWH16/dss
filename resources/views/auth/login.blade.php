@@ -43,6 +43,12 @@
         </a>
     </div>
 
+    @php
+        $isRegisterTab = ($activeTab ?? 'login') === 'register' || ($errors->any() && ($errors->has('name') || $errors->has('email') || $errors->has('student_number') || $errors->has('stall_id') || $errors->has('password') || $errors->has('course') || $errors->has('year_level')));
+        $currentLoginRole = old('role', $selectedRole ?? 'student');
+        $currentRegisterRole = old('role', ($selectedRole === 'admin' ? 'student' : ($selectedRole ?? 'student')));
+    @endphp
+
     <!-- Unified Form Card -->
     <div class="w-full max-w-md bg-white rounded-[4px] border border-neutral-200/60 p-6 md:p-8 shadow-sm my-12 relative z-10">
 
@@ -51,8 +57,8 @@
             <div class="flex justify-center mb-4">
                 <img src="{{ asset('assets/images/isu_logo.png') }}" alt="ISU Logo" class="w-14 h-14 object-contain">
             </div>
-            <h1 class="text-lg font-display font-bold text-neutral-900 tracking-tight" id="auth-heading">ISU Cauayan Canteen Client Evaluation System</h1>
-            <p class="text-neutral-500 text-xs mt-1 font-medium" id="auth-subheading">Decision Support System Portal</p>
+            <h1 class="text-lg font-display font-bold text-neutral-900 tracking-tight" id="auth-heading">{{ $isRegisterTab ? 'Register' : 'Login' }}</h1>
+            <p class="text-neutral-500 text-xs mt-1 font-medium" id="auth-subheading">{{ $isRegisterTab ? 'Create your account for student or staff access' : 'Access your evaluation dashboard' }}</p>
         </div>
 
         {{-- Laravel Errors/Success Alerts --}}
@@ -72,32 +78,37 @@
 
         <!-- Tab Switcher -->
         <div class="grid grid-cols-2 border border-neutral-200 p-1 rounded-[4px] bg-neutral-100/80 mb-6">
-            <button type="button" id="tab-login-btn" onclick="switchTab('login')" class="py-2 text-sm font-semibold rounded-[4px] transition-all focus:outline-none cursor-pointer">Login</button>
-            <button type="button" id="tab-register-btn" onclick="switchTab('register')" class="py-2 text-sm font-semibold rounded-[4px] transition-all focus:outline-none cursor-pointer">Register</button>
+            <button type="button" id="tab-login-btn" onclick="switchTab('login')" class="py-2 text-sm font-semibold rounded-[4px] {{ $isRegisterTab ? 'text-neutral-500 hover:text-neutral-800' : 'bg-white text-neutral-900 shadow-sm' }} transition-all focus:outline-none cursor-pointer">Login</button>
+            <button type="button" id="tab-register-btn" onclick="switchTab('register')" class="py-2 text-sm font-semibold rounded-[4px] {{ $isRegisterTab ? 'bg-white text-neutral-900 shadow-sm' : 'text-neutral-500 hover:text-neutral-800' }} transition-all focus:outline-none cursor-pointer">Register</button>
         </div>
 
         {{-- ── LOGIN FORM BLOCK ────────────────────────────────────────────── --}}
-        <div id="login-form-block">
+        <div id="login-form-block" style="{{ $isRegisterTab ? 'display: none;' : '' }}">
             <form action="{{ url('/login') }}" method="POST" class="space-y-4">
                 @csrf
 
                 <div>
                     <label for="login_role" class="block text-xs font-semibold text-neutral-700 mb-1.5">Role</label>
-                    <select id="login_role" name="role" class="w-full px-4 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800" onchange="toggleLoginFields()">
-                        <option value="student" {{ old('role', $selectedRole) == 'student' ? 'selected' : '' }}>Student</option>
-                        <option value="staff" {{ old('role', $selectedRole) == 'staff' ? 'selected' : '' }}>Staff</option>
-                        <option value="admin" {{ old('role', $selectedRole) == 'admin' ? 'selected' : '' }}>Admin</option>
-                    </select>
+                    <div class="relative">
+                        <select id="login_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleLoginFields()">
+                            <option value="student" {{ $currentLoginRole === 'student' ? 'selected' : '' }}>Student</option>
+                            <option value="staff" {{ $currentLoginRole === 'staff' ? 'selected' : '' }}>Staff</option>
+                            <option value="admin" {{ $currentLoginRole === 'admin' ? 'selected' : '' }}>Admin</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
+                            <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
+                        </div>
+                    </div>
                 </div>
 
-                <div id="login_student_number_field">
+                <div id="login_student_number_field" style="{{ $currentLoginRole === 'student' ? '' : 'display: none;' }}">
                     <label for="login_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                    <input type="text" id="login_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username">
+                    <input type="text" id="login_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentLoginRole === 'student' ? 'required' : '' }}>
                 </div>
 
-                <div id="login_email_field">
+                <div id="login_email_field" style="{{ $currentLoginRole === 'student' ? 'display: none;' : '' }}">
                     <label for="login_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
-                    <input type="email" id="login_email" name="email" value="{{ old('email') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username email">
+                    <input type="email" id="login_email" name="email" value="{{ old('email') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username email" {{ $currentLoginRole !== 'student' ? 'required' : '' }}>
                 </div>
 
                 <div>
@@ -126,16 +137,21 @@
         </div>
 
         {{-- ── REGISTER FORM BLOCK ─────────────────────────────────────────── --}}
-        <div id="register-form-block" style="display: none;">
+        <div id="register-form-block" style="{{ $isRegisterTab ? '' : 'display: none;' }}">
             <form method="POST" action="{{ url('/register') }}" class="space-y-4">
                 @csrf
 
                 <div>
                     <label for="register_role" class="block text-xs font-semibold text-neutral-700 mb-1.5">Role</label>
-                    <select id="register_role" name="role" class="w-full px-4 py-2.5 bg-white border @error('role') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800" onchange="toggleRegisterFields()">
-                        <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
-                        <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
-                    </select>
+                    <div class="relative">
+                        <select id="register_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('role') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleRegisterFields()">
+                            <option value="student" {{ $currentRegisterRole == 'student' ? 'selected' : '' }}>Student</option>
+                            <option value="staff" {{ $currentRegisterRole == 'staff' ? 'selected' : '' }}>Staff</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
+                            <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
+                        </div>
+                    </div>
                     @error('role')
                         <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
@@ -154,7 +170,7 @@
 
                     {{-- Student: split input (prefix + @isu.edu.ph locked) --}}
                     {{-- Student: split input with locked _cyn@isu.edu.ph suffix --}}
-                    <div id="register_email_student" class="flex rounded-[4px] overflow-hidden border @error('email') border-red-500 @else border-neutral-300 @enderror focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/15 transition-all">
+                    <div id="register_email_student" style="{{ $currentRegisterRole === 'student' ? 'display: flex;' : 'display: none;' }}" class="rounded-[4px] overflow-hidden border @error('email') border-red-500 @else border-neutral-300 @enderror focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/15 transition-all">
                         <input
                             type="text"
                             id="register_email_prefix"
@@ -173,7 +189,7 @@
                     <input type="hidden" name="email" id="register_email_hidden">
 
                     {{-- Staff/Admin: plain email input --}}
-                    <div id="register_email_other" style="display: none;">
+                    <div id="register_email_other" style="{{ $currentRegisterRole === 'staff' ? '' : 'display: none;' }}">
                         <input
                             type="email"
                             id="register_email_plain"
@@ -182,6 +198,7 @@
                             placeholder="e.g. user@example.com"
                             class="w-full px-4 py-2.5 bg-white border @error('email') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400"
                             autocomplete="email"
+                            {{ $currentRegisterRole === 'staff' ? 'required' : '' }}
                         >
                     </div>
 
@@ -189,22 +206,27 @@
                         <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
 
-                    <p id="register_email_hint" class="text-[11px] text-neutral-400 mt-1.5 font-medium">
+                    <p id="register_email_hint" style="{{ $currentRegisterRole === 'student' ? '' : 'display: none;' }}" class="text-[11px] text-neutral-400 mt-1.5 font-medium">
                         Use your official ISU email. A verification code will be sent after registration.
                     </p>
                 </div>
 
                 {{-- STUDENT FIELDS --}}
-                <div id="register_student_fields" class="space-y-4">
+                <div id="register_student_fields" style="{{ $currentRegisterRole === 'student' ? '' : 'display: none;' }}" class="space-y-4">
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                         <div>
                             <label for="register_course" class="block text-xs font-semibold text-neutral-700 mb-1.5">Course</label>
-                            <select id="register_course" name="course" class="w-full px-4 py-2.5 bg-white border @error('course') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800">
-                                <option value="">Select course</option>
-                                <option value="BSIT" {{ old('course') == 'BSIT' ? 'selected' : '' }}>BSIT</option>
-                                <option value="BSCS" {{ old('course') == 'BSCS' ? 'selected' : '' }}>BSCS</option>
-                                <option value="BSHM" {{ old('course') == 'BSHM' ? 'selected' : '' }}>BSHM</option>
-                            </select>
+                            <div class="relative">
+                                <select id="register_course" name="course" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('course') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                                    <option value="">Select course</option>
+                                    <option value="BSIT" {{ old('course') == 'BSIT' ? 'selected' : '' }}>BSIT</option>
+                                    <option value="BSCS" {{ old('course') == 'BSCS' ? 'selected' : '' }}>BSCS</option>
+                                    <option value="BSHM" {{ old('course') == 'BSHM' ? 'selected' : '' }}>BSHM</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
+                                    <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
+                                </div>
+                            </div>
                             @error('course')
                                 <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                             @enderror
@@ -212,13 +234,18 @@
 
                         <div>
                             <label for="register_year" class="block text-xs font-semibold text-neutral-700 mb-1.5">Year</label>
-                            <select id="register_year" name="year_level" class="w-full px-4 py-2.5 bg-white border @error('year_level') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800">
-                                <option value="">Select year</option>
-                                <option value="1st year" {{ old('year_level') == '1st year' ? 'selected' : '' }}>1st year</option>
-                                <option value="2nd year" {{ old('year_level') == '2nd year' ? 'selected' : '' }}>2nd year</option>
-                                <option value="3rd year" {{ old('year_level') == '3rd year' ? 'selected' : '' }}>3rd year</option>
-                                <option value="4th year" {{ old('year_level') == '4th year' ? 'selected' : '' }}>4th year</option>
-                            </select>
+                            <div class="relative">
+                                <select id="register_year" name="year_level" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('year_level') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                                    <option value="">Select year</option>
+                                    <option value="1st year" {{ old('year_level') == '1st year' ? 'selected' : '' }}>1st year</option>
+                                    <option value="2nd year" {{ old('year_level') == '2nd year' ? 'selected' : '' }}>2nd year</option>
+                                    <option value="3rd year" {{ old('year_level') == '3rd year' ? 'selected' : '' }}>3rd year</option>
+                                    <option value="4th year" {{ old('year_level') == '4th year' ? 'selected' : '' }}>4th year</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
+                                    <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
+                                </div>
+                            </div>
                             @error('year_level')
                                 <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                             @enderror
@@ -227,7 +254,7 @@
 
                     <div>
                         <label for="register_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                        <input type="text" id="register_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @error('student_number') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username">
+                        <input type="text" id="register_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @error('student_number') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
                         @error('student_number')
                             <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
@@ -235,7 +262,7 @@
                 </div>
 
                 {{-- STAFF ONBOARDING INFO --}}
-                <div id="register_staff_field" style="display:none;" class="p-3 bg-neutral-50 border border-neutral-200 rounded-[4px] text-xs text-neutral-600 space-y-1">
+                <div id="register_staff_field" style="{{ $currentRegisterRole === 'staff' ? '' : 'display: none;' }}" class="p-3 bg-neutral-50 border border-neutral-200 rounded-[4px] text-xs text-neutral-600 space-y-1">
                     <div class="flex items-center gap-1.5 font-bold text-neutral-800 text-[11px] uppercase tracking-wider">
                         <ion-icon name="shield-checkmark" class="text-brand-700 text-sm" aria-hidden="true"></ion-icon>
                         <span>Staff Security Verification</span>
@@ -362,33 +389,59 @@
         }
 
         function toggleLoginFields() {
-            const role = document.getElementById('login_role').value;
-            document.getElementById('login_student_number_field').style.display =
-                role === 'student' ? 'block' : 'none';
+            const roleEl = document.getElementById('login_role');
+            if (!roleEl) return;
+            const role = roleEl.value;
+            const isStudent = role === 'student';
 
-            document.getElementById('login_email_field').style.display =
-                role === 'student' ? 'none' : 'block';
+            const studentField = document.getElementById('login_student_number_field');
+            const emailField = document.getElementById('login_email_field');
+            const studentInput = document.getElementById('login_student_number');
+            const emailInput = document.getElementById('login_email');
+
+            if (studentField) studentField.style.display = isStudent ? 'block' : 'none';
+            if (emailField) emailField.style.display = isStudent ? 'none' : 'block';
+
+            if (studentInput) studentInput.required = isStudent;
+            if (emailInput) emailInput.required = !isStudent;
         }
 
         function toggleRegisterFields() {
-            const role = document.getElementById('register_role').value;
+            const roleEl = document.getElementById('register_role');
+            if (!roleEl) return;
+            const role = roleEl.value;
             const isStudent = role === 'student';
             const isStaff = role === 'staff';
 
             // Toggle student fields visibility and required state
-            document.getElementById('register_student_fields').style.display = isStudent ? 'block' : 'none';
-            document.getElementById('register_course').required = isStudent;
-            document.getElementById('register_year').required = isStudent;
-            document.getElementById('register_student_number').required = isStudent;
+            const studentFields = document.getElementById('register_student_fields');
+            if (studentFields) studentFields.style.display = isStudent ? 'block' : 'none';
+
+            const course = document.getElementById('register_course');
+            if (course) course.required = isStudent;
+
+            const year = document.getElementById('register_year');
+            if (year) year.required = isStudent;
+
+            const studentNum = document.getElementById('register_student_number');
+            if (studentNum) studentNum.required = isStudent;
 
             // Toggle email input style (split for students, plain for staff/admin)
-            document.getElementById('register_email_student').style.display = isStudent ? 'flex' : 'none';
-            document.getElementById('register_email_other').style.display = isStudent ? 'none' : 'block';
-            document.getElementById('register_email_hint').style.display = isStudent ? 'block' : 'none';
-            document.getElementById('register_email_plain').required = !isStudent;
+            const emailStudent = document.getElementById('register_email_student');
+            if (emailStudent) emailStudent.style.display = isStudent ? 'flex' : 'none';
+
+            const emailOther = document.getElementById('register_email_other');
+            if (emailOther) emailOther.style.display = isStudent ? 'none' : 'block';
+
+            const emailHint = document.getElementById('register_email_hint');
+            if (emailHint) emailHint.style.display = isStudent ? 'block' : 'none';
+
+            const emailPlain = document.getElementById('register_email_plain');
+            if (emailPlain) emailPlain.required = !isStudent;
 
             // Toggle staff fields visibility
-            document.getElementById('register_staff_field').style.display = isStaff ? 'block' : 'none';
+            const staffField = document.getElementById('register_staff_field');
+            if (staffField) staffField.style.display = isStaff ? 'block' : 'none';
         }
 
         function togglePasswordVisibility(fieldId, iconId) {
@@ -404,10 +457,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', () => {
-            let initialTab = "{{ $activeTab ?? 'login' }}";
-            @if($errors->any() && ($errors->has('name') || $errors->has('email') || $errors->has('student_number') || $errors->has('stall_id') || $errors->has('password') || $errors->has('course') || $errors->has('year_level')))
-                initialTab = 'register';
-            @endif
+            let initialTab = "{{ $isRegisterTab ? 'register' : 'login' }}";
             switchTab(initialTab);
             toggleLoginFields();
             toggleRegisterFields();
