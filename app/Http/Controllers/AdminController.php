@@ -525,24 +525,37 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
         $query = DB::table('users')
-            ->select('id', 'name', 'email', 'role', 'stall_id', 'course', 'year_level', 'student_number', 'created_at')
-            ->whereIn('role', ['admin', 'staff']);
+            ->leftJoin('stalls', 'stalls.id', '=', 'users.stall_id')
+            ->select(
+                'users.id',
+                'users.name',
+                'users.email',
+                'users.role',
+                'users.stall_id',
+                'users.created_at',
+                'stalls.name as stall_name'
+            )
+            ->whereIn('users.role', ['admin', 'staff']);
 
         if ($request->filled('q')) {
             $q = '%' . trim($request->q) . '%';
             $query->where(function ($sub) use ($q) {
-                $sub->where('name', 'like', $q)
-                    ->orWhere('email', 'like', $q);
+                $sub->where('users.name', 'like', $q)
+                    ->orWhere('users.email', 'like', $q)
+                    ->orWhere('stalls.name', 'like', $q);
             });
         }
 
         if ($request->filled('role_filter') && in_array($request->role_filter, ['admin', 'staff'])) {
-            $query->where('role', $request->role_filter);
+            $query->where('users.role', $request->role_filter);
         }
 
-        $users = $query->orderByDesc('created_at')->get();
+        $users = $query->orderByDesc('users.created_at')->get();
 
-        $stalls = DB::table('stalls')->select('id', 'name')->orderBy('name')->get();
+        $stalls = DB::table('stalls')
+            ->select('id', 'name', 'is_active')
+            ->orderBy('name')
+            ->get();
 
         return view('admin.users', compact('users', 'stalls'));
     }
@@ -555,6 +568,7 @@ class AdminController extends Controller
             'role'     => 'required|in:admin,staff',
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email',
+            'stall_id' => 'nullable|exists:stalls,id',
             'password' => [
                 'required',
                 'confirmed',
@@ -566,12 +580,58 @@ class AdminController extends Controller
             'role'              => $request->role,
             'name'              => trim($request->name),
             'email'             => trim($request->email),
+            'stall_id'          => $request->role === 'staff' ? $request->stall_id : null,
             'password'          => Hash::make($request->password),
             'email_verified_at' => now(),
         ]);
 
-        $label = ucfirst($request->role);
+        $label = $request->role === 'admin' ? 'Administrator' : 'Staff';
         return redirect()->back()->with('success', "{$label} account created successfully!");
+    }
+
+    public function updateUser(Request $request, $id)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $target = User::findOrFail($id);
+
+        if (!in_array($target->role, ['admin', 'staff'])) {
+            return redirect()->back()->with('error', 'Invalid operation for this user type.');
+        }
+
+        $rules = [
+            'role'     => 'required|in:admin,staff',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email,' . $target->id,
+            'stall_id' => 'nullable|exists:stalls,id',
+        ];
+
+        if ($request->filled('password')) {
+            $rules['password'] = [
+                'confirmed',
+                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
+            ];
+        }
+
+        $request->validate($rules);
+
+        // Safeguard: Do not allow logged-in admin to demote themselves if they are the only admin
+        if ($target->id === Auth::id() && $request->role !== 'admin') {
+            return redirect()->back()->with('error', 'You cannot remove your own administrator privileges.');
+        }
+
+        $target->name = trim($request->name);
+        $target->email = trim($request->email);
+        $target->role = $request->role;
+        $target->stall_id = $request->role === 'staff' ? $request->stall_id : null;
+
+        if ($request->filled('password')) {
+            $target->password = Hash::make($request->password);
+        }
+
+        $target->save();
+
+        return redirect()->back()->with('success', "Account for {$target->name} updated successfully.");
     }
 
     public function deleteUser($id)
@@ -585,13 +645,22 @@ class AdminController extends Controller
             return redirect()->back()->with('error', 'You cannot delete your own account.');
         }
 
+        // Safeguard: Prevent deleting the last remaining admin
+        if ($target->role === 'admin') {
+            $adminCount = User::where('role', 'admin')->count();
+            if ($adminCount <= 1) {
+                return redirect()->back()->with('error', 'Cannot delete the last remaining administrator account in the system.');
+            }
+        }
+
         // Only allow deleting admin/staff from this page (students managed elsewhere)
         if (!in_array($target->role, ['admin', 'staff'])) {
             return redirect()->back()->with('error', 'Invalid operation.');
         }
 
+        $targetName = $target->name;
         $target->delete();
 
-        return redirect()->back()->with('success', "{$target->name}'s account has been deleted.");
+        return redirect()->back()->with('success', "{$targetName}'s account has been deleted.");
     }
 }

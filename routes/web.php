@@ -133,6 +133,10 @@ Route::middleware('auth')->group(function () {
         [AdminController::class, 'createUser'])
         ->name('admin.users.create');
 
+    Route::put('/admin/users/{id}',
+        [AdminController::class, 'updateUser'])
+        ->name('admin.users.update');
+
     Route::delete('/admin/users/{id}',
         [AdminController::class, 'deleteUser'])
         ->name('admin.users.delete');
