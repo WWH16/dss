@@ -49,7 +49,7 @@
                 <span>Staff &amp; Administrators</span>
             </h1>
             <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
-                Manage administrator and canteen staff accounts. Students create their own accounts on the register page.
+                Directory and access controls for canteen vendor staff and system administrators.
             </p>
         </div>
         <div class="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
@@ -75,14 +75,14 @@
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Accounts</span>
                 <div class="w-8 h-8 rounded-lg bg-neutral-100 text-neutral-700 flex items-center justify-center">
-                    <ion-icon name="people" class="text-base"></ion-icon>
+                    <ion-icon name="id-card" class="text-base"></ion-icon>
                 </div>
             </div>
             <div class="mt-3 flex items-baseline gap-2">
                 <span class="text-2xl font-bold font-display text-neutral-900">{{ $users->count() }}</span>
                 <span class="text-xs text-neutral-500 font-medium">registered</span>
             </div>
-            <p class="text-[11px] text-neutral-400 mt-1">Canteen staff and administrators</p>
+            <p class="text-[11px] text-neutral-400 mt-1">Authorized canteen staff and administrators</p>
         </div>
 
         {{-- Administrators Card --}}

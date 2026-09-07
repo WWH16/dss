@@ -19,14 +19,14 @@
 <div class="max-w-6xl mx-auto space-y-6">
 
     {{-- ── 1. Page Header with Quick Actions ────────────────────────────── --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200/70">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200/80">
         <div>
             <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
                 <ion-icon name="grid-outline" class="text-brand-700 text-2xl"></ion-icon>
                 <span>Overview</span>
             </h1>
-            <p class="text-neutral-500 text-xs sm:text-sm mt-0.5">
-                Decision Support System • Campus Dining Performance & Evaluation Analytics
+            <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
+                Campus dining analytics, evaluation metrics, and decision support rankings.
             </p>
         </div>
 

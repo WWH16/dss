@@ -5,13 +5,13 @@
 <div class="max-w-7xl mx-auto space-y-6">
 
     {{-- ── 1. Page Header ─────────────────────────────────────────────── --}}
-    <div class="pb-2 border-b border-neutral-200/70">
+    <div class="pb-4 border-b border-neutral-200/80">
         <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
             <ion-icon name="receipt-outline" class="text-brand-700 text-2xl"></ion-icon>
-            Evaluations
+            <span>Evaluations</span>
         </h1>
-        <p class="text-xs sm:text-sm font-medium text-neutral-500 mt-0.5">
-            Comprehensive history of student feedback, stall ratings, and criteria breakdowns.
+        <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
+            Feedback history, criteria ratings, and student evaluation records across all food stalls.
         </p>
     </div>
 

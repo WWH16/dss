@@ -4,13 +4,13 @@
 <div class="max-w-6xl mx-auto space-y-6">
 
     {{-- ── 1. Page Header ─────────────────────────────────────────────────── --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-neutral-200/80">
+    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-200/80">
         <div>
             <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
                 <ion-icon name="storefront-outline" class="text-brand-700 text-2xl"></ion-icon>
-                <span>Manage Stalls &amp; Staff</span>
+                <span>Canteen Stalls</span>
             </h1>
-            <p class="text-xs text-neutral-500 mt-0.5">Add, rename, assign staff accounts, and monitor canteen food vendors across campus.</p>
+            <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">Directory, status controls, and vendor staff assignments across campus.</p>
         </div>
         <div class="flex items-center gap-2 self-start sm:self-auto">
             <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200/80">
