@@ -49,7 +49,7 @@
                 <span>Staff &amp; Administrators</span>
             </h1>
             <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
-                Directory and access controls for canteen vendor staff and system administrators.
+                Directory and access management for canteen staff and system administrators.
             </p>
         </div>
         <div class="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
@@ -63,14 +63,17 @@
 
     {{-- ── 2. Stat Metric Cards ────────────────────────────────────────── --}}
     @php
-        $adminCount = $users->where('role', 'admin')->count();
-        $staffCount = $users->where('role', 'staff')->count();
-        $assignedStaffCount = $users->where('role', 'staff')->whereNotNull('stall_id')->count();
-        $unassignedStaffCount = $users->where('role', 'staff')->whereNull('stall_id')->count();
+        $totalCount = $stats->total_count ?? $users->total();
+        $adminCount = $stats->admin_count ?? 0;
+        $staffCount = $stats->staff_count ?? 0;
+        $assignedStaffCount = $stats->assigned_staff_count ?? 0;
+        $unassignedStaffCount = $stats->unassigned_staff_count ?? 0;
+        $currentRole = request('role', 'all');
+        $hasFilters = request()->filled('q') || ($currentRole !== 'all') || (request()->filled('per_page') && request('per_page') != 10);
     @endphp
 
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {{-- Total Users Card --}}
+        {{-- Total Accounts Card --}}
         <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Accounts</span>
@@ -79,13 +82,13 @@
                 </div>
             </div>
             <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-2xl font-bold font-display text-neutral-900">{{ $users->count() }}</span>
-                <span class="text-xs text-neutral-500 font-medium">registered</span>
+                <span class="text-2xl font-bold font-display text-neutral-900">{{ $totalCount }}</span>
+                <span class="text-xs text-neutral-500 font-medium">accounts</span>
             </div>
-            <p class="text-[11px] text-neutral-400 mt-1">Authorized canteen staff and administrators</p>
+            <p class="text-[11px] text-neutral-400 mt-1">{{ $adminCount }} administrators · {{ $staffCount }} canteen staff</p>
         </div>
 
-        {{-- Administrators Card --}}
+        {{-- System Administrators Card --}}
         <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold text-brand-800 uppercase tracking-wider">System Administrators</span>
@@ -99,7 +102,7 @@
                     Full Access
                 </span>
             </div>
-            <p class="text-[11px] text-neutral-400 mt-1">Full access to stalls, evaluations, and settings</p>
+            <p class="text-[11px] text-neutral-400 mt-1">Full management of stalls, evaluations, and settings</p>
         </div>
 
         {{-- Canteen Staff Card --}}
@@ -123,52 +126,85 @@
                     </span>
                 @endif
             </div>
-            <p class="text-[11px] text-neutral-400 mt-1">{{ $assignedStaffCount }} assigned to food stalls</p>
+            <p class="text-[11px] text-neutral-400 mt-1">{{ $assignedStaffCount }} assigned to canteen stalls</p>
         </div>
     </div>
 
     {{-- ── 3. Search & Filter Bar ───────────────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs p-4 sm:p-5 space-y-3">
-        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-            {{-- Instant Search Input --}}
-            <div class="flex-1 relative">
-                <ion-icon name="search-outline" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
-                <input type="text" id="user-search-input" placeholder="Search accounts by name, email, or stall…"
-                    class="w-full pl-9 pr-9 py-2 bg-neutral-50/70 border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
-                <button type="button" id="user-search-clear" class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 hidden cursor-pointer" aria-label="Clear search">
-                    <ion-icon name="close-circle" class="text-base"></ion-icon>
-                </button>
-            </div>
+    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs p-4 sm:p-5">
+        <form id="user-filter-form" method="GET" action="{{ route('admin.users') }}" class="space-y-3">
+            @if(request('role') && request('role') !== 'all')
+                <input type="hidden" name="role" value="{{ request('role') }}">
+            @endif
+            @if(request('per_page'))
+                <input type="hidden" name="per_page" value="{{ request('per_page') }}">
+            @endif
 
-            {{-- Role Filter Pills --}}
-            <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 shrink-0 text-xs">
-                <button type="button" onclick="filterByRole('all')" id="filter-btn-all"
-                    class="px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer bg-neutral-900 text-white shadow-2xs">
-                    All ({{ $users->count() }})
-                </button>
-                <button type="button" onclick="filterByRole('admin')" id="filter-btn-admin"
-                    class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer bg-neutral-100 text-neutral-600 hover:bg-neutral-200">
-                    Admins ({{ $adminCount }})
-                </button>
-                <button type="button" onclick="filterByRole('staff')" id="filter-btn-staff"
-                    class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer bg-neutral-100 text-neutral-600 hover:bg-neutral-200">
-                    Staff ({{ $staffCount }})
-                </button>
-                @if($unassignedStaffCount > 0)
-                    <button type="button" onclick="filterByRole('unassigned')" id="filter-btn-unassigned"
-                        class="px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100 flex items-center gap-1">
-                        <ion-icon name="alert-circle" class="text-xs text-amber-600"></ion-icon>
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
+                {{-- Search Input --}}
+                <div class="flex-1 relative">
+                    <ion-icon name="search-outline" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
+                    <input type="text" name="q" id="user-search-input" value="{{ request('q') }}" placeholder="Search by name, email, or stall…"
+                        class="w-full pl-9 pr-9 py-2 bg-neutral-50/70 border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
+                    @if(request('q'))
+                        <a href="{{ route('admin.users', array_filter(['role' => $currentRole !== 'all' ? $currentRole : null, 'per_page' => request('per_page')])) }}"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Clear search">
+                            <ion-icon name="close-circle" class="text-base"></ion-icon>
+                        </a>
+                    @endif
+                </div>
+
+                {{-- Role Filter Pills --}}
+                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 shrink-0 text-xs">
+                    <a href="{{ route('admin.users', array_filter(['q' => request('q'), 'per_page' => request('per_page')])) }}"
+                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'all' ? 'font-bold bg-neutral-900 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                        All ({{ $totalCount }})
+                    </a>
+                    <a href="{{ route('admin.users', array_filter(['role' => 'admin', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
+                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'admin' ? 'font-bold bg-neutral-900 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                        Admins ({{ $adminCount }})
+                    </a>
+                    <a href="{{ route('admin.users', array_filter(['role' => 'staff', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
+                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'staff' ? 'font-bold bg-neutral-900 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                        Staff ({{ $staffCount }})
+                    </a>
+                    <a href="{{ route('admin.users', array_filter(['role' => 'unassigned', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
+                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'unassigned' ? 'font-bold bg-amber-500 text-white shadow-2xs' : ($unassignedStaffCount > 0 ? 'font-semibold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200') }} flex items-center gap-1">
+                        @if($unassignedStaffCount > 0 && $currentRole !== 'unassigned')
+                            <ion-icon name="alert-circle" class="text-xs text-amber-600"></ion-icon>
+                        @endif
                         <span>Unassigned ({{ $unassignedStaffCount }})</span>
-                    </button>
-                @endif
+                    </a>
+                </div>
             </div>
-        </div>
 
-        {{-- Active Result Count Indicator --}}
-        <div class="flex items-center justify-between text-[11px] text-neutral-500 pt-2 border-t border-neutral-100">
-            <span id="results-count-text">Showing {{ $users->count() }} of {{ $users->count() }} accounts</span>
-            <span class="text-neutral-400">Click on any account row to view quick actions</span>
-        </div>
+            {{-- Active Filter Chips (Only rendered when filters are active) --}}
+            @if($hasFilters)
+                <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-neutral-100 text-xs">
+                    <div class="flex flex-wrap items-center gap-1.5">
+                        <span class="text-neutral-400 font-medium text-[11px]">Active filters:</span>
+                        @if(request('q'))
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
+                                Search: "{{ request('q') }}"
+                            </span>
+                        @endif
+                        @if($currentRole !== 'all')
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 border border-brand-200 text-brand-800 text-[11px] font-semibold">
+                                Role: {{ ucfirst($currentRole) }}
+                            </span>
+                        @endif
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                            {{ $users->total() }} {{ Str::plural('result', $users->total()) }}
+                        </span>
+                    </div>
+
+                    <a href="{{ route('admin.users') }}" class="text-neutral-500 hover:text-neutral-900 font-semibold text-xs inline-flex items-center gap-1">
+                        <ion-icon name="close-circle-outline" class="text-sm"></ion-icon>
+                        Clear filters
+                    </a>
+                </div>
+            @endif
+        </form>
     </div>
 
     {{-- ── 4. Main Account Directory ───────────────────────────────────── --}}
@@ -178,17 +214,28 @@
                 <div class="w-14 h-14 rounded-full bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto mb-3">
                     <ion-icon name="people-outline" class="text-2xl"></ion-icon>
                 </div>
-                <h3 class="text-sm font-bold text-neutral-800">No staff or admin accounts found</h3>
-                <p class="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">Create your first administrator or staff account using the button above.</p>
-                <button type="button" onclick="openCreateUserModal()" class="btn btn-primary text-xs font-bold px-4 py-2 rounded-lg mt-4 inline-flex items-center gap-1.5">
-                    <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
-                    <span>Create Account</span>
-                </button>
+                <h3 class="text-sm font-bold text-neutral-800">
+                    {{ $hasFilters ? 'No accounts found' : 'No staff or admin accounts yet' }}
+                </h3>
+                <p class="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+                    {{ $hasFilters ? 'No accounts matched your search or role filters. Try adjusting your search query.' : 'Get started by creating your first administrator or staff account.' }}
+                </p>
+                @if($hasFilters)
+                    <a href="{{ route('admin.users') }}" class="btn btn-primary btn-sm text-xs font-bold px-4 py-2 rounded-lg mt-4 inline-flex items-center gap-1.5 shadow-2xs">
+                        <ion-icon name="refresh-outline" class="text-sm"></ion-icon>
+                        <span>Reset Filters</span>
+                    </a>
+                @else
+                    <button type="button" onclick="openCreateUserModal()" class="btn btn-primary text-xs font-bold px-4 py-2 rounded-lg mt-4 inline-flex items-center gap-1.5 shadow-2xs">
+                        <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
+                        <span>Create Account</span>
+                    </button>
+                @endif
             </div>
         @else
-            {{-- Desktop Table View --}}
-            <div class="hidden md:block overflow-x-auto">
-                <table class="w-full text-left border-collapse">
+            <div id="users-directory-container" class="overflow-x-auto">
+                {{-- Desktop Table View --}}
+                <table id="users-desktop-table" class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="border-b border-neutral-200/70 bg-neutral-50/75">
                             <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Account</th>
@@ -254,9 +301,9 @@
                                 {{-- Stall Assignment Column --}}
                                 <td class="px-5 py-3.5">
                                     @if($isAdmin)
-                                        <span class="text-neutral-400 text-xs font-medium flex items-center gap-1">
-                                            <ion-icon name="lock-closed-outline" class="text-xs text-neutral-300"></ion-icon>
-                                            <span>All Campus Stalls</span>
+                                        <span class="text-neutral-400 text-xs font-medium flex items-center gap-1.5">
+                                            <ion-icon name="globe-outline" class="text-xs text-neutral-400"></ion-icon>
+                                            <span>System-wide</span>
                                         </span>
                                     @elseif($isAssigned)
                                         <div class="flex items-center gap-1.5 text-xs font-semibold text-neutral-800">
@@ -275,9 +322,6 @@
                                 <td class="px-5 py-3.5">
                                     <span class="text-xs text-neutral-600 font-medium">
                                         {{ \Carbon\Carbon::parse($u->created_at)->format('M d, Y') }}
-                                    </span>
-                                    <span class="block text-[10px] text-neutral-400 font-normal">
-                                        {{ \Carbon\Carbon::parse($u->created_at)->diffForHumans() }}
                                     </span>
                                 </td>
 
@@ -299,8 +343,8 @@
                                                 <span>Delete</span>
                                             </button>
                                         @else
-                                            <span class="inline-flex items-center px-2.5 py-1.5 text-xs text-neutral-400 italic">
-                                                Protected
+                                            <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-neutral-100 text-neutral-500">
+                                                Current User
                                             </span>
                                         @endif
                                     </div>
@@ -309,10 +353,9 @@
                         @endforeach
                     </tbody>
                 </table>
-            </div>
 
-            {{-- Mobile Card List View --}}
-            <div class="md:hidden divide-y divide-neutral-100" id="users-mobile-list">
+                {{-- Mobile Card List View --}}
+                <div class="md:hidden divide-y divide-neutral-100" id="users-mobile-list">
                 @foreach($users as $u)
                     @php
                         $isCurrentUser = $u->id === Auth::id();
@@ -357,9 +400,9 @@
 
                         {{-- Stall Details for Mobile --}}
                         <div class="flex items-center justify-between text-xs pt-2 border-t border-neutral-100 text-neutral-600">
-                            <span class="text-[11px] text-neutral-400 font-semibold uppercase">Assignment:</span>
+                            <span class="text-[11px] text-neutral-400 font-semibold">Assignment:</span>
                             @if($isAdmin)
-                                <span class="font-medium text-neutral-500">All Stalls</span>
+                                <span class="font-medium text-neutral-500">System-wide</span>
                             @elseif($isAssigned)
                                 <span class="font-bold text-neutral-800 flex items-center gap-1 truncate max-w-[180px]">
                                     <ion-icon name="storefront" class="text-brand-700 text-xs"></ion-icon>
@@ -389,18 +432,78 @@
                         </div>
                     </div>
                 @endforeach
+                </div>
             </div>
 
-            {{-- No Results from Search Filter --}}
-            <div id="no-search-results" class="hidden p-12 text-center">
-                <div class="w-12 h-12 rounded-full bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto mb-2">
-                    <ion-icon name="search-outline" class="text-xl"></ion-icon>
+            {{-- ── Pagination Footer Bar ───────────────────────────────── --}}
+            <div class="px-5 py-4 bg-neutral-50/70 border-t border-neutral-200/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex items-center gap-3 text-xs text-neutral-500 font-medium order-2 sm:order-1">
+                    <span>
+                        Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $users->firstItem() ?? 0 }}</strong> to <strong class="text-neutral-900 font-bold tabular-nums">{{ $users->lastItem() ?? 0 }}</strong> of <strong class="text-neutral-900 font-bold tabular-nums">{{ $users->total() }}</strong> accounts
+                    </span>
+
+                    {{-- Per Page Selector --}}
+                    <div class="flex items-center gap-1.5 border-l border-neutral-200 pl-3">
+                        <label for="per_page_select" class="text-[11px] font-bold text-neutral-400 uppercase">Per Page</label>
+                        <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
+                            @foreach([10, 25, 50] as $size)
+                                <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" {{ $users->perPage() == $size ? 'selected' : '' }}>
+                                    {{ $size }}
+                                </option>
+                            @endforeach
+                        </select>
+                    </div>
                 </div>
-                <p class="text-sm font-bold text-neutral-700">No matching accounts found</p>
-                <p class="text-xs text-neutral-400 mt-0.5">Try searching with a different name, email, or role filter.</p>
-                <button type="button" onclick="resetFilters()" class="btn btn-ghost btn-sm text-xs mt-3 border border-neutral-200">
-                    Reset Filter
-                </button>
+
+                {{-- Pagination Controls --}}
+                <div class="flex items-center gap-1 order-1 sm:order-2">
+                    {{-- Previous Page Link --}}
+                    @if($users->onFirstPage())
+                        <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                            <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
+                            Previous
+                        </span>
+                    @else
+                        <a href="{{ $users->previousPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                            <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
+                            Previous
+                        </a>
+                    @endif
+
+                    {{-- Pagination Elements --}}
+                    <div class="hidden sm:flex items-center gap-1">
+                        @if($users->hasPages())
+                            @foreach($users->getUrlRange(max(1, $users->currentPage() - 2), min($users->lastPage(), $users->currentPage() + 2)) as $page => $url)
+                                @if($page == $users->currentPage())
+                                    <span class="w-8 h-8 rounded-lg bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                                        {{ $page }}
+                                    </span>
+                                @else
+                                    <a href="{{ $url }}" class="w-8 h-8 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs flex items-center justify-center transition-colors">
+                                        {{ $page }}
+                                    </a>
+                                @endif
+                            @endforeach
+                        @else
+                            <span class="w-8 h-8 rounded-lg bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                                1
+                            </span>
+                        @endif
+                    </div>
+
+                    {{-- Next Page Link --}}
+                    @if($users->hasMorePages())
+                        <a href="{{ $users->nextPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                            Next
+                            <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
+                        </a>
+                    @else
+                        <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                            Next
+                            <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
+                        </span>
+                    @endif
+                </div>
             </div>
         @endif
     </div>
@@ -421,7 +524,7 @@
                 </div>
                 <div>
                     <h3 id="create-modal-title" class="text-base font-bold font-display text-neutral-900 leading-tight">Create New Account</h3>
-                    <p class="text-[11px] text-neutral-500">Add an administrator or canteen stall staff member</p>
+                    <p class="text-[11px] text-neutral-500">Add a new administrator or canteen staff member</p>
                 </div>
             </div>
             <button type="button" onclick="closeCreateUserModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors p-1" aria-label="Close">
@@ -443,7 +546,7 @@
                             <span class="text-xs font-bold text-neutral-900">Administrator</span>
                             <input type="radio" name="role" value="admin" checked onchange="toggleCreateRole('admin')" class="accent-brand-600">
                         </div>
-                        <p class="text-[10px] text-neutral-500 leading-tight">Full access to algorithms, stalls, scores, and users.</p>
+                        <p class="text-[10px] text-neutral-500 leading-tight">Full access to stalls, evaluations, and system settings.</p>
                     </label>
 
                     <label class="relative flex flex-col p-3 border rounded-lg cursor-pointer transition-all role-card" id="create-role-staff-card">
@@ -451,7 +554,7 @@
                             <span class="text-xs font-bold text-neutral-900">Canteen Staff</span>
                             <input type="radio" name="role" value="staff" onchange="toggleCreateRole('staff')" class="accent-brand-600">
                         </div>
-                        <p class="text-[10px] text-neutral-500 leading-tight">Views feedback and rankings for their assigned food stall.</p>
+                        <p class="text-[10px] text-neutral-500 leading-tight">Access to feedback, analytics, and ratings for assigned stall.</p>
                     </label>
                 </div>
             </div>
@@ -468,7 +571,6 @@
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
                     @endforeach
                 </select>
-                <p class="text-[10px] text-neutral-500">You can also reassign or attach stall staff later under Manage Stalls.</p>
             </div>
 
             {{-- Full Name --}}
@@ -505,7 +607,7 @@
                 </div>
                 <div>
                     <label for="create_password_confirmation" class="block text-[11px] font-bold text-neutral-700 uppercase tracking-wider mb-1">
-                        Confirm <span class="text-red-500">*</span>
+                        Confirm Password <span class="text-red-500">*</span>
                     </label>
                     <div class="relative">
                         <input type="password" id="create_password_confirmation" name="password_confirmation" placeholder="••••••••" required
@@ -516,7 +618,7 @@
                     </div>
                 </div>
             </div>
-            <p class="text-[10px] text-neutral-400 leading-tight">Must contain at least 8 characters, mixed case letters, numbers, and symbols.</p>
+            <p class="text-[10px] text-neutral-400">Minimum 8 characters with letters, numbers, and symbols.</p>
 
             {{-- Form Buttons --}}
             <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
@@ -546,7 +648,7 @@
                 </div>
                 <div>
                     <h3 id="edit-modal-title" class="text-base font-bold font-display text-neutral-900 leading-tight">Edit Account</h3>
-                    <p class="text-[11px] text-neutral-500">Update account details, role, or credentials</p>
+                    <p class="text-[11px] text-neutral-500">Update account details, role, or password</p>
                 </div>
             </div>
             <button type="button" onclick="closeEditUserModal()" class="text-neutral-400 hover:text-neutral-600 transition-colors p-1" aria-label="Close">
@@ -570,7 +672,7 @@
                 </select>
                 <p id="edit-self-warning" class="hidden text-[10px] text-amber-700 mt-1 font-medium flex items-center gap-1">
                     <ion-icon name="information-circle" class="text-xs"></ion-icon>
-                    You are editing your own logged-in account. You cannot remove your administrator privileges.
+                    You are editing your own account. Administrator role cannot be changed.
                 </p>
             </div>
 
@@ -614,7 +716,7 @@
                 </button>
 
                 <div id="edit-password-fields" class="hidden space-y-3 mt-3 p-3 bg-neutral-50 rounded-lg border border-neutral-200">
-                    <p class="text-[10px] text-neutral-500">Leave blank to keep existing password.</p>
+                    <p class="text-[10px] text-neutral-400">Leave blank to keep existing password.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
                             <label for="edit_password" class="block text-[10px] font-bold text-neutral-600 uppercase mb-1">New Password</label>
@@ -660,7 +762,7 @@
         </div>
 
         <div class="p-3 bg-red-50/70 border border-red-200/80 rounded-lg text-[11px] text-red-800 leading-relaxed mb-4">
-            This will permanently revoke all access permissions for this user. This action cannot be undone.
+            This will permanently delete the account and revoke all access. This action cannot be undone.
         </div>
 
         <form id="delete-user-form" method="POST" action="">
@@ -682,100 +784,23 @@
 
 {{-- ── 8. Client-Side Polish & Filtering Script ───────────────────────── --}}
 <script>
-    // ── Instant Real-time Filter & Search ─────────────────────────────────
-    var currentRoleFilter = 'all';
-    var userRows = document.querySelectorAll('.user-row');
+    // ── Search & Filter Form Helpers ─────────────────────────────────────
     var searchInput = document.getElementById('user-search-input');
-    var clearSearchBtn = document.getElementById('user-search-clear');
-    var noResultsDiv = document.getElementById('no-search-results');
-    var countText = document.getElementById('results-count-text');
-    var totalUsersCount = {{ $users->count() }};
+    var filterForm = document.getElementById('user-filter-form');
+    var searchTimeout = null;
 
-    function applyUserFilters() {
-        var query = searchInput ? searchInput.value.toLowerCase().trim() : '';
-        var visibleCount = 0;
-
-        if (clearSearchBtn) {
-            clearSearchBtn.style.display = query.length > 0 ? 'block' : 'none';
-        }
-
-        userRows.forEach(function(row) {
-            var name = row.getAttribute('data-name') || '';
-            var email = row.getAttribute('data-email') || '';
-            var role = row.getAttribute('data-role') || '';
-            var stall = row.getAttribute('data-stall') || '';
-            var isAssigned = row.getAttribute('data-assigned') === '1';
-
-            var matchesSearch = query === '' || name.includes(query) || email.includes(query) || stall.includes(query);
-            var matchesRole = true;
-
-            if (currentRoleFilter === 'admin') {
-                matchesRole = role === 'admin';
-            } else if (currentRoleFilter === 'staff') {
-                matchesRole = role === 'staff';
-            } else if (currentRoleFilter === 'unassigned') {
-                matchesRole = role === 'staff' && !isAssigned;
-            }
-
-            if (matchesSearch && matchesRole) {
-                row.style.display = '';
-                visibleCount++;
-            } else {
-                row.style.display = 'none';
+    if (searchInput && filterForm) {
+        searchInput.addEventListener('input', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(function() {
+                filterForm.submit();
+            }, 450);
+        });
+        searchInput.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                window.location.href = "{{ route('admin.users') }}";
             }
         });
-
-        if (noResultsDiv) {
-            noResultsDiv.style.display = visibleCount === 0 ? 'block' : 'none';
-        }
-
-        if (countText) {
-            countText.textContent = 'Showing ' + visibleCount + ' of ' + totalUsersCount + ' accounts';
-        }
-    }
-
-    if (searchInput) {
-        searchInput.addEventListener('input', applyUserFilters);
-    }
-
-    if (clearSearchBtn) {
-        clearSearchBtn.addEventListener('click', function() {
-            searchInput.value = '';
-            applyUserFilters();
-            searchInput.focus();
-        });
-    }
-
-    function filterByRole(role) {
-        currentRoleFilter = role;
-
-        var allButtons = [
-            document.getElementById('filter-btn-all'),
-            document.getElementById('filter-btn-admin'),
-            document.getElementById('filter-btn-staff'),
-            document.getElementById('filter-btn-unassigned')
-        ];
-
-        allButtons.forEach(function(btn) {
-            if (!btn) return;
-            btn.className = "px-3 py-1.5 rounded-lg font-semibold transition-all cursor-pointer bg-neutral-100 text-neutral-600 hover:bg-neutral-200";
-        });
-
-        var activeBtn = document.getElementById('filter-btn-' + role);
-        if (activeBtn) {
-            if (role === 'unassigned') {
-                activeBtn.className = "px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer bg-amber-500 text-white shadow-2xs flex items-center gap-1";
-            } else {
-                activeBtn.className = "px-3 py-1.5 rounded-lg font-bold transition-all cursor-pointer bg-neutral-900 text-white shadow-2xs";
-            }
-        }
-
-        applyUserFilters();
-    }
-
-    function resetFilters() {
-        if (searchInput) searchInput.value = '';
-        filterByRole('all');
     }
 
     // ── Create Modal Controls ─────────────────────────────────────────────

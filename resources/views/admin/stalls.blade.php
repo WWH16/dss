@@ -191,7 +191,7 @@
                 <div id="stalls-list-container" class="divide-y divide-neutral-100">
                     @forelse($stalls as $stall)
                         @php
-                            $stallScore = $results->firstWhere('name', $stall->name);
+                            $stallScore = $results->get($stall->id);
                             $avgRating = null;
                             if ($stallScore) {
                                 $avgRating = ($stallScore->cleanliness + $stallScore->service + $stallScore->taste + $stallScore->price) / 4;

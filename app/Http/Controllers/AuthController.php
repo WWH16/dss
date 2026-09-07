@@ -12,14 +12,11 @@ class AuthController extends Controller
 {
     public function showRegister()
     {
-        $stalls = \Illuminate\Support\Facades\DB::table('stalls')->where('is_active', true)->orderBy('name')->get();
-
         return view('auth.login', [
             'activeTab' => 'register',
             'selectedRole' => 'student',
             'error' => session('error'),
             'success' => session('success'),
-            'stalls' => $stalls,
         ]);
     }
 

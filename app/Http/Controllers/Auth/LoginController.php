@@ -22,14 +22,12 @@ class LoginController extends Controller
         }
 
         $activeTab = $request->get('tab', 'login');
-        $stalls = \Illuminate\Support\Facades\DB::table('stalls')->where('is_active', true)->orderBy('name')->get();
 
         return view('auth.login', compact(
             'error',
             'success',
             'selectedRole',
-            'activeTab',
-            'stalls'
+            'activeTab'
         ));
     }
 

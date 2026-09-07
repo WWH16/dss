@@ -41,19 +41,12 @@ class StaffController extends Controller
             ]);
         }
 
-        // 2. Metrics for the assigned stall ONLY
-        $totalEvaluations = DB::table('stall_evaluations')
-            ->where('stall_id', $stall->id)
-            ->count();
-
-        $uniqueStudents = DB::table('stall_evaluations')
-            ->where('stall_id', $stall->id)
-            ->distinct('student_id')
-            ->count('student_id');
-
-        $averages = DB::table('stall_evaluations')
+        // 2. Metrics for the assigned stall ONLY (consolidated into 1 single aggregate query)
+        $metrics = DB::table('stall_evaluations')
             ->where('stall_id', $stall->id)
             ->selectRaw('
+                COUNT(*) as total_evaluations,
+                COUNT(DISTINCT student_id) as unique_students,
                 AVG(cleanliness) as cleanliness,
                 AVG(service) as service,
                 AVG(taste) as taste,
@@ -61,6 +54,10 @@ class StaffController extends Controller
                 COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall
             ')
             ->first();
+
+        $totalEvaluations = $metrics->total_evaluations ?? 0;
+        $uniqueStudents = $metrics->unique_students ?? 0;
+        $averages = $metrics;
 
         // 3. Compute this stall's current campus rank without exposing details of other stalls
         $rankedStalls = DB::table('stalls')
@@ -106,9 +103,11 @@ class StaffController extends Controller
             ->first();
 
         // 6. Evaluation Activity Timeline trend with Month & Year filtering
+        $driver = DB::connection()->getDriverName();
+        $yearSql = $driver === 'sqlite' ? "DISTINCT strftime('%Y', created_at) as year" : "DISTINCT YEAR(created_at) as year";
         $availableYears = DB::table('stall_evaluations')
             ->where('stall_id', $stall->id)
-            ->selectRaw('DISTINCT EXTRACT(YEAR FROM created_at) as year')
+            ->selectRaw($yearSql)
             ->orderByDesc('year')
             ->pluck('year')
             ->map(fn ($y) => (int) $y)
@@ -128,11 +127,13 @@ class StaffController extends Controller
 
         if ($selectedMonth === 'all') {
             // Full Year: Monthly aggregations (Jan - Dec)
+            $monthSql = $driver === 'sqlite' ? "strftime('%m', created_at) as m, COUNT(*) as count" : "MONTH(created_at) as m, COUNT(*) as count";
+            $monthGroup = $driver === 'sqlite' ? "strftime('%m', created_at)" : "MONTH(created_at)";
             $evalTrend = DB::table('stall_evaluations')
                 ->where('stall_id', $stall->id)
-                ->selectRaw('EXTRACT(MONTH FROM created_at) as m, COUNT(*) as count')
+                ->selectRaw($monthSql)
                 ->whereYear('created_at', $selectedYear)
-                ->groupByRaw('EXTRACT(MONTH FROM created_at)')
+                ->groupByRaw($monthGroup)
                 ->get()
                 ->keyBy(fn ($row) => (int) $row->m);
 
@@ -146,12 +147,14 @@ class StaffController extends Controller
             $m = (int)$selectedMonth;
             $daysInMonth = (int) date('t', mktime(0, 0, 0, $m, 1, $selectedYear));
 
+            $daySql = $driver === 'sqlite' ? "strftime('%d', created_at) as d, COUNT(*) as count" : "DAY(created_at) as d, COUNT(*) as count";
+            $dayGroup = $driver === 'sqlite' ? "strftime('%d', created_at)" : "DAY(created_at)";
             $evalTrend = DB::table('stall_evaluations')
                 ->where('stall_id', $stall->id)
-                ->selectRaw('EXTRACT(DAY FROM created_at) as d, COUNT(*) as count')
+                ->selectRaw($daySql)
                 ->whereYear('created_at', $selectedYear)
                 ->whereMonth('created_at', $m)
-                ->groupByRaw('EXTRACT(DAY FROM created_at)')
+                ->groupByRaw($dayGroup)
                 ->get()
                 ->keyBy(fn ($row) => (int) $row->d);
 

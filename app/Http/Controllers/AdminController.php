@@ -26,11 +26,6 @@ class AdminController extends Controller
 
         $evaluationCount = DB::table('stall_evaluations')->count();
 
-        // All stalls
-        $stalls = DB::table('stalls')
-            ->orderBy('name')
-            ->get();
-
         // Average rating per stall (Ranked by overall composite score)
         $results = DB::table('stall_evaluations')
             ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
@@ -68,8 +63,10 @@ class AdminController extends Controller
         })->values();
 
         // Evaluation Activity Trend (with Month & Year filtering)
+        $driver = DB::connection()->getDriverName();
+        $yearSql = $driver === 'sqlite' ? "DISTINCT strftime('%Y', created_at) as year" : "DISTINCT YEAR(created_at) as year";
         $availableYears = DB::table('stall_evaluations')
-            ->selectRaw('DISTINCT EXTRACT(YEAR FROM created_at) as year')
+            ->selectRaw($yearSql)
             ->orderByDesc('year')
             ->pluck('year')
             ->map(fn ($y) => (int) $y)
@@ -89,10 +86,12 @@ class AdminController extends Controller
 
         if ($selectedMonth === 'all') {
             // Full Year: Monthly aggregations (Jan - Dec)
+            $monthSql = $driver === 'sqlite' ? "strftime('%m', created_at) as m, COUNT(*) as count" : "MONTH(created_at) as m, COUNT(*) as count";
+            $monthGroup = $driver === 'sqlite' ? "strftime('%m', created_at)" : "MONTH(created_at)";
             $evalTrend = DB::table('stall_evaluations')
-                ->selectRaw('EXTRACT(MONTH FROM created_at) as m, COUNT(*) as count')
+                ->selectRaw($monthSql)
                 ->whereYear('created_at', $selectedYear)
-                ->groupByRaw('EXTRACT(MONTH FROM created_at)')
+                ->groupByRaw($monthGroup)
                 ->get()
                 ->keyBy(fn ($row) => (int) $row->m);
 
@@ -106,11 +105,13 @@ class AdminController extends Controller
             $m = (int)$selectedMonth;
             $daysInMonth = (int) date('t', mktime(0, 0, 0, $m, 1, $selectedYear));
 
+            $daySql = $driver === 'sqlite' ? "strftime('%d', created_at) as d, COUNT(*) as count" : "DAY(created_at) as d, COUNT(*) as count";
+            $dayGroup = $driver === 'sqlite' ? "strftime('%d', created_at)" : "DAY(created_at)";
             $evalTrend = DB::table('stall_evaluations')
-                ->selectRaw('EXTRACT(DAY FROM created_at) as d, COUNT(*) as count')
+                ->selectRaw($daySql)
                 ->whereYear('created_at', $selectedYear)
                 ->whereMonth('created_at', $m)
-                ->groupByRaw('EXTRACT(DAY FROM created_at)')
+                ->groupByRaw($dayGroup)
                 ->get()
                 ->keyBy(fn ($row) => (int) $row->d);
 
@@ -140,12 +141,13 @@ class AdminController extends Controller
         }
         $activityTotalCount = array_sum($trendCounts);
 
-        // Evaluations per stall (for Pie Chart)
-        $pieChartData = DB::table('stall_evaluations')
-            ->join('stalls', 'stalls.id', '=', 'stall_evaluations.stall_id')
-            ->select('stalls.name', DB::raw('COUNT(*) as count'))
-            ->groupBy('stalls.name')
-            ->get();
+        // Evaluations per stall (for Pie Chart - derived from $results in-memory to eliminate redundant query)
+        $pieChartData = $results->map(function ($row) {
+            return (object) [
+                'name'  => $row->name,
+                'count' => (int) $row->eval_count,
+            ];
+        });
 
         // Recent 5 evaluations
         $recentEvaluations = DB::table('stall_evaluations')
@@ -169,7 +171,6 @@ class AdminController extends Controller
             'studentCount',
             'stallCount',
             'evaluationCount',
-            'stalls',
             'results',
             'topStall',
             'campusHealth',
@@ -211,16 +212,16 @@ class AdminController extends Controller
         $stallStaffMap = $staffUsers->whereNotNull('stall_id')->groupBy('stall_id');
 
         $results = DB::table('stall_evaluations')
-            ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
             ->select(
-                'stalls.name',
+                'stall_id',
                 DB::raw('AVG(cleanliness) as cleanliness'),
                 DB::raw('AVG(service) as service'),
                 DB::raw('AVG(taste) as taste'),
                 DB::raw('AVG(price) as price')
             )
-            ->groupBy('stalls.name')
-            ->get();
+            ->groupBy('stall_id')
+            ->get()
+            ->keyBy('stall_id');
 
         return view('admin.stalls', compact('stalls', 'staffUsers', 'unassignedStaff', 'stallStaffMap', 'results'));
     }
@@ -383,14 +384,8 @@ class AdminController extends Controller
             ['code' => 'CAS',    'name' => 'Arts & Sciences (CAS)', 'courses' => ['BA Comm', 'BS Psych', 'BS Bio']],
         ];
 
-        // Available distinct courses from DB or standard list
-        $dbCourses = DB::table('users')
-            ->where('role', 'student')
-            ->whereNotNull('course')
-            ->where('course', '!=', '')
-            ->distinct()
-            ->pluck('course')
-            ->toArray();
+        // Available distinct courses derived from $courseCounts (eliminates redundant DB query)
+        $dbCourses = $courseCounts->keys()->filter(fn ($c) => trim((string)$c) !== '')->values()->toArray();
         $courseOptions = array_values(array_unique(array_merge(['BSIT', 'BSCS', 'BSHM', 'BSBA', 'BSED', 'BEED', 'BSCRIM'], $dbCourses)));
 
         $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
@@ -524,6 +519,18 @@ class AdminController extends Controller
     {
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
+        // Total system counts for stat cards & filter pill badges
+        $stats = DB::table('users')
+            ->whereIn('role', ['admin', 'staff'])
+            ->selectRaw("
+                COUNT(*) as total_count,
+                COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_count,
+                COUNT(CASE WHEN role = 'staff' THEN 1 END) as staff_count,
+                COUNT(CASE WHEN role = 'staff' AND stall_id IS NOT NULL THEN 1 END) as assigned_staff_count,
+                COUNT(CASE WHEN role = 'staff' AND stall_id IS NULL THEN 1 END) as unassigned_staff_count
+            ")
+            ->first();
+
         $query = DB::table('users')
             ->leftJoin('stalls', 'stalls.id', '=', 'users.stall_id')
             ->select(
@@ -538,26 +545,36 @@ class AdminController extends Controller
             ->whereIn('users.role', ['admin', 'staff']);
 
         if ($request->filled('q')) {
-            $q = '%' . trim($request->q) . '%';
+            $q = '%' . strtolower(trim($request->q)) . '%';
             $query->where(function ($sub) use ($q) {
-                $sub->where('users.name', 'like', $q)
-                    ->orWhere('users.email', 'like', $q)
-                    ->orWhere('stalls.name', 'like', $q);
+                $sub->whereRaw('LOWER(users.name) LIKE ?', [$q])
+                    ->orWhereRaw('LOWER(users.email) LIKE ?', [$q])
+                    ->orWhereRaw('LOWER(stalls.name) LIKE ?', [$q]);
             });
         }
 
-        if ($request->filled('role_filter') && in_array($request->role_filter, ['admin', 'staff'])) {
-            $query->where('users.role', $request->role_filter);
+        $role = $request->get('role', $request->get('role_filter', 'all'));
+        if ($role === 'admin') {
+            $query->where('users.role', 'admin');
+        } elseif ($role === 'staff') {
+            $query->where('users.role', 'staff');
+        } elseif ($role === 'unassigned') {
+            $query->where('users.role', 'staff')->whereNull('users.stall_id');
         }
 
-        $users = $query->orderByDesc('users.created_at')->get();
+        $perPage = (int) $request->get('per_page', 10);
+        if (!in_array($perPage, [10, 25, 50, 100])) {
+            $perPage = 10;
+        }
+
+        $users = $query->orderByDesc('users.created_at')->paginate($perPage)->withQueryString();
 
         $stalls = DB::table('stalls')
             ->select('id', 'name', 'is_active')
             ->orderBy('name')
             ->get();
 
-        return view('admin.users', compact('users', 'stalls'));
+        return view('admin.users', compact('users', 'stalls', 'stats'));
     }
 
     public function createUser(Request $request)
