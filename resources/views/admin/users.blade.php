@@ -44,11 +44,10 @@
     {{-- ── 1. Page Header & Primary Actions ────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200/80">
         <div>
-            <div class="flex items-center gap-2 text-[11px] font-semibold text-brand-700 uppercase tracking-wider mb-1">
-                <ion-icon name="people" class="text-sm"></ion-icon>
-                <span>Account Management</span>
-            </div>
-            <h1 class="text-2xl font-display font-bold text-neutral-900 tracking-tight">Staff &amp; Administrators</h1>
+            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
+                <ion-icon name="shield-checkmark-outline" class="text-brand-700 text-2xl"></ion-icon>
+                <span>Staff &amp; Administrators</span>
+            </h1>
             <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
                 Manage administrator and canteen staff accounts. Students create their own accounts on the register page.
             </p>

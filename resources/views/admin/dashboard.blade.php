@@ -21,7 +21,8 @@
     {{-- ── 1. Page Header with Quick Actions ────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-2 border-b border-neutral-200/70">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2">
+            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
+                <ion-icon name="grid-outline" class="text-brand-700 text-2xl"></ion-icon>
                 <span>Overview</span>
             </h1>
             <p class="text-neutral-500 text-xs sm:text-sm mt-0.5">
