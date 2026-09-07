@@ -197,6 +197,10 @@
                     <ion-icon name="people-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Students
                 </a>
+                <a href="{{ route('admin.users') }}" class="sidebar-link {{ request()->routeIs('admin.users') ? 'active' : '' }}">
+                    <ion-icon name="shield-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                    Users
+                </a>
             @elseif($user && $user->role === 'staff')
                 @php
                     $isStaffAssigned = !empty($user->stall_id);

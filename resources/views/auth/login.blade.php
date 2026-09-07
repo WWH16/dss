@@ -135,7 +135,6 @@
                     <select id="register_role" name="role" class="w-full px-4 py-2.5 bg-white border @error('role') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800" onchange="toggleRegisterFields()">
                         <option value="student" {{ old('role') == 'student' ? 'selected' : '' }}>Student</option>
                         <option value="staff" {{ old('role') == 'staff' ? 'selected' : '' }}>Staff</option>
-                        <option value="admin" {{ old('role') == 'admin' ? 'selected' : '' }}>Admin</option>
                     </select>
                     @error('role')
                         <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>

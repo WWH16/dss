@@ -124,6 +124,19 @@ Route::middleware('auth')->group(function () {
         [AdminController::class, 'unassignStaff'])
         ->name('admin.staff.unassign');
 
+    // Internal User Management (Admin & Staff accounts)
+    Route::get('/admin/users',
+        [AdminController::class, 'users'])
+        ->name('admin.users');
+
+    Route::post('/admin/users',
+        [AdminController::class, 'createUser'])
+        ->name('admin.users.create');
+
+    Route::delete('/admin/users/{id}',
+        [AdminController::class, 'deleteUser'])
+        ->name('admin.users.delete');
+
 });
 /*
 |--------------------------------------------------------------------------

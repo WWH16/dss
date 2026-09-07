@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules\Password;
+use App\Models\User;
 
 class AdminController extends Controller
 {
@@ -513,5 +516,82 @@ class AdminController extends Controller
         ]);
 
         return redirect()->back()->with('success', 'Staff member unassigned from stall successfully.');
+    }
+
+    // ─── Internal User Management ──────────────────────────────────────
+
+    public function users(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $query = DB::table('users')
+            ->select('id', 'name', 'email', 'role', 'stall_id', 'course', 'year_level', 'student_number', 'created_at')
+            ->whereIn('role', ['admin', 'staff']);
+
+        if ($request->filled('q')) {
+            $q = '%' . trim($request->q) . '%';
+            $query->where(function ($sub) use ($q) {
+                $sub->where('name', 'like', $q)
+                    ->orWhere('email', 'like', $q);
+            });
+        }
+
+        if ($request->filled('role_filter') && in_array($request->role_filter, ['admin', 'staff'])) {
+            $query->where('role', $request->role_filter);
+        }
+
+        $users = $query->orderByDesc('created_at')->get();
+
+        $stalls = DB::table('stalls')->select('id', 'name')->orderBy('name')->get();
+
+        return view('admin.users', compact('users', 'stalls'));
+    }
+
+    public function createUser(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $request->validate([
+            'role'     => 'required|in:admin,staff',
+            'name'     => 'required|string|max:255',
+            'email'    => 'required|email|max:255|unique:users,email',
+            'password' => [
+                'required',
+                'confirmed',
+                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
+            ],
+        ]);
+
+        User::create([
+            'role'              => $request->role,
+            'name'              => trim($request->name),
+            'email'             => trim($request->email),
+            'password'          => Hash::make($request->password),
+            'email_verified_at' => now(),
+        ]);
+
+        $label = ucfirst($request->role);
+        return redirect()->back()->with('success', "{$label} account created successfully!");
+    }
+
+    public function deleteUser($id)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
+        $target = User::findOrFail($id);
+
+        // Prevent self-deletion
+        if ($target->id === Auth::id()) {
+            return redirect()->back()->with('error', 'You cannot delete your own account.');
+        }
+
+        // Only allow deleting admin/staff from this page (students managed elsewhere)
+        if (!in_array($target->role, ['admin', 'staff'])) {
+            return redirect()->back()->with('error', 'Invalid operation.');
+        }
+
+        $target->delete();
+
+        return redirect()->back()->with('success', "{$target->name}'s account has been deleted.");
     }
 }
