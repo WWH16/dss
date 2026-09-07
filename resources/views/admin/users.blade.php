@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 @section('title', 'Staff & Admin Management | Admin — DSS')
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6">
 
     {{-- ── Flash Messages ──────────────────────────────────────────────── --}}
     @if(session('success'))

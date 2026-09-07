@@ -1,7 +1,7 @@
 @extends('layouts.dashboard')
 @section('title', 'Manage Stalls | Admin — DSS')
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="max-w-7xl mx-auto space-y-6">
 
     {{-- ── 1. Page Header ─────────────────────────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-neutral-200/80">
