@@ -17,7 +17,7 @@ use App\Http\Controllers\StaffController;
 | Public Pages
 |--------------------------------------------------------------------------
 */
-
+// Campus Canteen Decision Support System Web Routes
 Route::get('/', function () {
     return view('welcome');
 });
@@ -74,7 +74,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Submit Evaluation
     Route::post('/student/evaluation', [StudentEvaluationController::class, 'store'])
         ->name('student.evaluation.store');
-    
+
     Route::get('/evaluation', [StudentEvaluationController::class, 'index'])
     ->name('evaluation');
 
