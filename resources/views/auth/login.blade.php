@@ -44,7 +44,19 @@
     </div>
 
     @php
-        $isRegisterTab = ($activeTab ?? 'login') === 'register' || ($errors->any() && ($errors->has('name') || $errors->has('email') || $errors->has('student_number') || $errors->has('stall_id') || $errors->has('password') || $errors->has('course') || $errors->has('year_level')));
+        $isRegisterTab = old('active_tab') 
+            ? (old('active_tab') === 'register')
+            : (($activeTab ?? 'login') === 'register' || ($errors->any() && (
+                $errors->has('name') || 
+                $errors->has('email') || 
+                $errors->has('student_number') || 
+                $errors->has('stall_id') || 
+                $errors->has('password') || 
+                $errors->has('password_confirmation') || 
+                $errors->has('course') || 
+                $errors->has('year_level') || 
+                $errors->has('role')
+            )));
         $currentLoginRole = old('role', $selectedRole ?? 'student');
         $currentRegisterRole = old('role', ($selectedRole === 'admin' ? 'student' : ($selectedRole ?? 'student')));
     @endphp
@@ -64,15 +76,30 @@
         {{-- Laravel Errors/Success Alerts --}}
         @if($success)
             <div class="mb-4 p-4 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <ion-icon name="checkmark-circle" class="text-lg leading-none text-emerald-600"></ion-icon>
-                {{ $success }}
+                <ion-icon name="checkmark-circle" class="text-lg leading-none text-emerald-600 shrink-0"></ion-icon>
+                <span>{{ $success }}</span>
             </div>
         @endif
 
-        @if($error)
+        @if($errors->has('g_recaptcha_response'))
             <div class="mb-4 p-4 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600"></ion-icon>
-                {{ $error }}
+                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600 shrink-0"></ion-icon>
+                <span>{{ $errors->first('g_recaptcha_response') }}</span>
+            </div>
+        @endif
+
+        @php
+            $visibleFields = ['role', 'name', 'email', 'email_prefix', 'email_other', 'password', 'password_confirmation', 'course', 'year_level', 'student_number', 'g_recaptcha_response'];
+            $generalErrors = collect($errors->keys())->diff($visibleFields);
+        @endphp
+        @if($generalErrors->isNotEmpty())
+            <div class="mb-4 p-4 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
+                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600 shrink-0"></ion-icon>
+                <div class="space-y-0.5">
+                    @foreach($generalErrors as $errKey)
+                        <p>{{ $errors->first($errKey) }}</p>
+                    @endforeach
+                </div>
             </div>
         @endif
 
@@ -86,11 +113,12 @@
         <div id="login-form-block" style="{{ $isRegisterTab ? 'display: none;' : '' }}">
             <form action="{{ url('/login') }}" method="POST" class="space-y-4">
                 @csrf
+                <input type="hidden" name="active_tab" value="login">
 
                 <div>
                     <label for="login_role" class="block text-xs font-semibold text-neutral-700 mb-1.5">Role</label>
                     <div class="relative">
-                        <select id="login_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border border-neutral-300 rounded-[4px] text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleLoginFields()">
+                        <select id="login_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('role') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleLoginFields()">
                             <option value="student" {{ $currentLoginRole === 'student' ? 'selected' : '' }}>Student</option>
                             <option value="staff" {{ $currentLoginRole === 'staff' ? 'selected' : '' }}>Staff</option>
                             <option value="admin" {{ $currentLoginRole === 'admin' ? 'selected' : '' }}>Admin</option>
@@ -99,26 +127,40 @@
                             <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
                         </div>
                     </div>
+                    @error('role')
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div id="login_student_number_field" style="{{ $currentLoginRole === 'student' ? '' : 'display: none;' }}">
                     <label for="login_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                    <input type="text" id="login_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentLoginRole === 'student' ? 'required' : '' }}>
+                    <input type="text" id="login_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @if($error || $errors->has('student_number')) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentLoginRole === 'student' ? 'required' : '' }}>
+                    @error('student_number')
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div id="login_email_field" style="{{ $currentLoginRole === 'student' ? 'display: none;' : '' }}">
                     <label for="login_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
-                    <input type="email" id="login_email" name="email" value="{{ old('email') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username email" {{ $currentLoginRole !== 'student' ? 'required' : '' }}>
+                    <input type="email" id="login_email" name="email" value="{{ old('email') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @if($error || $errors->has('email')) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username email" {{ $currentLoginRole !== 'student' ? 'required' : '' }}>
+                    @error('email')
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                    @enderror
                 </div>
 
                 <div>
                     <label for="login_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password</label>
                     <div class="relative">
-                        <input type="password" id="login_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @if($error) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="current-password" required>
+                        <input type="password" id="login_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @if($error || $errors->has('password')) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="current-password" required>
                         <button type="button" onclick="togglePasswordVisibility('login_password', 'login_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
                             <ion-icon id="login_password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                         </button>
                     </div>
+                    @if($error)
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $error }}</p>
+                    @elseif($errors->has('password'))
+                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $errors->first('password') }}</p>
+                    @endif
                 </div>
 
                 <input type="hidden" name="g_recaptcha_response" id="login_g_recaptcha_response">
@@ -140,6 +182,7 @@
         <div id="register-form-block" style="{{ $isRegisterTab ? '' : 'display: none;' }}">
             <form method="POST" action="{{ url('/register') }}" class="space-y-4">
                 @csrf
+                <input type="hidden" name="active_tab" value="register">
 
                 <div>
                     <label for="register_role" class="block text-xs font-semibold text-neutral-700 mb-1.5">Role</label>
@@ -170,7 +213,7 @@
 
                     {{-- Student: split input (prefix + @isu.edu.ph locked) --}}
                     {{-- Student: split input with locked _cyn@isu.edu.ph suffix --}}
-                    <div id="register_email_student" style="{{ $currentRegisterRole === 'student' ? 'display: flex;' : 'display: none;' }}" class="rounded-[4px] overflow-hidden border @error('email') border-red-500 @else border-neutral-300 @enderror focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/15 transition-all">
+                    <div id="register_email_student" style="{{ $currentRegisterRole === 'student' ? 'display: flex;' : 'display: none;' }}" class="rounded-[4px] overflow-hidden border @error('email') border-red-500 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/15 @else border-neutral-300 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/15 @enderror transition-all">
                         <input
                             type="text"
                             id="register_email_prefix"
@@ -179,6 +222,7 @@
                             placeholder="yourname"
                             class="flex-1 min-w-0 px-4 py-2.5 text-sm font-medium text-neutral-800 placeholder:text-neutral-400 bg-white focus:outline-none"
                             autocomplete="off"
+                            {{ $currentRegisterRole === 'student' ? 'required' : '' }}
                         >
                         <span class="flex items-center px-3 bg-neutral-100 border-l border-neutral-300 text-sm font-semibold text-neutral-500 whitespace-nowrap select-none">
                             _cyn@isu.edu.ph
@@ -273,11 +317,19 @@
                 </div>
 
                 {{-- PASSWORDS --}}
+                @php
+                    $pwdErrors = $errors->get('password');
+                    $hasConfirmError = $errors->has('password_confirmation') || collect($pwdErrors)->contains(fn($e) => str_contains(strtolower($e), 'confirm'));
+                    $confirmErrorMessage = $errors->first('password_confirmation') ?: collect($pwdErrors)->first(fn($e) => str_contains(strtolower($e), 'confirm'));
+                    $pwdRuleErrors = collect($pwdErrors)->reject(fn($e) => str_contains(strtolower($e), 'confirm'));
+                    $hasPasswordError = $pwdRuleErrors->isNotEmpty();
+                    $passwordErrorMessage = $pwdRuleErrors->first();
+                @endphp
                 <div class="space-y-4">
                     <div class="relative">
                         <label for="register_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
+                            <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border {{ $hasPasswordError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15' }} rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password', 'register_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
                                 <ion-icon id="register_password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                             </button>
@@ -328,19 +380,22 @@
                             </div>
                         </div>
 
-                        @error('password')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
-                        @enderror
+                        @if($hasPasswordError)
+                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $passwordErrorMessage }}</p>
+                        @endif
                     </div>
 
                     <div>
                         <label for="register_password_confirmation" class="block text-xs font-semibold text-neutral-700 mb-1.5">Confirm Password <span class="text-red-500">*</span></label>
                         <div class="relative">
-                            <input type="password" id="register_password_confirmation" name="password_confirmation" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password_confirmation') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
+                            <input type="password" id="register_password_confirmation" name="password_confirmation" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border {{ $hasConfirmError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15' }} rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password_confirmation', 'register_password_confirm_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password confirmation visibility">
                                 <ion-icon id="register_password_confirm_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                             </button>
                         </div>
+                        @if($hasConfirmError)
+                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $confirmErrorMessage }}</p>
+                        @endif
                     </div>
                 </div>
 
@@ -438,6 +493,9 @@
 
             const emailPlain = document.getElementById('register_email_plain');
             if (emailPlain) emailPlain.required = !isStudent;
+
+            const emailPrefix = document.getElementById('register_email_prefix');
+            if (emailPrefix) emailPrefix.required = isStudent;
 
             // Toggle staff fields visibility
             const staffField = document.getElementById('register_staff_field');

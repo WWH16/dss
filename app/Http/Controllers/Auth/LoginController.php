@@ -33,10 +33,23 @@ class LoginController extends Controller
 
     public function login(Request $request)
     {
-        $request->validate([
+        $rules = [
             'role' => 'required|in:student,staff,admin',
             'password' => 'required|string',
             'g_recaptcha_response' => [new Recaptcha('login')],
+        ];
+
+        if ($request->role === 'student') {
+            $rules['student_number'] = 'required|string';
+        } else {
+            $rules['email'] = 'required|email';
+        }
+
+        $request->validate($rules, [
+            'student_number.required' => 'Please enter your student number.',
+            'email.required' => 'Please enter your email address.',
+            'email.email' => 'Please enter a valid email address.',
+            'password.required' => 'Please enter your password.',
         ]);
 
         $role = $request->role;

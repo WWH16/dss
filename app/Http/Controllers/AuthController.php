@@ -47,7 +47,16 @@ class AuthController extends Controller
         }
 
         $request->validate($rules, [
+            'name.required' => 'Please enter your full name.',
+            'email.required' => 'Please enter your email address.',
+            'email.unique' => 'This email address is already registered.',
             'email.regex' => 'Students must use their official ISU Cauayan email address (e.g. jdelacruz_cyn@isu.edu.ph).',
+            'course.required_if' => 'Please select your academic course.',
+            'year_level.required_if' => 'Please select your year level.',
+            'student_number.required_if' => 'Please enter your student number.',
+            'student_number.unique' => 'This student number is already registered.',
+            'password.required' => 'Please create a password.',
+            'password.confirmed' => 'The password confirmation does not match.',
         ]);
 
         $userData = [
@@ -65,19 +74,28 @@ class AuthController extends Controller
         if ($request->role === 'student') {
             $otp = str_pad(random_int(0, 999999), 6, '0', STR_PAD_LEFT);
 
-            \App\Models\EmailVerification::create([
+            $verification = \App\Models\EmailVerification::create([
                 'email'      => $userData['email'],
                 'otp'        => $otp,
                 'payload'    => $userData,
                 'expires_at' => now()->addMinutes(15),
             ]);
 
-            \Illuminate\Support\Facades\Mail::to($userData['email'])
-                ->send(new \App\Mail\OtpMail($otp, $userData['name'], $userData['email']));
+            try {
+                \Illuminate\Support\Facades\Mail::to($userData['email'])
+                    ->send(new \App\Mail\OtpMail($otp, $userData['name'], $userData['email']));
+            } catch (\Throwable $e) {
+                $verification->delete();
+                \Illuminate\Support\Facades\Log::error('Failed to send OTP email: ' . $e->getMessage());
+
+                return back()->withInput()->withErrors([
+                    'email' => 'Unable to send verification email. Please check your email configuration or try again.',
+                ]);
+            }
 
             session(['otp_email' => $userData['email']]);
 
-            return redirect('/verify-otp');
+            return redirect()->route('otp.show', ['email' => $userData['email']]);
         }
 
         // Staff/Admin: create user directly
