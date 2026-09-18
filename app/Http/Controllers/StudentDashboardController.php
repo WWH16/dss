@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\StallRanking;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -79,12 +80,17 @@ class StudentDashboardController extends Controller
                 'stalls.name',
                 'stalls.description',
                 DB::raw('COUNT(stall_evaluations.id) as eval_count'),
+                DB::raw('AVG(cleanliness) as cleanliness'),
+                DB::raw('AVG(service) as service'),
+                DB::raw('AVG(taste) as taste'),
+                DB::raw('AVG(price) as price'),
                 DB::raw('COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall_score')
             )
             ->groupBy('stalls.id', 'stalls.name', 'stalls.description')
             ->havingRaw('COUNT(stall_evaluations.id) > 0')
             ->orderByDesc('overall_score')
-            ->first();
+            ->get();
+        $topCampusStall = StallRanking::rank($topCampusStall)->first();
 
         return view('student.dashboard', compact(
             'profile',

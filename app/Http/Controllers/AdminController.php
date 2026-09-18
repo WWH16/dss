@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\StallRanking;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -42,6 +43,9 @@ class AdminController extends Controller
             ->groupBy('stalls.id', 'stalls.name')
             ->orderByDesc('overall_score')
             ->get();
+
+        // DSS ranking: order by SAW score, attach SAW and AHP scores
+        $results = StallRanking::rank($results);
 
         // Top Ranked Stall (DSS Benchmark Winner)
         $topStall = $results->first() ?? null;

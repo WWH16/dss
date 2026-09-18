@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use App\Services\StallRanking;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -64,11 +65,16 @@ class StaffController extends Controller
             ->leftJoin('stall_evaluations', 'stalls.id', '=', 'stall_evaluations.stall_id')
             ->select(
                 'stalls.id',
+                DB::raw('AVG(cleanliness) as cleanliness'),
+                DB::raw('AVG(service) as service'),
+                DB::raw('AVG(taste) as taste'),
+                DB::raw('AVG(price) as price'),
                 DB::raw('COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall_score')
             )
             ->groupBy('stalls.id')
             ->orderByDesc('overall_score')
             ->get();
+        $rankedStalls = StallRanking::rank($rankedStalls);
 
         $stallRank = null;
         $totalStalls = $rankedStalls->count();
@@ -305,6 +311,7 @@ class StaffController extends Controller
             ->groupBy('stalls.id', 'stalls.name', 'stalls.is_active')
             ->orderByDesc('overall_score')
             ->get();
+        $standings = StallRanking::rank($standings);
 
         return view('staff.standings', [
             'standings' => $standings,

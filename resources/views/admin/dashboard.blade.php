@@ -376,7 +376,7 @@
                         <span>Ranked Stall Leaderboard</span>
                         <span class="text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded-md">DSS Rankings</span>
                     </h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Stalls sorted by overall composite score across all criteria</p>
+                    <p class="text-xs text-neutral-500 mt-0.5">Stalls ranked by SAW score across all criteria</p>
                 </div>
                 <a href="{{ route('admin.stalls') }}" class="text-xs text-brand-700 hover:text-brand-800 font-bold inline-flex items-center gap-1 transition-colors no-print">
                     Manage All Stalls <ion-icon name="arrow-forward-outline" class="text-xs"></ion-icon>
@@ -384,7 +384,7 @@
             </div>
 
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[650px] hidden md:table">
+                <table class="w-full text-left border-collapse min-w-[800px] hidden md:table">
                     <thead>
                         <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/80 border-b border-neutral-200/70">
                             <th class="py-3.5 px-5 font-semibold text-center w-16">Rank</th>
@@ -394,6 +394,8 @@
                             <th class="py-3.5 px-3 text-center font-semibold">Taste</th>
                             <th class="py-3.5 px-3 text-center font-semibold">Price</th>
                             <th class="py-3.5 px-5 text-center font-semibold">Overall Composite</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">SAW</th>
+                            <th class="py-3.5 px-3 text-center font-semibold">AHP</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
@@ -463,6 +465,10 @@
                                         {{ number_format($composite, 2) }} <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
                                     </span>
                                 </td>
+
+                                {{-- DSS Scores (0 to 1) --}}
+                                <td class="py-3.5 px-3 text-center text-xs font-semibold font-mono text-neutral-700 tabular-nums">{{ number_format($result->saw_score, 4) }}</td>
+                                <td class="py-3.5 px-3 text-center text-xs font-semibold font-mono text-neutral-700 tabular-nums">{{ number_format($result->ahp_score, 4) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
