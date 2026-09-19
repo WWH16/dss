@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\StallRanking;
+use App\Services\Ahp;
+use App\Services\Saw;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -45,7 +46,12 @@ class AdminController extends Controller
             ->get();
 
         // DSS ranking: order by SAW score, attach SAW and AHP scores
-        $results = StallRanking::rank($results);
+        $ahp = new Ahp;
+        $ahpConsistency = $ahp->consistency();
+        $weights = $ahpConsistency['weights'];
+
+        $results = (new Saw)->rank($results, $weights);
+        $results = $ahp->attachScores($results, $weights);
 
         // Top Ranked Stall (DSS Benchmark Winner)
         $topStall = $results->first() ?? null;
@@ -215,7 +221,8 @@ class AdminController extends Controller
             'activityPeriodLabel',
             'activityTotalCount',
             'pieChartData',
-            'recentEvaluations'
+            'recentEvaluations',
+            'ahpConsistency'
         ));
     }
 

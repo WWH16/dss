@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\StallRanking;
+use App\Services\Ahp;
+use App\Services\Saw;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -90,7 +91,9 @@ class StudentDashboardController extends Controller
             ->havingRaw('COUNT(stall_evaluations.id) > 0')
             ->orderByDesc('overall_score')
             ->get();
-        $topCampusStall = StallRanking::rank($topCampusStall)->first();
+        $weights = (new Ahp)->weights();
+        $topCampusStall = (new Saw)->rank($topCampusStall, $weights);
+        $topCampusStall = (new Ahp)->attachScores($topCampusStall, $weights)->first();
 
         return view('student.dashboard', compact(
             'profile',

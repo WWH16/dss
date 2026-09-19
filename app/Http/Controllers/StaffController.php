@@ -4,7 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use App\Services\StallRanking;
+use App\Services\Ahp;
+use App\Services\Saw;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -74,7 +75,9 @@ class StaffController extends Controller
             ->groupBy('stalls.id')
             ->orderByDesc('overall_score')
             ->get();
-        $rankedStalls = StallRanking::rank($rankedStalls);
+        $weights = (new Ahp)->weights();
+        $rankedStalls = (new Saw)->rank($rankedStalls, $weights);
+        $rankedStalls = (new Ahp)->attachScores($rankedStalls, $weights);
 
         $stallRank = null;
         $totalStalls = $rankedStalls->count();
@@ -311,7 +314,9 @@ class StaffController extends Controller
             ->groupBy('stalls.id', 'stalls.name', 'stalls.is_active')
             ->orderByDesc('overall_score')
             ->get();
-        $standings = StallRanking::rank($standings);
+        $weights = (new Ahp)->weights();
+        $standings = (new Saw)->rank($standings, $weights);
+        $standings = (new Ahp)->attachScores($standings, $weights);
 
         return view('staff.standings', [
             'standings' => $standings,

@@ -377,6 +377,18 @@
                         <span class="text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded-md">DSS Rankings</span>
                     </h2>
                     <p class="text-xs text-neutral-500 mt-0.5">Stalls ranked by SAW score across all criteria</p>
+                    @if (!empty($ahpConsistency))
+                        <p class="text-[11px] text-neutral-500 mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
+                            <span class="font-semibold text-neutral-600">AHP weights</span>
+                            @foreach ($ahpConsistency['weights'] as $criterion => $weight)
+                                <span class="font-mono tabular-nums">{{ str_replace('_', ' ', $criterion) }} {{ number_format($weight, 2) }}</span>
+                            @endforeach
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-semibold {{ $ahpConsistency['consistent'] ? 'text-emerald-700 bg-emerald-50 border border-emerald-200/60' : 'text-rose-700 bg-rose-50 border border-rose-200/60' }}">
+                                CR {{ number_format($ahpConsistency['CR'], 4) }}
+                                {{ $ahpConsistency['consistent'] ? '(consistent)' : '(inconsistent)' }}
+                            </span>
+                        </p>
+                    @endif
                 </div>
                 <a href="{{ route('admin.stalls') }}" class="text-xs text-brand-700 hover:text-brand-800 font-bold inline-flex items-center gap-1 transition-colors no-print">
                     Manage All Stalls <ion-icon name="arrow-forward-outline" class="text-xs"></ion-icon>
