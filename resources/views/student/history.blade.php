@@ -2,6 +2,7 @@
 
 @section('title', 'Evaluation History | DSS')
 @section('header_title', 'Evaluation History')
+{{-- CHANGED (whole file): every rounded-lg became rounded-md (cards stay rounded-xl); font-black became font-bold; the modal section labels went from neutral-400 to neutral-500 for contrast. --}}
 
 @section('content')
 <div class="space-y-6">
@@ -22,7 +23,7 @@
             </p>
         </div>
 
-        <a href="{{ route('student.evaluation') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs shrink-0 self-start sm:self-auto">
+        <a href="{{ route('student.evaluation') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs shrink-0 self-start sm:self-auto">
             <ion-icon name="create-outline" class="text-sm"></ion-icon>
             Evaluate a Stall
         </a>
@@ -38,13 +39,13 @@
                 <div class="relative w-full sm:max-w-xs">
                     <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-sm"></ion-icon>
                     <input type="text" name="q" value="{{ request('q') }}" placeholder="Search stall or feedback..."
-                        class="w-full bg-neutral-50 border border-neutral-200 rounded-lg pl-9 pr-3 py-1.5 text-xs font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                        class="w-full bg-neutral-50 border border-neutral-200 rounded-md pl-9 pr-3 py-1.5 text-xs font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 </div>
 
                 {{-- Sort Dropdown --}}
                 <div class="w-full sm:w-auto">
                     <select name="sort" onchange="this.form.submit()"
-                        class="w-full sm:w-auto bg-neutral-50 border border-neutral-200 rounded-lg px-3 py-1.5 text-xs font-medium text-neutral-800 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors cursor-pointer">
+                        class="w-full sm:w-auto bg-neutral-50 border border-neutral-200 rounded-md px-3 py-1.5 text-xs font-medium text-neutral-800 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors cursor-pointer">
                         <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>Newest First</option>
                         <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Oldest First</option>
                         <option value="rating_high" {{ request('sort') === 'rating_high' ? 'selected' : '' }}>Highest Rating</option>
@@ -64,17 +65,26 @@
         {{-- Table / List Content --}}
         @if($myStudentEvals->isEmpty())
             <div class="p-12 text-center flex flex-col items-center justify-center">
-                <div class="w-14 h-14 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-3 text-neutral-400">
+                {{-- CHANGED: empty-state icon brand-700 on brand-50 instead of neutral-400 on neutral-50, like the admin empty states. --}}
+                <div class="w-14 h-14 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-3 text-brand-700">
                     <ion-icon name="receipt-outline" class="text-2xl"></ion-icon>
                 </div>
                 <h3 class="text-sm font-bold text-neutral-900 mb-1">No evaluations found</h3>
                 <p class="text-xs text-neutral-500 max-w-sm mb-5">
                     {{ request('q') ? 'No submitted evaluations matched your search criteria.' : "You haven't submitted any stall evaluations yet. Your reviews will appear here." }}
                 </p>
-                <a href="{{ route('student.evaluation') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs">
-                    <ion-icon name="add-outline" class="text-sm"></ion-icon>
-                    Evaluate your first stall
-                </a>
+                {{-- CHANGED: when a search matched nothing, the button now clears the search instead of saying "Evaluate your first stall" to a student who already has evaluations. --}}
+                @if(request('q'))
+                    <a href="{{ route('student.history') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs">
+                        <ion-icon name="refresh-outline" class="text-sm"></ion-icon>
+                        Clear search
+                    </a>
+                @else
+                    <a href="{{ route('student.evaluation') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs">
+                        <ion-icon name="add-outline" class="text-sm"></ion-icon>
+                        Evaluate your first stall
+                    </a>
+                @endif
             </div>
         @else
             {{-- Desktop Table View (Dashboard standard) --}}
@@ -97,12 +107,15 @@
                         @foreach($myStudentEvals as $eval)
                             @php
                                 $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4;
+                                // CHANGED: created_at is stored in UTC; convert to Philippine time for display and for the modal.
+                                $evalAt = \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila');
+                                $evalAtLabel = $evalAt->format('M d, Y, h:i A');
                             @endphp
                             <tr class="hover:bg-neutral-50/60 transition-colors group">
                                 {{-- Stall Name --}}
                                 <td class="py-3.5 px-5">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-lg bg-neutral-50 border border-neutral-200 text-brand-700 flex items-center justify-center shrink-0">
+                                        <div class="w-8 h-8 rounded-md bg-neutral-50 border border-neutral-200 text-brand-700 flex items-center justify-center shrink-0">
                                             <ion-icon name="storefront-outline" class="text-base"></ion-icon>
                                         </div>
                                         <div class="min-w-0">
@@ -112,9 +125,10 @@
                                 </td>
 
                                 {{-- Date --}}
+                                {{-- CHANGED: date shown in Philippine time; the "x ago" line raised from 10px neutral-400 to 11px neutral-500. --}}
                                 <td class="py-3.5 px-4 text-xs text-neutral-600 font-medium tabular-nums whitespace-nowrap">
-                                    {{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y') }}
-                                    <span class="block text-[10px] text-neutral-400">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</span>
+                                    {{ $evalAt->format('M d, Y') }}
+                                    <span class="block text-[11px] text-neutral-500">{{ $evalAt->diffForHumans() }}</span>
                                 </td>
 
                                 {{-- Criteria Scores --}}
@@ -140,21 +154,23 @@
 
                                 {{-- Feedback Comment --}}
                                 <td class="py-3.5 px-5">
+                                    {{-- CHANGED: typographic quotes around the comment; "No comment" neutral-400 to neutral-500. --}}
                                     @if($eval->comment)
                                         <p class="text-xs text-neutral-700 line-clamp-1 max-w-xs font-normal" title="{{ $eval->comment }}">
-                                            "{{ $eval->comment }}"
+                                            “{{ $eval->comment }}”
                                         </p>
                                     @else
-                                        <span class="text-neutral-400 text-xs italic">No comment</span>
+                                        <span class="text-neutral-500 text-xs italic">No comment</span>
                                     @endif
                                 </td>
 
                                 {{-- Action --}}
+                                {{-- CHANGED: passes the Philippine-time date string to the modal; label "Details" became "View", the same word as the mobile list and the admin pages. --}}
                                 <td class="py-3.5 px-4 text-right whitespace-nowrap">
-                                    <button type="button" 
-                                        onclick='openEvalDetailsModal(@json($eval), {{ number_format($avg, 1) }})'
+                                    <button type="button"
+                                        onclick='openEvalDetailsModal(@json($eval), {{ number_format($avg, 1) }}, @json($evalAtLabel))'
                                         class="inline-flex items-center gap-1 text-xs font-bold text-brand-700 hover:text-brand-800 hover:bg-brand-50 px-2.5 py-1 rounded-md transition-colors cursor-pointer">
-                                        Details
+                                        View
                                     </button>
                                 </td>
                             </tr>
@@ -167,16 +183,20 @@
                     @foreach($myStudentEvals as $eval)
                         @php
                             $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4;
+                            // CHANGED: same UTC to Philippine time conversion as the desktop table.
+                            $evalAt = \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila');
+                            $evalAtLabel = $evalAt->format('M d, Y, h:i A');
                         @endphp
                         <div class="p-4 flex flex-col gap-2.5">
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center gap-2 min-w-0">
-                                    <div class="w-8 h-8 rounded-lg bg-neutral-50 border border-neutral-200 text-brand-700 flex items-center justify-center shrink-0">
+                                    <div class="w-8 h-8 rounded-md bg-neutral-50 border border-neutral-200 text-brand-700 flex items-center justify-center shrink-0">
                                         <ion-icon name="storefront-outline" class="text-base"></ion-icon>
                                     </div>
                                     <div class="min-w-0">
                                         <h3 class="text-xs font-bold text-neutral-900 truncate">{{ $eval->stall_name ?? 'Food Stall' }}</h3>
-                                        <span class="text-[10px] text-neutral-400">{{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y • h:i A') }}</span>
+                                        {{-- CHANGED: Philippine time; 10px neutral-400 to 11px neutral-500. --}}
+                                        <span class="text-[11px] text-neutral-500">{{ $evalAt->format('M d, Y • h:i A') }}</span>
                                     </div>
                                 </div>
                                 <span class="inline-flex items-center gap-1 bg-brand-50 px-2 py-0.5 rounded-md text-xs font-bold text-brand-900 border border-brand-200 shrink-0">
@@ -185,36 +205,39 @@
                             </div>
 
                             {{-- 4 Criteria Grid --}}
+                            {{-- CHANGED: criteria labels raised from 9px neutral-400 to 11px neutral-500, and the boxes lost their inner border (as on the admin overview). --}}
                             <div class="grid grid-cols-4 gap-1.5 text-center text-xs">
-                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Clean</span>
+                                <div class="bg-neutral-50 rounded-md p-1.5">
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Clean</span>
                                     <span class="font-bold text-neutral-900">{{ $eval->cleanliness }}★</span>
                                 </div>
-                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Serv</span>
+                                <div class="bg-neutral-50 rounded-md p-1.5">
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Serv</span>
                                     <span class="font-bold text-neutral-900">{{ $eval->service }}★</span>
                                 </div>
-                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Taste</span>
+                                <div class="bg-neutral-50 rounded-md p-1.5">
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Taste</span>
                                     <span class="font-bold text-neutral-900">{{ $eval->taste }}★</span>
                                 </div>
-                                <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Price</span>
+                                <div class="bg-neutral-50 rounded-md p-1.5">
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Price</span>
                                     <span class="font-bold text-neutral-900">{{ $eval->price }}★</span>
                                 </div>
                             </div>
 
+                            {{-- CHANGED: typographic quotes around the comment. --}}
                             @if($eval->comment)
                                 <p class="text-xs text-neutral-600 bg-neutral-50/70 p-2.5 rounded-md border border-neutral-100 italic">
-                                    "{{ $eval->comment }}"
+                                    “{{ $eval->comment }}”
                                 </p>
                             @endif
 
+                            {{-- CHANGED: "View Full Details →" shortened to "View", matching the desktop table; passes the Philippine-time date to the modal. --}}
                             <div class="flex justify-end pt-1">
-                                <button type="button" 
-                                    onclick='openEvalDetailsModal(@json($eval), {{ number_format($avg, 1) }})'
+                                <button type="button"
+                                    onclick='openEvalDetailsModal(@json($eval), {{ number_format($avg, 1) }}, @json($evalAtLabel))'
                                     class="text-xs font-bold text-brand-700 hover:underline">
-                                    View Full Details &rarr;
+                                    View
                                 </button>
                             </div>
                         </div>
@@ -240,7 +263,7 @@
         {{-- Modal Header --}}
         <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-lg bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
+                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
                     <ion-icon name="storefront-outline" class="text-lg"></ion-icon>
                 </div>
                 <div>
@@ -248,35 +271,35 @@
                     <p id="modal-eval-date" class="text-[11px] text-neutral-500 mt-0.5"></p>
                 </div>
             </div>
-            <button type="button" class="js-close-eval-modal text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg transition-colors cursor-pointer" aria-label="Close modal">
+            <button type="button" class="js-close-eval-modal text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
                 <ion-icon name="close-outline" class="text-lg"></ion-icon>
             </button>
         </div>
 
         <div class="p-6 space-y-4">
             {{-- Overall Score Banner --}}
-            <div class="flex items-center justify-between p-3.5 rounded-lg bg-brand-50/50 border border-brand-200/80">
+            <div class="flex items-center justify-between p-3.5 rounded-md bg-brand-50/50 border border-brand-200/80">
                 <span class="text-xs font-bold text-brand-900">Overall Rating Given</span>
-                <span id="modal-eval-avg" class="text-base font-black text-brand-900 tabular-nums"></span>
+                <span id="modal-eval-avg" class="text-base font-bold text-brand-900 tabular-nums"></span>
             </div>
 
             {{-- 4 Criteria Breakdown --}}
             <div>
-                <h4 class="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-2">Criteria Breakdown</h4>
+                <h4 class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Criteria Breakdown</h4>
                 <div class="grid grid-cols-2 gap-2.5">
-                    <div class="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
+                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
                         <span class="text-xs font-medium text-neutral-600">Cleanliness</span>
                         <span id="modal-cleanliness" class="text-xs font-bold text-neutral-900"></span>
                     </div>
-                    <div class="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
+                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
                         <span class="text-xs font-medium text-neutral-600">Service</span>
                         <span id="modal-service" class="text-xs font-bold text-neutral-900"></span>
                     </div>
-                    <div class="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
+                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
                         <span class="text-xs font-medium text-neutral-600">Taste</span>
                         <span id="modal-taste" class="text-xs font-bold text-neutral-900"></span>
                     </div>
-                    <div class="p-2.5 rounded-lg bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
+                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
                         <span class="text-xs font-medium text-neutral-600">Price</span>
                         <span id="modal-price" class="text-xs font-bold text-neutral-900"></span>
                     </div>
@@ -285,8 +308,8 @@
 
             {{-- Comment / Feedback --}}
             <div>
-                <h4 class="text-xs font-bold text-neutral-400 uppercase tracking-wider mb-1.5">Your Feedback &amp; Comments</h4>
-                <div id="modal-comment-box" class="p-3 rounded-lg bg-neutral-50 border border-neutral-200/70 text-xs text-neutral-700 italic leading-relaxed">
+                <h4 class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Your Feedback &amp; Comments</h4>
+                <div id="modal-comment-box" class="p-3 rounded-md bg-neutral-50 border border-neutral-200/70 text-xs text-neutral-700 italic leading-relaxed">
                 </div>
             </div>
 
@@ -296,7 +319,7 @@
                     <ion-icon name="create-outline"></ion-icon>
                     Rate this stall again
                 </a>
-                <button type="button" class="js-close-eval-modal px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                <button type="button" class="js-close-eval-modal px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     Close
                 </button>
             </div>
@@ -309,29 +332,27 @@
 document.addEventListener('DOMContentLoaded', () => {
     const evalModal = document.getElementById('eval-details-modal');
 
-    window.openEvalDetailsModal = function(evalData, avgScore) {
+    // CHANGED: takes a third argument, the submission date already formatted in Philippine time by the server. new Date() on the raw UTC string read it as local time and shows "Invalid Date" in Safari.
+    window.openEvalDetailsModal = function(evalData, avgScore, submittedAt) {
         document.getElementById('modal-stall-name').textContent = evalData.stall_name || 'Food Stall';
-        
-        if (evalData.created_at) {
-            const d = new Date(evalData.created_at);
-            document.getElementById('modal-eval-date').textContent = 'Submitted on ' + d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-        } else {
-            document.getElementById('modal-eval-date').textContent = '';
-        }
+
+        document.getElementById('modal-eval-date').textContent = submittedAt ? 'Submitted on ' + submittedAt : '';
 
         document.getElementById('modal-eval-avg').textContent = avgScore + '★';
-        document.getElementById('modal-cleanliness').innerHTML = evalData.cleanliness + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
-        document.getElementById('modal-service').innerHTML = evalData.service + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
-        document.getElementById('modal-taste').innerHTML = evalData.taste + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
-        document.getElementById('modal-price').innerHTML = evalData.price + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
+        // CHANGED: textContent with the ★ glyph instead of innerHTML with an amber star ion-icon.
+        document.getElementById('modal-cleanliness').textContent = evalData.cleanliness + '★';
+        document.getElementById('modal-service').textContent = evalData.service + '★';
+        document.getElementById('modal-taste').textContent = evalData.taste + '★';
+        document.getElementById('modal-price').textContent = evalData.price + '★';
 
         const commentBox = document.getElementById('modal-comment-box');
+        // CHANGED: typographic quotes; the no-comment text uses neutral-500 instead of neutral-400.
         if (evalData.comment && evalData.comment.trim().length > 0) {
-            commentBox.textContent = '"' + evalData.comment + '"';
-            commentBox.classList.remove('text-neutral-400', 'not-italic');
+            commentBox.textContent = '“' + evalData.comment + '”';
+            commentBox.classList.remove('text-neutral-500', 'not-italic');
         } else {
             commentBox.textContent = 'No written feedback was included with this evaluation.';
-            commentBox.classList.add('text-neutral-400', 'not-italic');
+            commentBox.classList.add('text-neutral-500', 'not-italic');
         }
 
         const rateAgainBtn = document.getElementById('modal-rate-again-btn');

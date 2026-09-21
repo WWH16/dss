@@ -2,6 +2,7 @@
 
 @section('title', 'Evaluate Food Stall | DSS')
 @section('header_title', 'Evaluate Food Stall')
+{{-- CHANGED (whole file): every rounded-lg and plain rounded became rounded-md (cards stay rounded-xl); every 8px, 9px and 10px text became 11px; font-black became font-bold; grey helper, criterion and reCAPTCHA text went from neutral-400 to neutral-500; the "Official Campus Survey" shield icon went from emerald to brand green. --}}
 
 @section('head')
 <style>
@@ -29,12 +30,12 @@
     @if(!session('success'))
         {{-- Back Navigation --}}
         <div class="flex items-center justify-between">
-            <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-xs font-bold text-neutral-600 hover:text-brand-700 transition-colors bg-white px-3.5 py-2 rounded-lg border border-neutral-200/80 shadow-2xs">
+            <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-xs font-bold text-neutral-600 hover:text-brand-700 transition-colors bg-white px-3.5 py-2 rounded-md border border-neutral-200/80 shadow-2xs">
                 <ion-icon name="arrow-back-outline" class="text-sm"></ion-icon>
                 Back to Dashboard
             </a>
-            <span class="text-xs text-neutral-400 font-medium hidden sm:inline-flex items-center gap-1">
-                <ion-icon name="shield-checkmark-outline" class="text-emerald-600 text-sm"></ion-icon>
+            <span class="text-xs text-neutral-500 font-medium hidden sm:inline-flex items-center gap-1">
+                <ion-icon name="shield-checkmark-outline" class="text-brand-600 text-sm"></ion-icon>
                 Official Campus Survey
             </span>
         </div>
@@ -49,19 +50,20 @@
                     <ion-icon name="checkmark-circle" class="text-5xl"></ion-icon>
                 </div>
                 
-                <h2 class="text-2xl sm:text-3xl font-black text-neutral-900 tracking-tight mb-2">
+                <h2 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight mb-2">
                     Evaluation Submitted!
                 </h2>
                 
+                {{-- CHANGED: removed "logged anonymously". Each evaluation is stored with the student's account, and administrators see the student's name next to it on the Evaluations page, so the claim was not true. --}}
                 <p class="text-neutral-500 max-w-md mx-auto mb-8 text-xs sm:text-sm leading-relaxed">
-                    Thank you for your valuable feedback. Your rating has been logged anonymously to help maintain high quality dining standards across Isabela State University.
+                    Thank you for your valuable feedback. Your rating has been recorded to help maintain high quality dining standards across Isabela State University.
                 </p>
                 
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
-                    <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 font-bold rounded-lg transition-colors text-xs text-center">
+                    <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 font-bold rounded-md transition-colors text-xs text-center">
                         Back to Dashboard
                     </a>
-                    <a href="{{ route('student.evaluation') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-lg transition-colors text-xs text-center flex items-center justify-center gap-1.5 shadow-2xs">
+                    <a href="{{ route('student.evaluation') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center flex items-center justify-center gap-1.5 shadow-2xs">
                         <ion-icon name="refresh-outline" class="text-sm"></ion-icon>
                         Evaluate Another Stall
                     </a>
@@ -83,7 +85,7 @@
                     {{-- Logos --}}
                     <div class="flex items-center gap-4 shrink-0">
                         <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-14 h-14 sm:w-16 sm:h-16 object-contain" alt="ISU Logo">
-                        <img src="{{ asset('assets/images/bagong-pilipinas-logo.png') }}" class="w-14 h-14 sm:w-16 sm:h-16 object-contain" alt="Bagong Pilipinas">
+                        {{-- CHANGED: removed the Bagong Pilipinas logo; only the ISU logo remains. --}}
                     </div>
 
                     <div class="flex-1 min-w-0">
@@ -137,16 +139,17 @@
                     
                     <div class="relative max-w-md">
                         <select id="stall_id" name="stall_id" required
-                            class="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-semibold text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors cursor-pointer">
+                            class="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-semibold text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors cursor-pointer">
                             <option value="">Choose a Food Stall...</option>
                             @foreach($stalls as $stall)
-                                <option value="{{ $stall->id }}" {{ (string)request('stall') === (string)$stall->id ? 'selected' : '' }}>
+                                {{-- CHANGED: falls back to old('stall_id') so the chosen stall survives a failed submission (e.g. reCAPTCHA rejection), not just the ?stall= link. --}}
+                                <option value="{{ $stall->id }}" {{ (string)old('stall_id', request('stall')) === (string)$stall->id ? 'selected' : '' }}>
                                     {{ $stall->name }}
                                 </option>
                             @endforeach
                         </select>
                     </div>
-                    <p class="text-[11px] text-neutral-400">Choose the specific campus dining stall where you purchased your meal.</p>
+                    <p class="text-[11px] text-neutral-500">Choose the specific campus dining stall where you purchased your meal.</p>
                 </div>
 
                 {{-- 2. Rating Scale Legend --}}
@@ -160,27 +163,14 @@
                     </div>
 
                     {{-- Scale Badges --}}
-                    <div class="grid grid-cols-5 gap-1.5 sm:gap-2 text-center text-xs">
-                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">5★</span>
-                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Excellent</span>
-                        </div>
-                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">4★</span>
-                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Very Good</span>
-                        </div>
-                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">3★</span>
-                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Good</span>
-                        </div>
-                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">2★</span>
-                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Fair</span>
-                        </div>
-                        <div class="bg-white p-1.5 sm:p-2 rounded-lg border border-neutral-200/80 shadow-2xs">
-                            <span class="block font-black text-neutral-900 text-xs sm:text-sm">1★</span>
-                            <span class="text-[9px] sm:text-[10px] font-semibold text-neutral-500 truncate block">Poor</span>
-                        </div>
+                    {{-- CHANGED: on phones the legend is a wrapping row of "5★ Excellent" chips instead of a fixed 5-column grid; at 9px the labels were unreadable and "Excellent" / "Very Good" were cut off. From sm up it is the same 5-column grid. Labels are 11px, font-bold became font-bold, and the chips use rounded-md. --}}
+                    <div class="flex flex-wrap gap-1.5 sm:grid sm:grid-cols-5 sm:gap-2 text-center text-xs">
+                        @foreach([5 => 'Excellent', 4 => 'Very Good', 3 => 'Good', 2 => 'Fair', 1 => 'Poor'] as $legendVal => $legendLabel)
+                            <div class="bg-white px-2 py-1 sm:p-2 rounded-md border border-neutral-200/80 shadow-2xs flex items-center gap-1 sm:block">
+                                <span class="sm:block font-bold text-neutral-900 text-xs sm:text-sm">{{ $legendVal }}★</span>
+                                <span class="text-[11px] font-semibold text-neutral-600 sm:block">{{ $legendLabel }}</span>
+                            </div>
+                        @endforeach
                     </div>
 
                     {{-- Progress Bar --}}
@@ -196,13 +186,13 @@
                     <div class="rounded-xl border border-neutral-200/80 shadow-xs overflow-hidden bg-white">
                         <table class="w-full text-left border-collapse min-w-[620px]">
                             <thead>
-                                <tr class="bg-neutral-50/80 border-b border-neutral-200 text-[10px] text-neutral-500 font-bold uppercase tracking-wider">
+                                <tr class="bg-neutral-50/80 border-b border-neutral-200 text-[11px] text-neutral-500 font-bold uppercase tracking-wider">
                                     <th class="py-3.5 px-5">Survey Statement</th>
-                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">5★</th>
-                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">4★</th>
-                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">3★</th>
-                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">2★</th>
-                                    <th class="py-3.5 px-2 text-center w-16 font-black text-neutral-800 text-xs">1★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-bold text-neutral-800 text-xs">5★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-bold text-neutral-800 text-xs">4★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-bold text-neutral-800 text-xs">3★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-bold text-neutral-800 text-xs">2★</th>
+                                    <th class="py-3.5 px-2 text-center w-16 font-bold text-neutral-800 text-xs">1★</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-neutral-100 text-xs">
@@ -210,14 +200,14 @@
                                     <tr class="survey-row group hover:bg-neutral-50/50 transition-colors" id="desktop_row_{{ $statement['id'] }}">
                                         <td class="py-4 px-5">
                                             <div class="flex items-start gap-2.5">
-                                                <span class="w-5 h-5 rounded-full bg-neutral-100 text-neutral-600 font-bold text-[10px] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
+                                                <span class="w-5 h-5 rounded-full bg-neutral-100 text-neutral-600 font-bold text-[11px] flex items-center justify-center shrink-0 mt-0.5 tabular-nums">
                                                     {{ $index + 1 }}
                                                 </span>
                                                 <div>
                                                     <p class="font-medium text-neutral-800 leading-relaxed text-xs sm:text-[13px]">
                                                         {{ $statement['statement'] }}
                                                     </p>
-                                                    <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-neutral-400 mt-1">
+                                                    <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-neutral-500 mt-1">
                                                         Criterion: {{ ucfirst($statement['criterion_key']) }}
                                                     </span>
                                                 </div>
@@ -226,10 +216,12 @@
                                         @for($val = 5; $val >= 1; $val--)
                                             <td class="p-0 text-center align-middle border-l border-neutral-100">
                                                 <label for="dt_q{{ $statement['id'] }}_v{{ $val }}" class="flex items-center justify-center w-full h-full min-h-[58px] cursor-pointer hover:bg-brand-50/50 transition-colors">
-                                                    <input type="radio" 
+                                                    {{-- CHANGED: @checked(old(...)) restores the student's answers after a failed submission; the existing sync script then copies them to the mobile radios. --}}
+                                                    <input type="radio"
                                                         id="dt_q{{ $statement['id'] }}_v{{ $val }}"
-                                                        name="responses[{{ $statement['id'] }}]" 
-                                                        value="{{ $val }}" 
+                                                        name="responses[{{ $statement['id'] }}]"
+                                                        value="{{ $val }}"
+                                                        @checked((string) old('responses.' . $statement['id']) === (string) $val)
                                                         class="peer sr-only survey-radio-dt"
                                                         data-statement-id="{{ $statement['id'] }}"
                                                         data-val="{{ $val }}">
@@ -260,7 +252,7 @@
                                     <p class="text-xs font-semibold text-neutral-900 leading-snug">
                                         {{ $statement['statement'] }}
                                     </p>
-                                    <span class="inline-block text-[9px] font-bold uppercase tracking-wider text-neutral-400 mt-1">
+                                    <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-neutral-500 mt-1">
                                         Criterion: {{ ucfirst($statement['criterion_key']) }}
                                     </span>
                                 </div>
@@ -279,10 +271,11 @@
                                                 class="peer sr-only survey-radio-mb"
                                                 data-statement-id="{{ $statement['id'] }}"
                                                 data-val="{{ $val }}">
-                                            <div class="peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 peer-checked:shadow-2xs flex flex-col items-center justify-center min-h-[46px] rounded-lg border border-neutral-200 bg-neutral-50/50 transition-all active:scale-95 select-none text-center">
-                                                <span class="text-xs font-bold leading-none">{{ $val }}★</span>
-                                                <span class="text-[8px] font-medium leading-tight mt-0.5 opacity-70 peer-checked:opacity-100">
-                                                    @if($val === 5) Excel @elseif($val === 4) V.Good @elseif($val === 3) Good @elseif($val === 2) Fair @else Poor @endif
+                                            {{-- CHANGED: the visible 8px sub-labels ("Excel", "V.Good") were too small to read and do not fit five columns at 11px, so the rating number is shown larger and the full label is kept for screen readers; the legend above gives the words. rounded-md to rounded-md. --}}
+                                            <div class="peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 peer-checked:shadow-2xs flex flex-col items-center justify-center min-h-[46px] rounded-md border border-neutral-200 bg-neutral-50/50 transition-all active:scale-95 select-none text-center">
+                                                <span class="text-sm font-bold leading-none">{{ $val }}★</span>
+                                                <span class="sr-only">
+                                                    @if($val === 5) Excellent @elseif($val === 4) Very Good @elseif($val === 3) Good @elseif($val === 2) Fair @else Poor @endif
                                                 </span>
                                             </div>
                                         </label>
@@ -302,12 +295,13 @@
                 {{-- 3. Comments & Suggestions --}}
                 <div class="bg-white rounded-xl border border-neutral-200/80 p-3.5 sm:p-5 shadow-2xs space-y-2">
                     <label for="comment" class="block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                        Comments / Suggestions / Compliments <span class="text-neutral-400 font-normal">(Optional)</span>
+                        Comments / Suggestions / Compliments <span class="text-neutral-500 font-normal">(Optional)</span>
                     </label>
                     <textarea id="comment" name="comment" rows="3" 
-                        class="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-lg text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors resize-none"
-                        placeholder="Share any specific feedback about food quality, taste, cleanliness, or staff service..."></textarea>
-                    <p class="text-[11px] text-neutral-400">All comments are strictly anonymous and assist stall managers in continuous improvement.</p>
+                        class="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-md text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors resize-none"
+                        placeholder="Share any specific feedback about food quality, taste, cleanliness, or staff service...">{{ old('comment') }}</textarea>
+                    {{-- CHANGED: the textarea now restores old('comment') after a failed submission. The helper no longer says comments are "strictly anonymous" (administrators see the student's name); it now says who reads them, and is neutral-500 for contrast. --}}
+                    <p class="text-[11px] text-neutral-500">Comments are read by the canteen administrators to help stalls improve.</p>
                 </div>
 
                 {{-- 4. Submit Bar --}}
@@ -325,7 +319,7 @@
                             <ion-icon id="submitLoader" name="hourglass-outline" class="text-sm leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                         </button>
                         @if(config('services.recaptcha.site_key'))
-                            <span class="text-[10px] text-neutral-400 text-center sm:text-right">
+                            <span class="text-[11px] text-neutral-500 text-center sm:text-right">
                                 Protected by reCAPTCHA (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Privacy</a> & <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Terms</a>)
                             </span>
                         @endif
