@@ -32,10 +32,11 @@
 
         {{-- Action Button Group --}}
         <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 no-print">
-            <button type="button" onclick="window.print()" class="btn btn-secondary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50 cursor-pointer">
+            {{-- CHANGED: was a button calling window.print() on the dashboard; now opens the dedicated report page with print options. --}}
+            <a href="{{ route('admin.report') }}" class="btn btn-secondary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50 cursor-pointer">
                 <ion-icon name="print-outline" class="text-sm text-neutral-600"></ion-icon>
                 Print Report
-            </button>
+            </a>
             <a href="{{ route('admin.stalls') }}" class="btn btn-primary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 shadow-2xs">
                 <ion-icon name="add-circle-outline" class="text-sm"></ion-icon>
                 Manage Stalls

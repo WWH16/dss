@@ -141,6 +141,11 @@ Route::middleware('auth')->group(function () {
         [AdminController::class, 'deleteUser'])
         ->name('admin.users.delete');
 
+    // ADDED: printable evaluation report with admin-chosen period, stalls, sections and signatories.
+    Route::get('/admin/report',
+        [AdminController::class, 'report'])
+        ->name('admin.report');
+
 });
 /*
 |--------------------------------------------------------------------------

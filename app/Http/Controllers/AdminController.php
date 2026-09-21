@@ -226,6 +226,164 @@ class AdminController extends Controller
         ));
     }
 
+    // ADDED: printable report. Same SAW and AHP ranking as the dashboard, limited to the
+    // period and stalls the admin picks. Period boundaries use Philippine time, while
+    // created_at is stored in UTC.
+    public const REPORT_SECTIONS = [
+        'ranking'    => 'Stall ranking',
+        'attention'  => 'Stalls needing attention',
+        'chart'      => 'SAW score chart',
+        'prepared'   => 'Prepared by',
+    ];
+
+    public const CRITERION_LABELS = [
+        'food_quality'    => 'Food Quality',
+        'service_quality' => 'Service Quality',
+        'price'           => 'Price',
+        'cleanliness'     => 'Cleanliness',
+    ];
+
+    public function report(Request $request)
+    {
+        if (!Auth::check() || Auth::user()->role != 'admin') {
+            return redirect('/login');
+        }
+
+        $input = $request->validate([
+            'period'          => 'nullable|in:all,month,year,custom',
+            'from'            => 'nullable|required_if:period,custom|date',
+            'to'              => 'nullable|required_if:period,custom|date|after_or_equal:from',
+            'stalls'          => 'nullable|array',
+            'stalls.*'        => 'integer',
+            'stall_filter'    => 'nullable|boolean',
+            'sections'        => 'nullable|array',
+            'sections.*'      => 'in:' . implode(',', array_keys(self::REPORT_SECTIONS)),
+            'section_filter'  => 'nullable|boolean',
+        ]);
+
+        $tz = 'Asia/Manila';
+        $now = now($tz);
+        $period = $input['period'] ?? 'all';
+        $from = null;
+        $to = null;
+
+        if ($period === 'month') {
+            $from = $now->copy()->startOfMonth();
+            $to = $now->copy()->endOfMonth();
+            $periodLabel = $from->format('F Y');
+        } elseif ($period === 'year') {
+            $from = $now->copy()->startOfYear();
+            $to = $now->copy()->endOfYear();
+            $periodLabel = 'January – December ' . $from->format('Y');
+        } elseif ($period === 'custom') {
+            $from = \Carbon\Carbon::parse($input['from'], $tz)->startOfDay();
+            $to = \Carbon\Carbon::parse($input['to'], $tz)->endOfDay();
+            $periodLabel = $from->format('M j, Y') . ' – ' . $to->format('M j, Y');
+        } else {
+            $periodLabel = 'All evaluations up to ' . $now->format('M j, Y');
+        }
+
+        $fromUtc = $from?->copy()->utc();
+        $toUtc = $to?->copy()->utc();
+
+        $allStalls = DB::table('stalls')->orderBy('name')->get(['id', 'name']);
+
+        $selectedIds = $request->boolean('stall_filter')
+            ? collect($input['stalls'] ?? [])->map(fn ($id) => (int) $id)
+                ->intersect($allStalls->pluck('id'))->values()->all()
+            : $allStalls->pluck('id')->all();
+
+        $sections = $request->boolean('section_filter')
+            ? array_values($input['sections'] ?? [])
+            : array_keys(self::REPORT_SECTIONS);
+
+        $results = DB::table('stalls')
+            ->leftJoin('stall_evaluations', function ($join) use ($fromUtc, $toUtc) {
+                $join->on('stalls.id', '=', 'stall_evaluations.stall_id');
+                if ($fromUtc) $join->where('stall_evaluations.created_at', '>=', $fromUtc);
+                if ($toUtc) $join->where('stall_evaluations.created_at', '<=', $toUtc);
+            })
+            ->whereIn('stalls.id', $selectedIds)
+            ->select(
+                'stalls.id as stall_id',
+                'stalls.name',
+                DB::raw('COUNT(stall_evaluations.id) as eval_count'),
+                DB::raw('AVG(cleanliness) as cleanliness'),
+                DB::raw('AVG(service) as service'),
+                DB::raw('AVG(taste) as taste'),
+                DB::raw('AVG(price) as price'),
+                DB::raw('(AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4 as overall_score')
+            )
+            ->groupBy('stalls.id', 'stalls.name')
+            ->get();
+
+        $ahp = new Ahp;
+        $ahpConsistency = $ahp->consistency();
+        $weights = $ahpConsistency['weights'];
+
+        $results = (new Saw)->rank($results, $weights);
+        $results = $ahp->attachScores($results, $weights);
+
+        $rated = $results->filter(fn ($row) => (int) $row->eval_count > 0)->values();
+        $unrated = $results->filter(fn ($row) => (int) $row->eval_count === 0)->sortBy('name')->values();
+
+        $totals = DB::table('stall_evaluations')
+            ->whereIn('stall_id', $selectedIds)
+            ->when($fromUtc, fn ($q) => $q->where('created_at', '>=', $fromUtc))
+            ->when($toUtc, fn ($q) => $q->where('created_at', '<=', $toUtc))
+            ->selectRaw('
+                COUNT(*) as evaluations,
+                COUNT(DISTINCT student_id) as respondents,
+                AVG(taste) as food_quality,
+                AVG(service) as service_quality,
+                AVG(price) as price,
+                AVG(cleanliness) as cleanliness,
+                MIN(created_at) as first_at,
+                MAX(created_at) as last_at
+            ')
+            ->first();
+
+        // A stall needs attention when its overall mean or any single criterion mean is below 3.00.
+        $attention = $rated->map(function ($row) {
+            $means = [];
+            foreach (Saw::COLUMNS as $criterion => $column) {
+                $means[$criterion] = (float) $row->$column;
+            }
+            asort($means);
+
+            $row->weakest = array_key_first($means);
+            $row->below = array_keys(array_filter($means, fn ($m) => $m < 3.0));
+
+            return $row;
+        })->filter(fn ($row) => (float) $row->overall_score < 3.0 || $row->below !== [])->values();
+
+        $preparedBy = [
+            'name'  => Auth::user()->name,
+            'title' => ucfirst(Auth::user()->role === 'admin' ? 'administrator' : Auth::user()->role),
+        ];
+
+        return view('admin.report', [
+            'period'          => $period,
+            'from'            => $from,
+            'to'              => $to,
+            'periodLabel'     => $periodLabel,
+            'generatedAt'     => $now,
+            'allStalls'       => $allStalls,
+            'selectedIds'     => $selectedIds,
+            'sections'        => $sections,
+            'sectionOptions'  => self::REPORT_SECTIONS,
+            'criterionLabels' => self::CRITERION_LABELS,
+            'columns'         => Saw::COLUMNS,
+            'ahpConsistency'  => $ahpConsistency,
+            'rated'           => $rated,
+            'unrated'         => $unrated,
+            'totals'          => $totals,
+            'attention'       => $attention,
+            'preparedBy'      => $preparedBy,
+            'autoPrint'       => $request->boolean('print'),
+        ]);
+    }
+
     public function stalls()
     {
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
