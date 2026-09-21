@@ -483,13 +483,14 @@ class AdminController extends Controller
     {
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
+        // CHANGED: codes are upper-case and matched against UPPER(TRIM(course)) below, the same way the Students view assigns department badges. PostgreSQL compares text case-sensitively, so a course saved as "bsit" or "BS Crim" got a badge but was left out when filtering by its department. Added "BS CRIM", which the view already counted as CCJE; dropped the mixed-case duplicates.
         $deptCourseMap = [
             'CCSICT' => ['BSIT', 'BSCS', 'BSIS', 'ACT', 'MIT'],
             'CHM'    => ['BSHM', 'BSTM', 'HRM'],
-            'CBA'    => ['BSBA', 'BSA', 'BSMA', 'BSEntrep', 'BSENTREP'],
+            'CBA'    => ['BSBA', 'BSA', 'BSMA', 'BSENTREP'],
             'CED'    => ['BSED', 'BEED', 'BPED', 'BTLED'],
-            'CCJE'   => ['BSCRIM', 'BSCrim', 'BSLE'],
-            'CAS'    => ['BA Comm', 'BS Psych', 'BS Bio', 'BACOMM', 'BSPSYCH'],
+            'CCJE'   => ['BSCRIM', 'BS CRIM', 'BSLE'],
+            'CAS'    => ['BA COMM', 'BS PSYCH', 'BS BIO', 'BACOMM', 'BSPSYCH'],
         ];
 
         $query = DB::table('users')
@@ -526,17 +527,21 @@ class AdminController extends Controller
         // Department filter
         $selectedDept = $request->get('department');
         if ($selectedDept && isset($deptCourseMap[$selectedDept])) {
-            $query->whereIn('users.course', $deptCourseMap[$selectedDept]);
+            // CHANGED: case- and space-insensitive match (see $deptCourseMap).
+            $codes = $deptCourseMap[$selectedDept];
+            $query->whereRaw('UPPER(TRIM(users.course)) IN (' . implode(',', array_fill(0, count($codes), '?')) . ')', $codes);
         }
 
         // Course filter
         if ($request->filled('course')) {
-            $query->where('users.course', $request->course);
+            // CHANGED: case- and space-insensitive, so "BSIT" also finds "bsit".
+            $query->whereRaw('UPPER(TRIM(users.course)) = ?', [strtoupper(trim($request->course))]);
         }
 
         // Year level filter
         if ($request->filled('year_level')) {
-            $query->where('users.year_level', $request->year_level);
+            // CHANGED: case-insensitive. Sign-up saves "1st year" but the profile form saved "1st Year", so on PostgreSQL the filter missed every student who had edited their profile.
+            $query->whereRaw('LOWER(users.year_level) = ?', [strtolower($request->year_level)]);
         }
 
         // Sort order
@@ -567,9 +572,16 @@ class AdminController extends Controller
             ->groupBy('course')
             ->pluck('cnt', 'course');
 
+        // CHANGED: counts are grouped by UPPER(TRIM(course)) so the numbers in the department dropdown match what the filter returns.
+        $upperCourseCounts = [];
+        foreach ($courseCounts as $course => $cnt) {
+            $key = strtoupper(trim((string) $course));
+            $upperCourseCounts[$key] = ($upperCourseCounts[$key] ?? 0) + $cnt;
+        }
+
         $departmentStats = [];
         foreach ($deptCourseMap as $code => $courses) {
-            $departmentStats[$code] = collect($courses)->sum(fn ($c) => $courseCounts[$c] ?? 0);
+            $departmentStats[$code] = collect($courses)->sum(fn ($c) => $upperCourseCounts[$c] ?? 0);
         }
 
         $departments = [

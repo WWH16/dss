@@ -190,11 +190,13 @@
                 <select id="modal-year-level" name="year_level"
                     class="w-full px-3 py-2 bg-neutral-50 border @error('year_level') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="">Select Year Level</option>
-                    <option value="1st Year" {{ old('year_level', $profile->year_level) === '1st Year' ? 'selected' : '' }}>1st Year</option>
-                    <option value="2nd Year" {{ old('year_level', $profile->year_level) === '2nd Year' ? 'selected' : '' }}>2nd Year</option>
-                    <option value="3rd Year" {{ old('year_level', $profile->year_level) === '3rd Year' ? 'selected' : '' }}>3rd Year</option>
-                    <option value="4th Year" {{ old('year_level', $profile->year_level) === '4th Year' ? 'selected' : '' }}>4th Year</option>
-                    <option value="Graduate" {{ old('year_level', $profile->year_level) === 'Graduate' ? 'selected' : '' }}>Graduate</option>
+                    {{-- CHANGED: option values are lower-case ("1st year"), the same values the sign-up form saves, and the current value is matched case-insensitively. Before, a student who signed up with "1st year" opened this form with no year selected, and saving it erased their year level. --}}
+                    @php $currentYear = strtolower((string) old('year_level', $profile->year_level)); @endphp
+                    <option value="1st year" {{ $currentYear === '1st year' ? 'selected' : '' }}>1st Year</option>
+                    <option value="2nd year" {{ $currentYear === '2nd year' ? 'selected' : '' }}>2nd Year</option>
+                    <option value="3rd year" {{ $currentYear === '3rd year' ? 'selected' : '' }}>3rd Year</option>
+                    <option value="4th year" {{ $currentYear === '4th year' ? 'selected' : '' }}>4th Year</option>
+                    <option value="Graduate" {{ $currentYear === 'graduate' ? 'selected' : '' }}>Graduate</option>
                 </select>
                 @error('year_level')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
