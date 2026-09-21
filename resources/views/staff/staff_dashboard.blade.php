@@ -1,6 +1,7 @@
 @extends('layouts.dashboard')
 
 @section('title', 'Staff Dashboard | Decision Support System')
+{{-- CHANGED (whole file): rank chips follow the admin overview (#1 brand green, #2 and #3 neutral grey instead of amber, slate and bronze); the Overall Score and Unique Evaluators icon boxes went from amber and emerald to brand green; every 9px and 10px text became 11px; font-black and font-extrabold became font-bold; rounded-lg and plain rounded became rounded-md; grey helper text went from neutral-400 to neutral-500; the mobile criteria boxes lost their inner border; comments show in typographic quotes; the empty-state icon is brand green. --}}
 
 @section('head')
 <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
@@ -21,7 +22,7 @@
                 Your staff account is pending verification and assignment to a food stall by an Administrator. Evaluation records and campus performance standings are restricted until your stall assignment is active.
             </p>
             <div class="flex items-center justify-center gap-3 flex-wrap">
-                <a href="{{ route('staff.profile') }}" class="btn btn-secondary text-xs px-4 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 shadow-2xs border border-neutral-200">
+                <a href="{{ route('staff.profile') }}" class="btn btn-secondary text-xs px-4 py-2 rounded-md font-bold inline-flex items-center gap-1.5 shadow-2xs border border-neutral-200">
                     <ion-icon name="person-outline" class="text-sm"></ion-icon>
                     View Account Profile
                 </a>
@@ -36,18 +37,18 @@
                     <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">{{ $stall->name }}</h1>
                     @if($stallRank)
                         @if($stallRank === 1)
-                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-amber-100 text-amber-950 border border-amber-300 font-extrabold text-xs shadow-2xs">
-                                <ion-icon name="trophy" class="text-amber-600 text-xs"></ion-icon>
+                            <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-brand-50 text-brand-900 border border-brand-200 font-bold text-xs shadow-2xs">
+                                <ion-icon name="trophy" class="text-brand-600 text-xs"></ion-icon>
                                 #1 on Campus
                             </span>
                         @elseif($stallRank === 2)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-slate-100 text-slate-900 border border-slate-300 font-extrabold text-xs shadow-2xs">
-                                <ion-icon name="medal" class="text-slate-500 text-xs"></ion-icon>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-900 border border-neutral-200 font-bold text-xs shadow-2xs">
+                                <ion-icon name="medal" class="text-neutral-500 text-xs"></ion-icon>
                                 #2 on Campus
                             </span>
                         @elseif($stallRank === 3)
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-amber-50 text-amber-900 border border-amber-600/30 font-bold text-xs shadow-2xs">
-                                <ion-icon name="medal" class="text-amber-700 text-xs"></ion-icon>
+                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-900 border border-neutral-200 font-bold text-xs shadow-2xs">
+                                <ion-icon name="medal" class="text-neutral-400 text-xs"></ion-icon>
                                 #3 on Campus
                             </span>
                         @else
@@ -63,7 +64,7 @@
             </div>
 
             <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                <a href="{{ route('staff.standings') }}" class="btn btn-secondary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50">
+                <a href="{{ route('staff.standings') }}" class="btn btn-secondary text-xs px-3.5 py-2 rounded-md font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50">
                     <ion-icon name="podium-outline" class="text-sm text-neutral-600"></ion-icon>
                     Campus Standings
                 </a>
@@ -76,15 +77,15 @@
             <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Overall Score</span>
-                    <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-200/70 flex items-center justify-center text-amber-700">
-                        <ion-icon name="star" class="text-base text-amber-500"></ion-icon>
+                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
+                        <ion-icon name="star" class="text-base"></ion-icon>
                     </div>
                 </div>
                 <div class="flex items-baseline gap-1.5">
-                    <span class="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums tracking-tight">
+                    <span class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
                         {{ number_format($averages ? (float)$averages->overall : 0, 2) }}★
                     </span>
-                    <span class="text-xs text-neutral-400 font-semibold">/ 5.00</span>
+                    <span class="text-xs text-neutral-500 font-semibold">/ 5.00</span>
                 </div>
                 @if($campusCriteria)
                     <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
@@ -97,11 +98,11 @@
             <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Evaluations</span>
-                    <div class="w-8 h-8 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
+                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
                         <ion-icon name="receipt-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums tracking-tight">
+                <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
                     {{ $totalEvaluations }}
                 </div>
                 <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
@@ -113,11 +114,11 @@
             <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Unique Evaluators</span>
-                    <div class="w-8 h-8 rounded-lg bg-emerald-50 border border-emerald-200/70 flex items-center justify-center text-emerald-700">
+                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
                         <ion-icon name="people-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="text-2xl sm:text-3xl font-black text-neutral-900 tabular-nums tracking-tight">
+                <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
                     {{ $uniqueStudents }}
                 </div>
                 <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
@@ -145,7 +146,7 @@
                         @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
                         @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
-                        <div class="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/90 rounded-lg p-1">
+                        <div class="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/90 rounded-md p-1">
                             <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
                                 class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
                                 <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
@@ -227,18 +228,18 @@
                                     $isTop = ($item['name'] === $topCritName);
                                     $isLow = ($item['name'] === $lowestCritName && $topCritName !== $lowestCritName);
                                 @endphp
-                                <div class="p-2.5 bg-neutral-50/80 border {{ $isTop ? 'border-emerald-200/90 ring-1 ring-emerald-200/60' : ($isLow ? 'border-amber-200/90 ring-1 ring-amber-200/60' : 'border-neutral-200/80') }} rounded-lg flex flex-col justify-between hover:border-neutral-300 transition-colors">
+                                <div class="p-2.5 bg-neutral-50/80 border {{ $isTop ? 'border-emerald-200/90 ring-1 ring-emerald-200/60' : ($isLow ? 'border-amber-200/90 ring-1 ring-amber-200/60' : 'border-neutral-200/80') }} rounded-md flex flex-col justify-between hover:border-neutral-300 transition-colors">
                                     <div class="flex items-center justify-between gap-1 mb-1">
                                         <span class="text-[11px] font-semibold text-neutral-600 truncate">{{ $item['name'] }}</span>
                                         @if($isTop)
-                                            <span class="text-[9px] font-bold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded shrink-0">Strength</span>
+                                            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md shrink-0">Strength</span>
                                         @elseif($isLow)
-                                            <span class="text-[9px] font-bold text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded shrink-0">Focus</span>
+                                            <span class="text-[11px] font-bold text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded-md shrink-0">Focus</span>
                                         @endif
                                     </div>
                                     <div class="flex items-baseline justify-between mt-0.5">
-                                        <span class="text-sm font-black text-neutral-900 tabular-nums">{{ number_format($item['score'], 2) }}★</span>
-                                        <span class="text-[10px] font-bold tabular-nums {{ $delta >= 0 ? 'text-emerald-700' : 'text-amber-700' }}">
+                                        <span class="text-sm font-bold text-neutral-900 tabular-nums">{{ number_format($item['score'], 2) }}★</span>
+                                        <span class="text-[11px] font-bold tabular-nums {{ $delta >= 0 ? 'text-emerald-700' : 'text-amber-700' }}">
                                             {{ $delta >= 0 ? '+' : '' }}{{ number_format($delta, 2) }}
                                         </span>
                                     </div>
@@ -261,7 +262,7 @@
                                 <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Rating Breakdown</h2>
                                 <p class="text-xs text-neutral-500 mt-0.5">Score distribution from 5★ to 1★</p>
                             </div>
-                            <span class="text-xs font-black text-neutral-800 tabular-nums bg-neutral-100 px-2 py-0.5 rounded">{{ number_format($averages ? (float)$averages->overall : 0, 2) }}★</span>
+                            <span class="text-xs font-bold text-neutral-800 tabular-nums bg-neutral-100 px-2 py-0.5 rounded-md">{{ number_format($averages ? (float)$averages->overall : 0, 2) }}★</span>
                         </div>
 
                         @php
@@ -287,7 +288,7 @@
                                     <div class="flex items-center justify-between text-xs">
                                         <span class="font-bold text-neutral-700 text-xs">{{ $starRow['label'] }}</span>
                                         <div class="flex items-center gap-1.5">
-                                            <span class="font-mono text-[11px] text-neutral-400 tabular-nums">{{ $starRow['count'] }} ({{ $pct }}%)</span>
+                                            <span class="font-mono text-[11px] text-neutral-500 tabular-nums">{{ $starRow['count'] }} ({{ $pct }}%)</span>
                                         </div>
                                     </div>
                                     <div class="w-full bg-neutral-100 h-2 rounded-full overflow-hidden">
@@ -342,7 +343,7 @@
 
             @if($evaluations->isEmpty())
                 <div class="p-12 text-center">
-                    <div class="w-12 h-12 rounded-lg bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-3 text-neutral-400 mx-auto">
+                    <div class="w-12 h-12 rounded-md bg-brand-50 border border-brand-100 flex items-center justify-center mb-3 text-brand-700 mx-auto">
                         <ion-icon name="receipt-outline" class="text-2xl"></ion-icon>
                     </div>
                     <p class="text-sm font-bold text-neutral-900 mb-0.5">No evaluations found</p>
@@ -366,11 +367,12 @@
                         </thead>
                         <tbody class="divide-y divide-neutral-100 text-sm">
                             @foreach($evaluations as $eval)
+                                {{-- CHANGED: the date and "x ago" text are shown in Philippine time (created_at is stored in UTC), as on the printable report. --}}
                                 @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
                                 <tr class="hover:bg-neutral-50/60 transition-colors">
                                     <td class="py-3.5 px-5 font-medium text-neutral-600 text-xs tabular-nums whitespace-nowrap">
-                                        {{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y') }}
-                                        <span class="block text-[10px] text-neutral-400">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</span>
+                                        {{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
+                                        <span class="block text-[11px] text-neutral-500">{{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->diffForHumans() }}</span>
                                     </td>
                                     <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->cleanliness >= 4 ? 'text-emerald-700' : ($eval->cleanliness <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
                                         {{ $eval->cleanliness }}★
@@ -392,10 +394,10 @@
                                     <td class="py-3.5 px-5">
                                         @if($eval->comment)
                                             <p class="text-xs text-neutral-700 line-clamp-2 max-w-xs font-normal" title="{{ $eval->comment }}">
-                                                "{{ $eval->comment }}"
+                                                “{{ $eval->comment }}”
                                             </p>
                                         @else
-                                            <span class="text-neutral-400 text-xs italic">No comment provided</span>
+                                            <span class="text-neutral-500 text-xs italic">No comment provided</span>
                                         @endif
                                     </td>
                                 </tr>
@@ -406,37 +408,38 @@
                     <!-- Mobile View -->
                     <div class="md:hidden divide-y divide-neutral-100">
                         @foreach($evaluations as $eval)
+                            {{-- CHANGED: date shown in Philippine time, as in the desktop table. --}}
                             @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
                             <div class="p-4 flex flex-col gap-2">
                                 <div class="flex items-center justify-between">
                                     <span class="text-xs font-bold text-neutral-600 tabular-nums">
-                                        {{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y') }}
+                                        {{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                     </span>
                                     <span class="inline-flex items-center gap-1 bg-brand-50 px-2 py-0.5 rounded-md text-xs font-bold text-brand-900 border border-brand-200">
                                         {{ number_format($avg, 1) }}★
                                     </span>
                                 </div>
                                 <div class="grid grid-cols-4 gap-1.5 text-center text-xs">
-                                    <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                        <span class="block text-[9px] font-bold text-neutral-400 uppercase">Clean</span>
+                                    <div class="bg-neutral-50 rounded-md p-1.5">
+                                        <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Clean</span>
                                         <span class="font-bold text-neutral-900">{{ $eval->cleanliness }}★</span>
                                     </div>
-                                    <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                        <span class="block text-[9px] font-bold text-neutral-400 uppercase">Serv</span>
+                                    <div class="bg-neutral-50 rounded-md p-1.5">
+                                        <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Serv</span>
                                         <span class="font-bold text-neutral-900">{{ $eval->service }}★</span>
                                     </div>
-                                    <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                        <span class="block text-[9px] font-bold text-neutral-400 uppercase">Taste</span>
+                                    <div class="bg-neutral-50 rounded-md p-1.5">
+                                        <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Taste</span>
                                         <span class="font-bold text-neutral-900">{{ $eval->taste }}★</span>
                                     </div>
-                                    <div class="bg-neutral-50 rounded-md p-1.5 border border-neutral-100">
-                                        <span class="block text-[9px] font-bold text-neutral-400 uppercase">Price</span>
+                                    <div class="bg-neutral-50 rounded-md p-1.5">
+                                        <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Price</span>
                                         <span class="font-bold text-neutral-900">{{ $eval->price }}★</span>
                                     </div>
                                 </div>
                                 @if($eval->comment)
                                     <p class="text-xs text-neutral-700 bg-neutral-50 p-2.5 rounded-md border border-neutral-200/60 mt-1 italic">
-                                        "{{ $eval->comment }}"
+                                        “{{ $eval->comment }}”
                                     </p>
                                 @endif
                             </div>

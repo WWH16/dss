@@ -124,7 +124,8 @@
                     <div class="p-4 bg-rose-50 border border-rose-200/80 rounded-xl text-rose-800 text-xs">
                         <p class="font-bold mb-1">Please correct the following errors:</p>
                         <ul class="list-disc pl-4 space-y-0.5">
-                            @foreach($errors->all() as $error)
+                            {{-- CHANGED: array_unique so ten missing ratings show one "Please answer all survey statements" line, not ten. --}}
+                            @foreach(array_unique($errors->all()) as $error)
                                 <li>{{ $error }}</li>
                             @endforeach
                         </ul>

@@ -1,6 +1,8 @@
 @extends('layouts.dashboard')
 
-@section('title', 'My Profile | Staff — DSS')
+{{-- CHANGED: replaced the em-dash in the title with a hyphen. --}}
+@section('title', 'My Profile | Staff - DSS')
+{{-- CHANGED (whole file): every rounded-lg became rounded-md (cards stay rounded-xl); font-black became font-bold; field labels, the portal tag, the no-stall note and the password hint went from neutral-400 to neutral-500 (the hint also 10px to 11px). --}}
 @section('header_title', 'My Profile')
 
 @section('content')
@@ -13,7 +15,7 @@
         <div class="p-6 sm:p-8 border-b border-neutral-100 bg-neutral-50/50 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 relative">
             <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
                 {{-- Avatar Circle --}}
-                <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-brand-50 border-2 border-brand-200/80 text-brand-700 font-black text-3xl shadow-xs flex items-center justify-center ring-4 ring-white shrink-0">
+                <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-brand-50 border-2 border-brand-200/80 text-brand-700 font-bold text-3xl shadow-xs flex items-center justify-center ring-4 ring-white shrink-0">
                     {{ strtoupper(substr($profile->name ?? ($profile->email ?? 'S'), 0, 1)) }}
                 </div>
 
@@ -51,12 +53,12 @@
             {{-- Action Buttons --}}
             <div class="flex flex-row sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
                 <button type="button" onclick="openEditProfileModal()" 
-                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     <ion-icon name="create-outline" class="text-sm"></ion-icon>
                     Edit Profile
                 </button>
                 <button type="button" onclick="openChangePasswordModal()" 
-                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200/90 text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200/90 text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     <ion-icon name="lock-closed-outline" class="text-sm text-neutral-500"></ion-icon>
                     Password
                 </button>
@@ -70,13 +72,13 @@
                     <ion-icon name="briefcase-outline" class="text-lg text-brand-700"></ion-icon>
                     Staff &amp; Stall Information
                 </h2>
-                <span class="text-[11px] font-semibold text-neutral-400">ISU DSS Portal</span>
+                <span class="text-[11px] font-semibold text-neutral-500">ISU DSS Portal</span>
             </div>
 
             <dl class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-8 gap-x-8">
                 {{-- Staff Name --}}
                 <div class="group">
-                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1 flex items-center gap-1.5">
+                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
                         <ion-icon name="person-outline" class="text-neutral-400"></ion-icon>
                         Full Name
                     </dt>
@@ -87,7 +89,7 @@
 
                 {{-- Email --}}
                 <div class="group">
-                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1 flex items-center gap-1.5">
+                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
                         <ion-icon name="mail-outline" class="text-neutral-400"></ion-icon>
                         Email
                     </dt>
@@ -98,7 +100,7 @@
 
                 {{-- Assigned Stall --}}
                 <div class="group">
-                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1 flex items-center gap-1.5">
+                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
                         <ion-icon name="storefront-outline" class="text-neutral-400"></ion-icon>
                         Assigned Canteen Stall
                     </dt>
@@ -106,14 +108,14 @@
                         @if(isset($stall) && $stall)
                             {{ $stall->name }}
                         @else
-                            <span class="text-neutral-400 font-normal italic">No stall assigned</span>
+                            <span class="text-neutral-500 font-normal italic">No stall assigned</span>
                         @endif
                     </dd>
                 </div>
 
                 {{-- Role / Account Type --}}
                 <div class="group">
-                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-400 mb-1 flex items-center gap-1.5">
+                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
                         <ion-icon name="shield-checkmark-outline" class="text-neutral-400"></ion-icon>
                         Account Role
                     </dt>
@@ -160,7 +162,7 @@
         {{-- Modal Header --}}
         <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
                     <ion-icon name="create-outline" class="text-base"></ion-icon>
                 </div>
                 <div>
@@ -168,7 +170,7 @@
                     <p class="text-[11px] text-neutral-500">Update your staff account information</p>
                 </div>
             </div>
-            <button type="button" class="js-close-profile-modal text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg transition-colors cursor-pointer" aria-label="Close modal">
+            <button type="button" class="js-close-profile-modal text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
                 <ion-icon name="close-outline" class="text-lg"></ion-icon>
             </button>
         </div>
@@ -181,7 +183,7 @@
             <div>
                 <label for="modal-name" class="block text-xs font-bold text-neutral-700 mb-1.5">Full Name</label>
                 <input type="text" id="modal-name" name="name" value="{{ old('name', $profile->name) }}" required
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('name') border-rose-500 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border @error('name') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 @error('name')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -191,24 +193,24 @@
             <div>
                 <label for="modal-email" class="block text-xs font-bold text-neutral-700 mb-1.5">Email Address</label>
                 <input type="email" id="modal-email" name="email" value="{{ old('email', $profile->email) }}" required
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('email') border-rose-500 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border @error('email') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 @error('email')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
             {{-- Readonly Reference Chips --}}
-            <div class="p-3 rounded-lg bg-neutral-50 border border-neutral-200/70 text-[11px] text-neutral-500 space-y-1">
+            <div class="p-3 rounded-md bg-neutral-50 border border-neutral-200/70 text-[11px] text-neutral-500 space-y-1">
                 <p><strong>Assigned Stall:</strong> {{ $stall->name ?? 'No stall assigned' }} (Managed by Admin)</p>
                 <p><strong>Role:</strong> Canteen Staff</p>
             </div>
 
             {{-- Footer Buttons --}}
             <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" class="js-close-profile-modal px-3.5 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+                <button type="button" class="js-close-profile-modal px-3.5 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
                     Cancel
                 </button>
-                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     <ion-icon name="save-outline" class="text-sm"></ion-icon>
                     Save Changes
                 </button>
@@ -223,7 +225,7 @@
         {{-- Modal Header --}}
         <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-lg bg-neutral-100 border border-neutral-200 text-neutral-700 flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-700 flex items-center justify-center shrink-0">
                     <ion-icon name="lock-closed-outline" class="text-base"></ion-icon>
                 </div>
                 <div>
@@ -231,7 +233,7 @@
                     <p class="text-[11px] text-neutral-500">Update your security credentials</p>
                 </div>
             </div>
-            <button type="button" class="js-close-password-modal text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg transition-colors cursor-pointer" aria-label="Close modal">
+            <button type="button" class="js-close-password-modal text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
                 <ion-icon name="close-outline" class="text-lg"></ion-icon>
             </button>
         </div>
@@ -245,7 +247,7 @@
                 <label for="modal-current-password" class="block text-xs font-bold text-neutral-700 mb-1.5">Current Password</label>
                 <input type="password" id="modal-current-password" name="current_password" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 @error('current_password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -256,8 +258,8 @@
                 <label for="modal-new-password" class="block text-xs font-bold text-neutral-700 mb-1.5">New Password</label>
                 <input type="password" id="modal-new-password" name="password" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                <p class="text-[10px] text-neutral-400 mt-1">Minimum 8 characters with upper &amp; lowercase, a number, and a symbol.</p>
+                    class="w-full px-3 py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <p class="text-[11px] text-neutral-500 mt-1">Minimum 8 characters with upper &amp; lowercase, a number, and a symbol.</p>
                 @error('password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -268,15 +270,16 @@
                 <label for="modal-password-confirmation" class="block text-xs font-bold text-neutral-700 mb-1.5">Confirm New Password</label>
                 <input type="password" id="modal-password-confirmation" name="password_confirmation" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
             </div>
 
             {{-- Footer Buttons --}}
             <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" class="js-close-password-modal px-3.5 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+                <button type="button" class="js-close-password-modal px-3.5 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
                     Cancel
                 </button>
-                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+                {{-- CHANGED: "Update Password" button neutral-900 to brand-600, the same as the student profile and the "Save Changes" button. --}}
+                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
                     Update Password
                 </button>

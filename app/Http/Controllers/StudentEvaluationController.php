@@ -101,24 +101,12 @@ class StudentEvaluationController extends Controller
     {
         $user = Auth::user();
 
-        $request->validate([
-            'stall_id' => [
-                'required',
-                Rule::exists('stalls', 'id')->where(function ($query) {
-                    $query->where('is_active', true);
-                }),
-            ],
-            'comment' => 'nullable|string',
-            'g_recaptcha_response' => [new Recaptcha('evaluation')],
-        ], [
-            'stall_id.exists' => 'The selected food stall is currently closed for student evaluations.',
-        ]);
+        // CHANGED: same role check as index(). The route only requires login, so a staff or admin account could post evaluations and move a stall's ranking.
+        if (!$user || $user->role !== 'student') {
+            return redirect('/login');
+        }
 
-        $responses = $request->responses;
-
-        $criterionTotals = [];
-        $criterionCounts = [];
-
+        // CHANGED: moved above validate() so the rating rules below are built from the same statement list the scores are computed from.
         $displayStatements = [
             1=>'taste',
             2=>'taste',
@@ -131,6 +119,37 @@ class StudentEvaluationController extends Controller
             9=>'service',
             10=>'service',
         ];
+
+        // CHANGED: every statement's rating is now required and must be a whole number from 1 to 5. Before, a missing answer crashed with a 500 error and any number (e.g. 100) was saved and fed into the SAW and AHP rankings.
+        $ratingRules = [];
+        foreach (array_keys($displayStatements) as $id) {
+            $ratingRules["responses.$id"] = 'required|integer|between:1,5';
+        }
+
+        $request->validate([
+            'stall_id' => [
+                'required',
+                Rule::exists('stalls', 'id')->where(function ($query) {
+                    $query->where('is_active', true);
+                }),
+            ],
+            'comment' => 'nullable|string',
+            'g_recaptcha_response' => [new Recaptcha('evaluation')],
+            // CHANGED: rating rules added (see above).
+            'responses' => 'required|array',
+        ] + $ratingRules, [
+            'stall_id.exists' => 'The selected food stall is currently closed for student evaluations.',
+            // CHANGED: plain-language messages for the new rating rules.
+            'responses.required' => 'Please answer all survey statements before submitting.',
+            'responses.*.required' => 'Please answer all survey statements before submitting.',
+            'responses.*.integer' => 'Each rating must be a whole number from 1 to 5.',
+            'responses.*.between' => 'Each rating must be a whole number from 1 to 5.',
+        ]);
+
+        $responses = $request->responses;
+
+        $criterionTotals = [];
+        $criterionCounts = [];
 
         foreach($displayStatements as $id=>$criterion){
 
