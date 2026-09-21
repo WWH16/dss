@@ -1,5 +1,9 @@
 @extends('layouts.dashboard')
-@section('title', 'Staff & Admin Management | Admin — DSS')
+{{-- CHANGED: replaced the em-dash in the title with a hyphen. --}}
+@section('title', 'Staff & Admin Management | Admin - DSS')
+{{-- CHANGED: added header_title so the top bar reads "Staff & Admins" (the sidebar label) instead of the layout default "Dashboard". --}}
+@section('header_title', 'Staff & Admins')
+{{-- CHANGED (whole file): every rounded-lg and plain rounded became rounded-md (cards stay rounded-xl), every 9px and 10px text became 11px, grey helper and label text went from neutral-400 to neutral-500 for contrast, and every sky-* colour (staff avatars, badges and the staff stat icon) became the matching neutral-* shade, so brand green is the only accent. --}}
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
 
@@ -43,7 +47,7 @@
         </div>
         <div class="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
             <button type="button" onclick="openCreateUserModal()"
-                class="btn btn-primary text-xs font-bold px-4 py-2 rounded-lg shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all">
+                class="btn btn-primary text-xs font-bold px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all">
                 <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
                 <span>New Account</span>
             </button>
@@ -66,7 +70,7 @@
         <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Accounts</span>
-                <div class="w-8 h-8 rounded-lg bg-neutral-100 text-neutral-700 flex items-center justify-center">
+                <div class="w-8 h-8 rounded-md bg-neutral-100 text-neutral-700 flex items-center justify-center">
                     <ion-icon name="id-card" class="text-base"></ion-icon>
                 </div>
             </div>
@@ -74,48 +78,48 @@
                 <span class="text-2xl font-bold font-display text-neutral-900">{{ $totalCount }}</span>
                 <span class="text-xs text-neutral-500 font-medium">accounts</span>
             </div>
-            <p class="text-[11px] text-neutral-400 mt-1">{{ $adminCount }} administrators · {{ $staffCount }} canteen staff</p>
+            <p class="text-[11px] text-neutral-500 mt-1">{{ $adminCount }} administrators · {{ $staffCount }} canteen staff</p>
         </div>
 
         {{-- System Administrators Card --}}
         <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold text-brand-800 uppercase tracking-wider">System Administrators</span>
-                <div class="w-8 h-8 rounded-lg bg-brand-50 text-brand-700 border border-brand-200/80 flex items-center justify-center">
+                <div class="w-8 h-8 rounded-md bg-brand-50 text-brand-700 border border-brand-200/80 flex items-center justify-center">
                     <ion-icon name="shield-checkmark" class="text-base"></ion-icon>
                 </div>
             </div>
             <div class="mt-3 flex items-baseline gap-2">
                 <span class="text-2xl font-bold font-display text-neutral-900">{{ $adminCount }}</span>
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 border border-brand-200 text-[10px]">
+                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 border border-brand-200 text-[11px]">
                     Full Access
                 </span>
             </div>
-            <p class="text-[11px] text-neutral-400 mt-1">Full management of stalls, evaluations, and settings</p>
+            <p class="text-[11px] text-neutral-500 mt-1">Full management of stalls, evaluations, and settings</p>
         </div>
 
         {{-- Canteen Staff Card --}}
         <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
             <div class="flex items-center justify-between">
                 <span class="text-[11px] font-bold text-neutral-600 uppercase tracking-wider">Canteen Staff</span>
-                <div class="w-8 h-8 rounded-lg bg-sky-50 text-sky-700 border border-sky-200/80 flex items-center justify-center">
+                <div class="w-8 h-8 rounded-md bg-neutral-50 text-neutral-700 border border-neutral-200/80 flex items-center justify-center">
                     <ion-icon name="storefront" class="text-base"></ion-icon>
                 </div>
             </div>
             <div class="mt-3 flex items-baseline gap-2">
                 <span class="text-2xl font-bold font-display text-neutral-900">{{ $staffCount }}</span>
                 @if($unassignedStaffCount > 0)
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[10px] flex items-center gap-1">
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] flex items-center gap-1">
                         <ion-icon name="alert-circle" class="text-xs"></ion-icon>
                         {{ $unassignedStaffCount }} Unassigned
                     </span>
                 @else
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[10px]">
+                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px]">
                         All Assigned
                     </span>
                 @endif
             </div>
-            <p class="text-[11px] text-neutral-400 mt-1">{{ $assignedStaffCount }} assigned to canteen stalls</p>
+            <p class="text-[11px] text-neutral-500 mt-1">{{ $assignedStaffCount }} assigned to canteen stalls</p>
         </div>
     </div>
 
@@ -134,7 +138,7 @@
                 <div class="flex-1 relative">
                     <ion-icon name="search-outline" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
                     <input type="text" name="q" id="user-search-input" value="{{ request('q') }}" placeholder="Search by name, email, or stall…"
-                        class="w-full pl-9 pr-9 py-2 bg-neutral-50/70 border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
+                        class="w-full pl-9 pr-9 py-2 bg-neutral-50/70 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
                     @if(request('q'))
                         <a href="{{ route('admin.users', array_filter(['role' => $currentRole !== 'all' ? $currentRole : null, 'per_page' => request('per_page')])) }}"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Clear search">
@@ -144,21 +148,22 @@
                 </div>
 
                 {{-- Role Filter Pills --}}
+                {{-- CHANGED: the active pill is brand-700 instead of neutral-900, matching the stalls page. The active "Unassigned" pill was white on amber-500 (about 2.1:1 contrast, unreadable) and is now brand-700 like the others. --}}
                 <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 shrink-0 text-xs">
                     <a href="{{ route('admin.users', array_filter(['q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'all' ? 'font-bold bg-neutral-900 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'all' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
                         All ({{ $totalCount }})
                     </a>
                     <a href="{{ route('admin.users', array_filter(['role' => 'admin', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'admin' ? 'font-bold bg-neutral-900 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'admin' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
                         Admins ({{ $adminCount }})
                     </a>
                     <a href="{{ route('admin.users', array_filter(['role' => 'staff', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'staff' ? 'font-bold bg-neutral-900 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'staff' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
                         Staff ({{ $staffCount }})
                     </a>
                     <a href="{{ route('admin.users', array_filter(['role' => 'unassigned', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-lg transition-all cursor-pointer {{ $currentRole === 'unassigned' ? 'font-bold bg-amber-500 text-white shadow-2xs' : ($unassignedStaffCount > 0 ? 'font-semibold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200') }} flex items-center gap-1">
+                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'unassigned' ? 'font-bold bg-brand-700 text-white shadow-2xs' : ($unassignedStaffCount > 0 ? 'font-semibold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200') }} flex items-center gap-1">
                         @if($unassignedStaffCount > 0 && $currentRole !== 'unassigned')
                             <ion-icon name="alert-circle" class="text-xs text-amber-600"></ion-icon>
                         @endif
@@ -171,7 +176,7 @@
             @if($hasFilters)
                 <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-neutral-100 text-xs">
                     <div class="flex flex-wrap items-center gap-1.5">
-                        <span class="text-neutral-400 font-medium text-[11px]">Active filters:</span>
+                        <span class="text-neutral-500 font-medium text-[11px]">Active filters:</span>
                         @if(request('q'))
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
                                 Search: "{{ request('q') }}"
@@ -182,7 +187,8 @@
                                 Role: {{ ucfirst($currentRole) }}
                             </span>
                         @endif
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                        {{-- CHANGED: result count recoloured from emerald to neutral; emerald is kept for positive status only. --}}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-800 text-[11px] font-bold tabular-nums">
                             {{ $users->total() }} {{ Str::plural('result', $users->total()) }}
                         </span>
                     </div>
@@ -200,22 +206,23 @@
     <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs overflow-hidden">
         @if($users->isEmpty())
             <div class="p-16 text-center">
-                <div class="w-14 h-14 rounded-full bg-neutral-100 text-neutral-400 flex items-center justify-center mx-auto mb-3">
+                {{-- CHANGED: empty-state icon neutral-400 on neutral-100 to brand-700 on brand-50, like the other admin empty states. --}}
+                <div class="w-14 h-14 rounded-full bg-brand-50 text-brand-700 flex items-center justify-center mx-auto mb-3">
                     <ion-icon name="people-outline" class="text-2xl"></ion-icon>
                 </div>
                 <h3 class="text-sm font-bold text-neutral-800">
                     {{ $hasFilters ? 'No accounts found' : 'No staff or admin accounts yet' }}
                 </h3>
-                <p class="text-xs text-neutral-400 mt-1 max-w-sm mx-auto">
+                <p class="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">
                     {{ $hasFilters ? 'No accounts matched your search or role filters. Try adjusting your search query.' : 'Get started by creating your first administrator or staff account.' }}
                 </p>
                 @if($hasFilters)
-                    <a href="{{ route('admin.users') }}" class="btn btn-primary btn-sm text-xs font-bold px-4 py-2 rounded-lg mt-4 inline-flex items-center gap-1.5 shadow-2xs">
+                    <a href="{{ route('admin.users') }}" class="btn btn-primary btn-sm text-xs font-bold px-4 py-2 rounded-md mt-4 inline-flex items-center gap-1.5 shadow-2xs">
                         <ion-icon name="refresh-outline" class="text-sm"></ion-icon>
                         <span>Reset Filters</span>
                     </a>
                 @else
-                    <button type="button" onclick="openCreateUserModal()" class="btn btn-primary text-xs font-bold px-4 py-2 rounded-lg mt-4 inline-flex items-center gap-1.5 shadow-2xs">
+                    <button type="button" onclick="openCreateUserModal()" class="btn btn-primary text-xs font-bold px-4 py-2 rounded-md mt-4 inline-flex items-center gap-1.5 shadow-2xs">
                         <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
                         <span>Create Account</span>
                     </button>
@@ -252,19 +259,20 @@
                                 {{-- User Column --}}
                                 <td class="px-5 py-3.5">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full {{ $isAdmin ? 'bg-brand-100 text-brand-800 border border-brand-200/70' : 'bg-sky-100 text-sky-800 border border-sky-200/70' }} flex items-center justify-center font-bold text-xs shrink-0 font-display">
+                                        <div class="w-9 h-9 rounded-full {{ $isAdmin ? 'bg-brand-100 text-brand-800 border border-brand-200/70' : 'bg-neutral-100 text-neutral-800 border border-neutral-200/70' }} flex items-center justify-center font-bold text-xs shrink-0 font-display">
                                             {{ strtoupper(substr($u->name, 0, 1)) }}
                                         </div>
                                         <div class="min-w-0">
                                             <div class="text-xs font-bold text-neutral-900 truncate flex items-center gap-1.5">
                                                 <span>{{ $u->name }}</span>
                                                 @if($isCurrentUser)
-                                                    <span class="text-[9px] font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-200/80">YOU</span>
+                                                    <span class="text-[11px] font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200/80">YOU</span>
                                                 @endif
                                             </div>
                                             <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-neutral-500">
                                                 <span class="truncate font-mono">{{ $u->email }}</span>
-                                                <button type="button" onclick="copyToClipboard('{{ $u->email }}', this)" class="text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer" title="Copy email">
+                                                {{-- CHANGED: Js::from() for the email. It was inserted raw between single quotes, so an address with an apostrophe (valid, e.g. o'neil@...) broke the button. --}}
+                                                <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }}, this)" class="text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer" title="Copy email">
                                                     <ion-icon name="copy-outline" class="text-xs leading-none"></ion-icon>
                                                 </button>
                                             </div>
@@ -280,8 +288,8 @@
                                             <span>Administrator</span>
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200/80">
-                                            <ion-icon name="person" class="text-xs text-sky-600"></ion-icon>
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-neutral-50 text-neutral-800 border border-neutral-200/80">
+                                            <ion-icon name="person" class="text-xs text-neutral-600"></ion-icon>
                                             <span>Canteen Staff</span>
                                         </span>
                                     @endif
@@ -290,7 +298,7 @@
                                 {{-- Stall Assignment Column --}}
                                 <td class="px-5 py-3.5">
                                     @if($isAdmin)
-                                        <span class="text-neutral-400 text-xs font-medium flex items-center gap-1.5">
+                                        <span class="text-neutral-500 text-xs font-medium flex items-center gap-1.5">
                                             <ion-icon name="globe-outline" class="text-xs text-neutral-400"></ion-icon>
                                             <span>System-wide</span>
                                         </span>
@@ -300,7 +308,7 @@
                                             <span class="truncate max-w-[200px]" title="{{ $u->stall_name }}">{{ $u->stall_name }}</span>
                                         </div>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
                                             <ion-icon name="alert-circle" class="text-xs text-amber-600"></ion-icon>
                                             <span>Unassigned</span>
                                         </span>
@@ -308,17 +316,19 @@
                                 </td>
 
                                 {{-- Created Date Column --}}
+                                {{-- CHANGED: created_at is stored in UTC; shown in Philippine time, as on the printable report. --}}
                                 <td class="px-5 py-3.5">
                                     <span class="text-xs text-neutral-600 font-medium">
-                                        {{ \Carbon\Carbon::parse($u->created_at)->format('M d, Y') }}
+                                        {{ \Carbon\Carbon::parse($u->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                     </span>
                                 </td>
 
                                 {{-- Actions Column --}}
+                                {{-- CHANGED: Edit and Delete pass name and email through Js::from() instead of quoted addslashes() output, the same fix as the stalls page. --}}
                                 <td class="px-5 py-3.5 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <button type="button"
-                                            onclick="openEditUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ addslashes($u->email) }}', '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
+                                            onclick="openEditUserModal({{ $u->id }}, {{ Js::from($u->name) }}, {{ Js::from($u->email) }}, '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
                                             class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold text-neutral-700 hover:text-neutral-900 bg-neutral-50 hover:bg-neutral-100 border border-neutral-200 transition-all cursor-pointer">
                                             <ion-icon name="create-outline" class="text-sm text-neutral-500"></ion-icon>
                                             <span>Edit</span>
@@ -326,13 +336,13 @@
 
                                         @if(!$isCurrentUser)
                                             <button type="button"
-                                                onclick="openDeleteUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ $u->role }}')"
+                                                onclick="openDeleteUserModal({{ $u->id }}, {{ Js::from($u->name) }}, '{{ $u->role }}')"
                                                 class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50/50 hover:bg-red-50 border border-red-200/70 transition-all cursor-pointer">
                                                 <ion-icon name="trash-outline" class="text-sm"></ion-icon>
                                                 <span>Delete</span>
                                             </button>
                                         @else
-                                            <span class="inline-flex items-center px-2 py-1 rounded text-[10px] font-bold bg-neutral-100 text-neutral-500">
+                                            <span class="inline-flex items-center px-2 py-1 rounded-md text-[11px] font-bold bg-neutral-100 text-neutral-500">
                                                 Current User
                                             </span>
                                         @endif
@@ -361,14 +371,14 @@
 
                         <div class="flex items-start justify-between gap-3">
                             <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full {{ $isAdmin ? 'bg-brand-100 text-brand-800 border border-brand-200' : 'bg-sky-100 text-sky-800 border border-sky-200' }} flex items-center justify-center font-bold text-sm shrink-0 font-display">
+                                <div class="w-10 h-10 rounded-full {{ $isAdmin ? 'bg-brand-100 text-brand-800 border border-brand-200' : 'bg-neutral-100 text-neutral-800 border border-neutral-200' }} flex items-center justify-center font-bold text-sm shrink-0 font-display">
                                     {{ strtoupper(substr($u->name, 0, 1)) }}
                                 </div>
                                 <div>
                                     <div class="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
                                         <span>{{ $u->name }}</span>
                                         @if($isCurrentUser)
-                                            <span class="text-[9px] font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded border border-brand-200">YOU</span>
+                                            <span class="text-[11px] font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200">YOU</span>
                                         @endif
                                     </div>
                                     <div class="text-xs text-neutral-500 font-mono mt-0.5">{{ $u->email }}</div>
@@ -376,11 +386,11 @@
                             </div>
                             <div>
                                 @if($isAdmin)
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-brand-50 text-brand-800 border border-brand-200">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-800 border border-brand-200">
                                         Admin
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-neutral-50 text-neutral-800 border border-neutral-200">
                                         Staff
                                     </span>
                                 @endif
@@ -389,7 +399,7 @@
 
                         {{-- Stall Details for Mobile --}}
                         <div class="flex items-center justify-between text-xs pt-2 border-t border-neutral-100 text-neutral-600">
-                            <span class="text-[11px] text-neutral-400 font-semibold">Assignment:</span>
+                            <span class="text-[11px] text-neutral-500 font-semibold">Assignment:</span>
                             @if($isAdmin)
                                 <span class="font-medium text-neutral-500">System-wide</span>
                             @elseif($isAssigned)
@@ -398,23 +408,24 @@
                                     {{ $u->stall_name }}
                                 </span>
                             @else
-                                <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
+                                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
                                     Unassigned
                                 </span>
                             @endif
                         </div>
 
                         {{-- Actions for Mobile --}}
+                        {{-- CHANGED: Js::from() for the name and email arguments, as in the desktop table. --}}
                         <div class="flex items-center justify-end gap-2 pt-1">
                             <button type="button"
-                                onclick="openEditUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ addslashes($u->email) }}', '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
-                                class="btn btn-ghost text-xs font-semibold px-3 py-1.5 rounded border border-neutral-200 text-neutral-700">
+                                onclick="openEditUserModal({{ $u->id }}, {{ Js::from($u->name) }}, {{ Js::from($u->email) }}, '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
+                                class="btn btn-ghost text-xs font-semibold px-3 py-1.5 rounded-md border border-neutral-200 text-neutral-700">
                                 Edit
                             </button>
                             @if(!$isCurrentUser)
                                 <button type="button"
-                                    onclick="openDeleteUserModal({{ $u->id }}, '{{ addslashes($u->name) }}', '{{ $u->role }}')"
-                                    class="text-xs font-semibold px-3 py-1.5 rounded bg-red-50 text-red-600 border border-red-200">
+                                    onclick="openDeleteUserModal({{ $u->id }}, {{ Js::from($u->name) }}, '{{ $u->role }}')"
+                                    class="text-xs font-semibold px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-200">
                                     Delete
                                 </button>
                             @endif
@@ -433,8 +444,8 @@
 
                     {{-- Per Page Selector --}}
                     <div class="flex items-center gap-1.5 border-l border-neutral-200 pl-3">
-                        <label for="per_page_select" class="text-[11px] font-bold text-neutral-400 uppercase">Per Page</label>
-                        <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
+                        <label for="per_page_select" class="text-[11px] font-bold text-neutral-500 uppercase">Per Page</label>
+                        <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded-md px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
                             @foreach([10, 25, 50] as $size)
                                 <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" {{ $users->perPage() == $size ? 'selected' : '' }}>
                                     {{ $size }}
@@ -448,12 +459,12 @@
                 <div class="flex items-center gap-1 order-1 sm:order-2">
                     {{-- Previous Page Link --}}
                     @if($users->onFirstPage())
-                        <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                        <span class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
                             <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
                             Previous
                         </span>
                     @else
-                        <a href="{{ $users->previousPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                        <a href="{{ $users->previousPageUrl() }}" class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
                             <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
                             Previous
                         </a>
@@ -464,17 +475,17 @@
                         @if($users->hasPages())
                             @foreach($users->getUrlRange(max(1, $users->currentPage() - 2), min($users->lastPage(), $users->currentPage() + 2)) as $page => $url)
                                 @if($page == $users->currentPage())
-                                    <span class="w-8 h-8 rounded-lg bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                                    <span class="w-8 h-8 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
                                         {{ $page }}
                                     </span>
                                 @else
-                                    <a href="{{ $url }}" class="w-8 h-8 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs flex items-center justify-center transition-colors">
+                                    <a href="{{ $url }}" class="w-8 h-8 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs flex items-center justify-center transition-colors">
                                         {{ $page }}
                                     </a>
                                 @endif
                             @endforeach
                         @else
-                            <span class="w-8 h-8 rounded-lg bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                            <span class="w-8 h-8 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
                                 1
                             </span>
                         @endif
@@ -482,12 +493,12 @@
 
                     {{-- Next Page Link --}}
                     @if($users->hasMorePages())
-                        <a href="{{ $users->nextPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                        <a href="{{ $users->nextPageUrl() }}" class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
                             Next
                             <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
                         </a>
                     @else
-                        <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                        <span class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
                             Next
                             <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
                         </span>
@@ -508,12 +519,12 @@
     {{-- Modal Header --}}
     <div class="px-5 py-3.5 bg-neutral-50/80 border-b border-neutral-100 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-brand-50 border border-brand-200/80 text-brand-700 flex items-center justify-center shrink-0">
+            <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200/80 text-brand-700 flex items-center justify-center shrink-0">
                 <ion-icon name="person-add-outline" class="text-base"></ion-icon>
             </div>
             <h3 id="create-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Create Account</h3>
         </div>
-        <button type="button" onclick="closeCreateUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg transition-colors cursor-pointer" aria-label="Close modal">
+        <button type="button" onclick="closeCreateUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
             <ion-icon name="close-outline" class="text-lg"></ion-icon>
         </button>
     </div>
@@ -523,7 +534,7 @@
 
         <div class="p-5 space-y-3.5">
             {{-- General Error Box --}}
-            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-lg text-xs text-rose-800 flex items-center gap-2">
+            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-md text-xs text-rose-800 flex items-center gap-2">
                 <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
                 <span class="leading-tight font-medium"></span>
             </div>
@@ -533,7 +544,7 @@
                 <label class="block text-xs font-bold text-neutral-700 mb-1.5">
                     Account Role <span class="text-red-500">*</span>
                 </label>
-                <div class="grid grid-cols-2 p-1 bg-neutral-100/90 rounded-lg border border-neutral-200/80 gap-1 text-xs">
+                <div class="grid grid-cols-2 p-1 bg-neutral-100/90 rounded-md border border-neutral-200/80 gap-1 text-xs">
                     <button type="button" id="create-role-admin-btn" onclick="toggleCreateRole('admin')"
                         class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer">
                         <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
@@ -555,10 +566,10 @@
             {{-- Dynamic Stall Assignment Selector (for staff) --}}
             <div id="create-stall-container" class="hidden space-y-1.5">
                 <label for="create_stall_id" class="block text-xs font-bold text-neutral-700">
-                    Assigned Stall <span class="text-neutral-400 font-normal">(Optional)</span>
+                    Assigned Stall <span class="text-neutral-500 font-normal">(Optional)</span>
                 </label>
                 <select id="create_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="">-- Unassigned (Assign Later) --</option>
                     @foreach($stalls as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -576,7 +587,7 @@
                     Full Name <span class="text-red-500">*</span>
                 </label>
                 <input type="text" id="create_name" name="name" placeholder="e.g. Maria Santos" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
                     <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
                     <span></span>
@@ -589,7 +600,7 @@
                     Email Address <span class="text-red-500">*</span>
                 </label>
                 <input type="email" id="create_email" name="email" placeholder="e.g. maria@isu.edu.ph" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
                     <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
                     <span></span>
@@ -604,7 +615,7 @@
                     </label>
                     <div class="relative">
                         <input type="password" id="create_password" name="password" placeholder="••••••••" required
-                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                         <button type="button" onclick="togglePasswordVisibility('create_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Toggle password visibility">
                             <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
                         </button>
@@ -620,7 +631,7 @@
                     </label>
                     <div class="relative">
                         <input type="password" id="create_password_confirmation" name="password_confirmation" placeholder="••••••••" required
-                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                         <button type="button" onclick="togglePasswordVisibility('create_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Toggle password visibility">
                             <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
                         </button>
@@ -631,15 +642,15 @@
                     </p>
                 </div>
             </div>
-            <p class="text-[10px] text-neutral-400 -mt-1">Min. 8 characters with letters, numbers & symbols.</p>
+            <p class="text-[11px] text-neutral-500 -mt-1">Min. 8 characters with letters, numbers & symbols.</p>
         </div>
 
         {{-- Form Footer Actions --}}
         <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeCreateUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+            <button type="button" onclick="closeCreateUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
                 Cancel
             </button>
-            <button type="submit" id="create-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+            <button type="submit" id="create-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                 <ion-icon name="person-add" class="text-sm"></ion-icon>
                 <span>Create Account</span>
             </button>
@@ -656,12 +667,12 @@
     {{-- Modal Header --}}
     <div class="px-5 py-3.5 bg-neutral-50/80 border-b border-neutral-100 flex items-center justify-between">
         <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-lg bg-neutral-100 border border-neutral-200/80 text-neutral-700 flex items-center justify-center shrink-0">
+            <div class="w-8 h-8 rounded-md bg-neutral-100 border border-neutral-200/80 text-neutral-700 flex items-center justify-center shrink-0">
                 <ion-icon name="create-outline" class="text-base"></ion-icon>
             </div>
             <h3 id="edit-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Edit Account</h3>
         </div>
-        <button type="button" onclick="closeEditUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-lg transition-colors cursor-pointer" aria-label="Close modal">
+        <button type="button" onclick="closeEditUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
             <ion-icon name="close-outline" class="text-lg"></ion-icon>
         </button>
     </div>
@@ -672,7 +683,7 @@
 
         <div class="p-5 space-y-3.5">
             {{-- General Error Box --}}
-            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-lg text-xs text-rose-800 flex items-center gap-2">
+            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-md text-xs text-rose-800 flex items-center gap-2">
                 <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
                 <span class="leading-tight font-medium"></span>
             </div>
@@ -683,7 +694,7 @@
                     Role <span class="text-red-500">*</span>
                 </label>
                 <select id="edit_role" name="role" onchange="toggleEditRole(this.value)"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="admin">Administrator</option>
                     <option value="staff">Canteen Staff</option>
                 </select>
@@ -691,7 +702,7 @@
                     <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
                     <span></span>
                 </p>
-                <div id="edit-self-warning" class="hidden mt-2 p-2 bg-amber-50 border border-amber-200/80 rounded-lg text-[11px] text-amber-800 flex items-center gap-1.5">
+                <div id="edit-self-warning" class="hidden mt-2 p-2 bg-amber-50 border border-amber-200/80 rounded-md text-[11px] text-amber-800 flex items-center gap-1.5">
                     <ion-icon name="information-circle" class="text-sm shrink-0 text-amber-600"></ion-icon>
                     <span>You are editing your own account. Role cannot be changed.</span>
                 </div>
@@ -703,7 +714,7 @@
                     Assigned Canteen Stall
                 </label>
                 <select id="edit_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="">-- Unassigned (No Stall) --</option>
                     @foreach($stalls as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -721,7 +732,7 @@
                     Full Name <span class="text-red-500">*</span>
                 </label>
                 <input type="text" id="edit_name" name="name" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
                     <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
                     <span></span>
@@ -734,7 +745,7 @@
                     Email Address <span class="text-red-500">*</span>
                 </label>
                 <input type="email" id="edit_email" name="email" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                 <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
                     <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
                     <span></span>
@@ -748,14 +759,14 @@
                     <span id="edit-pwd-toggle-text">Change Account Password</span>
                 </button>
 
-                <div id="edit-password-fields" class="hidden space-y-2.5 mt-2.5 p-3 bg-neutral-50 rounded-lg border border-neutral-200/80">
-                    <p class="text-[10px] text-neutral-400">Leave blank to keep existing password.</p>
+                <div id="edit-password-fields" class="hidden space-y-2.5 mt-2.5 p-3 bg-neutral-50 rounded-md border border-neutral-200/80">
+                    <p class="text-[11px] text-neutral-500">Leave blank to keep existing password.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
-                            <label for="edit_password" class="block text-[10px] font-bold text-neutral-600 uppercase mb-1">New Password</label>
+                            <label for="edit_password" class="block text-[11px] font-bold text-neutral-600 uppercase mb-1">New Password</label>
                             <div class="relative">
                                 <input type="password" id="edit_password" name="password" placeholder="••••••••"
-                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded text-xs font-medium focus:outline-none focus:border-brand-700">
+                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
                                 <button type="button" onclick="togglePasswordVisibility('edit_password', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
                                     <ion-icon name="eye-outline" class="text-xs leading-none"></ion-icon>
                                 </button>
@@ -766,10 +777,10 @@
                             </p>
                         </div>
                         <div>
-                            <label for="edit_password_confirmation" class="block text-[10px] font-bold text-neutral-600 uppercase mb-1">Confirm</label>
+                            <label for="edit_password_confirmation" class="block text-[11px] font-bold text-neutral-600 uppercase mb-1">Confirm</label>
                             <div class="relative">
                                 <input type="password" id="edit_password_confirmation" name="password_confirmation" placeholder="••••••••"
-                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded text-xs font-medium focus:outline-none focus:border-brand-700">
+                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
                                 <button type="button" onclick="togglePasswordVisibility('edit_password_confirmation', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
                                     <ion-icon name="eye-outline" class="text-xs leading-none"></ion-icon>
                                 </button>
@@ -786,10 +797,10 @@
 
         {{-- Form Footer Actions --}}
         <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeEditUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+            <button type="button" onclick="closeEditUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
                 Cancel
             </button>
-            <button type="submit" id="edit-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+            <button type="submit" id="edit-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                 <ion-icon name="save-outline" class="text-sm"></ion-icon>
                 <span>Save Changes</span>
             </button>
@@ -812,12 +823,12 @@
             </div>
         </div>
 
-        <div class="mt-4 p-3 bg-rose-50/70 border border-rose-200/70 rounded-lg text-xs text-rose-800 leading-relaxed">
+        <div class="mt-4 p-3 bg-rose-50/70 border border-rose-200/70 rounded-md text-xs text-rose-800 leading-relaxed">
             This will permanently delete the account and revoke all access. This action cannot be undone.
         </div>
 
         {{-- General Error Box for Delete --}}
-        <div data-general-error class="general-error-box hidden mt-3 p-2.5 bg-rose-100/90 border border-rose-300 rounded-lg text-xs text-rose-900 flex items-center gap-2">
+        <div data-general-error class="general-error-box hidden mt-3 p-2.5 bg-rose-100/90 border border-rose-300 rounded-md text-xs text-rose-900 flex items-center gap-2">
             <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
             <span class="leading-tight font-medium"></span>
         </div>
@@ -828,10 +839,10 @@
         @method('DELETE')
 
         <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeDeleteUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-lg transition-colors cursor-pointer">
+            <button type="button" onclick="closeDeleteUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
                 Cancel
             </button>
-            <button type="submit" id="delete-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition-colors shadow-2xs cursor-pointer">
+            <button type="submit" id="delete-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                 <ion-icon name="trash-outline" class="text-sm"></ion-icon>
                 <span>Delete Account</span>
             </button>
@@ -847,6 +858,11 @@
     var searchTimeout = null;
 
     if (searchInput && filterForm) {
+        // CHANGED: after the debounced auto-submit reloads the page, put focus and the caret back at the end of the search box. Before, focus was lost on reload, so anything typed next went nowhere.
+        if (searchInput.value) {
+            searchInput.focus();
+            searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
+        }
         searchInput.addEventListener('input', function() {
             clearTimeout(searchTimeout);
             searchTimeout = setTimeout(function() {
