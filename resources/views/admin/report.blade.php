@@ -339,7 +339,7 @@
             <header class="letterhead">
                 <img src="{{ asset('assets/images/isu_logo.png') }}" alt="Isabela State University seal">
                 <div>
-                    <p class="lh-small">Republic of the Philippines</p>
+                    {{-- CHANGED: removed the "Republic of the Philippines" line above the university name. --}}
                     <p class="lh-name">Isabela State University</p>
                     <p class="lh-campus">Cauayan City Campus</p>
                 </div>
