@@ -118,7 +118,6 @@
 
         /* ── Paper ─────────────────────────────────────── */
         .sheet-wrap { min-width: 0; }
-        .sheet-note { max-width: 210mm; margin: 0 auto 10px; font-size: 12px; color: var(--ink-2); display: flex; justify-content: space-between; gap: 12px; }
         .sheet {
             width: 210mm;
             max-width: 100%;
@@ -212,7 +211,6 @@
             .letterhead { grid-template-columns: auto 1fr; }
             .lh-right { display: none; }
             .chart { grid-template-columns: minmax(0, 7rem) 1fr 3rem; }
-            .sheet-note { flex-direction: column; gap: 2px; }
         }
 
         @page {
@@ -223,7 +221,7 @@
         }
         @media print {
             body { background: #fff; }
-            .panel, .sheet-note { display: none !important; }
+            .panel { display: none !important; }
             .desk { display: block; padding: 0; }
             .sheet-wrap { padding: 0; }
             .sheet { width: auto; min-height: 0; padding: 0; margin: 0; box-shadow: none; }
@@ -329,11 +327,6 @@
     </aside>
 
     <div class="sheet-wrap">
-        <p class="sheet-note">
-            <span>A4 preview. Page breaks and page numbers appear in the print dialog.</span>
-            <span>Turn off the browser's "Headers and footers" option for a clean page.</span>
-        </p>
-
         <article class="sheet">
             <header class="letterhead">
                 <img src="{{ asset('assets/images/isu_logo.png') }}" alt="Isabela State University seal">
