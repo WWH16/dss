@@ -33,12 +33,14 @@
         {{-- Action Button Group --}}
         <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 no-print">
             {{-- CHANGED: was a button calling window.print() on the dashboard; now opens the dedicated report page with print options. --}}
-            <a href="{{ route('admin.report') }}" class="btn btn-secondary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50 cursor-pointer">
-                <ion-icon name="print-outline" class="text-sm text-neutral-600"></ion-icon>
+            {{-- CHANGED: dropped the Tailwind size, border and shadow utilities, which the unlayered .btn rule overrode; .btn-secondary now supplies the white fill and border. Icon tinted brand green. --}}
+            <a href="{{ route('admin.report') }}" class="btn btn-secondary font-bold">
+                <ion-icon name="print-outline" class="text-base text-brand-700"></ion-icon>
                 Print Report
             </a>
-            <a href="{{ route('admin.stalls') }}" class="btn btn-primary text-xs px-3.5 py-2 rounded-lg font-bold inline-flex items-center gap-1.5 shadow-2xs">
-                <ion-icon name="add-circle-outline" class="text-sm"></ion-icon>
+            {{-- CHANGED: dropped the same dead size utilities so both header buttons share one size from .btn. --}}
+            <a href="{{ route('admin.stalls') }}" class="btn btn-primary font-bold">
+                <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
                 Manage Stalls
             </a>
         </div>
@@ -59,7 +61,8 @@
                     </p>
                 </div>
             </div>
-            <a href="{{ route('admin.evaluations') }}" class="btn text-[11px] font-bold px-3 py-1.5 bg-amber-200/80 hover:bg-amber-300/80 text-amber-900 border border-amber-300 rounded-md self-start sm:self-auto shrink-0">
+            {{-- CHANGED: added btn-sm for a smaller size, and marked the amber border important because .btn reset it to transparent. --}}
+            <a href="{{ route('admin.evaluations') }}" class="btn btn-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300! self-start sm:self-auto shrink-0">
                 Review Evaluations
             </a>
         </div>
