@@ -602,6 +602,29 @@
     </div>
 </dialog>
 
+{{-- CHANGED: added a styled confirmation dialog for removing a staff member from a stall; it replaces the browser's native confirm() popup, which did not match the other modals on this page. --}}
+<dialog id="unassign-confirm-modal" class="confirm-modal relative" aria-labelledby="unassign-modal-title">
+    <div class="flex items-start gap-3.5 mb-4">
+        <div class="flex-shrink-0 w-9 h-9 rounded-md bg-red-50 border border-red-200/80 flex items-center justify-center text-red-700">
+            <ion-icon name="person-remove-outline" class="text-lg text-red-700" aria-hidden="true"></ion-icon>
+        </div>
+        <div>
+            <h3 id="unassign-modal-title" class="text-sm font-bold text-neutral-900 leading-tight mb-1">Remove Staff Member?</h3>
+            <p class="text-neutral-500 text-xs leading-relaxed">
+                Remove <strong id="unassign-staff-name" class="text-neutral-900 font-semibold"></strong> from <strong id="unassign-stall-name" class="text-neutral-900 font-semibold"></strong>? The staff account will become unassigned.
+            </p>
+        </div>
+    </div>
+    <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
+        <button type="button" id="unassign-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
+        <button type="button" id="confirm-unassign-btn"
+            class="btn btn-sm text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 rounded-md flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
+            <ion-icon name="person-remove-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
+            <span>Yes, Remove</span>
+        </button>
+    </div>
+</dialog>
+
 @section('scripts')
 <script>
 // Helper for spinning SVG icon
@@ -919,12 +942,37 @@ function escapeHtml(str) {
     return div.innerHTML;
 }
 
-function triggerUnassignStaff(staffId, staffName) {
-    if (isSubmittingAction) return;
+// CHANGED: opens the styled confirmation dialog instead of calling confirm(); the removal itself moved to performUnassignStaff(), which runs when "Yes, Remove" is clicked.
+var unassignModal      = document.getElementById('unassign-confirm-modal');
+var unassignConfirmBtn = document.getElementById('confirm-unassign-btn');
+var unassignCancelBtn  = document.getElementById('unassign-modal-cancel-btn');
+var pendingUnassignId  = null;
 
-    if (!confirm('Remove ' + staffName + ' from ' + currentRosterStallName + '? The staff account will become unassigned.')) {
-        return;
-    }
+function triggerUnassignStaff(staffId, staffName) {
+    if (isSubmittingAction || !unassignModal) return;
+
+    pendingUnassignId = staffId;
+    document.getElementById('unassign-staff-name').textContent = staffName;
+    document.getElementById('unassign-stall-name').textContent = currentRosterStallName;
+    unassignModal.showModal();
+}
+
+if (unassignModal) {
+    unassignCancelBtn.addEventListener('click', function() { unassignModal.close(); });
+    unassignModal.addEventListener('click', function(e) {
+        var r = unassignModal.getBoundingClientRect();
+        if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
+            unassignModal.close();
+        }
+    });
+    unassignConfirmBtn.addEventListener('click', function() {
+        unassignModal.close();
+        if (pendingUnassignId !== null) performUnassignStaff(pendingUnassignId);
+    });
+}
+
+function performUnassignStaff(staffId) {
+    if (isSubmittingAction) return;
 
     isSubmittingAction = true;
 

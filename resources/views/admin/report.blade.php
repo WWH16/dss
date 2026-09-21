@@ -142,7 +142,7 @@
 
         .letterhead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; }
         .letterhead img { width: 60px; height: 60px; object-fit: contain; }
-        .lh-small { margin: 0; font-size: 8.5pt; color: var(--ink-2); }
+        {{-- CHANGED: removed the .lh-small rule; its only user, the "Republic of the Philippines" line, was removed from the letterhead. --}}
         .lh-name { margin: 1px 0 0; font-family: 'Sora', sans-serif; font-size: 14pt; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; color: var(--brand-deep); line-height: 1.15; }
         .lh-campus { margin: 1px 0 0; font-size: 9.5pt; font-weight: 600; }
         .lh-right { text-align: right; font-size: 8.5pt; color: var(--ink-2); line-height: 1.35; }
