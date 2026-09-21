@@ -380,7 +380,7 @@ class AdminController extends Controller
             'totals'          => $totals,
             'attention'       => $attention,
             'preparedBy'      => $preparedBy,
-            'autoPrint'       => $request->boolean('print'),
+            // CHANGED: removed 'autoPrint'. The page now prints from the live preview, so print=1 is never sent.
         ]);
     }
 

@@ -101,10 +101,17 @@
         .actions {
             position: sticky; bottom: 0; margin: auto -22px 0; padding: 14px 22px 18px;
             background: var(--panel); border-top: 1px solid var(--rule);
-            display: grid; grid-template-columns: 1fr 1.3fr; gap: 8px;
+            /* CHANGED: one full-width Print button, since Apply was removed. */
+            display: grid; grid-template-columns: 1fr; gap: 8px;
         }
-        .stale { grid-column: 1 / -1; margin: 0 0 2px; font-size: 12px; font-weight: 600; color: var(--low); display: none; }
-        form[data-dirty="true"] .stale { display: block; }
+        /* ADDED: range hint shown while a custom range is incomplete or reversed. */
+        .range-hint { grid-column: 1 / -1; margin: 2px 0 0; font-size: 12px; font-weight: 600; color: var(--low); }
+        .range-hint[hidden] { display: none; }
+        /* ADDED: the paper dims slightly while a new preview is loading. */
+        .sheet { transition: opacity .12s ease-out; }
+        .sheet[aria-busy="true"] { opacity: .55; }
+        /* ADDED: visually hidden status text read out by screen readers when the preview updates. */
+        .sr-status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); white-space: nowrap; }
         .btn {
             display: inline-flex; align-items: center; justify-content: center; gap: 8px;
             padding: 10px 14px; border-radius: 8px; font-size: 13.5px; font-weight: 700; cursor: pointer;
@@ -242,7 +249,8 @@
                 Back to Overview
             </a>
             <h1 class="panel-title">Print report</h1>
-            <p class="panel-sub">Choose what goes on paper. The preview updates when you apply changes.</p>
+            {{-- CHANGED: copy now says the preview updates on its own. --}}
+            <p class="panel-sub">Choose what goes on paper. The preview updates as you change options.</p>
             @if ($errors->any())
                 <div class="errors" role="alert">
                     <ul>
@@ -280,7 +288,7 @@
 
             <fieldset>
                 <legend>
-                    <span>Stalls <span class="muted" style="font-weight:500">({{ count($selectedIds) }} of {{ $allStalls->count() }})</span></span>
+                    <span>Stalls <span class="muted" id="stallCount" style="font-weight:500">({{ count($selectedIds) }} of {{ $allStalls->count() }})</span></span>
                     <span class="quick">
                         <button type="button" data-check="stalls" data-state="1">All</button>
                         <button type="button" data-check="stalls" data-state="0">None</button>
@@ -315,10 +323,10 @@
             </fieldset>
 
 
+            {{-- CHANGED: removed the Apply button and the "out of date" note; the preview now refreshes on every change. --}}
             <div class="actions">
-                <p class="stale" role="status">Preview is out of date. Apply or print to refresh it.</p>
-                <button type="submit" class="btn">Apply</button>
-                <button type="submit" name="print" value="1" class="btn btn-primary">
+                {{-- CHANGED: dropped name="print" value="1"; nothing reads it now that auto-print on reload is gone. --}}
+                <button type="submit" class="btn btn-primary">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9V3h12v6"/><rect x="6" y="14" width="12" height="7" rx="1"/><path d="M6 18H4a1 1 0 0 1-1-1v-6a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v6a1 1 0 0 1-1 1h-2"/></svg>
                     Print report
                 </button>
@@ -497,30 +505,129 @@
         dates.forEach(function (d) { d.disabled = !on; });
     }
 
+    // ADDED: live preview. Each change fetches this same page with the new options and
+    // swaps in only the paper, the stall count and the tab title. The address bar is
+    // updated too, so a refresh or bookmark keeps the chosen options.
+    var sheet = document.querySelector('.sheet');
+    var stallCount = document.getElementById('stallCount');
+    var hint = document.createElement('p');
+    hint.className = 'range-hint';
+    hint.hidden = true;
+    hint.textContent = 'Pick a start and end date, with the end on or after the start.';
+    range.appendChild(hint);
+
+    // ADDED: polite screen reader announcement after each preview update.
+    var status = document.createElement('p');
+    status.className = 'sr-status';
+    status.setAttribute('role', 'status');
+    status.setAttribute('aria-live', 'polite');
+    document.querySelector('.panel').appendChild(status);
+
+    var timer = null;
+    var controller = null;
+    var pending = Promise.resolve(true);
+
+    function rangeReady() {
+        var custom = form.querySelector('input[name="period"]:checked');
+        if (!custom || custom.value !== 'custom') return true;
+        return dates[0].value !== '' && dates[1].value !== '' && dates[0].value <= dates[1].value;
+    }
+
+    function refresh() {
+        var ready = rangeReady();
+        hint.hidden = ready;
+        if (!ready) return pending;
+
+        var url = new URL(form.action);
+        url.search = new URLSearchParams(new FormData(form)).toString();
+
+        if (controller) controller.abort();
+        controller = new AbortController();
+        sheet.setAttribute('aria-busy', 'true');
+
+        pending = fetch(url, { signal: controller.signal, headers: { 'Accept': 'text/html' } })
+            .then(function (res) {
+                if (!res.ok || res.redirected) throw new Error('Preview request failed');
+                return res.text();
+            })
+            .then(function (html) {
+                var doc = new DOMParser().parseFromString(html, 'text/html');
+                var nextSheet = doc.querySelector('.sheet');
+                if (!nextSheet) throw new Error('Preview missing');
+                sheet.innerHTML = nextSheet.innerHTML;
+                var nextCount = doc.getElementById('stallCount');
+                if (nextCount) stallCount.textContent = nextCount.textContent;
+                document.title = doc.title;
+                history.replaceState(null, '', url);
+                sheet.removeAttribute('aria-busy');
+                // ADDED: clears a validation error box left over from a full page load.
+                var errors = document.querySelector('.errors');
+                if (errors) errors.remove();
+                status.textContent = 'Preview updated.';
+                return true;
+            })
+            .catch(function (err) {
+                // CHANGED: resolves false so a waiting Print skips printing. An aborted
+                // request resolves true because a newer request has replaced it.
+                if (err.name === 'AbortError') return true;
+                sheet.removeAttribute('aria-busy');
+                form.submit();
+                return false;
+            });
+        return pending;
+    }
+
+    function schedule() {
+        clearTimeout(timer);
+        timer = setTimeout(function () {
+            // CHANGED: timer is cleared once it fires, so Print does not re-fetch a current preview.
+            timer = null;
+            refresh();
+        }, 200);
+    }
+
+    // ADDED: Enter in an option field refreshes the preview instead of submitting the form,
+    // which would otherwise open the print dialog.
+    form.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+            e.preventDefault();
+            schedule();
+        }
+    });
+
     form.addEventListener('change', function (e) {
         if (e.target.name === 'period') syncRange();
-        form.dataset.dirty = 'true';
+        schedule();
     });
-    form.addEventListener('input', function () { form.dataset.dirty = 'true'; });
 
     document.querySelectorAll('[data-check]').forEach(function (btn) {
         btn.addEventListener('click', function () {
             var on = btn.dataset.state === '1';
             form.querySelectorAll('input[data-group="' + btn.dataset.check + '"]').forEach(function (box) { box.checked = on; });
-            form.dataset.dirty = 'true';
+            schedule();
         });
+    });
+
+    // ADDED: Print no longer reloads the page. It waits for any preview still loading,
+    // then opens the print dialog. Without JavaScript the button still submits with print=1.
+    form.addEventListener('submit', function (e) {
+        e.preventDefault();
+        if (timer) {
+            clearTimeout(timer);
+            timer = null;
+            refresh();
+        }
+        if (!rangeReady()) {
+            hint.hidden = false;
+            return;
+        }
+        // CHANGED: prints only when the latest preview loaded; a failed update reloads the page instead.
+        pending.then(function (ok) { if (ok) window.print(); });
     });
 
     syncRange();
 
-    @if ($autoPrint && ! $errors->any())
-    window.addEventListener('load', function () {
-        var url = new URL(window.location.href);
-        url.searchParams.delete('print');
-        history.replaceState(null, '', url);
-        (document.fonts ? document.fonts.ready : Promise.resolve()).then(function () { window.print(); });
-    });
-    @endif
+    {{-- CHANGED: removed the auto-print-on-load block; Print now prints the live preview directly. --}}
 })();
 </script>
 </body>
