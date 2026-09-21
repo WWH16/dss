@@ -1,5 +1,8 @@
 @extends('layouts.dashboard')
-@section('title', 'Evaluations | Admin — DSS')
+{{-- CHANGED: replaced the em-dash in the title with a hyphen. --}}
+@section('title', 'Evaluations | Admin - DSS')
+{{-- CHANGED: added header_title so the top bar reads "Evaluations" instead of the layout default "Dashboard". --}}
+@section('header_title', 'Evaluations')
 
 @section('content')
 <div class="max-w-7xl mx-auto space-y-6">
@@ -29,30 +32,33 @@
             {{-- Top Row: Search & Toggle --}}
             <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 {{-- Search Bar --}}
+                {{-- CHANGED: search field rounded-lg to rounded-md (controls are md). --}}
                 <div class="flex-1 relative">
                     <ion-icon name="search-outline" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
                     <input type="text" name="q" value="{{ request('q') }}" placeholder="Search evaluator name, stall, or comment keywords…"
-                        class="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
+                        class="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
                 </div>
 
                 {{-- Action Controls --}}
                 <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
                     {{-- Toggle Filters Button --}}
+                    {{-- CHANGED: rounded-lg to rounded-md; filter count badge raised from 10px to 11px. --}}
                     <button type="button" id="toggle-filter-btn" onclick="toggleEvalFilterDrawer()"
-                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg text-xs sm:text-sm font-bold transition-all border cursor-pointer {{ $activeFilterCount > 0 ? 'bg-brand-50 text-brand-800 border-brand-300 shadow-2xs' : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50' }}">
+                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs sm:text-sm font-bold transition-all border cursor-pointer {{ $activeFilterCount > 0 ? 'bg-brand-50 text-brand-800 border-brand-300 shadow-2xs' : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50' }}">
                         <ion-icon name="options-outline" class="text-base text-brand-700"></ion-icon>
                         <span id="filter-toggle-label">{{ $activeFilterCount > 0 ? 'Hide Filters' : 'Show Filters' }}</span>
                         @if($activeFilterCount > 0)
-                            <span class="px-1.5 py-0.5 rounded-full text-[10px] bg-brand-600 text-white font-bold tabular-nums">
+                            <span class="px-1.5 py-0.5 rounded-full text-[11px] bg-brand-600 text-white font-bold tabular-nums">
                                 {{ $activeFilterCount }}
                             </span>
                         @endif
                     </button>
 
                     {{-- Clear Filters Button --}}
+                    {{-- CHANGED: rounded-lg to rounded-md. This is now the only "clear" control in the toolbar; the duplicate "Clear filters" link in the active-filter row was removed. --}}
                     @if($hasFilters)
-                        <a href="{{ route('admin.evaluations') }}" class="btn btn-ghost text-xs sm:text-sm py-2 px-3 font-semibold flex items-center gap-1 border border-neutral-200 rounded-lg text-neutral-600 hover:text-neutral-900" title="Reset all filters">
-                            <ion-icon name="close-circle-outline" class="text-sm text-neutral-400"></ion-icon>
+                        <a href="{{ route('admin.evaluations') }}" class="btn btn-ghost text-xs sm:text-sm py-2 px-3 font-semibold flex items-center gap-1 border border-neutral-200 rounded-md text-neutral-600 hover:text-neutral-900" title="Reset all filters">
+                            <ion-icon name="close-circle-outline" class="text-sm text-neutral-500"></ion-icon>
                             Clear
                         </a>
                     @endif
@@ -65,7 +71,8 @@
                     {{-- Food Stall Dropdown --}}
                     <div>
                         <label for="filter_stall_id" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Food Stall</label>
-                        <select id="filter_stall_id" name="stall_id" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
+                        {{-- CHANGED: rounded-lg to rounded-md. --}}
+                        <select id="filter_stall_id" name="stall_id" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
                             <option value="">All Canteen Stalls</option>
                             @foreach($stalls as $s)
                                 <option value="{{ $s->id }}" {{ request('stall_id') == $s->id ? 'selected' : '' }}>
@@ -78,7 +85,8 @@
                     {{-- Sort Order Dropdown --}}
                     <div>
                         <label for="filter_sort" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Sort Order</label>
-                        <select id="filter_sort" name="sort" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-lg text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
+                        {{-- CHANGED: rounded-lg to rounded-md. --}}
+                        <select id="filter_sort" name="sort" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
                             <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Newest Evaluations First</option>
                             <option value="rating_high" {{ request('sort') == 'rating_high' ? 'selected' : '' }}>Highest Overall Rating</option>
                             <option value="rating_low" {{ request('sort') == 'rating_low' ? 'selected' : '' }}>Lowest Overall Rating</option>
@@ -92,7 +100,8 @@
             @if($hasFilters)
                 <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-neutral-100 text-xs">
                     <div class="flex flex-wrap items-center gap-1.5">
-                        <span class="text-neutral-400 font-medium">Active filters:</span>
+                        {{-- CHANGED: neutral-400 to neutral-500 for contrast. --}}
+                        <span class="text-neutral-500 font-medium">Active filters:</span>
                         @if(request('q'))
                             <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
                                 Search: "{{ request('q') }}"
@@ -111,15 +120,13 @@
                                 Sort: {{ request('sort') === 'rating_high' ? 'Highest Rating' : (request('sort') === 'rating_low' ? 'Lowest Rating' : 'Oldest') }}
                             </span>
                         @endif
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-800 text-[11px] font-bold">
+                        {{-- CHANGED: result count recoloured from emerald to neutral; emerald is kept for "good score" only. --}}
+                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-800 text-[11px] font-bold tabular-nums">
                             {{ $evaluations->total() }} results
                         </span>
                     </div>
 
-                    <a href="{{ route('admin.evaluations') }}" class="text-neutral-500 hover:text-neutral-900 font-semibold text-xs inline-flex items-center gap-1">
-                        <ion-icon name="close-circle-outline" class="text-sm"></ion-icon>
-                        Clear filters
-                    </a>
+                    {{-- CHANGED: removed the "Clear filters" link here; it repeated the "Clear" button a few pixels above. --}}
                 </div>
             @endif
         </form>
@@ -129,8 +136,9 @@
     <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden">
         @if($evaluations->isEmpty())
             <div class="p-12 text-center flex flex-col items-center justify-center">
-                <div class="w-16 h-16 rounded-xl bg-neutral-50 border border-neutral-200 flex items-center justify-center mb-3 text-neutral-400">
-                    <ion-icon name="receipt-outline" class="text-3xl text-neutral-400"></ion-icon>
+                {{-- CHANGED: empty-state icon neutral-400 on neutral-50 to brand-700 on brand-50, matching the overview and stalls empty states. --}}
+                <div class="w-16 h-16 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-3 text-brand-700">
+                    <ion-icon name="receipt-outline" class="text-3xl text-brand-700"></ion-icon>
                 </div>
                 <p class="text-base font-bold text-neutral-900 mb-1">No evaluations found</p>
                 <p class="text-xs text-neutral-500 max-w-sm">
@@ -164,6 +172,9 @@
                         @foreach($evaluations as $eval)
                             @php
                                 $avg = round(($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4, 1);
+                                // CHANGED: created_at is stored in UTC; convert to Philippine time, as the printable report does.
+                                $evalAt = \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila');
+                                $evalAtLabel = $evalAt->format('M d, Y, h:i A');
                             @endphp
                             <tr class="hover:bg-neutral-50/70 transition-colors">
                                 {{-- Student --}}
@@ -187,54 +198,59 @@
                                 </td>
 
                                 {{-- Criteria Ratings --}}
+                                {{-- CHANGED (all four criteria cells): amber star ion-icon replaced with the ★ glyph used on the overview; rounded to rounded-md. --}}
                                 <td class="px-3 py-3.5 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $eval->cleanliness >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->cleanliness <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
-                                        {{ $eval->cleanliness }} <ion-icon name="star" class="text-amber-500 text-[10px]"></ion-icon>
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-semibold {{ $eval->cleanliness >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->cleanliness <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
+                                        {{ $eval->cleanliness }}★
                                     </span>
                                 </td>
                                 <td class="px-3 py-3.5 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $eval->service >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->service <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
-                                        {{ $eval->service }} <ion-icon name="star" class="text-amber-500 text-[10px]"></ion-icon>
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-semibold {{ $eval->service >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->service <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
+                                        {{ $eval->service }}★
                                     </span>
                                 </td>
                                 <td class="px-3 py-3.5 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $eval->taste >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->taste <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
-                                        {{ $eval->taste }} <ion-icon name="star" class="text-amber-500 text-[10px]"></ion-icon>
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-semibold {{ $eval->taste >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->taste <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
+                                        {{ $eval->taste }}★
                                     </span>
                                 </td>
                                 <td class="px-3 py-3.5 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $eval->price >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->price <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
-                                        {{ $eval->price }} <ion-icon name="star" class="text-amber-500 text-[10px]"></ion-icon>
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-semibold {{ $eval->price >= 4 ? 'bg-emerald-50 text-emerald-700 border border-emerald-200/60' : ($eval->price <= 2 ? 'bg-rose-50 text-rose-700 border border-rose-200/60' : 'bg-neutral-50 text-neutral-700 border border-neutral-200/60') }}">
+                                        {{ $eval->price }}★
                                     </span>
                                 </td>
 
                                 {{-- Overall Rating --}}
+                                {{-- CHANGED: font-extrabold to font-bold; star ion-icon to ★ glyph. --}}
                                 <td class="px-4 py-3.5 text-center">
-                                    <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-extrabold bg-brand-50 text-brand-900 border border-brand-200/80 tabular-nums">
-                                        {{ $avg }} <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
+                                    <span class="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-md text-xs font-bold bg-brand-50 text-brand-900 border border-brand-200/80 tabular-nums">
+                                        {{ $avg }}★
                                     </span>
                                 </td>
 
                                 {{-- Feedback Comment --}}
+                                {{-- CHANGED: straight quotes around the comment became typographic quotes; "No comment" darkened from neutral-400 to neutral-500. --}}
                                 <td class="px-5 py-3.5 text-xs text-neutral-600 max-w-[220px]">
                                     @if($eval->comment)
                                         <p class="truncate italic" title="{{ $eval->comment }}">
-                                            "{{ $eval->comment }}"
+                                            “{{ $eval->comment }}”
                                         </p>
                                     @else
-                                        <span class="text-neutral-400 font-normal">No comment</span>
+                                        <span class="text-neutral-500 font-normal">No comment</span>
                                     @endif
                                 </td>
 
                                 {{-- Date --}}
+                                {{-- CHANGED: shows $evalAt (Philippine time) instead of the raw UTC timestamp. --}}
                                 <td class="px-5 py-3.5 text-right text-xs text-neutral-500 font-medium whitespace-nowrap tabular-nums">
-                                    {{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y') }}
+                                    {{ $evalAt->format('M d, Y') }}
                                 </td>
 
                                 {{-- Action --}}
+                                {{-- CHANGED: passes the Philippine-time date string to the modal, which used to parse the raw timestamp in the browser. --}}
                                 <td class="px-4 py-3.5 text-right whitespace-nowrap">
                                     <button type="button"
-                                        onclick='openEvalDetailsModal(@json($eval), {{ $avg }})'
+                                        onclick='openEvalDetailsModal(@json($eval), {{ $avg }}, @json($evalAtLabel))'
                                         class="text-brand-700 hover:text-brand-800 text-xs font-bold inline-flex items-center gap-1 transition-all bg-white px-2.5 py-1.5 rounded-md border border-brand-200 hover:bg-brand-50 shadow-2xs cursor-pointer">
                                         <ion-icon name="eye-outline" class="text-sm"></ion-icon>
                                         View
@@ -250,6 +266,9 @@
                     @foreach($evaluations as $eval)
                         @php
                             $avg = round(($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4, 1);
+                            // CHANGED: same UTC to Philippine time conversion as the desktop table.
+                            $evalAt = \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila');
+                            $evalAtLabel = $evalAt->format('M d, Y, h:i A');
                         @endphp
                         <div class="p-4 flex flex-col gap-3 hover:bg-neutral-50/70 transition-colors">
                             <div class="flex items-start justify-between gap-3">
@@ -262,43 +281,47 @@
                                         <p class="text-[11px] font-bold text-brand-700 mt-0.5 truncate">{{ $eval->stall_name }}</p>
                                     </div>
                                 </div>
-                                <span class="shrink-0 inline-flex items-center gap-1 bg-brand-50 px-2 py-1 rounded-md text-xs font-extrabold text-brand-900 border border-brand-200 tabular-nums">
-                                    {{ $avg }} <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
+                                {{-- CHANGED: font-extrabold to font-bold; star ion-icon to ★ glyph. --}}
+                                <span class="shrink-0 inline-flex items-center gap-0.5 bg-brand-50 px-2 py-1 rounded-md text-xs font-bold text-brand-900 border border-brand-200 tabular-nums">
+                                    {{ $avg }}★
                                 </span>
                             </div>
 
+                            {{-- CHANGED: typographic quotes around the comment. --}}
                             @if($eval->comment)
                                 <div class="bg-neutral-50 p-3 rounded-md text-xs text-neutral-700 italic border border-neutral-200/60">
-                                    "{{ $eval->comment }}"
+                                    “{{ $eval->comment }}”
                                 </div>
                             @endif
 
+                            {{-- CHANGED: criteria labels raised from 9px neutral-400 to 11px neutral-500. "Service" shortened to "Serv" so it fits the narrow column at 11px, as on the overview. --}}
                             <div class="grid grid-cols-4 gap-1.5 text-center text-xs bg-neutral-50 p-2.5 rounded-md border border-neutral-100">
                                 <div>
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Clean</span>
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Clean</span>
                                     <span class="font-bold text-neutral-900 text-xs">{{ $eval->cleanliness }}★</span>
                                 </div>
                                 <div>
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Service</span>
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Serv</span>
                                     <span class="font-bold text-neutral-900 text-xs">{{ $eval->service }}★</span>
                                 </div>
                                 <div>
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Taste</span>
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Taste</span>
                                     <span class="font-bold text-neutral-900 text-xs">{{ $eval->taste }}★</span>
                                 </div>
                                 <div>
-                                    <span class="block text-[9px] font-bold text-neutral-400 uppercase">Price</span>
+                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Price</span>
                                     <span class="font-bold text-neutral-900 text-xs">{{ $eval->price }}★</span>
                                 </div>
                             </div>
 
-                            <div class="flex items-center justify-between pt-1 text-[11px] text-neutral-400">
-                                <span>{{ \Carbon\Carbon::parse($eval->created_at)->format('M d, Y • h:i A') }}</span>
+                            {{-- CHANGED: date shown in Philippine time and darkened from neutral-400 to neutral-500; button label "Details" renamed "View" to match the desktop table, and it passes the formatted date to the modal. --}}
+                            <div class="flex items-center justify-between pt-1 text-[11px] text-neutral-500">
+                                <span>{{ $evalAt->format('M d, Y • h:i A') }}</span>
                                 <button type="button"
-                                    onclick='openEvalDetailsModal(@json($eval), {{ $avg }})'
+                                    onclick='openEvalDetailsModal(@json($eval), {{ $avg }}, @json($evalAtLabel))'
                                     class="text-brand-700 hover:text-brand-800 text-xs font-bold inline-flex items-center gap-1 bg-white px-2.5 py-1 rounded-md border border-brand-200 shadow-2xs">
                                     <ion-icon name="eye-outline" class="text-sm"></ion-icon>
-                                    Details
+                                    View
                                 </button>
                             </div>
                         </div>
@@ -314,9 +337,10 @@
                     </span>
 
                     {{-- Per Page Selector --}}
+                    {{-- CHANGED: label neutral-400 to neutral-500 for contrast; select rounded to rounded-md. --}}
                     <div class="flex items-center gap-1.5 border-l border-neutral-200 pl-3">
-                        <label for="per_page_select" class="text-[11px] font-bold text-neutral-400 uppercase">Per Page</label>
-                        <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
+                        <label for="per_page_select" class="text-[11px] font-bold text-neutral-500 uppercase">Per Page</label>
+                        <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded-md px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
                             @foreach([10, 25, 50] as $size)
                                 <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" {{ $evaluations->perPage() == $size ? 'selected' : '' }}>
                                     {{ $size }}
@@ -327,15 +351,16 @@
                 </div>
 
                 {{-- Pagination Controls --}}
+                {{-- CHANGED: Previous, Next and page-number buttons rounded-lg to rounded-md (controls are md). --}}
                 <div class="flex items-center gap-1 order-1 sm:order-2">
                     {{-- Previous Page Link --}}
                     @if($evaluations->onFirstPage())
-                        <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                        <span class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
                             <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
                             Previous
                         </span>
                     @else
-                        <a href="{{ $evaluations->previousPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                        <a href="{{ $evaluations->previousPageUrl() }}" class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
                             <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
                             Previous
                         </a>
@@ -346,17 +371,17 @@
                         @if($evaluations->hasPages())
                             @foreach($evaluations->getUrlRange(max(1, $evaluations->currentPage() - 2), min($evaluations->lastPage(), $evaluations->currentPage() + 2)) as $page => $url)
                                 @if($page == $evaluations->currentPage())
-                                    <span class="w-8 h-8 rounded-lg bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                                    <span class="w-8 h-8 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
                                         {{ $page }}
                                     </span>
                                 @else
-                                    <a href="{{ $url }}" class="w-8 h-8 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs flex items-center justify-center transition-colors">
+                                    <a href="{{ $url }}" class="w-8 h-8 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 font-semibold text-xs flex items-center justify-center transition-colors">
                                         {{ $page }}
                                     </a>
                                 @endif
                             @endforeach
                         @else
-                            <span class="w-8 h-8 rounded-lg bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                            <span class="w-8 h-8 rounded-md bg-brand-700 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
                                 1
                             </span>
                         @endif
@@ -364,12 +389,12 @@
 
                     {{-- Next Page Link --}}
                     @if($evaluations->hasMorePages())
-                        <a href="{{ $evaluations->nextPageUrl() }}" class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                        <a href="{{ $evaluations->nextPageUrl() }}" class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
                             Next
                             <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
                         </a>
                     @else
-                        <span class="px-2.5 py-1.5 rounded-lg border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                        <span class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
                             Next
                             <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
                         </span>
@@ -400,7 +425,8 @@
     <div class="p-5 sm:p-6 space-y-4 bg-white text-xs">
         {{-- Criteria Breakdown Sheet --}}
         <div>
-            <span class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+            {{-- CHANGED: section label raised from 10px neutral-400 to 11px neutral-500. --}}
+            <span class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
                 4-Criteria Evaluation Breakdown
             </span>
             <div class="grid grid-cols-2 gap-px bg-neutral-200 border border-neutral-200 rounded-md overflow-hidden">
@@ -429,15 +455,16 @@
                 <p class="text-xs font-bold text-neutral-900">Overall Average Score</p>
                 <p class="text-[11px] text-neutral-500" id="modal-eval-date"></p>
             </div>
-            <div class="flex items-center gap-1 px-3 py-1 bg-brand-50 border border-brand-200 text-brand-900 font-extrabold text-sm rounded-md tabular-nums">
-                <span id="modal-eval-avg"></span>
-                <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>
+            {{-- CHANGED: font-extrabold to font-bold; star ion-icon to ★ glyph. --}}
+            <div class="flex items-center gap-0.5 px-3 py-1 bg-brand-50 border border-brand-200 text-brand-900 font-bold text-sm rounded-md tabular-nums">
+                <span id="modal-eval-avg"></span>★
             </div>
         </div>
 
         {{-- Student Feedback Comment --}}
         <div>
-            <span class="block text-[10px] font-bold text-neutral-400 uppercase tracking-wider mb-2">
+            {{-- CHANGED: section label raised from 10px neutral-400 to 11px neutral-500. --}}
+            <span class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
                 Written Feedback & Observations
             </span>
             <div id="modal-eval-comment-box" class="bg-neutral-50/80 p-3.5 rounded-md border border-neutral-200 text-neutral-700 italic text-xs leading-relaxed">
@@ -471,32 +498,32 @@ function toggleEvalFilterDrawer() {
     }
 }
 
-function openEvalDetailsModal(evalData, avgScore) {
+// CHANGED: takes a third argument, the submission date already formatted in Philippine time by the server.
+function openEvalDetailsModal(evalData, avgScore, submittedAt) {
     document.getElementById('modal-eval-student').textContent = evalData.student_name || 'Student';
     document.getElementById('modal-eval-stall').textContent = 'Rated: ' + (evalData.stall_name || 'Stall');
     document.getElementById('modal-eval-avatar').textContent = (evalData.student_name || 'S').charAt(0).toUpperCase();
 
-    document.getElementById('modal-eval-cleanliness').innerHTML = evalData.cleanliness + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
-    document.getElementById('modal-eval-service').innerHTML = evalData.service + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
-    document.getElementById('modal-eval-taste').innerHTML = evalData.taste + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
-    document.getElementById('modal-eval-price').innerHTML = evalData.price + ' <ion-icon name="star" class="text-amber-500 text-xs"></ion-icon>';
+    // CHANGED: textContent with the ★ glyph instead of innerHTML with an amber star ion-icon.
+    document.getElementById('modal-eval-cleanliness').textContent = evalData.cleanliness + '★';
+    document.getElementById('modal-eval-service').textContent = evalData.service + '★';
+    document.getElementById('modal-eval-taste').textContent = evalData.taste + '★';
+    document.getElementById('modal-eval-price').textContent = evalData.price + '★';
 
     document.getElementById('modal-eval-avg').textContent = avgScore;
 
-    if (evalData.created_at) {
-        var d = new Date(evalData.created_at);
-        document.getElementById('modal-eval-date').textContent = 'Submitted on ' + d.toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
-    } else {
-        document.getElementById('modal-eval-date').textContent = '';
-    }
+    // CHANGED: uses the server-formatted date. new Date() on the raw "YYYY-MM-DD HH:MM:SS" value read the UTC time as local time, and Safari cannot parse that format at all, so it showed "Invalid Date".
+    document.getElementById('modal-eval-date').textContent = submittedAt ? 'Submitted on ' + submittedAt : '';
 
     var commentBox = document.getElementById('modal-eval-comment-box');
     if (evalData.comment && evalData.comment.trim() !== '') {
-        commentBox.textContent = '"' + evalData.comment + '"';
+        // CHANGED: typographic quotes, matching the table.
+        commentBox.textContent = '“' + evalData.comment + '”';
         commentBox.className = 'bg-neutral-50/80 p-3.5 rounded-md border border-neutral-200 text-neutral-700 italic text-xs leading-relaxed';
     } else {
         commentBox.textContent = 'No written comment provided with this evaluation submission.';
-        commentBox.className = 'bg-neutral-50/80 p-3.5 rounded-md border border-neutral-200 text-neutral-400 italic text-xs leading-relaxed';
+        // CHANGED: neutral-400 to neutral-500 for contrast.
+        commentBox.className = 'bg-neutral-50/80 p-3.5 rounded-md border border-neutral-200 text-neutral-500 italic text-xs leading-relaxed';
     }
 
     evalModal.showModal();
