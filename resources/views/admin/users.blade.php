@@ -58,6 +58,7 @@
     @php
         $totalCount = $stats->total_count ?? $users->total();
         $adminCount = $stats->admin_count ?? 0;
+        $clinicCount = $stats->clinic_count ?? 0; // ADDED: clinic accounts
         $staffCount = $stats->staff_count ?? 0;
         $assignedStaffCount = $stats->assigned_staff_count ?? 0;
         $unassignedStaffCount = $stats->unassigned_staff_count ?? 0;
@@ -78,7 +79,8 @@
                 <span class="text-2xl font-bold font-display text-neutral-900">{{ $totalCount }}</span>
                 <span class="text-xs text-neutral-500 font-medium">accounts</span>
             </div>
-            <p class="text-[11px] text-neutral-500 mt-1">{{ $adminCount }} administrators · {{ $staffCount }} canteen staff</p>
+            {{-- CHANGED: added clinic count. --}}
+            <p class="text-[11px] text-neutral-500 mt-1">{{ $adminCount }} administrators · {{ $clinicCount }} clinic · {{ $staffCount }} canteen staff</p>
         </div>
 
         {{-- System Administrators Card --}}
@@ -157,6 +159,11 @@
                     <a href="{{ route('admin.users', array_filter(['role' => 'admin', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
                         class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'admin' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
                         Admins ({{ $adminCount }})
+                    </a>
+                    {{-- ADDED: clinic filter pill. --}}
+                    <a href="{{ route('admin.users', array_filter(['role' => 'clinic', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
+                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'clinic' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
+                        Clinic ({{ $clinicCount }})
                     </a>
                     <a href="{{ route('admin.users', array_filter(['role' => 'staff', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
                         class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'staff' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
@@ -247,6 +254,7 @@
                                 $isCurrentUser = $u->id === Auth::id();
                                 $isAdmin = $u->role === 'admin';
                                 $isStaff = $u->role === 'staff';
+                                $isClinic = $u->role === 'clinic'; // ADDED
                                 $isAssigned = !empty($u->stall_id);
                             @endphp
                             <tr class="user-row hover:bg-neutral-50/70 transition-colors {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}"
@@ -287,6 +295,12 @@
                                             <ion-icon name="shield-checkmark" class="text-xs text-brand-600"></ion-icon>
                                             <span>Administrator</span>
                                         </span>
+                                    {{-- ADDED: clinic badge. --}}
+                                    @elseif($isClinic)
+                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200/80">
+                                            <ion-icon name="medkit" class="text-xs text-sky-600"></ion-icon>
+                                            <span>Clinic</span>
+                                        </span>
                                     @else
                                         <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-neutral-50 text-neutral-800 border border-neutral-200/80">
                                             <ion-icon name="person" class="text-xs text-neutral-600"></ion-icon>
@@ -297,7 +311,8 @@
 
                                 {{-- Stall Assignment Column --}}
                                 <td class="px-5 py-3.5">
-                                    @if($isAdmin)
+                                    {{-- CHANGED: clinic accounts are system-wide like admins. --}}
+                                    @if($isAdmin || $isClinic)
                                         <span class="text-neutral-500 text-xs font-medium flex items-center gap-1.5">
                                             <ion-icon name="globe-outline" class="text-xs text-neutral-400"></ion-icon>
                                             <span>System-wide</span>
@@ -360,6 +375,7 @@
                         $isCurrentUser = $u->id === Auth::id();
                         $isAdmin = $u->role === 'admin';
                         $isStaff = $u->role === 'staff';
+                        $isClinic = $u->role === 'clinic'; // ADDED
                         $isAssigned = !empty($u->stall_id);
                     @endphp
                     <div class="user-row p-4 space-y-3 {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}"
@@ -389,6 +405,11 @@
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-800 border border-brand-200">
                                         Admin
                                     </span>
+                                {{-- ADDED: clinic badge. --}}
+                                @elseif($isClinic)
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
+                                        Clinic
+                                    </span>
                                 @else
                                     <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-neutral-50 text-neutral-800 border border-neutral-200">
                                         Staff
@@ -400,7 +421,8 @@
                         {{-- Stall Details for Mobile --}}
                         <div class="flex items-center justify-between text-xs pt-2 border-t border-neutral-100 text-neutral-600">
                             <span class="text-[11px] text-neutral-500 font-semibold">Assignment:</span>
-                            @if($isAdmin)
+                            {{-- CHANGED: clinic accounts are system-wide like admins. --}}
+                            @if($isAdmin || $isClinic)
                                 <span class="font-medium text-neutral-500">System-wide</span>
                             @elseif($isAssigned)
                                 <span class="font-bold text-neutral-800 flex items-center gap-1 truncate max-w-[180px]">
@@ -544,7 +566,8 @@
                 <label class="block text-xs font-bold text-neutral-700 mb-1.5">
                     Account Role <span class="text-red-500">*</span>
                 </label>
-                <div class="grid grid-cols-2 p-1 bg-neutral-100/90 rounded-md border border-neutral-200/80 gap-1 text-xs">
+                {{-- CHANGED: three columns for the added Clinic option. --}}
+                <div class="grid grid-cols-3 p-1 bg-neutral-100/90 rounded-md border border-neutral-200/80 gap-1 text-xs">
                     <button type="button" id="create-role-admin-btn" onclick="toggleCreateRole('admin')"
                         class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer">
                         <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
@@ -554,6 +577,12 @@
                         class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer">
                         <ion-icon name="restaurant-outline" class="text-sm"></ion-icon>
                         <span>Canteen Staff</span>
+                    </button>
+                    {{-- ADDED: clinic role option. --}}
+                    <button type="button" id="create-role-clinic-btn" onclick="toggleCreateRole('clinic')"
+                        class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer">
+                        <ion-icon name="medkit-outline" class="text-sm"></ion-icon>
+                        <span>Clinic</span>
                     </button>
                 </div>
                 <input type="hidden" name="role" id="create-role-input" value="admin">
@@ -697,6 +726,7 @@
                     class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="admin">Administrator</option>
                     <option value="staff">Canteen Staff</option>
+                    <option value="clinic">Clinic</option> {{-- ADDED --}}
                 </select>
                 <p data-error-for="role" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
                     <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
@@ -1039,11 +1069,12 @@
         });
     }
 
+    // CHANGED: handles three role buttons (admin, staff, clinic) instead of an admin/staff if-else.
     function toggleCreateRole(role) {
         var stallContainer = document.getElementById('create-stall-container');
-        var adminBtn = document.getElementById('create-role-admin-btn');
-        var staffBtn = document.getElementById('create-role-staff-btn');
         var roleInput = document.getElementById('create-role-input');
+        var activeClass = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer";
+        var idleClass = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer";
 
         if (roleInput) roleInput.value = role;
 
@@ -1057,23 +1088,12 @@
             }
         }
 
-        if (role === 'staff') {
-            if (stallContainer) stallContainer.classList.remove('hidden');
-            if (staffBtn) {
-                staffBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer";
-            }
-            if (adminBtn) {
-                adminBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer";
-            }
-        } else {
-            if (stallContainer) stallContainer.classList.add('hidden');
-            if (adminBtn) {
-                adminBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer";
-            }
-            if (staffBtn) {
-                staffBtn.className = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer";
-            }
-        }
+        if (stallContainer) stallContainer.classList.toggle('hidden', role !== 'staff');
+
+        ['admin', 'staff', 'clinic'].forEach(function (r) {
+            var btn = document.getElementById('create-role-' + r + '-btn');
+            if (btn) btn.className = r === role ? activeClass : idleClass;
+        });
     }
 
     if (createForm) {
@@ -1412,7 +1432,8 @@
         if (!deleteModal || !deleteForm) return;
         clearFormErrors(deleteForm);
         deleteForm.action = "/admin/users/" + id;
-        if (deleteName) deleteName.textContent = name + ' (' + (role === 'admin' ? 'Administrator' : 'Staff') + ')';
+        // CHANGED: label for clinic accounts.
+        if (deleteName) deleteName.textContent = name + ' (' + ({ admin: 'Administrator', staff: 'Staff', clinic: 'Clinic' }[role] || role) + ')';
         deleteModal.showModal();
     }
 

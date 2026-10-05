@@ -168,3 +168,57 @@ test('admin dashboard still links to admin-only pages', function () {
     $response->assertSee(route('admin.students'), false);
     $response->assertSee(route('admin.users'), false);
 });
+
+test('admin creates a clinic account', function () {
+    $this->actingAs(adminUser())->post(route('admin.users.create'), [
+        'role' => 'clinic',
+        'name' => 'Clinic Nurse',
+        'email' => 'nurse@example.com',
+        'stall_id' => seedStall(),
+        'password' => 'Password1!',
+        'password_confirmation' => 'Password1!',
+    ])->assertSessionHasNoErrors();
+
+    $nurse = User::where('email', 'nurse@example.com')->first();
+    expect($nurse->role)->toBe('clinic');
+    expect($nurse->stall_id)->toBeNull();
+});
+
+test('admin users page lists and filters clinic accounts', function () {
+    $admin = adminUser();
+    clinicUser();
+
+    $this->actingAs($admin)->get(route('admin.users'))
+        ->assertSee('Clinic Nurse')
+        ->assertSee('Clinic (1)');
+
+    $this->actingAs($admin)->get(route('admin.users', ['role' => 'clinic']))
+        ->assertSee('Clinic Nurse')
+        ->assertDontSee('admin@example.com');
+});
+
+test('admin changes a clinic account to staff with a stall, and back to clinic', function () {
+    $admin = adminUser();
+    $clinic = clinicUser();
+    $stallId = seedStall();
+
+    $this->actingAs($admin)->put(route('admin.users.update', $clinic->id), [
+        'role' => 'staff', 'name' => $clinic->name, 'email' => $clinic->email, 'stall_id' => $stallId,
+    ])->assertSessionHasNoErrors();
+    expect($clinic->fresh()->only('role', 'stall_id'))->toBe(['role' => 'staff', 'stall_id' => $stallId]);
+
+    $this->actingAs($admin)->put(route('admin.users.update', $clinic->id), [
+        'role' => 'clinic', 'name' => $clinic->name, 'email' => $clinic->email, 'stall_id' => $stallId,
+    ])->assertSessionHasNoErrors();
+    expect($clinic->fresh()->only('role', 'stall_id'))->toBe(['role' => 'clinic', 'stall_id' => null]);
+});
+
+test('admin deletes a clinic account', function () {
+    $admin = adminUser();
+    $clinic = clinicUser();
+
+    $this->actingAs($admin)->delete(route('admin.users.delete', $clinic->id))
+        ->assertSessionHas('success');
+
+    expect(User::find($clinic->id))->toBeNull();
+});

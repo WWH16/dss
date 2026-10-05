@@ -735,11 +735,13 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
         // Total system counts for stat cards & filter pill badges
+        // CHANGED: include clinic accounts and count them.
         $stats = DB::table('users')
-            ->whereIn('role', ['admin', 'staff'])
+            ->whereIn('role', ['admin', 'staff', 'clinic'])
             ->selectRaw("
                 COUNT(*) as total_count,
                 COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_count,
+                COUNT(CASE WHEN role = 'clinic' THEN 1 END) as clinic_count,
                 COUNT(CASE WHEN role = 'staff' THEN 1 END) as staff_count,
                 COUNT(CASE WHEN role = 'staff' AND stall_id IS NOT NULL THEN 1 END) as assigned_staff_count,
                 COUNT(CASE WHEN role = 'staff' AND stall_id IS NULL THEN 1 END) as unassigned_staff_count
@@ -757,7 +759,8 @@ class AdminController extends Controller
                 'users.created_at',
                 'stalls.name as stall_name'
             )
-            ->whereIn('users.role', ['admin', 'staff']);
+            // CHANGED: include clinic accounts.
+            ->whereIn('users.role', ['admin', 'staff', 'clinic']);
 
         if ($request->filled('q')) {
             $q = '%' . strtolower(trim($request->q)) . '%';
@@ -771,6 +774,9 @@ class AdminController extends Controller
         $role = $request->get('role', $request->get('role_filter', 'all'));
         if ($role === 'admin') {
             $query->where('users.role', 'admin');
+        // ADDED: clinic filter pill.
+        } elseif ($role === 'clinic') {
+            $query->where('users.role', 'clinic');
         } elseif ($role === 'staff') {
             $query->where('users.role', 'staff');
         } elseif ($role === 'unassigned') {
@@ -797,7 +803,8 @@ class AdminController extends Controller
         if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
 
         $request->validate([
-            'role'     => 'required|in:admin,staff',
+            // CHANGED: admins can create clinic accounts.
+            'role'     => 'required|in:admin,staff,clinic',
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email',
             'stall_id' => 'nullable|exists:stalls,id',
@@ -817,7 +824,8 @@ class AdminController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        $label = $request->role === 'admin' ? 'Administrator' : 'Staff';
+        // CHANGED: label for clinic accounts.
+        $label = ['admin' => 'Administrator', 'staff' => 'Staff', 'clinic' => 'Clinic'][$request->role];
         if ($request->wantsJson()) {
             session()->flash('success', "{$label} account created successfully!");
             return response()->json([
@@ -834,7 +842,8 @@ class AdminController extends Controller
 
         $target = User::findOrFail($id);
 
-        if (!in_array($target->role, ['admin', 'staff'])) {
+        // CHANGED: clinic accounts are managed here too.
+        if (!in_array($target->role, ['admin', 'staff', 'clinic'])) {
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Invalid operation for this user type.'], 422);
             }
@@ -842,7 +851,8 @@ class AdminController extends Controller
         }
 
         $rules = [
-            'role'     => 'required|in:admin,staff',
+            // CHANGED: admins can assign the clinic role.
+            'role'     => 'required|in:admin,staff,clinic',
             'name'     => 'required|string|max:255',
             'email'    => 'required|email|max:255|unique:users,email,' . $target->id,
             'stall_id' => 'nullable|exists:stalls,id',
@@ -917,7 +927,8 @@ class AdminController extends Controller
         }
 
         // Only allow deleting admin/staff from this page (students managed elsewhere)
-        if (!in_array($target->role, ['admin', 'staff'])) {
+        // CHANGED: clinic accounts can be deleted from this page too.
+        if (!in_array($target->role, ['admin', 'staff', 'clinic'])) {
             if ($request->wantsJson()) {
                 return response()->json(['message' => 'Invalid operation.'], 422);
             }
