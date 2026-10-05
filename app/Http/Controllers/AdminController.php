@@ -570,6 +570,14 @@ class AdminController extends Controller
         return back()->with('success','Stall deleted.');
     }
 
+    // ADDED: printable and downloadable QR page for a stall (see Controller::stallQrData).
+    public function stallQr($id)
+    {
+        $stall = DB::table('stalls')->find($id) ?? abort(404);
+
+        return view('admin.stall-qr', $this->stallQrData($stall));
+    }
+
     // Quick Assign Staff
     public function assignStaff(Request $request)
     {

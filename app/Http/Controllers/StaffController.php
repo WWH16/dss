@@ -21,9 +21,8 @@ class StaffController extends Controller
         $user = Auth::user();
 
         // 1. Look up assigned food stall for this staff member (via users.stall_id)
-        $stall = $user->stall_id
-            ? DB::table('stalls')->where('id', $user->stall_id)->first()
-            : null;
+        // CHANGED: find() returns null for an unassigned (null) stall_id, so the ternary is gone.
+        $stall = DB::table('stalls')->find($user->stall_id);
 
         // If not assigned to any stall, render the unassigned state with zero stall data
         if (!$stall) {
@@ -181,10 +180,8 @@ class StaffController extends Controller
         $user = Auth::user();
 
         // Check if this staff member has an assigned stall
-        $myStall = null;
-        if ($user->stall_id) {
-            $myStall = DB::table('stalls')->where('id', $user->stall_id)->first();
-        }
+        // CHANGED: find() returns null for an unassigned (null) stall_id, so the if-block is gone.
+        $myStall = DB::table('stalls')->find($user->stall_id);
         // Strict Security Guard: Unassigned staff MUST NOT view campus rankings or performance
         if (!$myStall) {
             return redirect()->route('staff.dashboard')->with('error', 'Access restricted. You must be assigned to a food stall by an Administrator to view campus standings.');
@@ -218,15 +215,27 @@ class StaffController extends Controller
         ]);
     }
 
+    // ADDED: the assigned stall's QR code, so staff can print it or share it with students.
+    public function qr()
+    {
+        $user = Auth::user();
+        $stall = DB::table('stalls')->find($user->stall_id);
+
+        if (! $stall) {
+            return redirect()->route('staff.dashboard')->with('error', 'Access restricted. You must be assigned to a food stall by an Administrator to view its QR code.');
+        }
+
+        return view('staff.qr', $this->stallQrData($stall));
+    }
+
     /**
      * Staff Profile Page
      */
     public function profile()
     {
         $user = Auth::user();
-        $stall = $user->stall_id
-            ? DB::table('stalls')->where('id', $user->stall_id)->first()
-            : null;
+        // CHANGED: find() returns null for an unassigned (null) stall_id, so the ternary is gone.
+        $stall = DB::table('stalls')->find($user->stall_id);
 
         return view('staff.profile', [
             'profile' => $user,

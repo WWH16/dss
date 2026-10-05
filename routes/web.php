@@ -127,6 +127,11 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         [AdminController::class,'deleteStall'])
         ->name('admin.stall.delete');
 
+    // ADDED: printable and downloadable QR code for a stall; scanning it opens that stall's evaluation form.
+    Route::get('/admin/stalls/{id}/qr',
+        [AdminController::class, 'stallQr'])
+        ->name('admin.stall.qr');
+
     Route::post('/admin/staff/assign',
         [AdminController::class, 'assignStaff'])
         ->name('admin.staff.assign');
@@ -167,6 +172,10 @@ Route::middleware(['auth', 'role:staff'])->group(function () {
 
     Route::get('/staff/standings', [StaffController::class, 'standings'])
         ->name('staff.standings');
+
+    // ADDED: the staff member's stall QR code (print, download, share).
+    Route::get('/staff/qr', [StaffController::class, 'qr'])
+        ->name('staff.qr');
 
     Route::get('/staff/profile', [StaffController::class, 'profile'])
         ->name('staff.profile');

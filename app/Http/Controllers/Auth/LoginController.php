@@ -77,13 +77,17 @@ class LoginController extends Controller
                 return redirect()->back()->withInput($request->except('password'))->with('error', 'Invalid credentials');
             }
 
+            // CHANGED: students return to the page they were sent to sign in from (e.g. a stall QR link).
+            // Other roles drop that stored page, since student pages would bounce them back to /login.
+            if ($role === 'student') {
+                return redirect()->intended('/student/dashboard');
+            }
+
+            $request->session()->forget('url.intended');
+
             // CHANGED: clinic users share the admin monitoring pages.
             if ($role === 'admin' || $role === 'clinic') {
                 return redirect('/admin/dashboard');
-            }
-
-            if ($role === 'student') {
-                return redirect('/student/dashboard');
             }
 
             return redirect('/staff/dashboard');

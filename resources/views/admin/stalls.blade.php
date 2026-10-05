@@ -273,6 +273,14 @@
                             </div>
 
                             <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                                {{-- ADDED: opens the stall's QR code page (print or download) in a new tab. --}}
+                                <a href="{{ route('admin.stall.qr', $stall->id) }}" target="_blank" rel="noopener"
+                                    aria-label="QR code for {{ $stall->name }}"
+                                    class="text-neutral-700 hover:text-brand-800 text-xs font-semibold inline-flex items-center gap-1 transition-colors bg-white hover:bg-neutral-50 px-2.5 py-1.5 rounded-md border border-neutral-200 hover:border-brand-300 shadow-2xs cursor-pointer">
+                                    <ion-icon name="qr-code-outline" class="text-sm"></ion-icon>
+                                    <span>QR</span>
+                                </a>
+
                                 {{-- Edit Button --}}
                                 {{-- CHANGED: Js::from() instead of addslashes for the name and description arguments (same newline fix as the staff buttons). --}}
                                 <button type="button"

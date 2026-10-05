@@ -2,11 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use chillerlan\QRCode\QRCode;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Str;
 
 abstract class Controller
 {
+    // ADDED: view data for a stall's QR code, shared by the admin QR page and the staff QR tab.
+    // The QR holds a signed evaluation link, so students can only open a stall's form by scanning it.
+    // The signature covers only the path and query (not the host), and the host is the site the page
+    // is viewed on, so a code made on localhost works locally and one made on the live site works there.
+    protected function stallQrData(object $stall): array
+    {
+        $url = url(URL::signedRoute('student.evaluation', ['stall' => $stall->id], null, false));
+
+        return [
+            'stall' => $stall,
+            'url' => $url,
+            'qr' => (new QRCode)->render($url),
+            'fileName' => Str::slug($stall->name) . '-qr',
+        ];
+    }
+
     // ADDED: evaluation activity trend (with Month & Year filtering), moved here from
     // AdminController::dashboard and StaffController::dashboard, which held identical copies.
     // Pass a stall id to limit it to one stall, as the staff dashboard did.

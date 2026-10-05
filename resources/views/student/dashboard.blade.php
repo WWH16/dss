@@ -8,13 +8,14 @@
 <div class="space-y-6">
 
     {{-- ── 1. Page Header & Greeting Bar ───────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-neutral-200/80 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div class="flex items-center gap-3.5">
+    {{-- CHANGED: the "Evaluate a Stall" button is gone, since evaluations now open only from a stall's QR code. The greeting card carries a short how-to strip instead. --}}
+    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-xs overflow-hidden">
+        <div class="p-5 sm:p-6 flex items-center gap-3.5">
             <div class="w-12 h-12 rounded-xl bg-brand-50 border border-brand-200/80 text-brand-700 flex items-center justify-center font-bold text-lg shrink-0 shadow-2xs">
                 {{ strtoupper(substr($profile->name ?? ($profile->student_number ?? 'S'), 0, 1)) }}
             </div>
             <div class="min-w-0">
-                <div class="flex items-center gap-2">
+                <div class="flex flex-wrap items-center gap-2">
                     <h1 class="text-lg sm:text-xl font-bold text-neutral-900 truncate tracking-tight leading-tight">
                         Hello, {{ $profile->name ?? 'Student' }}
                     </h1>
@@ -23,15 +24,27 @@
                     </span>
                 </div>
                 <p class="text-xs text-neutral-500 mt-0.5">
-                    Evaluate campus food stalls to help maintain quality dining standards.
+                    Rate the stalls you eat at to help keep campus dining clean, fair and good.
                 </p>
             </div>
         </div>
 
-        <a href="{{ route('student.evaluation') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs shrink-0 self-start sm:self-auto">
-            <ion-icon name="create-outline" class="text-sm"></ion-icon>
-            Evaluate a Stall
-        </a>
+        <div class="px-5 sm:px-6 py-4 bg-brand-50/60 border-t border-brand-100 flex flex-col md:flex-row md:items-center gap-4">
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="w-10 h-10 rounded-md bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <ion-icon name="qr-code-outline" class="text-xl" aria-hidden="true"></ion-icon>
+                </div>
+                <h2 class="text-sm font-bold text-brand-900 leading-tight">To evaluate a stall,<br class="hidden md:inline"> scan its QR code</h2>
+            </div>
+            <ol class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 md:flex-1 md:pl-5 md:border-l md:border-brand-200">
+                @foreach(["Find the QR code posted at the stall's counter.", "Scan it with your phone's camera.", 'Answer the survey and submit.'] as $step)
+                    <li class="flex items-start gap-2 text-xs text-brand-900">
+                        <span class="w-5 h-5 rounded-full bg-white border border-brand-200 text-brand-800 text-[11px] font-bold flex items-center justify-center shrink-0 tabular-nums">{{ $loop->iteration }}</span>
+                        <span>{{ $step }}</span>
+                    </li>
+                @endforeach
+            </ol>
+        </div>
     </div>
 
     {{-- ── 2. Summary Metric Cards (3 Balanced Columns) ───────────────────── --}}
@@ -114,8 +127,9 @@
                             <ion-icon name="restaurant-outline" class="text-brand-700 text-base"></ion-icon>
                             Campus Food Stalls
                         </h2>
+                        {{-- CHANGED: stalls are no longer picked here; the list now tracks which ones you have rated. --}}
                         <p class="text-xs text-neutral-500 mt-0.5">
-                            Select a stall below to submit or update your evaluation
+                            Stalls open for evaluation and which ones you have rated
                         </p>
                     </div>
 
@@ -142,7 +156,8 @@
                             All ({{ $totalStallsCount }})
                         </button>
                         <button type="button" class="filter-pill px-3 py-1 rounded-md text-xs font-bold bg-neutral-100 text-neutral-600 hover:bg-neutral-200/70 transition-all" data-filter="needs_rating">
-                            Needs Rating ({{ max(0, $totalStallsCount - $uniqueEvaluatedCount) }})
+                            {{-- CHANGED: "Needs Rating" became "Not Yet Rated"; nothing here can be rated directly any more. --}}
+                            Not Yet Rated ({{ max(0, $totalStallsCount - $uniqueEvaluatedCount) }})
                         </button>
                         <button type="button" class="filter-pill px-3 py-1 rounded-md text-xs font-bold bg-neutral-100 text-neutral-600 hover:bg-neutral-200/70 transition-all" data-filter="rated">
                             Rated ({{ $uniqueEvaluatedCount }})
@@ -185,9 +200,10 @@
                                             Rated ({{ number_format($evalInfo['latest_avg'], 1) }}★)
                                         </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-200/80 shrink-0">
-                                            <span class="w-1.5 h-1.5 rounded-full bg-amber-500"></span>
-                                            Needs Rating
+                                        {{-- CHANGED: neutral "Not yet rated" chip instead of an amber warning; an unrated stall is not a problem to fix. --}}
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-neutral-50 text-neutral-600 border border-neutral-200 shrink-0">
+                                            <span class="w-1.5 h-1.5 rounded-full bg-neutral-400"></span>
+                                            Not yet rated
                                         </span>
                                     @endif
                                 </div>
@@ -207,14 +223,7 @@
                                 @endif
                             </div>
 
-                            {{-- Action Button --}}
-                            <div class="mt-4 pt-3 border-t border-neutral-100">
-                                <a href="{{ route('student.evaluation', ['stall' => $stall->id]) }}" 
-                                    class="w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-bold transition-all {{ $isRated ? 'bg-neutral-50 hover:bg-neutral-100 text-neutral-700 border border-neutral-200' : 'bg-brand-600 hover:bg-brand-700 text-white shadow-2xs' }}">
-                                    <ion-icon name="{{ $isRated ? 'sync-outline' : 'star-outline' }}" class="text-sm"></ion-icon>
-                                    <span>{{ $isRated ? 'Rate Again' : 'Rate Stall' }}</span>
-                                </a>
-                            </div>
+                            {{-- CHANGED: removed the Rate Stall / Rate Again button; the how-to strip at the top explains scanning the stall's QR code. --}}
 
                         </div>
                     @endforeach
@@ -268,11 +277,7 @@
                             </div>
                         </div>
 
-                        <a href="{{ route('student.evaluation', ['stall' => $topCampusStall->id]) }}" 
-                            class="mt-3.5 w-full inline-flex items-center justify-center gap-1.5 py-2 px-3 rounded-md text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white transition-colors shadow-2xs">
-                            <ion-icon name="create-outline" class="text-sm"></ion-icon>
-                            Evaluate {{ Str::words($topCampusStall->name, 2, '') }}
-                        </a>
+                        {{-- CHANGED: removed the Evaluate button; evaluations open only from the stall's QR code. --}}
                     </div>
                 </div>
             @endif
@@ -302,9 +307,11 @@
                         </div>
                         <p class="text-xs font-bold text-neutral-800 mb-0.5">No evaluation history yet</p>
                         <p class="text-[11px] text-neutral-500 max-w-[200px] mb-3">Your submitted reviews will appear here.</p>
-                        <a href="{{ route('student.evaluation') }}" class="text-xs font-bold text-brand-700 hover:underline">
-                            Rate your first stall &rarr;
-                        </a>
+                        {{-- CHANGED: the "Rate your first stall" link became a QR hint; the evaluation page opens only from a scan. --}}
+                        <p class="text-[11px] font-semibold text-brand-700 inline-flex items-center gap-1">
+                            <ion-icon name="qr-code-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                            Scan a stall's QR code to start
+                        </p>
                     </div>
                 @else
                     <div class="divide-y divide-neutral-100">

@@ -71,21 +71,28 @@ class StudentEvaluationController extends Controller
 
         $profile = $user;
 
-        $stalls = DB::table('stalls')
-            ->where('is_active', true)
-            ->select('id', 'name')
-            ->orderBy('name')
-            ->get();
+        // CHANGED: no stall dropdown. The form opens only from a stall's QR code, whose link carries a
+        // signature (see AdminController::stallQr), so a student cannot type in another stall's id.
+        // The scanned stall is kept in the session for store(). Without a valid scan, the page asks
+        // the student to scan the QR code at the stall.
+        $stall = null;
 
-        // If a specific stall was requested via query param, verify it is in the active list
-        if ($request->filled('stall')) {
-            $stallId = (int) $request->stall;
-            if (!$stalls->contains('id', $stallId)) {
-                $requestedStall = DB::table('stalls')->where('id', $stallId)->first();
-                if ($requestedStall) {
-                    return redirect()->route('student.evaluation')->with('error', "{$requestedStall->name} is currently closed for student evaluations.");
-                }
+        if ($request->has('signature')) {
+            if (! $request->hasValidSignature(false)) {
+                return redirect()->route('student.evaluation')->with('error', 'This QR code is not valid. Scan the code posted at the stall.');
             }
+
+            $stall = DB::table('stalls')->where('id', (int) $request->stall)->first(['id', 'name', 'is_active']);
+
+            if (! $stall) {
+                return redirect()->route('student.evaluation')->with('error', 'This stall no longer exists.');
+            }
+
+            if (! $stall->is_active) {
+                return redirect()->route('student.evaluation')->with('error', "{$stall->name} is currently closed for student evaluations.");
+            }
+
+            session(['qr_stall_id' => $stall->id]);
         }
 
         // CHANGED: statements moved to self::STATEMENTS; store() reads the same list.
@@ -93,7 +100,7 @@ class StudentEvaluationController extends Controller
 
         return view('student.evaluation', compact(
             'profile',
-            'stalls',
+            'stall',
             'displayStatements'
         ));
     }
@@ -101,6 +108,12 @@ class StudentEvaluationController extends Controller
     public function store(Request $request)
     {
         $user = Auth::user();
+
+        // ADDED: the stall comes from the last scanned QR code, not from the form.
+        if (! session('qr_stall_id')) {
+            return redirect()->route('student.evaluation')->with('error', 'Scan the QR code at the stall to evaluate it.');
+        }
+        $request->merge(['stall_id' => session('qr_stall_id')]);
 
         // CHANGED: moved above validate() so the rating rules below are built from the same statement list the scores are computed from.
         // CHANGED: built from self::STATEMENTS instead of a second hand-written id => criterion list.

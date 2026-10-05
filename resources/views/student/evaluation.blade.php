@@ -69,15 +69,203 @@
                     </a>
                 </div>
             </div>
-        @elseif($stalls->isEmpty())
-            {{-- Empty Stalls Notice --}}
-            <div class="p-12 text-center">
-                <div class="w-12 h-12 rounded-xl bg-amber-50 border border-amber-200 text-amber-700 flex items-center justify-center mx-auto mb-3">
-                    <ion-icon name="alert-circle-outline" class="text-2xl"></ion-icon>
+        {{-- CHANGED: the "scan the QR code" notice is now an in-page scanner. The camera reads the stall's QR code and opens its evaluation; a photo of the code works too, for phones where live camera access is blocked. --}}
+        @elseif(! $stall)
+            <div class="px-5 py-8 sm:p-12 flex flex-col items-center text-center">
+                <h1 class="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Scan the stall's QR code</h1>
+                <p class="text-xs sm:text-sm text-neutral-500 mt-1 max-w-sm">Point your camera at the QR code posted at the stall's counter. The evaluation opens as soon as it is read.</p>
+
+                @if(session('error'))
+                    <p class="mt-4 inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
+                        <ion-icon name="alert-circle" class="text-sm text-rose-600 shrink-0" aria-hidden="true"></ion-icon>
+                        {{ session('error') }}
+                    </p>
+                @endif
+
+                <div id="qr-viewfinder" class="qr-viewfinder relative mt-6 w-full max-w-[18rem] sm:max-w-xs aspect-square rounded-xl overflow-hidden bg-neutral-950">
+                    <video id="qr-video" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300" playsinline muted aria-hidden="true"></video>
+
+                    <div id="qr-idle" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-neutral-400 px-6">
+                        <ion-icon name="qr-code-outline" class="text-5xl text-neutral-500" aria-hidden="true"></ion-icon>
+                        <p class="text-xs font-semibold">Camera is off</p>
+                    </div>
+
+                    <span class="qr-corner qr-corner--tl" aria-hidden="true"></span>
+                    <span class="qr-corner qr-corner--tr" aria-hidden="true"></span>
+                    <span class="qr-corner qr-corner--bl" aria-hidden="true"></span>
+                    <span class="qr-corner qr-corner--br" aria-hidden="true"></span>
+                    <span id="qr-scanline" class="qr-scanline hidden" aria-hidden="true"></span>
                 </div>
-                <h3 class="text-sm font-bold text-neutral-900">No Food Stalls Open for Evaluation</h3>
-                <p class="text-xs text-neutral-500 mt-1 max-w-sm mx-auto">There are currently no active food stalls open for student evaluations.</p>
+
+                <p id="qr-status" class="mt-4 min-h-[2.5rem] max-w-xs text-xs font-semibold text-neutral-600" role="status" aria-live="polite">
+                    Tap <span class="font-bold text-neutral-900">Start scanning</span> and allow camera access.
+                </p>
+
+                <div class="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full max-w-xs sm:max-w-none sm:w-auto">
+                    <button type="button" id="qr-start" class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
+                        <ion-icon name="camera-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                        <span>Start scanning</span>
+                    </button>
+                    <label class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-bold rounded-md border border-neutral-200 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-brand-600/30">
+                        <ion-icon name="image-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                        <span>Scan from a photo</span>
+                        <input type="file" id="qr-photo" accept="image/*" capture="environment" class="sr-only">
+                    </label>
+                </div>
+
+                <a href="{{ route('student.dashboard') }}" class="mt-6 text-xs font-bold text-neutral-500 hover:text-brand-700 transition-colors">Back to Dashboard</a>
             </div>
+
+            <style>
+                .qr-corner { position: absolute; width: 2.25rem; height: 2.25rem; border: 3px solid oklch(0.78 0.15 155); pointer-events: none; }
+                .qr-corner--tl { top: 0.85rem; left: 0.85rem; border-right: 0; border-bottom: 0; border-top-left-radius: 0.6rem; }
+                .qr-corner--tr { top: 0.85rem; right: 0.85rem; border-left: 0; border-bottom: 0; border-top-right-radius: 0.6rem; }
+                .qr-corner--bl { bottom: 0.85rem; left: 0.85rem; border-right: 0; border-top: 0; border-bottom-left-radius: 0.6rem; }
+                .qr-corner--br { bottom: 0.85rem; right: 0.85rem; border-left: 0; border-top: 0; border-bottom-right-radius: 0.6rem; }
+                .qr-scanline {
+                    position: absolute; left: 1.25rem; right: 1.25rem; top: 1.25rem; height: 2px; border-radius: 2px;
+                    background: oklch(0.78 0.15 155); box-shadow: 0 0 12px 2px oklch(0.78 0.15 155 / 0.55);
+                    animation: qr-sweep 2.2s cubic-bezier(0.65, 0, 0.35, 1) infinite alternate;
+                }
+                @keyframes qr-sweep { to { top: calc(100% - 1.25rem - 2px); } }
+                @media (prefers-reduced-motion: reduce) { .qr-scanline { animation: none; top: 50%; } }
+                .qr-viewfinder.is-found { box-shadow: 0 0 0 4px oklch(0.78 0.15 155); }
+            </style>
+
+            <script src="https://unpkg.com/jsqr@1.4.0/dist/jsQR.js" integrity="sha384-b5Ya4Bq3qCyz39m2ISh+4DxjAIljdeFwK/BsXLuj9gugaNwAcj/ia15fxNZL9Nlx" crossorigin="anonymous"></script>
+            <script>
+            (function () {
+                var video = document.getElementById('qr-video');
+                var idle = document.getElementById('qr-idle');
+                var scanline = document.getElementById('qr-scanline');
+                var viewfinder = document.getElementById('qr-viewfinder');
+                var statusEl = document.getElementById('qr-status');
+                var startBtn = document.getElementById('qr-start');
+                var photoInput = document.getElementById('qr-photo');
+                var canvas = document.createElement('canvas');
+                var ctx = canvas.getContext('2d', { willReadFrequently: true });
+                var stream = null;
+                var done = false;
+
+                function setStatus(text, tone) {
+                    statusEl.textContent = text;
+                    statusEl.className = 'mt-4 min-h-[2.5rem] max-w-xs text-xs font-semibold ' +
+                        (tone === 'error' ? 'text-rose-700' : tone === 'ok' ? 'text-brand-700' : 'text-neutral-600');
+                }
+
+                function stopCamera() {
+                    if (stream) stream.getTracks().forEach(function (t) { t.stop(); });
+                    stream = null;
+                    video.classList.add('opacity-0');
+                    scanline.classList.add('hidden');
+                    idle.classList.remove('hidden');
+                    startBtn.classList.remove('hidden');
+                }
+
+                // Only evaluation links for this site open; anything else is explained, not followed.
+                function handleCode(text) {
+                    var url;
+                    try { url = new URL(text, window.location.href); } catch (e) { url = null; }
+
+                    if (!url || url.pathname !== '/student/evaluation' || !url.searchParams.has('signature')) {
+                        setStatus("That QR code isn't a stall evaluation code. Scan the code posted at the stall's counter.", 'error');
+                        return false;
+                    }
+                    if (url.origin !== window.location.origin) {
+                        setStatus('That code was made for ' + url.host + ', not this site. Ask the canteen office for the current code.', 'error');
+                        return false;
+                    }
+
+                    done = true;
+                    stopCamera();
+                    viewfinder.classList.add('is-found');
+                    setStatus('Code found. Opening the evaluation…', 'ok');
+                    window.location.assign(url.href);
+                    return true;
+                }
+
+                function decode(source, width, height) {
+                    var scale = Math.min(1, 720 / Math.max(width, height));
+                    canvas.width = Math.round(width * scale);
+                    canvas.height = Math.round(height * scale);
+                    ctx.drawImage(source, 0, 0, canvas.width, canvas.height);
+                    var image = ctx.getImageData(0, 0, canvas.width, canvas.height);
+                    return window.jsQR ? jsQR(image.data, image.width, image.height, { inversionAttempts: 'attemptBoth' }) : null;
+                }
+
+                function tick() {
+                    if (done || !stream) return;
+                    if (video.readyState === video.HAVE_ENOUGH_DATA) {
+                        var code = decode(video, video.videoWidth, video.videoHeight);
+                        if (code && code.data && handleCode(code.data)) return;
+                    }
+                    requestAnimationFrame(tick);
+                }
+
+                startBtn.addEventListener('click', function () {
+                    if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+                        setStatus('Live scanning needs a secure (https) connection. Use "Scan from a photo" instead.', 'error');
+                        return;
+                    }
+                    setStatus('Starting camera…');
+                    navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } }, audio: false })
+                        .then(function (s) {
+                            stream = s;
+                            video.srcObject = s;
+                            return video.play();
+                        })
+                        .then(function () {
+                            video.classList.remove('opacity-0');
+                            idle.classList.add('hidden');
+                            scanline.classList.remove('hidden');
+                            startBtn.classList.add('hidden');
+                            setStatus('Hold the QR code inside the frame.');
+                            requestAnimationFrame(tick);
+                        })
+                        .catch(function (err) {
+                            stopCamera();
+                            if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+                                setStatus('Camera access was blocked. Allow it in your browser settings, or use "Scan from a photo".', 'error');
+                            } else if (err && (err.name === 'NotFoundError' || err.name === 'OverconstrainedError')) {
+                                setStatus('No camera was found on this device. Use "Scan from a photo" instead.', 'error');
+                            } else {
+                                setStatus('The camera could not start. Use "Scan from a photo" instead.', 'error');
+                            }
+                        });
+                });
+
+                photoInput.addEventListener('change', function () {
+                    var file = photoInput.files && photoInput.files[0];
+                    if (!file) return;
+                    setStatus('Reading the photo…');
+                    var img = new Image();
+                    img.onload = function () {
+                        var code = decode(img, img.naturalWidth, img.naturalHeight);
+                        URL.revokeObjectURL(img.src);
+                        photoInput.value = '';
+                        if (!code || !code.data) {
+                            setStatus('No QR code found in that photo. Take it closer, with the whole code in view.', 'error');
+                            return;
+                        }
+                        handleCode(code.data);
+                    };
+                    img.onerror = function () {
+                        photoInput.value = '';
+                        setStatus('That file could not be opened as an image.', 'error');
+                    };
+                    img.src = URL.createObjectURL(file);
+                });
+
+                // Release the camera when the student leaves or switches apps.
+                document.addEventListener('visibilitychange', function () {
+                    if (document.hidden && stream && !done) {
+                        stopCamera();
+                        setStatus('Scanning paused. Tap Start scanning to continue.');
+                    }
+                });
+                window.addEventListener('pagehide', stopCamera);
+            })();
+            </script>
         @else
             {{-- ── Form Header & Institutional Identity ────────────────────── --}}
             <div class="p-6 sm:p-8 border-b border-neutral-100 bg-neutral-50/50">
@@ -132,25 +320,15 @@
                     </div>
                 @endif
 
-                {{-- 1. Stall Selection Section --}}
-                <div class="bg-white rounded-xl border border-neutral-200/80 p-3.5 sm:p-5 shadow-2xs space-y-2.5" id="stallSelectCard">
-                    <label for="stall_id" class="block text-xs font-bold uppercase tracking-wider text-neutral-700">
-                        1. Select Food Stall to Evaluate <span class="text-rose-500">*</span>
-                    </label>
-                    
-                    <div class="relative max-w-md">
-                        <select id="stall_id" name="stall_id" required
-                            class="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-semibold text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors cursor-pointer">
-                            <option value="">Choose a Food Stall...</option>
-                            @foreach($stalls as $stall)
-                                {{-- CHANGED: falls back to old('stall_id') so the chosen stall survives a failed submission (e.g. reCAPTCHA rejection), not just the ?stall= link. --}}
-                                <option value="{{ $stall->id }}" {{ (string)old('stall_id', request('stall')) === (string)$stall->id ? 'selected' : '' }}>
-                                    {{ $stall->name }}
-                                </option>
-                            @endforeach
-                        </select>
+                {{-- CHANGED: the stall dropdown is gone; the stall comes from the scanned QR code and is shown here. --}}
+                <div class="bg-white rounded-xl border border-neutral-200/80 p-3.5 sm:p-5 shadow-2xs flex items-center gap-3" id="stallSelectCard">
+                    <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200 text-brand-700 flex items-center justify-center shrink-0">
+                        <ion-icon name="storefront-outline" class="text-lg" aria-hidden="true"></ion-icon>
                     </div>
-                    <p class="text-[11px] text-neutral-500">Choose the specific campus dining stall where you purchased your meal.</p>
+                    <div class="min-w-0">
+                        <p class="text-[11px] font-bold uppercase tracking-wider text-neutral-500">You are evaluating</p>
+                        <p class="text-sm font-bold text-neutral-900 truncate">{{ $stall->name }}</p>
+                    </div>
                 </div>
 
                 {{-- 2. Rating Scale Legend --}}
@@ -424,18 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Form Submission Validation
     if (form && submitBtn) {
         form.addEventListener('submit', (e) => {
-            // Check stall
-            const stallSelect = document.getElementById('stall_id');
-            if (!stallSelect || !stallSelect.value) {
-                e.preventDefault();
-                if (alertBox && alertMsg) {
-                    alertMsg.textContent = 'Please select a Food Stall to evaluate.';
-                    alertBox.classList.remove('hidden');
-                    stallSelect.scrollIntoView({ behavior: 'smooth', block: 'center' });
-                    stallSelect.focus();
-                }
-                return false;
-            }
+            // CHANGED: removed the stall dropdown check; the stall comes from the scanned QR code.
 
             // Check that all statements are answered in the canonical desktop inputs
             const missingStatementIds = [];

@@ -314,11 +314,8 @@
             </div>
 
             {{-- Footer Action --}}
-            <div class="pt-3 border-t border-neutral-100 flex items-center justify-between gap-2">
-                <a id="modal-rate-again-btn" href="#" class="inline-flex items-center gap-1.5 text-xs font-bold text-brand-700 hover:text-brand-800">
-                    <ion-icon name="create-outline"></ion-icon>
-                    Rate this stall again
-                </a>
+            {{-- CHANGED: removed "Rate this stall again" (evaluations open only from the stall's QR code); Close now sits on the right via justify-end. --}}
+            <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
                 <button type="button" class="js-close-eval-modal px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     Close
                 </button>
@@ -355,13 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
             commentBox.classList.add('text-neutral-500', 'not-italic');
         }
 
-        const rateAgainBtn = document.getElementById('modal-rate-again-btn');
-        if (evalData.stall_id) {
-            rateAgainBtn.href = "{{ url('/student/evaluation') }}?stall=" + evalData.stall_id;
-            rateAgainBtn.classList.remove('hidden');
-        } else {
-            rateAgainBtn.classList.add('hidden');
-        }
+        // CHANGED: removed the rate-again link setup along with the link.
 
         if (evalModal) evalModal.showModal();
     };

@@ -219,6 +219,11 @@
                         <ion-icon name="podium-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                         Standings
                     </a>
+                    {{-- ADDED: the stall's QR code, for staff to print or share. --}}
+                    <a href="{{ route('staff.qr') }}" class="sidebar-link {{ request()->routeIs('staff.qr') ? 'active' : '' }}">
+                        <ion-icon name="qr-code-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                        QR Code
+                    </a>
                 @endif
                 <a href="{{ route('staff.profile') }}" class="sidebar-link {{ request()->routeIs('staff.profile*') ? 'active' : '' }}">
                     <ion-icon name="person-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
