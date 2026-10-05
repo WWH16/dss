@@ -98,6 +98,17 @@ test('a non-student signing in after a scanned link goes to their own dashboard'
     ['staff', '/staff/dashboard'],
 ]);
 
+// ADDED: regression test for the 500 "Route [verification.notice] not defined" a scanned link threw
+// for any signed-in account whose email_verified_at is null (every staff and admin self-registration).
+test('an account with an unverified email that scans the link is redirected, not a 500', function () {
+    $scanned = qrLink($this, qrStall());
+
+    $user = qrUser('staff');
+    $user->forceFill(['email_verified_at' => null])->save();
+
+    $this->actingAs($user)->get($scanned)->assertRedirect('/login');
+});
+
 test('a student signing in normally still goes to the dashboard', function () {
     qrUser('student');
 

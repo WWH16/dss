@@ -50,7 +50,8 @@ Route::post('/verify-otp/resend', [OtpController::class, 'resend'])->name('otp.r
 */
 
 // CHANGED: role:student replaces the inline role checks in the student controllers.
-Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
+// CHANGED: dropped 'verified' - it redirects to the undefined route('verification.notice'); students already verify by OTP.
+Route::middleware(['auth', 'role:student'])->group(function () {
 
     // Dashboard
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
