@@ -15,7 +15,8 @@
 <body class="bg-neutral-50 font-sans antialiased text-neutral-900">
 
 <div class="max-w-xl mx-auto px-4 py-6">
-    <a href="{{ route('admin.stalls') }}" class="no-print text-xs font-bold text-brand-700 hover:text-brand-800">&larr; Back to Stalls</a>
+    {{-- CHANGED: back link is a 44px-tall tap target on phones. --}}
+    <a href="{{ route('admin.stalls') }}" class="no-print inline-flex items-center min-h-11 -my-2 text-xs font-bold text-brand-700 hover:text-brand-800">&larr; Back to Stalls</a>
 
     <div class="mt-4">
         @include('partials.stall-qr')

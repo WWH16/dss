@@ -82,7 +82,8 @@
                     </p>
                 @endif
 
-                <div id="qr-viewfinder" class="qr-viewfinder relative mt-6 w-full max-w-[18rem] sm:max-w-xs aspect-square rounded-xl overflow-hidden bg-neutral-950">
+                {{-- CHANGED: the viewfinder fills the phone's width (up to 20rem) so the code is easier to frame. --}}
+                <div id="qr-viewfinder" class="qr-viewfinder relative mt-6 w-full max-w-[20rem] aspect-square rounded-xl overflow-hidden bg-neutral-950">
                     <video id="qr-video" class="absolute inset-0 w-full h-full object-cover opacity-0 transition-opacity duration-300" playsinline muted aria-hidden="true"></video>
 
                     <div id="qr-idle" class="absolute inset-0 flex flex-col items-center justify-center gap-2 text-neutral-400 px-6">
@@ -97,23 +98,24 @@
                     <span id="qr-scanline" class="qr-scanline hidden" aria-hidden="true"></span>
                 </div>
 
-                <p id="qr-status" class="mt-4 min-h-[2.5rem] max-w-xs text-xs font-semibold text-neutral-600" role="status" aria-live="polite">
+                <p id="qr-status" class="mt-4 min-h-[2.5rem] max-w-[20rem] text-xs font-semibold text-neutral-600" role="status" aria-live="polite">
                     Tap <span class="font-bold text-neutral-900">Start scanning</span> and allow camera access.
                 </p>
 
-                <div class="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full max-w-xs sm:max-w-none sm:w-auto">
-                    <button type="button" id="qr-start" class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
+                {{-- CHANGED: full-width, 44px-tall buttons on phones (thumb-sized), side by side from sm up. --}}
+                <div class="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full max-w-[20rem] sm:max-w-none sm:w-auto">
+                    <button type="button" id="qr-start" class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 min-h-11 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                         <ion-icon name="camera-outline" class="text-sm" aria-hidden="true"></ion-icon>
                         <span>Start scanning</span>
                     </button>
-                    <label class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-bold rounded-md border border-neutral-200 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-brand-600/30">
+                    <label class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 min-h-11 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-bold rounded-md border border-neutral-200 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-brand-600/30">
                         <ion-icon name="image-outline" class="text-sm" aria-hidden="true"></ion-icon>
                         <span>Scan from a photo</span>
                         <input type="file" id="qr-photo" accept="image/*" capture="environment" class="sr-only">
                     </label>
                 </div>
 
-                <a href="{{ route('student.dashboard') }}" class="mt-6 text-xs font-bold text-neutral-500 hover:text-brand-700 transition-colors">Back to Dashboard</a>
+                <a href="{{ route('student.dashboard') }}" class="mt-4 inline-flex items-center min-h-11 text-xs font-bold text-neutral-500 hover:text-brand-700 transition-colors">Back to Dashboard</a>
             </div>
 
             <style>
@@ -149,7 +151,7 @@
 
                 function setStatus(text, tone) {
                     statusEl.textContent = text;
-                    statusEl.className = 'mt-4 min-h-[2.5rem] max-w-xs text-xs font-semibold ' +
+                    statusEl.className = 'mt-4 min-h-[2.5rem] max-w-[20rem] text-xs font-semibold ' +
                         (tone === 'error' ? 'text-rose-700' : tone === 'ok' ? 'text-brand-700' : 'text-neutral-600');
                 }
 
