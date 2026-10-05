@@ -40,8 +40,10 @@
                     </p>
                 </div>
             </div>
+            {{-- CHANGED: full width and 44px tall on phones, where it was a 30px button hugging the left edge under
+                 two lines of warning text; the compact self-sizing button returns from sm up. --}}
             <button type="button" onclick="openQuickAssignModal()"
-                class="btn btn-primary text-xs font-bold px-3 py-1.5 rounded-md self-start sm:self-auto shrink-0 shadow-2xs flex items-center gap-1.5 cursor-pointer">
+                class="btn btn-primary text-xs font-bold px-3 min-h-11 sm:min-h-0 sm:py-1.5 rounded-md w-full sm:w-auto self-stretch sm:self-auto shrink-0 shadow-2xs flex items-center justify-center sm:justify-start gap-1.5 cursor-pointer">
                 <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
                 <span>Assign Staff</span>
             </button>
@@ -51,13 +53,33 @@
     {{-- ── 3. Main 2-Column Layout ────────────────────────────────────────── --}}
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
 
-        {{-- Left Column: Creation Form & Guidelines (4 cols) --}}
+        {{-- Left Column: Creation Form (4 cols) --}}
+        {{-- CHANGED: the Guidelines card moved out of this column to its own grid item after the directory, so on
+             a phone the order is [Add New Stall, collapsed] - [directory] - [guidelines]. Desktop auto-placement
+             puts Guidelines back under this card, unchanged. --}}
         <div class="lg:col-span-4 space-y-5">
-            
+
             {{-- Add Stall Card --}}
             {{-- CHANGED: card radius rounded-lg to rounded-xl, matching the overview's card rule (cards xl, controls md). --}}
-            <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-2xs">
-                <div class="mb-3.5 pb-2.5 border-b border-neutral-100">
+            {{-- CHANGED: the card is a <details> so this two-screen form is one 44px row on a phone instead of
+                 everything between the header and the stall list. The summary is hidden from lg up, where the form
+                 stays open in its own column as before; the script at the bottom of this page collapses it on
+                 phones on load, unless the form came back with a validation error. --}}
+            <details id="add-stall-panel" class="group bg-white rounded-xl border border-neutral-200/80 shadow-2xs" open @error('name') data-has-error="1" @enderror>
+                <summary class="lg:hidden list-none [&::-webkit-details-marker]:hidden cursor-pointer select-none flex items-center justify-between gap-3 p-5 min-h-14 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40 rounded-xl">
+                    <span class="flex items-start gap-2 min-w-0">
+                        <ion-icon name="add-circle-outline" class="text-base text-brand-700 mt-0.5 shrink-0" aria-hidden="true"></ion-icon>
+                        <span class="min-w-0">
+                            <span class="block text-sm font-bold text-neutral-900 tracking-tight">Add New Stall</span>
+                            <span class="block text-[11px] text-neutral-500 mt-0.5">Register a vendor &amp; optionally assign staff members.</span>
+                        </span>
+                    </span>
+                    <ion-icon name="chevron-down-outline" class="text-sm text-neutral-500 shrink-0 transition-transform duration-200 group-open:rotate-180" aria-hidden="true"></ion-icon>
+                </summary>
+
+                <div class="px-5 pb-5 lg:pt-5">
+                {{-- CHANGED: hidden on phones, where the summary above already carries this title and subtitle. --}}
+                <div class="hidden lg:block mb-3.5 pb-2.5 border-b border-neutral-100">
                     <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Add New Stall</h2>
                     <p class="text-[11px] text-neutral-500 mt-0.5">Register a vendor &amp; optionally assign staff members.</p>
                 </div>
@@ -99,13 +121,16 @@
                             {{-- Search in Add Form --}}
                             <div class="relative mb-1.5">
                                 <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></ion-icon>
+                                {{-- CHANGED: py-1 (~24px) became py-2 for thumbs; the compact height returns from sm up. --}}
                                 <input type="text" id="add-staff-search" placeholder="Search staff…"
-                                    class="w-full pl-7 pr-3 py-1 bg-white border border-neutral-300 rounded text-[11px] font-medium focus:outline-none focus:border-brand-700">
+                                    class="w-full pl-7 pr-3 py-2 sm:py-1 bg-white border border-neutral-300 rounded text-[11px] font-medium focus:outline-none focus:border-brand-700">
                             </div>
 
-                            <div id="add-staff-list" class="max-h-36 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-300 rounded-md space-y-1 custom-scrollbar">
+                            {{-- CHANGED: a 144px scroller inside the page scroll is a trap under a thumb, and each row
+                                 was a ~26px label. The list is taller on phones and each row is 44px there. --}}
+                            <div id="add-staff-list" class="max-h-64 sm:max-h-36 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-300 rounded-md space-y-1 custom-scrollbar">
                                 @foreach($staffUsers as $staff)
-                                    <label class="add-staff-item flex items-center justify-between p-1.5 rounded hover:bg-white border border-transparent hover:border-neutral-200 transition-colors cursor-pointer text-xs"
+                                    <label class="add-staff-item flex items-center justify-between gap-2 p-2.5 sm:p-1.5 min-h-11 sm:min-h-0 rounded hover:bg-white border border-transparent hover:border-neutral-200 transition-colors cursor-pointer text-xs"
                                         data-staff-name="{{ strtolower($staff->name) }}" data-staff-email="{{ strtolower($staff->email) }}">
                                         <div class="flex items-center gap-2 min-w-0">
                                             <input type="checkbox" name="staff_ids[]" value="{{ $staff->id }}"
@@ -144,30 +169,8 @@
                         <span>Create Stall</span>
                     </button>
                 </form>
-            </div>
-
-            {{-- Guidelines Card --}}
-            {{-- CHANGED: rounded-lg to rounded-xl (card rule). --}}
-            <div class="bg-white rounded-xl border border-neutral-200/80 p-4.5 shadow-2xs space-y-2.5 text-xs">
-                <div class="flex items-center gap-1.5 text-neutral-800 font-bold text-[11px] uppercase tracking-wider">
-                    <ion-icon name="information-circle-outline" class="text-base text-brand-700" aria-hidden="true"></ion-icon>
-                    <span>Staff &amp; Stall Guidelines</span>
                 </div>
-                <ul class="space-y-1.5 text-neutral-600 text-[11px] font-medium leading-relaxed">
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-neutral-400 mt-0.5">•</span>
-                        <span>A single stall can have multiple staff members assigned to it.</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-neutral-400 mt-0.5">•</span>
-                        <span>Click any staff badge to view the full scrollable roster &amp; manage assignments.</span>
-                    </li>
-                    <li class="flex items-start gap-1.5">
-                        <span class="text-neutral-400 mt-0.5">•</span>
-                        <span>Unassigned staff are blocked from viewing campus standings until assigned.</span>
-                    </li>
-                </ul>
-            </div>
+            </details>
 
         </div>
 
@@ -186,11 +189,22 @@
                     {{-- Search Input --}}
                     <div class="relative w-full sm:w-56">
                         <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none" aria-hidden="true"></ion-icon>
+                        {{-- CHANGED: py-1.5 (~30px) became py-2.5 (44px) for thumbs; the compact height returns from sm up. --}}
                         <input type="text" id="stall-search-input"
                             placeholder="Filter stalls…"
                             aria-label="Filter stalls by name"
-                            class="w-full pl-8 pr-3 py-1.5 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700">
+                            class="w-full pl-8 pr-3 py-2.5 sm:py-1.5 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700">
                     </div>
+                </div>
+
+                {{-- ADDED: column labels for the grid the rows form from lg up. The list is tabular data - name,
+                     status, rating, staff - and without a legend the aligned columns read as coincidence. The
+                     grid template here must stay identical to the one on .stall-item below. --}}
+                <div class="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_7rem_12rem_13rem] lg:items-center lg:gap-4 px-5 py-2 border-b border-neutral-100 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                    <span>Stall</span>
+                    <span>Rating</span>
+                    <span>Staff</span>
+                    <span class="sr-only">Actions</span>
                 </div>
 
                 {{-- Stalls List --}}
@@ -208,14 +222,24 @@
                             $staffRosterJson = json_encode($assignedStaffList->map(fn($s) => ['id' => $s->id, 'name' => $s->name, 'email' => $s->email])->toArray());
                             $allStaffNames = $assignedStaffList->pluck('name')->join(', ');
                         @endphp
-                        <div class="stall-item flex flex-col sm:flex-row sm:items-center justify-between py-3.5 px-5 gap-3 hover:bg-neutral-50/70 transition-colors" data-stall-name="{{ strtolower($stall->name) }}">
-                            <div class="flex items-center gap-3 min-w-0">
-                                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/70 text-brand-800 flex items-center justify-center shrink-0">
-                                    <ion-icon name="storefront-outline" class="text-lg text-brand-800"></ion-icon>
-                                </div>
-                                <div class="min-w-0 space-y-1">
-                                    <div class="flex items-center gap-2 flex-wrap">
-                                        <span class="text-xs font-bold text-neutral-900 truncate">{{ $stall->name }}</span>
+                        {{-- CHANGED: one row at every width. The actions used to drop to a second line on phones,
+                             which cost a whole row of height per stall; icon-only buttons fit beside the content. --}}
+                        {{-- CHANGED: from lg up the row is a four-column grid - stall, rating, staff, actions - so
+                             each field sits at the same x position down the whole list and an admin can scan one
+                             attribute at a time. Rating and staff used to trail the stall name on a shared line, so
+                             they started at a different place in every row. The two wrappers below become
+                             lg:contents, which promotes their children to grid items without changing the phone
+                             layout, where the row stays a flex line with the meta pair wrapping under the name. --}}
+                        <div class="stall-item flex items-start justify-between py-3.5 px-4 gap-2.5 lg:grid lg:grid-cols-[minmax(0,1fr)_7rem_12rem_13rem] lg:items-center lg:gap-4 lg:px-5 hover:bg-neutral-50/70 transition-colors" data-stall-name="{{ strtolower($stall->name) }}">
+                            <div class="flex items-start gap-2.5 min-w-0 flex-1 flex-wrap lg:contents">
+                                {{-- Cell 1 from lg up: the stall's identity. --}}
+                                <div class="flex items-center gap-2.5 min-w-0">
+                                    <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/70 text-brand-800 flex items-center justify-center shrink-0">
+                                        <ion-icon name="storefront-outline" class="text-lg text-brand-800"></ion-icon>
+                                    </div>
+                                    <div class="flex items-center gap-2 flex-wrap min-w-0">
+                                        {{-- CHANGED: 12px to 14px. The stall name is the row's identity and was set at the same size as its own metadata, so no element led. --}}
+                                        <span class="text-sm font-bold text-neutral-900 truncate">{{ $stall->name }}</span>
                                         {{-- CHANGED: status tags raised from 9px to 11px, py-0.2 (no such Tailwind v4 step) to py-0.5, rounded to rounded-md; Inactive text neutral-500 to neutral-600 for contrast. --}}
                                         @if($stall->is_active)
                                             <span class="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-emerald-50 text-emerald-700 border border-emerald-200">Active</span>
@@ -223,8 +247,11 @@
                                             <span class="text-[11px] font-bold uppercase tracking-wider px-1.5 py-0.5 rounded-md bg-neutral-100 text-neutral-600 border border-neutral-200">Inactive</span>
                                         @endif
                                     </div>
+                                </div>
 
-                                    <div class="flex items-center gap-3 text-[11px] text-neutral-500 flex-wrap">
+                                {{-- CHANGED: on phones this meta pair wraps to its own full-width line under the stall name. From
+                                     lg up it is lg:contents, so the rating and the staff control become grid cells 2 and 3. --}}
+                                    <div class="flex items-center gap-x-3 gap-y-1 text-[11px] text-neutral-500 flex-wrap w-full lg:w-auto lg:contents">
                                         {{-- Rating --}}
                                         {{-- CHANGED: rating colours use the overview's status set (emerald-700 / amber-700 / rose-600) instead of brand-700 / amber-700 / red-600, and the amber star ion-icon became the ★ glyph used on the overview. "No ratings yet" darkened from neutral-400 to neutral-500. --}}
                                         @if($avgRating !== null)
@@ -235,50 +262,57 @@
                                             <span class="text-neutral-500">No ratings yet</span>
                                         @endif
 
-                                        <span class="text-neutral-300">•</span>
+                                        {{-- CHANGED: hidden from lg up, where the rating and the staff control are
+                                             separate columns and a separator between them would be noise. --}}
+                                        <span class="text-neutral-300 lg:hidden">•</span>
 
                                         {{-- Scalable Compact Staff Presentation with Interactive Roster --}}
+                                        {{-- CHANGED: the roster pills and "Assign staff" were ~20px tall, under the 24px
+                                             minimum. They are py-1.5 on phones and keep the compact py-0.5 from sm up. --}}
                                         {{-- CHANGED (all four staff buttons): JS arguments now use Js::from() instead of quoted addslashes() output. addslashes does not escape line breaks, so a stall whose description has a newline broke the whole onclick handler. The roster buttons now also pass description and is_active (see openRosterModal). Text raised from 10px/9px to 11px, rounded to rounded-md, and "Assign staff" darkened from neutral-400 to neutral-500. --}}
                                         @if($staffCount === 0)
                                             <button type="button" onclick="openEditModal({{ $stall->id }}, {{ Js::from($stall->name) }}, {{ $staffIdsJson }}, {{ Js::from($stall->description ?? '') }}, {{ $stall->is_active ? 1 : 0 }})"
-                                                class="text-[11px] text-neutral-500 hover:text-brand-700 font-medium inline-flex items-center gap-1 cursor-pointer transition-colors">
+                                                class="text-[11px] text-neutral-500 hover:text-brand-700 font-medium inline-flex items-center gap-1 cursor-pointer transition-colors py-1.5 sm:py-0 pr-2 -mr-2">
                                                 <ion-icon name="person-add-outline" class="text-xs"></ion-icon>
                                                 <span>Assign staff</span>
                                             </button>
                                         @elseif($staffCount === 1)
                                             <button type="button" onclick="openRosterModal({{ $stall->id }}, {{ Js::from($stall->name) }}, {{ $staffRosterJson }}, {{ Js::from($stall->description ?? '') }}, {{ $stall->is_active ? 1 : 0 }})"
-                                                class="inline-flex items-center gap-1 font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-0.5 rounded-md text-[11px] border border-brand-200/60 transition-colors cursor-pointer"
+                                                class="inline-flex items-center gap-1 min-w-0 max-w-full font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-1.5 sm:py-0.5 rounded-md text-[11px] border border-brand-200/60 transition-colors cursor-pointer"
                                                 title="Click to view staff roster for {{ $stall->name }}">
                                                 <ion-icon name="person-outline" class="text-xs"></ion-icon>
-                                                Staff: {{ $assignedStaffList->first()->name }}
+                                                <span class="truncate">Staff: {{ $assignedStaffList->first()->name }}</span>
                                             </button>
                                         @elseif($staffCount === 2)
                                             <button type="button" onclick="openRosterModal({{ $stall->id }}, {{ Js::from($stall->name) }}, {{ $staffRosterJson }}, {{ Js::from($stall->description ?? '') }}, {{ $stall->is_active ? 1 : 0 }})"
-                                                class="inline-flex items-center gap-1 font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-0.5 rounded-md text-[11px] border border-brand-200/60 transition-colors cursor-pointer"
+                                                class="inline-flex items-center gap-1 min-w-0 max-w-full font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-1.5 sm:py-0.5 rounded-md text-[11px] border border-brand-200/60 transition-colors cursor-pointer"
                                                 title="Click to view staff roster for {{ $stall->name }}">
                                                 <ion-icon name="people-outline" class="text-xs"></ion-icon>
-                                                Staff: {{ Str::limit($assignedStaffList[0]->name, 12) }}, {{ Str::limit($assignedStaffList[1]->name, 12) }}
+                                                <span class="truncate">Staff: {{ Str::limit($assignedStaffList[0]->name, 12) }}, {{ Str::limit($assignedStaffList[1]->name, 12) }}</span>
                                             </button>
                                         @else
                                             <button type="button" onclick="openRosterModal({{ $stall->id }}, {{ Js::from($stall->name) }}, {{ $staffRosterJson }}, {{ Js::from($stall->description ?? '') }}, {{ $stall->is_active ? 1 : 0 }})"
-                                                class="inline-flex items-center gap-1 font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-0.5 rounded-md text-[11px] border border-brand-200/60 transition-colors cursor-pointer"
+                                                class="inline-flex items-center gap-1 min-w-0 max-w-full font-semibold text-brand-800 bg-brand-50 hover:bg-brand-100 px-2 py-1.5 sm:py-0.5 rounded-md text-[11px] border border-brand-200/60 transition-colors cursor-pointer"
                                                 title="Click to view all {{ $staffCount }} staff members">
                                                 <ion-icon name="people-outline" class="text-xs"></ion-icon>
-                                                Staff: {{ Str::limit($assignedStaffList[0]->name, 10) }}, {{ Str::limit($assignedStaffList[1]->name, 10) }}
-                                                <span class="bg-brand-200/70 text-brand-900 px-1 rounded-md text-[11px] font-bold">+{{ $staffCount - 2 }} more</span>
+                                                <span class="truncate">Staff: {{ Str::limit($assignedStaffList[0]->name, 10) }}, {{ Str::limit($assignedStaffList[1]->name, 10) }}</span>
+                                                <span class="bg-brand-200/70 text-brand-900 px-1 rounded-md text-[11px] font-bold shrink-0">+{{ $staffCount - 2 }} more</span>
                                             </button>
                                         @endif
                                     </div>
-                                </div>
                             </div>
 
-                            <div class="flex items-center gap-1.5 shrink-0 self-end sm:self-center">
+                            {{-- CHANGED: icon-only 36px squares on phones instead of a full-width row of labelled
+                                 44px buttons, which ate a second line per stall. The labels return from sm up. Each
+                                 button keeps its aria-label for the icon-only state, and all three sit on one even
+                                 gap - the extra margin that used to set Delete apart read as a misalignment. --}}
+                            <div class="flex items-center gap-1 sm:gap-1.5 shrink-0 lg:justify-end">
                                 {{-- ADDED: opens the stall's QR code page (print or download) in a new tab. --}}
                                 <a href="{{ route('admin.stall.qr', $stall->id) }}" target="_blank" rel="noopener"
                                     aria-label="QR code for {{ $stall->name }}"
-                                    class="text-neutral-700 hover:text-brand-800 text-xs font-semibold inline-flex items-center gap-1 transition-colors bg-white hover:bg-neutral-50 px-2.5 py-1.5 rounded-md border border-neutral-200 hover:border-brand-300 shadow-2xs cursor-pointer">
-                                    <ion-icon name="qr-code-outline" class="text-sm"></ion-icon>
-                                    <span>QR</span>
+                                    class="w-9 h-9 sm:w-auto sm:h-auto justify-center text-neutral-700 hover:text-brand-800 text-xs font-semibold inline-flex items-center gap-1 transition-colors bg-white hover:bg-neutral-50 sm:px-2.5 sm:py-1.5 rounded-md border border-neutral-200 hover:border-brand-300 shadow-2xs cursor-pointer">
+                                    <ion-icon name="qr-code-outline" class="text-base sm:text-sm"></ion-icon>
+                                    <span class="hidden sm:inline">QR</span>
                                 </a>
 
                                 {{-- Edit Button --}}
@@ -286,9 +320,9 @@
                                 <button type="button"
                                     onclick="openEditModal({{ $stall->id }}, {{ Js::from($stall->name) }}, {{ $staffIdsJson }}, {{ Js::from($stall->description ?? '') }}, {{ $stall->is_active ? 1 : 0 }})"
                                     aria-label="Edit {{ $stall->name }}"
-                                    class="text-neutral-700 hover:text-brand-800 text-xs font-semibold inline-flex items-center gap-1 transition-colors bg-white hover:bg-neutral-50 px-2.5 py-1.5 rounded-md border border-neutral-200 hover:border-brand-300 shadow-2xs cursor-pointer">
-                                    <ion-icon name="pencil-outline" class="text-sm"></ion-icon>
-                                    <span>Edit</span>
+                                    class="w-9 h-9 sm:w-auto sm:h-auto justify-center text-neutral-700 hover:text-brand-800 text-xs font-semibold inline-flex items-center gap-1 transition-colors bg-white hover:bg-neutral-50 sm:px-2.5 sm:py-1.5 rounded-md border border-neutral-200 hover:border-brand-300 shadow-2xs cursor-pointer">
+                                    <ion-icon name="pencil-outline" class="text-base sm:text-sm"></ion-icon>
+                                    <span class="hidden sm:inline">Edit</span>
                                 </button>
 
                                 {{-- Hidden Delete Form --}}
@@ -302,9 +336,9 @@
                                 <button type="button"
                                     onclick="openDeleteModal({{ $stall->id }}, {{ Js::from($stall->name) }})"
                                     aria-label="Delete {{ $stall->name }}"
-                                    class="text-red-600 hover:text-red-700 text-xs font-semibold inline-flex items-center gap-1 transition-colors bg-white hover:bg-red-50 px-2.5 py-1.5 rounded-md border border-neutral-200 hover:border-red-300 shadow-2xs cursor-pointer">
-                                    <ion-icon name="trash-outline" class="text-sm"></ion-icon>
-                                    <span>Delete</span>
+                                    class="w-9 h-9 sm:w-auto sm:h-auto justify-center text-red-600 hover:text-red-700 text-xs font-semibold inline-flex items-center gap-1 transition-colors bg-white hover:bg-red-50 sm:px-2.5 sm:py-1.5 rounded-md border border-neutral-200 hover:border-red-300 shadow-2xs cursor-pointer">
+                                    <ion-icon name="trash-outline" class="text-base sm:text-sm"></ion-icon>
+                                    <span class="hidden sm:inline">Delete</span>
                                 </button>
                             </div>
                         </div>
@@ -315,7 +349,8 @@
                                 <ion-icon name="storefront-outline" class="text-2xl text-brand-700"></ion-icon>
                             </div>
                             <p class="text-xs font-bold text-neutral-700 mb-0.5">No stalls registered yet</p>
-                            <p class="text-[11px] text-neutral-500 max-w-xs mx-auto">Use the form on the left to add your first canteen vendor.</p>
+                            {{-- CHANGED: the form is above this list on a phone, not to the left, so the copy names the panel instead of a position. --}}
+                            <p class="text-[11px] text-neutral-500 max-w-xs mx-auto">Open the Add New Stall panel to register your first canteen vendor.</p>
                         </div>
                     @endforelse
                 </div>
@@ -326,6 +361,32 @@
                 </div>
             </div>
 
+        </div>
+
+        {{-- Guidelines Card --}}
+        {{-- CHANGED: rounded-lg to rounded-xl (card rule). --}}
+        {{-- CHANGED: its own grid item, after the directory. Grid auto-placement keeps it under the Add New Stall
+             card on desktop, exactly where it was, while on a phone this reference text no longer sits between
+             the form and the stall list. --}}
+        <div class="lg:col-span-4 bg-white rounded-xl border border-neutral-200/80 p-4.5 shadow-2xs space-y-2.5 text-xs">
+            <div class="flex items-center gap-1.5 text-neutral-800 font-bold text-[11px] uppercase tracking-wider">
+                <ion-icon name="information-circle-outline" class="text-base text-brand-700" aria-hidden="true"></ion-icon>
+                <span>Staff &amp; Stall Guidelines</span>
+            </div>
+            <ul class="space-y-1.5 text-neutral-600 text-[11px] font-medium leading-relaxed">
+                <li class="flex items-start gap-1.5">
+                    <span class="text-neutral-400 mt-0.5">•</span>
+                    <span>A single stall can have multiple staff members assigned to it.</span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                    <span class="text-neutral-400 mt-0.5">•</span>
+                    <span>Click any staff badge to view the full scrollable roster &amp; manage assignments.</span>
+                </li>
+                <li class="flex items-start gap-1.5">
+                    <span class="text-neutral-400 mt-0.5">•</span>
+                    <span>Unassigned staff are blocked from viewing campus standings until assigned.</span>
+                </li>
+            </ul>
         </div>
 
     </div>
@@ -392,10 +453,11 @@
 
                         {{-- Filter Tabs --}}
                         {{-- CHANGED: tabs raised from 10px to 11px, rounded to rounded-md, the active tab recoloured from neutral-900 to brand-700 (the one accent), and the ⭐ emoji dropped from "Unassigned". filterModalStaff() applies the same classes. --}}
-                        <div class="flex items-center gap-1.5 text-[11px]">
-                            <button type="button" id="tab-all-staff" onclick="filterModalStaff('all')" class="px-2 py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer">All ({{ $staffUsers->count() }})</button>
-                            <button type="button" id="tab-unassigned-staff" onclick="filterModalStaff('unassigned')" class="px-2 py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer">Unassigned ({{ $unassignedStaff->count() }})</button>
-                            <button type="button" id="tab-selected-staff" onclick="filterModalStaff('selected')" class="px-2 py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer">Selected Only</button>
+                        {{-- CHANGED: py-1.5 on phones, where these were ~20px tall inside a modal; they wrap instead of overflowing a 320px dialog. The same classes in filterModalStaff() moved with them. --}}
+                        <div class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                            <button type="button" id="tab-all-staff" onclick="filterModalStaff('all')" class="px-2 py-1.5 sm:py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer">All ({{ $staffUsers->count() }})</button>
+                            <button type="button" id="tab-unassigned-staff" onclick="filterModalStaff('unassigned')" class="px-2 py-1.5 sm:py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer">Unassigned ({{ $unassignedStaff->count() }})</button>
+                            <button type="button" id="tab-selected-staff" onclick="filterModalStaff('selected')" class="px-2 py-1.5 sm:py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer">Selected Only</button>
                         </div>
                     </div>
 
@@ -646,6 +708,16 @@ function makeSpinnerSvg(sizeClass = 'h-3.5 w-3.5') {
 // ── Global Flag to Prevent Modal Closing During Active Requests ──────────
 var isSubmittingAction = false;
 
+// ── Collapse the Add New Stall panel on phones ────────────────────────────
+// ADDED: the panel ships open so it is expanded on desktop and still usable without JavaScript. Below the
+// lg breakpoint it collapses to its summary row, unless the form came back with a validation error to show.
+(function () {
+    var addPanel = document.getElementById('add-stall-panel');
+    if (addPanel && !addPanel.dataset.hasError && window.matchMedia('(max-width: 1023px)').matches) {
+        addPanel.open = false;
+    }
+})();
+
 // ── Quick Filter Stalls in Directory ──────────────────────────────────────
 var searchInput = document.getElementById('stall-search-input');
 var stallItems  = document.querySelectorAll('.stall-item');
@@ -781,9 +853,9 @@ function filterModalStaff(tab) {
 
     if (btnAll && btnUn && btnSel) {
         // CHANGED: same tab classes as the markup: rounded-md, and brand-700 instead of neutral-900 for the active tab.
-        btnAll.className = tab === 'all' ? 'px-2 py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer' : 'px-2 py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
-        btnUn.className = tab === 'unassigned' ? 'px-2 py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer' : 'px-2 py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
-        btnSel.className = tab === 'selected' ? 'px-2 py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer' : 'px-2 py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
+        btnAll.className = tab === 'all' ? 'px-2 py-1.5 sm:py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer' : 'px-2 py-1.5 sm:py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
+        btnUn.className = tab === 'unassigned' ? 'px-2 py-1.5 sm:py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer' : 'px-2 py-1.5 sm:py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
+        btnSel.className = tab === 'selected' ? 'px-2 py-1.5 sm:py-0.5 rounded-md font-bold bg-brand-700 text-white transition-colors cursor-pointer' : 'px-2 py-1.5 sm:py-0.5 rounded-md font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200 transition-colors cursor-pointer';
     }
 
     applyModalStaffVisibility();
@@ -930,7 +1002,7 @@ function renderRosterItems(list) {
                 </div>
             </div>
             <button type="button" id="unassign-btn-${member.id}"
-                class="roster-remove-btn text-neutral-500 hover:text-red-700 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-200 px-2 py-1 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                class="roster-remove-btn text-neutral-500 hover:text-red-700 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-200 px-2.5 py-2.5 sm:py-1 min-h-11 sm:min-h-0 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                 title="Remove staff from this stall">
                 <ion-icon name="close-circle-outline" class="text-xs"></ion-icon>
                 <span>Remove</span>
