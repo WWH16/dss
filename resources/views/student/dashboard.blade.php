@@ -29,15 +29,19 @@
             </div>
         </div>
 
-        <div class="px-5 sm:px-6 py-4 bg-brand-50/60 border-t border-brand-100 flex flex-col md:flex-row md:items-center gap-4">
-            <div class="flex items-center gap-3 shrink-0">
-                <div class="w-10 h-10 rounded-md bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                    <ion-icon name="qr-code-outline" class="text-xl" aria-hidden="true"></ion-icon>
+        {{-- CHANGED: this strip held a static three-step instruction. It now carries the live scanner from partials/qr-scanner.blade.php, so a student can start an evaluation from the dashboard instead of finding the Evaluate page first. The three steps stay as supporting text. --}}
+        <div class="px-5 sm:px-6 py-5 bg-brand-50/60 border-t border-brand-100 flex flex-col lg:flex-row lg:items-center gap-5">
+            <div class="flex flex-col items-center text-center shrink-0 w-full lg:w-auto">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-md bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                        <ion-icon name="qr-code-outline" class="text-xl" aria-hidden="true"></ion-icon>
+                    </div>
+                    <h2 class="text-sm font-bold text-brand-900 leading-tight text-left">To evaluate a stall,<br> scan its QR code</h2>
                 </div>
-                <h2 class="text-sm font-bold text-brand-900 leading-tight">To evaluate a stall,<br class="hidden md:inline"> scan its QR code</h2>
+                @include('partials.qr-scanner')
             </div>
-            <ol class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 md:flex-1 md:pl-5 md:border-l md:border-brand-200">
-                @foreach(["Find the QR code posted at the stall's counter.", "Scan it with your phone's camera.", 'Answer the survey and submit.'] as $step)
+            <ol class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-4 lg:flex-1 lg:pl-5 lg:border-l lg:border-brand-200">
+                @foreach(["Find the QR code posted at the stall's counter.", 'Tap Start scanning, or pick a saved image of the code.', 'Answer the survey and submit.'] as $step)
                     <li class="flex items-start gap-2 text-xs text-brand-900">
                         <span class="w-5 h-5 rounded-full bg-white border border-brand-200 text-brand-800 text-[11px] font-bold flex items-center justify-center shrink-0 tabular-nums">{{ $loop->iteration }}</span>
                         <span>{{ $step }}</span>
