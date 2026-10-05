@@ -58,7 +58,8 @@
                 $errors->has('role')
             )));
         $currentLoginRole = old('role', $selectedRole ?? 'student');
-        $currentRegisterRole = old('role', ($selectedRole === 'admin' ? 'student' : ($selectedRole ?? 'student')));
+        // CHANGED: clinic, like admin, cannot register, so the register tab falls back to student.
+        $currentRegisterRole = old('role', (in_array($selectedRole, ['admin', 'clinic']) ? 'student' : ($selectedRole ?? 'student')));
     @endphp
 
     <!-- Unified Form Card -->
@@ -122,6 +123,8 @@
                             <option value="student" {{ $currentLoginRole === 'student' ? 'selected' : '' }}>Student</option>
                             <option value="staff" {{ $currentLoginRole === 'staff' ? 'selected' : '' }}>Staff</option>
                             <option value="admin" {{ $currentLoginRole === 'admin' ? 'selected' : '' }}>Admin</option>
+                            {{-- ADDED: clinic sign-in. Not added to #register_role; clinic accounts are created by admins. --}}
+                            <option value="clinic" {{ $currentLoginRole === 'clinic' ? 'selected' : '' }}>Clinic</option>
                         </select>
                         <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
                             <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>

@@ -35,3 +35,58 @@ test('admin seeder creates only the admin account', function () {
     expect(User::pluck('email')->all())->toBe(['admin@gmail.com']);
     expect(User::where('email', 'admin@gmail.com')->value('role'))->toBe('admin');
 });
+
+test('login page offers clinic role and preselects it', function () {
+    $response = $this->get('/login?role=clinic');
+
+    $response->assertStatus(200);
+    $response->assertSee('<option value="clinic" selected>Clinic</option>', false);
+});
+
+test('register form never offers the clinic role, even from role=clinic', function () {
+    $response = $this->get('/login?role=clinic');
+
+    $register = str($response->getContent())->after('id="register_role"')->before('</select>');
+    expect((string) $register)->not->toContain('value="clinic"');
+    expect((string) $register)->toContain('<option value="student" selected>Student</option>');
+});
+
+test('clinic user signs in and lands on the admin dashboard', function () {
+    clinicUser();
+
+    $response = $this->post('/login', [
+        'role' => 'clinic',
+        'email' => 'clinic@example.com',
+        'password' => 'password',
+    ]);
+
+    $response->assertRedirect('/admin/dashboard');
+    $this->assertAuthenticated();
+});
+
+test('clinic user cannot sign in with the admin role picked', function () {
+    clinicUser();
+
+    $response = $this->from('/login')->post('/login', [
+        'role' => 'admin',
+        'email' => 'clinic@example.com',
+        'password' => 'password',
+    ]);
+
+    $response->assertRedirect('/login');
+    $response->assertSessionHas('error', 'Invalid credentials');
+    $this->assertGuest();
+});
+
+test('registering with the clinic role is rejected', function () {
+    $response = $this->from('/login')->post('/register', [
+        'role' => 'clinic',
+        'name' => 'Sneaky',
+        'email' => 'sneaky@example.com',
+        'password' => 'Password1!',
+        'password_confirmation' => 'Password1!',
+    ]);
+
+    $response->assertSessionHasErrors('role');
+    expect(User::where('email', 'sneaky@example.com')->exists())->toBeFalse();
+});

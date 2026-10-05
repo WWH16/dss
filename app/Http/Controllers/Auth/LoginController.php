@@ -14,7 +14,8 @@ class LoginController extends Controller
         $error = $request->get('error') ?? session('error');
         $success = $request->get('success') ?? session('success');
 
-        $allowedRoles = ['student', 'staff', 'admin'];
+        // CHANGED: added 'clinic' so /login?role=clinic preselects it.
+        $allowedRoles = ['student', 'staff', 'admin', 'clinic'];
         $selectedRole = $request->get('role', 'student');
 
         if (!in_array($selectedRole, $allowedRoles)) {
@@ -34,7 +35,8 @@ class LoginController extends Controller
     public function login(Request $request)
     {
         $rules = [
-            'role' => 'required|in:student,staff,admin',
+            // CHANGED: added clinic; clinic users sign in by email like staff and admin.
+            'role' => 'required|in:student,staff,admin,clinic',
             'password' => 'required|string',
             'g_recaptcha_response' => [new Recaptcha('login')],
         ];
@@ -75,7 +77,8 @@ class LoginController extends Controller
                 return redirect()->back()->withInput($request->except('password'))->with('error', 'Invalid credentials');
             }
 
-            if ($role === 'admin') {
+            // CHANGED: clinic users share the admin monitoring pages.
+            if ($role === 'admin' || $role === 'clinic') {
                 return redirect('/admin/dashboard');
             }
 
