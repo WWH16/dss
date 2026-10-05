@@ -180,7 +180,7 @@
                     <ion-icon name="time-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     History
                 </a>
-            {{-- CHANGED: admin and clinic share this block; clinic sees only the monitoring links (was a separate clinic block repeating Overview and Evaluations). --}}
+            {{-- CHANGED: admin and clinic share this block; clinic sees only Overview and Evaluations (was a separate clinic block repeating them). --}}
             @elseif($user && in_array($user->role, ['admin', 'clinic']))
                 <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
                     <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
@@ -204,11 +204,6 @@
                 <a href="{{ route('admin.users') }}" class="sidebar-link {{ request()->routeIs('admin.users') ? 'active' : '' }}">
                     <ion-icon name="id-card-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Staff &amp; Admins
-                </a>
-                @else
-                <a href="{{ route('admin.report') }}" class="sidebar-link {{ request()->routeIs('admin.report') ? 'active' : '' }}">
-                    <ion-icon name="print-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
-                    Print Report
                 </a>
                 @endif
             @elseif($user && $user->role === 'staff')

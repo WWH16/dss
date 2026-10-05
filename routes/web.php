@@ -96,11 +96,6 @@ Route::middleware(['auth', 'role:admin,clinic'])->group(function () {
         [AdminController::class,'evaluations'])
         ->name('admin.evaluations');
 
-    // ADDED: printable evaluation report with admin-chosen period, stalls, sections and signatories.
-    Route::get('/admin/report',
-        [AdminController::class, 'report'])
-        ->name('admin.report');
-
 });
 
 // CHANGED: role:admin replaces the inline role checks in AdminController.
@@ -109,6 +104,12 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
     Route::get('/admin/stalls',
         [AdminController::class,'stalls'])
         ->name('admin.stalls');
+
+    // ADDED: printable evaluation report with admin-chosen period, stalls, sections and signatories.
+    // CHANGED: admin-only; moved out of the admin and clinic group.
+    Route::get('/admin/report',
+        [AdminController::class, 'report'])
+        ->name('admin.report');
 
     Route::get('/admin/students',
         [AdminController::class,'students'])

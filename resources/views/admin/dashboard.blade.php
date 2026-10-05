@@ -37,13 +37,13 @@
         <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 no-print">
             {{-- CHANGED: was a button calling window.print() on the dashboard; now opens the dedicated report page with print options. --}}
             {{-- CHANGED: dropped the Tailwind size, border and shadow utilities, which the unlayered .btn rule overrode; .btn-secondary now supplies the white fill and border. Icon tinted brand green. --}}
+            {{-- CHANGED: Print Report and Manage Stalls are admin-only; both hidden for clinic users. --}}
+            @if(Auth::user()->role === 'admin')
             <a href="{{ route('admin.report') }}" class="btn btn-secondary font-bold">
                 <ion-icon name="print-outline" class="text-base text-brand-700"></ion-icon>
                 Print Report
             </a>
             {{-- CHANGED: dropped the same dead size utilities so both header buttons share one size from .btn. --}}
-            {{-- CHANGED: Manage Stalls is admin-only; hidden for clinic users. --}}
-            @if(Auth::user()->role === 'admin')
             <a href="{{ route('admin.stalls') }}" class="btn btn-primary font-bold">
                 <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
                 Manage Stalls

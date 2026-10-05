@@ -104,11 +104,11 @@ test('clinic user can open the monitoring pages', function (string $route) {
     seedStall();
 
     $this->actingAs(clinicUser())->get(route($route))->assertStatus(200);
-})->with(['admin.dashboard', 'admin.evaluations', 'admin.report']);
+})->with(['admin.dashboard', 'admin.evaluations']);
 
 test('clinic user is bounced from admin-only pages', function (string $route) {
     $this->actingAs(clinicUser())->get(route($route))->assertRedirect('/login');
-})->with(['admin.stalls', 'admin.students', 'admin.users']);
+})->with(['admin.stalls', 'admin.students', 'admin.users', 'admin.report']);
 
 test('clinic user cannot change stalls or accounts', function () {
     $stallId = seedStall();
@@ -152,7 +152,7 @@ test('clinic dashboard hides admin-only links and shows clinic sidebar', functio
     $response->assertDontSee(route('admin.students'), false);
     $response->assertDontSee(route('admin.users'), false);
     $response->assertSee(route('admin.evaluations'), false);
-    $response->assertSee(route('admin.report'), false);
+    $response->assertDontSee(route('admin.report'), false);
 });
 
 test('admin dashboard still links to admin-only pages', function () {
