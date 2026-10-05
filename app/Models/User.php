@@ -29,10 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at',
     ];
 
-    public function stall(): \Illuminate\Database\Eloquent\Relations\BelongsTo
-    {
-        return $this->belongsTo(Stall::class, 'stall_id');
-    }
+    // CHANGED: removed the unused stall() relation; queries join stalls directly.
 
     /**
      * The attributes that should be hidden for serialization.

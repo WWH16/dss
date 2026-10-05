@@ -11,15 +11,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use App\Models\User;
 
+// CHANGED: role checks moved out of each method into the role middleware on this controller's routes (routes/web.php).
 class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        // CHANGED: clinic users may view this monitoring page (read-only).
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'clinic'])) {
-            return redirect('/login');
-        }
-
         // Dashboard Counts
         $studentCount = DB::table('users')
             ->where('role', 'student')
@@ -73,112 +69,16 @@ class AdminController extends Controller
             return (float)$stall->overall_score < 3.0 || (float)$stall->cleanliness < 3.0 || (float)$stall->service < 3.0;
         })->values();
 
-        // Evaluation Activity Trend (with Month & Year filtering)
-        $driver = DB::connection()->getDriverName();
-        $yearSql = match ($driver) {
-            'sqlite' => "DISTINCT strftime('%Y', created_at) as year",
-            'pgsql'  => "DISTINCT CAST(EXTRACT(YEAR FROM created_at) AS INTEGER) as year",
-            default  => "DISTINCT YEAR(created_at) as year",
-        };
-        $availableYears = DB::table('stall_evaluations')
-            ->selectRaw($yearSql)
-            ->orderByDesc('year')
-            ->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->toArray();
-        if (empty($availableYears)) {
-            $availableYears = [(int)date('Y')];
-        }
-        if (!in_array((int)date('Y'), $availableYears)) {
-            array_unshift($availableYears, (int)date('Y'));
-        }
-
-        $selectedYear = (int)$request->get('activity_year', $availableYears[0] ?? date('Y'));
-        $selectedMonth = $request->get('activity_month', '30_days');
-
-        $trendDates = [];
-        $trendCounts = [];
-
-        if ($selectedMonth === 'all') {
-            // Full Year: Monthly aggregations (Jan - Dec)
-            $monthSql = match ($driver) {
-                'sqlite' => "strftime('%m', created_at) as m, COUNT(*) as count",
-                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER) as m, COUNT(*) as count",
-                default  => "MONTH(created_at) as m, COUNT(*) as count",
-            };
-            $monthGroup = match ($driver) {
-                'sqlite' => "strftime('%m', created_at)",
-                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER)",
-                default  => "MONTH(created_at)",
-            };
-            $evalTrend = DB::table('stall_evaluations')
-                ->selectRaw($monthSql)
-                ->whereYear('created_at', $selectedYear)
-                ->groupByRaw($monthGroup)
-                ->get()
-                ->keyBy(fn ($row) => (int) $row->m);
-
-            for ($m = 1; $m <= 12; $m++) {
-                $trendDates[] = date('M', mktime(0, 0, 0, $m, 1));
-                $trendCounts[] = isset($evalTrend[$m]) ? (int)$evalTrend[$m]->count : 0;
-            }
-            $activityPeriodLabel = "Full Year {$selectedYear}";
-        } elseif (is_numeric($selectedMonth) && (int)$selectedMonth >= 1 && (int)$selectedMonth <= 12) {
-            // Specific Month: Day-by-Day (Day 1 to Days in Month)
-            $m = (int)$selectedMonth;
-            $daysInMonth = (int) date('t', mktime(0, 0, 0, $m, 1, $selectedYear));
-
-            $daySql = match ($driver) {
-                'sqlite' => "strftime('%d', created_at) as d, COUNT(*) as count",
-                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER) as d, COUNT(*) as count",
-                default  => "DAY(created_at) as d, COUNT(*) as count",
-            };
-            $dayGroup = match ($driver) {
-                'sqlite' => "strftime('%d', created_at)",
-                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER)",
-                default  => "DAY(created_at)",
-            };
-            $evalTrend = DB::table('stall_evaluations')
-                ->selectRaw($daySql)
-                ->whereYear('created_at', $selectedYear)
-                ->whereMonth('created_at', $m)
-                ->groupByRaw($dayGroup)
-                ->get()
-                ->keyBy(fn ($row) => (int) $row->d);
-
-            $monthShort = date('M', mktime(0, 0, 0, $m, 1));
-            for ($d = 1; $d <= $daysInMonth; $d++) {
-                $trendDates[] = sprintf('%s %02d', $monthShort, $d);
-                $trendCounts[] = isset($evalTrend[$d]) ? (int)$evalTrend[$d]->count : 0;
-            }
-            $activityPeriodLabel = date('F Y', mktime(0, 0, 0, $m, 1, $selectedYear));
-        } else {
-            // Default: Rolling Last 30 Days
-            $selectedMonth = '30_days';
-            $dateSql = match ($driver) {
-                'pgsql'  => "CAST(created_at AS DATE) as date, COUNT(*) as count",
-                default  => "DATE(created_at) as date, COUNT(*) as count",
-            };
-            $dateGroup = match ($driver) {
-                'pgsql'  => "CAST(created_at AS DATE)",
-                default  => "DATE(created_at)",
-            };
-            $evalTrend = DB::table('stall_evaluations')
-                ->selectRaw($dateSql)
-                ->where('created_at', '>=', now()->subDays(29)->startOfDay())
-                ->groupByRaw($dateGroup)
-                ->orderBy('date')
-                ->get()
-                ->keyBy('date');
-
-            for ($i = 29; $i >= 0; $i--) {
-                $d = now()->subDays($i)->format('Y-m-d');
-                $trendDates[] = now()->subDays($i)->format('M d');
-                $trendCounts[] = isset($evalTrend[$d]) ? (int) $evalTrend[$d]->count : 0;
-            }
-            $activityPeriodLabel = 'Last 30 Days';
-        }
-        $activityTotalCount = array_sum($trendCounts);
+        // CHANGED: trend query moved to Controller::activityTrend(), shared with the staff dashboard.
+        [
+            'availableYears' => $availableYears,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+            'trendDates' => $trendDates,
+            'trendCounts' => $trendCounts,
+            'activityPeriodLabel' => $activityPeriodLabel,
+            'activityTotalCount' => $activityTotalCount,
+        ] = $this->activityTrend($request);
 
         // Evaluations per stall (for Pie Chart - derived from $results in-memory to eliminate redundant query)
         $pieChartData = $results->map(function ($row) {
@@ -246,11 +146,6 @@ class AdminController extends Controller
 
     public function report(Request $request)
     {
-        // CHANGED: clinic users may view this monitoring page (read-only).
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'clinic'])) {
-            return redirect('/login');
-        }
-
         $input = $request->validate([
             'period'          => 'nullable|in:all,month,year,custom',
             'from'            => 'nullable|required_if:period,custom|date',
@@ -388,8 +283,6 @@ class AdminController extends Controller
 
     public function stalls()
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $stalls = DB::table('stalls')
             ->orderBy('name')
             ->get();
@@ -427,9 +320,6 @@ class AdminController extends Controller
 
     public function evaluations(Request $request)
     {
-        // CHANGED: clinic users may view this monitoring page (read-only).
-        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'clinic'])) return redirect('/login');
-
         $query = DB::table('stall_evaluations')
             ->join('users','users.id','=','stall_evaluations.student_id')
             ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
@@ -484,8 +374,6 @@ class AdminController extends Controller
 
     public function students(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         // CHANGED: codes are upper-case and matched against UPPER(TRIM(course)) below, the same way the Students view assigns department badges. PostgreSQL compares text case-sensitively, so a course saved as "bsit" or "BS Crim" got a badge but was left out when filtering by its department. Added "BS CRIM", which the view already counted as CCJE; dropped the mixed-case duplicates.
         $deptCourseMap = [
             'CCSICT' => ['BSIT', 'BSCS', 'BSIS', 'ACT', 'MIT'],
@@ -615,8 +503,6 @@ class AdminController extends Controller
     // Add Stall
     public function addStall(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $request->validate([
             'name' => 'required|string|max:255',
             'staff_ids' => 'nullable|array',
@@ -646,8 +532,6 @@ class AdminController extends Controller
     // Edit Stall
     public function editStall(Request $request, $id)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $request->validate([
             'name' => 'required|string|max:255',
             'staff_ids' => 'nullable|array',
@@ -681,9 +565,6 @@ class AdminController extends Controller
     // Delete Stall
     public function deleteStall($id)
     {
-        // ADDED: role guard. This method had none, so any signed-in user could delete a stall.
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         DB::table('stalls')
             ->where('id',$id)
             ->delete();
@@ -694,8 +575,6 @@ class AdminController extends Controller
     // Quick Assign Staff
     public function assignStaff(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $request->validate([
             'staff_id' => 'required|exists:users,id',
             'stall_id' => 'required|exists:stalls,id',
@@ -714,8 +593,6 @@ class AdminController extends Controller
     // Unassign Staff
     public function unassignStaff(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $request->validate([
             'staff_id' => 'required|exists:users,id',
         ]);
@@ -732,8 +609,6 @@ class AdminController extends Controller
 
     public function users(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         // Total system counts for stat cards & filter pill badges
         // CHANGED: include clinic accounts and count them.
         $stats = DB::table('users')
@@ -800,8 +675,6 @@ class AdminController extends Controller
 
     public function createUser(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $request->validate([
             // CHANGED: admins can create clinic accounts.
             'role'     => 'required|in:admin,staff,clinic',
@@ -838,8 +711,6 @@ class AdminController extends Controller
 
     public function updateUser(Request $request, $id)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $target = User::findOrFail($id);
 
         // CHANGED: clinic accounts are managed here too.
@@ -903,8 +774,6 @@ class AdminController extends Controller
 
     public function deleteUser(Request $request, $id)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
-
         $target = User::findOrFail($id);
 
         // Prevent self-deletion

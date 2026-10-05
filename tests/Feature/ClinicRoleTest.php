@@ -7,26 +7,25 @@ use Illuminate\Support\Facades\DB;
 
 uses(RefreshDatabase::class);
 
-function adminUser(): User
+function makeUser(string $role, string $email, string $name = 'User'): User
 {
     return User::create([
-        'name' => 'Admin',
-        'email' => 'admin@example.com',
+        'name' => $name,
+        'email' => $email,
         'password' => bcrypt('password'),
-        'role' => 'admin',
+        'role' => $role,
         'email_verified_at' => now(),
     ]);
 }
 
+function adminUser(): User
+{
+    return makeUser('admin', 'admin@example.com', 'Admin');
+}
+
 function clinicUser(): User
 {
-    return User::create([
-        'name' => 'Clinic Nurse',
-        'email' => 'clinic@example.com',
-        'password' => bcrypt('password'),
-        'role' => 'clinic',
-        'email_verified_at' => now(),
-    ]);
+    return makeUser('clinic', 'clinic@example.com', 'Clinic Nurse');
 }
 
 test('admin seeder creates only the admin account', function () {
@@ -129,10 +128,7 @@ test('clinic user cannot change stalls or accounts', function () {
 
 test('student cannot delete a stall', function () {
     $stallId = seedStall();
-    $student = User::create([
-        'name' => 'Student', 'email' => 'student@example.com', 'password' => bcrypt('password'),
-        'role' => 'student', 'email_verified_at' => now(),
-    ]);
+    $student = makeUser('student', 'student@example.com');
 
     $this->actingAs($student)->delete(route('admin.stall.delete', $stallId))->assertRedirect('/login');
 

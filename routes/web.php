@@ -49,7 +49,8 @@ Route::post('/verify-otp/resend', [OtpController::class, 'resend'])->name('otp.r
 |--------------------------------------------------------------------------
 */
 
-Route::middleware(['auth', 'verified'])->group(function () {
+// CHANGED: role:student replaces the inline role checks in the student controllers.
+Route::middleware(['auth', 'verified', 'role:student'])->group(function () {
 
     // Dashboard
     Route::get('/student/dashboard', [StudentDashboardController::class, 'index'])
@@ -74,9 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Submit Evaluation
     Route::post('/student/evaluation', [StudentEvaluationController::class, 'store'])
         ->name('student.evaluation.store');
-
-    Route::get('/evaluation', [StudentEvaluationController::class, 'index'])
-    ->name('evaluation');
+    // CHANGED: removed the unused /evaluation duplicate of /student/evaluation.
 
 });
 
@@ -86,19 +85,30 @@ Route::middleware(['auth', 'verified'])->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+// ADDED: monitoring pages shared by admin and clinic users; role middleware replaces the inline checks.
+Route::middleware(['auth', 'role:admin,clinic'])->group(function () {
 
     Route::get('/admin/dashboard',
         [AdminController::class,'dashboard'])
         ->name('admin.dashboard');
 
-    Route::get('/admin/stalls',
-        [AdminController::class,'stalls'])
-        ->name('admin.stalls');
-
     Route::get('/admin/evaluations',
         [AdminController::class,'evaluations'])
         ->name('admin.evaluations');
+
+    // ADDED: printable evaluation report with admin-chosen period, stalls, sections and signatories.
+    Route::get('/admin/report',
+        [AdminController::class, 'report'])
+        ->name('admin.report');
+
+});
+
+// CHANGED: role:admin replaces the inline role checks in AdminController.
+Route::middleware(['auth', 'role:admin'])->group(function () {
+
+    Route::get('/admin/stalls',
+        [AdminController::class,'stalls'])
+        ->name('admin.stalls');
 
     Route::get('/admin/students',
         [AdminController::class,'students'])
@@ -141,11 +151,6 @@ Route::middleware('auth')->group(function () {
         [AdminController::class, 'deleteUser'])
         ->name('admin.users.delete');
 
-    // ADDED: printable evaluation report with admin-chosen period, stalls, sections and signatories.
-    Route::get('/admin/report',
-        [AdminController::class, 'report'])
-        ->name('admin.report');
-
 });
 /*
 |--------------------------------------------------------------------------
@@ -153,7 +158,8 @@ Route::middleware('auth')->group(function () {
 |--------------------------------------------------------------------------
 */
 
-Route::middleware('auth')->group(function () {
+// CHANGED: role:staff replaces the inline role checks in StaffController.
+Route::middleware(['auth', 'role:staff'])->group(function () {
 
     Route::get('/staff/dashboard', [StaffController::class, 'dashboard'])
         ->name('staff.dashboard');

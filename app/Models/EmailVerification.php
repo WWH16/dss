@@ -20,11 +20,5 @@ class EmailVerification extends Model
         'used'       => 'boolean',
     ];
 
-    /**
-     * Check if this OTP is still valid (not expired, not used).
-     */
-    public function isValid(): bool
-    {
-        return !$this->used && $this->expires_at->isFuture();
-    }
+    // CHANGED: removed the unused isValid() helper; OtpController checks expiry in its queries.
 }

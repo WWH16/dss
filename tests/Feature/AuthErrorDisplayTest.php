@@ -2,6 +2,7 @@
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Hash;
 
 uses(RefreshDatabase::class);
 
@@ -66,4 +67,22 @@ test('recaptcha error displays in red alert banner on auth page', function () {
 
     $response = $this->withSession(['errors' => $errorBag])->get('/login');
     $response->assertSee('reCAPTCHA security verification failed. Please refresh and try again.');
+});
+
+test('password change rejects a wrong current password and accepts the right one', function () {
+    $student = User::create([
+        'name' => 'Student', 'email' => 'student@example.com', 'password' => bcrypt('OldPass1!'),
+        'role' => 'student', 'email_verified_at' => now(),
+    ]);
+    $payload = ['password' => 'NewPass1!', 'password_confirmation' => 'NewPass1!'];
+
+    $this->actingAs($student)->from(route('student.profile'))
+        ->post(route('student.profile.password'), ['current_password' => 'wrong'] + $payload)
+        ->assertSessionHasErrors(['current_password' => 'The current password provided is incorrect.']);
+
+    $this->actingAs($student)
+        ->post(route('student.profile.password'), ['current_password' => 'OldPass1!'] + $payload)
+        ->assertSessionHas('success');
+
+    expect(Hash::check('NewPass1!', $student->fresh()->password))->toBeTrue();
 });

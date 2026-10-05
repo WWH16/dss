@@ -93,3 +93,18 @@ test('inactive stalls do not appear on the student dashboard', function () {
     $response->assertSee('Active Canteen');
     $response->assertDontSee('Closed Canteen');
 });
+
+test('submitted ratings are averaged per criterion', function () {
+    $responses = [1 => 5, 2 => 4, 3 => 3, 4 => 2, 5 => 3, 6 => 1, 7 => 2, 8 => 2, 9 => 5, 10 => 4];
+
+    $this->actingAs($this->student)->post(route('student.evaluation.store'), [
+        'stall_id' => $this->activeStallId,
+        'responses' => $responses,
+    ])->assertSessionHas('success');
+
+    $row = DB::table('stall_evaluations')->first();
+    expect((float) $row->taste)->toBe(4.0);
+    expect((float) $row->price)->toBe(2.5);
+    expect((float) $row->cleanliness)->toBe(1.67);
+    expect((float) $row->service)->toBe(4.5);
+});

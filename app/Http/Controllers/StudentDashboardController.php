@@ -10,15 +10,12 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
+// CHANGED: role checks moved out of each method into the role middleware on this controller's routes (routes/web.php).
 class StudentDashboardController extends Controller
 {
     public function index()
     {
         $user = Auth::user();
-
-        if (!$user || $user->role !== 'student') {
-            return redirect('/login');
-        }
 
         // Student profile
         $profile = $user;
@@ -113,10 +110,6 @@ class StudentDashboardController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user || $user->role !== 'student') {
-            return redirect('/login');
-        }
-
         $profile = $user;
 
         // Single aggregated SQL query for profile metrics
@@ -141,10 +134,6 @@ class StudentDashboardController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user || $user->role !== 'student') {
-            return redirect('/login');
-        }
-
         $request->validate([
             'name' => 'required|string|max:255',
             'course' => 'nullable|string|max:100',
@@ -165,22 +154,17 @@ class StudentDashboardController extends Controller
     {
         $user = Auth::user();
 
-        if (!$user || $user->role !== 'student') {
-            return redirect('/login');
-        }
-
         $request->validate([
-            'current_password' => 'required',
+            // CHANGED: Laravel's current_password rule replaces the manual Hash::check() block.
+            'current_password' => 'required|current_password',
             'password' => [
                 'required',
                 'confirmed',
                 Password::min(8)->letters()->mixedCase()->numbers()->symbols()
             ],
+        ], [
+            'current_password.current_password' => 'The current password provided is incorrect.',
         ]);
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return redirect()->back()->withErrors(['current_password' => 'The current password provided is incorrect.']);
-        }
 
         DB::table('users')->where('id', $user->id)->update([
             'password' => Hash::make($request->password),
@@ -193,10 +177,6 @@ class StudentDashboardController extends Controller
     public function history(Request $request)
     {
         $user = Auth::user();
-
-        if (!$user || $user->role !== 'student') {
-            return redirect('/login');
-        }
 
         $query = DB::table('stall_evaluations')
             ->join('stalls', 'stall_evaluations.stall_id', '=', 'stalls.id')

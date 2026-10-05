@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 
+// CHANGED: role checks moved out of each method into the role middleware on this controller's routes (routes/web.php).
 class StaffController extends Controller
 {
     /**
@@ -17,10 +18,6 @@ class StaffController extends Controller
      */
     public function dashboard(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role !== 'staff') {
-            return redirect('/login');
-        }
-
         $user = Auth::user();
 
         // 1. Look up assigned food stall for this staff member (via users.stall_id)
@@ -111,116 +108,16 @@ class StaffController extends Controller
             ')
             ->first();
 
-        // 6. Evaluation Activity Timeline trend with Month & Year filtering
-        $driver = DB::connection()->getDriverName();
-        $yearSql = match ($driver) {
-            'sqlite' => "DISTINCT strftime('%Y', created_at) as year",
-            'pgsql'  => "DISTINCT CAST(EXTRACT(YEAR FROM created_at) AS INTEGER) as year",
-            default  => "DISTINCT YEAR(created_at) as year",
-        };
-        $availableYears = DB::table('stall_evaluations')
-            ->where('stall_id', $stall->id)
-            ->selectRaw($yearSql)
-            ->orderByDesc('year')
-            ->pluck('year')
-            ->map(fn ($y) => (int) $y)
-            ->toArray();
-        if (empty($availableYears)) {
-            $availableYears = [(int)date('Y')];
-        }
-        if (!in_array((int)date('Y'), $availableYears)) {
-            array_unshift($availableYears, (int)date('Y'));
-        }
-
-        $selectedYear = (int)$request->get('activity_year', $availableYears[0] ?? date('Y'));
-        $selectedMonth = $request->get('activity_month', '30_days');
-
-        $trendDates = [];
-        $trendCounts = [];
-
-        if ($selectedMonth === 'all') {
-            // Full Year: Monthly aggregations (Jan - Dec)
-            $monthSql = match ($driver) {
-                'sqlite' => "strftime('%m', created_at) as m, COUNT(*) as count",
-                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER) as m, COUNT(*) as count",
-                default  => "MONTH(created_at) as m, COUNT(*) as count",
-            };
-            $monthGroup = match ($driver) {
-                'sqlite' => "strftime('%m', created_at)",
-                'pgsql'  => "CAST(EXTRACT(MONTH FROM created_at) AS INTEGER)",
-                default  => "MONTH(created_at)",
-            };
-            $evalTrend = DB::table('stall_evaluations')
-                ->where('stall_id', $stall->id)
-                ->selectRaw($monthSql)
-                ->whereYear('created_at', $selectedYear)
-                ->groupByRaw($monthGroup)
-                ->get()
-                ->keyBy(fn ($row) => (int) $row->m);
-
-            for ($m = 1; $m <= 12; $m++) {
-                $trendDates[] = date('M', mktime(0, 0, 0, $m, 1));
-                $trendCounts[] = isset($evalTrend[$m]) ? (int)$evalTrend[$m]->count : 0;
-            }
-            $activityPeriodLabel = "Full Year {$selectedYear}";
-        } elseif (is_numeric($selectedMonth) && (int)$selectedMonth >= 1 && (int)$selectedMonth <= 12) {
-            // Specific Month: Day-by-Day (Day 1 to Days in Month)
-            $m = (int)$selectedMonth;
-            $daysInMonth = (int) date('t', mktime(0, 0, 0, $m, 1, $selectedYear));
-
-            $daySql = match ($driver) {
-                'sqlite' => "strftime('%d', created_at) as d, COUNT(*) as count",
-                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER) as d, COUNT(*) as count",
-                default  => "DAY(created_at) as d, COUNT(*) as count",
-            };
-            $dayGroup = match ($driver) {
-                'sqlite' => "strftime('%d', created_at)",
-                'pgsql'  => "CAST(EXTRACT(DAY FROM created_at) AS INTEGER)",
-                default  => "DAY(created_at)",
-            };
-            $evalTrend = DB::table('stall_evaluations')
-                ->where('stall_id', $stall->id)
-                ->selectRaw($daySql)
-                ->whereYear('created_at', $selectedYear)
-                ->whereMonth('created_at', $m)
-                ->groupByRaw($dayGroup)
-                ->get()
-                ->keyBy(fn ($row) => (int) $row->d);
-
-            $monthShort = date('M', mktime(0, 0, 0, $m, 1));
-            for ($d = 1; $d <= $daysInMonth; $d++) {
-                $trendDates[] = sprintf('%s %02d', $monthShort, $d);
-                $trendCounts[] = isset($evalTrend[$d]) ? (int)$evalTrend[$d]->count : 0;
-            }
-            $activityPeriodLabel = date('F Y', mktime(0, 0, 0, $m, 1, $selectedYear));
-        } else {
-            // Default: Rolling Last 30 Days
-            $selectedMonth = '30_days';
-            $dateSql = match ($driver) {
-                'pgsql'  => "CAST(created_at AS DATE) as date, COUNT(*) as count",
-                default  => "DATE(created_at) as date, COUNT(*) as count",
-            };
-            $dateGroup = match ($driver) {
-                'pgsql'  => "CAST(created_at AS DATE)",
-                default  => "DATE(created_at)",
-            };
-            $evalTrend = DB::table('stall_evaluations')
-                ->where('stall_id', $stall->id)
-                ->selectRaw($dateSql)
-                ->where('created_at', '>=', now()->subDays(29)->startOfDay())
-                ->groupByRaw($dateGroup)
-                ->orderBy('date')
-                ->get()
-                ->keyBy('date');
-
-            for ($i = 29; $i >= 0; $i--) {
-                $d = now()->subDays($i)->format('Y-m-d');
-                $trendDates[] = now()->subDays($i)->format('M d');
-                $trendCounts[] = isset($evalTrend[$d]) ? (int) $evalTrend[$d]->count : 0;
-            }
-            $activityPeriodLabel = 'Last 30 Days';
-        }
-        $activityTotalCount = array_sum($trendCounts);
+        // CHANGED: trend query moved to Controller::activityTrend(), shared with the admin dashboard.
+        [
+            'availableYears' => $availableYears,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+            'trendDates' => $trendDates,
+            'trendCounts' => $trendCounts,
+            'activityPeriodLabel' => $activityPeriodLabel,
+            'activityTotalCount' => $activityTotalCount,
+        ] = $this->activityTrend($request, $stall->id);
 
         // 7. Paginated evaluations list for this stall (STRICT PRIVACY: zero student names or IDs)
         $evaluationsQuery = DB::table('stall_evaluations')
@@ -281,10 +178,6 @@ class StaffController extends Controller
      */
     public function standings()
     {
-        if (!Auth::check() || Auth::user()->role !== 'staff') {
-            return redirect('/login');
-        }
-
         $user = Auth::user();
 
         // Check if this staff member has an assigned stall
@@ -330,10 +223,6 @@ class StaffController extends Controller
      */
     public function profile()
     {
-        if (!Auth::check() || Auth::user()->role !== 'staff') {
-            return redirect('/login');
-        }
-
         $user = Auth::user();
         $stall = $user->stall_id
             ? DB::table('stalls')->where('id', $user->stall_id)->first()
@@ -350,10 +239,6 @@ class StaffController extends Controller
      */
     public function updateProfile(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role !== 'staff') {
-            return redirect('/login');
-        }
-
         $user = Auth::user();
 
         $request->validate([
@@ -375,24 +260,19 @@ class StaffController extends Controller
      */
     public function updatePassword(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role !== 'staff') {
-            return redirect('/login');
-        }
-
         $user = Auth::user();
 
         $request->validate([
-            'current_password' => 'required',
+            // CHANGED: Laravel's current_password rule replaces the manual Hash::check() block.
+            'current_password' => 'required|current_password',
             'password' => [
                 'required',
                 'confirmed',
                 Password::min(8)->letters()->mixedCase()->numbers()->symbols()
             ],
+        ], [
+            'current_password.current_password' => 'The current password you provided is incorrect.',
         ]);
-
-        if (!Hash::check($request->current_password, $user->password)) {
-            return redirect()->back()->withErrors(['current_password' => 'The current password you provided is incorrect.']);
-        }
 
         DB::table('users')->where('id', $user->id)->update([
             'password' => Hash::make($request->password),
