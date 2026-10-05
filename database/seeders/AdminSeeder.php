@@ -9,29 +9,21 @@ use Illuminate\Support\Facades\Hash;
 class AdminSeeder extends Seeder
 {
     /**
-     * Seed the initial administrator account.
-     *
-     * Only creates the admin if no admin account exists yet.
-     * Credentials are pulled from .env or use secure defaults.
+     * Seed the administrator account.
      *
      * Usage:
      *   php artisan db:seed --class=AdminSeeder
      */
     public function run(): void
     {
-        if (User::where('role', 'admin')->exists()) {
-            $this->command->warn('An admin account already exists — skipping.');
-            return;
-        }
-
-        $user = User::create([
+        // CHANGED: no longer seeds clinic@gmail.com; admins create clinic accounts from Staff & Admins.
+        $user = User::firstOrCreate(['email' => 'admin@gmail.com'], [
             'role'              => 'admin',
-            'name'              => env('ADMIN_NAME', 'System Administrator'),
-            'email'             => env('ADMIN_EMAIL', 'admin@isu.edu.ph'),
-            'password'          => Hash::make(env('ADMIN_PASSWORD', 'Admin@DSS2026!')),
+            'name'              => 'System Administrator',
+            'password'          => Hash::make('password'),
             'email_verified_at' => now(),
         ]);
 
-        $this->command->info("✓ Admin account created: {$user->email}");
+        $this->command->info(($user->wasRecentlyCreated ? 'Created: ' : 'Exists, skipped: ') . $user->email);
     }
 }
