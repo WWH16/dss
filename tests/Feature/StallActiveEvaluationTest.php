@@ -150,3 +150,23 @@ test('submitted ratings are averaged per criterion', function () {
     expect((float) $row->cleanliness)->toBe(1.67);
     expect((float) $row->service)->toBe(4.5);
 });
+
+// ADDED: the scanner markup, CSS and script now come from partials/qr-scanner.blade.php; these
+// assertions pin the pieces that the extraction could silently drop.
+test('the evaluation page renders the shared scanner partial in full', function () {
+    $response = $this->actingAs($this->student)->get(route('student.evaluation'))->assertOk();
+
+    $response->assertSee('id="qr-viewfinder"', false)
+        ->assertSee('id="qr-video"', false)
+        ->assertSee('id="qr-status"', false)
+        ->assertSee('id="qr-start"', false)
+        ->assertSee('id="qr-photo"', false)
+        ->assertSee('Start scanning', false)
+        ->assertSee('Scan a saved image', false)
+        ->assertSee('jsqr@1.4.0/dist/jsQR.js', false)
+        ->assertSee('@media (prefers-reduced-motion: reduce)', false)
+        ->assertSee("That QR code isn't a stall evaluation code.", false)
+        ->assertSee('was made for', false);
+
+    expect(substr_count($response->getContent(), 'id="qr-start"'))->toBe(1);
+});
