@@ -69,7 +69,7 @@
                     </a>
                 </div>
             </div>
-        {{-- CHANGED: the "scan the QR code" notice is now an in-page scanner. The camera reads the stall's QR code and opens its evaluation; a photo of the code works too, for phones where live camera access is blocked. --}}
+        {{-- CHANGED: the "scan the QR code" notice is now an in-page scanner. The camera reads the stall's QR code and opens its evaluation; CHANGED: uploading a saved image of the code works too, for phones where live camera access is blocked. --}}
         @elseif(! $stall)
             <div class="px-5 py-8 sm:p-12 flex flex-col items-center text-center">
                 <h1 class="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Scan the stall's QR code</h1>
@@ -110,8 +110,9 @@
                     </button>
                     <label class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 min-h-11 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-bold rounded-md border border-neutral-200 transition-colors cursor-pointer focus-within:ring-2 focus-within:ring-brand-600/30">
                         <ion-icon name="image-outline" class="text-sm" aria-hidden="true"></ion-icon>
-                        <span>Scan from a photo</span>
-                        <input type="file" id="qr-photo" accept="image/*" capture="environment" class="sr-only">
+                        {{-- CHANGED: "Scan from a photo" is now "Scan a saved image" - nothing is uploaded, the code is read in the browser - and capture="environment" is gone so the button opens the gallery or file picker instead of forcing the camera. --}}
+                        <span>Scan a saved image</span>
+                        <input type="file" id="qr-photo" accept="image/*" class="sr-only">
                     </label>
                 </div>
 
@@ -206,7 +207,7 @@
 
                 startBtn.addEventListener('click', function () {
                     if (!window.isSecureContext || !navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-                        setStatus('Live scanning needs a secure (https) connection. Use "Scan from a photo" instead.', 'error');
+                        setStatus('Live scanning needs a secure (https) connection. Use "Scan a saved image" instead.', 'error');
                         return;
                     }
                     setStatus('Starting camera…');
@@ -227,11 +228,11 @@
                         .catch(function (err) {
                             stopCamera();
                             if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
-                                setStatus('Camera access was blocked. Allow it in your browser settings, or use "Scan from a photo".', 'error');
+                                setStatus('Camera access was blocked. Allow it in your browser settings, or use "Scan a saved image".', 'error');
                             } else if (err && (err.name === 'NotFoundError' || err.name === 'OverconstrainedError')) {
-                                setStatus('No camera was found on this device. Use "Scan from a photo" instead.', 'error');
+                                setStatus('No camera was found on this device. Use "Scan a saved image" instead.', 'error');
                             } else {
-                                setStatus('The camera could not start. Use "Scan from a photo" instead.', 'error');
+                                setStatus('The camera could not start. Use "Scan a saved image" instead.', 'error');
                             }
                         });
                 });
@@ -239,14 +240,16 @@
                 photoInput.addEventListener('change', function () {
                     var file = photoInput.files && photoInput.files[0];
                     if (!file) return;
-                    setStatus('Reading the photo…');
+                    {{-- CHANGED: wording follows the upload button; the file now comes from the gallery, not a photo taken on the spot. --}}
+                    setStatus('Reading the image…');
                     var img = new Image();
                     img.onload = function () {
                         var code = decode(img, img.naturalWidth, img.naturalHeight);
                         URL.revokeObjectURL(img.src);
                         photoInput.value = '';
                         if (!code || !code.data) {
-                            setStatus('No QR code found in that photo. Take it closer, with the whole code in view.', 'error');
+                            {{-- CHANGED: wording follows the upload button; the student picks an existing image instead of taking one. --}}
+                            setStatus('No QR code found in that image. Pick one where the whole code is sharp and in view.', 'error');
                             return;
                         }
                         handleCode(code.data);
