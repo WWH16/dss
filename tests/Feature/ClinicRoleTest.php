@@ -218,3 +218,26 @@ test('admin deletes a clinic account', function () {
 
     expect(User::find($clinic->id))->toBeNull();
 });
+
+test('evaluation pages never expose the student name', function (string $role) {
+    $stallId = seedStall();
+    $student = makeUser('student', 'juan@example.com', 'Juan Dela Cruz');
+    DB::table('stall_evaluations')->insert([
+        'student_id' => $student->id, 'stall_id' => $stallId,
+        'cleanliness' => 4, 'service' => 4, 'taste' => 4, 'price' => 4,
+        'comment' => 'Good', 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $viewer = makeUser($role, "{$role}-viewer@example.com");
+
+    foreach ([route('admin.evaluations'), route('admin.dashboard')] as $url) {
+        $this->actingAs($viewer)->get($url)
+            ->assertSee('Anonymous student')
+            ->assertDontSee('Juan Dela Cruz')
+            ->assertDontSee('student_id');
+    }
+
+    $this->actingAs($viewer)->get(route('admin.evaluations', ['q' => 'Juan']))
+        ->assertViewHas('evaluations', fn ($page) => $page->total() === 0);
+    $this->actingAs($viewer)->get(route('admin.evaluations', ['q' => 'Snack']))
+        ->assertViewHas('evaluations', fn ($page) => $page->total() === 1);
+})->with(['admin', 'clinic']);

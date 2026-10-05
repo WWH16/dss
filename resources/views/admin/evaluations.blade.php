@@ -35,7 +35,7 @@
                 {{-- CHANGED: search field rounded-lg to rounded-md (controls are md). --}}
                 <div class="flex-1 relative">
                     <ion-icon name="search-outline" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search evaluator name, stall, or comment keywords…"
+                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search stall or comment keywords…"
                         class="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
                 </div>
 
@@ -180,11 +180,12 @@
                                 {{-- Student --}}
                                 <td class="px-5 py-3.5">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200/70 text-brand-800 font-bold text-xs flex items-center justify-center shrink-0">
-                                            {{ strtoupper(substr($eval->student_name ?? 'S', 0, 1)) }}
+                                        {{-- CHANGED: anonymous evaluator; person icon instead of the name's first letter. --}}
+                                        <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200/70 text-brand-800 text-sm flex items-center justify-center shrink-0">
+                                            <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
                                         </div>
                                         <div class="min-w-0">
-                                            <p class="font-bold text-neutral-900 leading-tight truncate">{{ $eval->student_name }}</p>
+                                            <p class="font-bold text-neutral-900 leading-tight truncate">Anonymous student</p>
                                         </div>
                                     </div>
                                 </td>
@@ -273,11 +274,12 @@
                         <div class="p-4 flex flex-col gap-3 hover:bg-neutral-50/70 transition-colors">
                             <div class="flex items-start justify-between gap-3">
                                 <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200 text-brand-800 font-bold text-xs flex items-center justify-center shrink-0">
-                                        {{ strtoupper(substr($eval->student_name ?? 'S', 0, 1)) }}
+                                    {{-- CHANGED: anonymous evaluator; person icon instead of the name's first letter. --}}
+                                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200 text-brand-800 text-sm flex items-center justify-center shrink-0">
+                                        <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
                                     </div>
                                     <div class="min-w-0">
-                                        <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">{{ $eval->student_name }}</h3>
+                                        <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">Anonymous student</h3>
                                         <p class="text-[11px] font-bold text-brand-700 mt-0.5 truncate">{{ $eval->stall_name }}</p>
                                     </div>
                                 </div>
@@ -410,10 +412,12 @@
 <dialog id="eval-details-modal" class="confirm-modal modal-sharp max-w-lg w-full rounded-lg p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
     <div class="bg-brand-900 text-white px-5 py-4 flex items-center justify-between border-b border-brand-950">
         <div class="flex items-center gap-3">
-            <div id="modal-eval-avatar" class="w-10 h-10 rounded-md bg-brand-800 border border-brand-700/80 text-white font-bold text-base flex items-center justify-center shrink-0">
+            {{-- CHANGED: static person icon and "Anonymous student"; the modal no longer receives a name. --}}
+            <div id="modal-eval-avatar" class="w-10 h-10 rounded-md bg-brand-800 border border-brand-700/80 text-white text-lg flex items-center justify-center shrink-0">
+                <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
             </div>
             <div>
-                <h3 id="modal-eval-student" class="text-sm font-bold text-white leading-tight tracking-tight"></h3>
+                <h3 id="modal-eval-student" class="text-sm font-bold text-white leading-tight tracking-tight">Anonymous student</h3>
                 <p id="modal-eval-stall" class="text-xs text-brand-200 font-semibold mt-0.5"></p>
             </div>
         </div>
@@ -500,9 +504,8 @@ function toggleEvalFilterDrawer() {
 
 // CHANGED: takes a third argument, the submission date already formatted in Philippine time by the server.
 function openEvalDetailsModal(evalData, avgScore, submittedAt) {
-    document.getElementById('modal-eval-student').textContent = evalData.student_name || 'Student';
+    // CHANGED: removed the student name and avatar letter lines; the modal header is static "Anonymous student".
     document.getElementById('modal-eval-stall').textContent = 'Rated: ' + (evalData.stall_name || 'Stall');
-    document.getElementById('modal-eval-avatar').textContent = (evalData.student_name || 'S').charAt(0).toUpperCase();
 
     // CHANGED: textContent with the ★ glyph instead of innerHTML with an amber star ion-icon.
     document.getElementById('modal-eval-cleanliness').textContent = evalData.cleanliness + '★';

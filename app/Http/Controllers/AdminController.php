@@ -89,8 +89,8 @@ class AdminController extends Controller
         });
 
         // Recent 5 evaluations
+        // CHANGED: evaluations are anonymous; the users join and student name are no longer loaded.
         $recentEvaluations = DB::table('stall_evaluations')
-            ->join('users', 'users.id', '=', 'stall_evaluations.student_id')
             ->join('stalls', 'stalls.id', '=', 'stall_evaluations.stall_id')
             ->select(
                 'stall_evaluations.id',
@@ -99,7 +99,6 @@ class AdminController extends Controller
                 'stall_evaluations.taste',
                 'stall_evaluations.price',
                 'stall_evaluations.created_at',
-                'users.name as student_name',
                 'stalls.name as stall_name'
             )
             ->orderBy('stall_evaluations.created_at', 'desc')
@@ -320,28 +319,27 @@ class AdminController extends Controller
 
     public function evaluations(Request $request)
     {
+        // CHANGED: evaluations are anonymous. The users join, student_id and student name are no longer
+        // loaded, because each row is also written into the page as JSON for the details modal.
         $query = DB::table('stall_evaluations')
-            ->join('users','users.id','=','stall_evaluations.student_id')
             ->join('stalls','stalls.id','=','stall_evaluations.stall_id')
             ->select(
                 'stall_evaluations.id',
                 'stall_evaluations.stall_id',
-                'stall_evaluations.student_id',
                 'stall_evaluations.cleanliness',
                 'stall_evaluations.service',
                 'stall_evaluations.taste',
                 'stall_evaluations.price',
                 'stall_evaluations.comment',
                 'stall_evaluations.created_at',
-                'users.name as student_name',
                 'stalls.name as stall_name'
             );
 
         if ($request->filled('q')) {
             $q = '%' . trim($request->q) . '%';
+            // CHANGED: search no longer matches student names.
             $query->where(function($sub) use ($q) {
-                $sub->where('users.name', 'like', $q)
-                    ->orWhere('stalls.name', 'like', $q)
+                $sub->where('stalls.name', 'like', $q)
                     ->orWhere('stall_evaluations.comment', 'like', $q);
             });
         }

@@ -557,7 +557,8 @@
                         @foreach($recentEvaluations as $eval)
                             @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
                             <tr class="hover:bg-neutral-50/60 transition-colors">
-                                <td class="py-3.5 px-5 font-bold text-neutral-900 truncate max-w-[150px]">{{ $eval->student_name }}</td>
+                                {{-- CHANGED: evaluations are anonymous. --}}
+                                <td class="py-3.5 px-5 font-bold text-neutral-900 truncate max-w-[150px]">Anonymous student</td>
                                 <td class="py-3.5 px-4 text-neutral-700 font-semibold truncate max-w-[130px]">{{ $eval->stall_name }}</td>
                                 <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->cleanliness }}★</td>
                                 <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->service }}★</td>
@@ -583,7 +584,8 @@
                         @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
                         <div class="p-4 flex items-start justify-between gap-3">
                             <div class="min-w-0">
-                                <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">{{ $eval->student_name }}</h3>
+                                {{-- CHANGED: evaluations are anonymous. --}}
+                                <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">Anonymous student</h3>
                                 <p class="text-xs font-medium text-brand-700 mt-0.5 truncate">{{ $eval->stall_name }}</p>
                                 {{-- CHANGED: timestamp raised from 10px neutral-400 to 11px neutral-500. --}}
                                 <p class="text-[11px] text-neutral-500 mt-0.5">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
