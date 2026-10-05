@@ -20,7 +20,8 @@
             </p>
 
             {{-- CHANGED: full-width, 44px-tall buttons on phones (thumb-sized), side by side from sm up. --}}
-            <div class="mt-2 flex flex-col sm:flex-row items-stretch sm:items-center gap-2 w-full max-w-[20rem] sm:max-w-none sm:w-auto">
+            {{-- CHANGED: wraps and centres, so the pair also fits the narrower scanner dialog on the dashboard. --}}
+            <div class="mt-2 flex flex-col sm:flex-row sm:flex-wrap sm:justify-center items-stretch sm:items-center gap-2 w-full max-w-[20rem] sm:max-w-none sm:w-auto">
                 <button type="button" id="qr-start" class="inline-flex items-center justify-center gap-1.5 px-5 py-2.5 min-h-11 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     <ion-icon name="camera-outline" class="text-sm" aria-hidden="true"></ion-icon>
                     <span>Start scanning</span>
@@ -219,6 +220,18 @@
                     setStatus('The scanner could not load. Check your internet connection and try again.', 'error');
                 });
             });
+
+            // ADDED: when this scanner sits in a dialog (the student dashboard), closing it releases the
+            // camera and resets the status line. Inline copies have no dialog ancestor and skip this.
+            var hostDialog = viewfinder.closest('dialog');
+            if (hostDialog) {
+                hostDialog.addEventListener('close', function () {
+                    if (done) return;
+                    stopCamera();
+                    viewfinder.classList.remove('is-found');
+                    setStatus('Tap Start scanning and allow camera access.');
+                });
+            }
 
             // Release the camera when the student leaves or switches apps.
             document.addEventListener('visibilitychange', function () {

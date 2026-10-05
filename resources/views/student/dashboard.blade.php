@@ -5,7 +5,8 @@
 {{-- CHANGED (whole file): every rounded-lg and plain rounded became rounded-md (cards stay rounded-xl); every 9px and 10px text became 11px; font-black and font-extrabold became font-bold; grey helper text went from neutral-400 to neutral-500 for contrast. --}}
 
 @section('content')
-<div class="space-y-6">
+{{-- CHANGED: bottom padding keeps the floating scan button clear of the last card. --}}
+<div class="space-y-6 pb-24">
 
     {{-- ── 1. Page Header & Greeting Bar ───────────────────────────────── --}}
     {{-- CHANGED: the "Evaluate a Stall" button is gone, since evaluations now open only from a stall's QR code. The greeting card carries a short how-to strip instead. --}}
@@ -29,19 +30,18 @@
             </div>
         </div>
 
-        {{-- CHANGED: this strip held a static three-step instruction. It now carries the live scanner from partials/qr-scanner.blade.php, so a student can start an evaluation from the dashboard instead of finding the Evaluate page first. The three steps stay as supporting text. --}}
-        <div class="px-5 sm:px-6 py-5 bg-brand-50/60 border-t border-brand-100 flex flex-col lg:flex-row lg:items-center gap-5">
-            <div class="flex flex-col items-center text-center shrink-0 w-full lg:w-auto">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-md bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                        <ion-icon name="qr-code-outline" class="text-xl" aria-hidden="true"></ion-icon>
-                    </div>
-                    <h2 class="text-sm font-bold text-brand-900 leading-tight text-left">To evaluate a stall,<br> scan its QR code</h2>
+        {{-- CHANGED: the viewfinder was inline here and took the whole strip. The scanner now lives in the
+             #qr-scan-modal dialog at the bottom of this page, opened by the floating Scan QR button, so the
+             strip is back to the three steps. --}}
+        <div class="px-5 sm:px-6 py-4 bg-brand-50/60 border-t border-brand-100 flex flex-col md:flex-row md:items-center gap-4">
+            <div class="flex items-center gap-3 shrink-0">
+                <div class="w-10 h-10 rounded-md bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
+                    <ion-icon name="qr-code-outline" class="text-xl" aria-hidden="true"></ion-icon>
                 </div>
-                @include('partials.qr-scanner')
+                <h2 class="text-sm font-bold text-brand-900 leading-tight">To evaluate a stall,<br class="hidden md:inline"> scan its QR code</h2>
             </div>
-            <ol class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-1 gap-2.5 sm:gap-4 lg:flex-1 lg:pl-5 lg:border-l lg:border-brand-200">
-                @foreach(["Find the QR code posted at the stall's counter.", 'Tap Start scanning, or pick a saved image of the code.', 'Answer the survey and submit.'] as $step)
+            <ol class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 md:flex-1 md:pl-5 md:border-l md:border-brand-200">
+                @foreach(["Find the QR code posted at the stall's counter.", 'Open the scanner and point it at the code.', 'Answer the survey and submit.'] as $step)
                     <li class="flex items-start gap-2 text-xs text-brand-900">
                         <span class="w-5 h-5 rounded-full bg-white border border-brand-200 text-brand-800 text-[11px] font-bold flex items-center justify-center shrink-0 tabular-nums">{{ $loop->iteration }}</span>
                         <span>{{ $step }}</span>
@@ -375,7 +375,34 @@
 
 </div>
 
-{{-- ── 3. Client-Side Stall Search & Filtering Logic ──────────────────────── --}}
+{{-- ── 3. Floating Scan Trigger ───────────────────────────────────────────── --}}
+{{-- ADDED: the scanner is out of the page flow now. This stays within thumb reach on every scroll position, which is where a student holding a phone at a counter needs it. --}}
+<button type="button"
+        class="js-open-scanner fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 pl-5 pr-6 min-h-14 rounded-full bg-brand-700 hover:bg-brand-800 text-white font-bold text-sm shadow-lg shadow-brand-900/25 transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-600/35">
+    <ion-icon name="scan-outline" class="text-2xl" aria-hidden="true"></ion-icon>
+    Scan QR
+</button>
+
+{{-- ── 4. Scanner Dialog ──────────────────────────────────────────────────── --}}
+{{-- ADDED: a native <dialog>, the same confirm-modal treatment the logout prompt uses. Scanning wants the
+     screen to itself: the viewfinder is the task, and showModal() traps focus and dims everything else. --}}
+<dialog id="qr-scan-modal" class="confirm-modal" aria-labelledby="qr-scan-modal-title">
+    <div class="flex items-start justify-between gap-3 mb-1">
+        <div>
+            <h2 id="qr-scan-modal-title" class="text-base font-bold text-ink-900 leading-tight" style="font-family: var(--font-display);">Scan the stall's QR code</h2>
+            <p class="text-xs text-ink-500 mt-1">Point your camera at the code posted at the counter.</p>
+        </div>
+        <button type="button" class="js-close-scanner shrink-0 -mt-1 -mr-1 p-2 rounded-md text-ink-500 hover:text-ink-900 hover:bg-ink-50 transition-colors cursor-pointer" aria-label="Close the scanner">
+            <ion-icon name="close-outline" class="text-xl" aria-hidden="true"></ion-icon>
+        </button>
+    </div>
+
+    <div class="flex flex-col items-center text-center">
+        @include('partials.qr-scanner')
+    </div>
+</dialog>
+
+{{-- ── 5. Client-Side Stall Search & Filtering Logic ──────────────────────── --}}
 <script>
 document.addEventListener('DOMContentLoaded', () => {
     const searchInput = document.getElementById('stallSearchInput');
@@ -463,6 +490,25 @@ document.addEventListener('DOMContentLoaded', () => {
             applyFilters();
         });
     });
+
+    // ADDED: opens the scanner dialog from the floating button and starts the camera straight away - the
+    // student already said what they wanted by tapping. The partial stops the camera when the dialog closes.
+    const scanModal = document.getElementById('qr-scan-modal');
+    const openScanner = document.querySelector('.js-open-scanner');
+
+    if (scanModal && openScanner) {
+        openScanner.addEventListener('click', () => {
+            scanModal.showModal();
+            document.getElementById('qr-start')?.click();
+        });
+
+        scanModal.querySelector('.js-close-scanner').addEventListener('click', () => scanModal.close());
+
+        // A click on the dimmed area targets the dialog itself; clicks inside it target its children.
+        scanModal.addEventListener('click', (e) => {
+            if (e.target === scanModal) scanModal.close();
+        });
+    }
 });
 </script>
 @endsection

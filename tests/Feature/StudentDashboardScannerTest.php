@@ -56,6 +56,18 @@ test('the dashboard includes the scanner exactly once', function () {
     expect(substr_count($content, 'id="qr-viewfinder"'))->toBe(1);
 });
 
+// ADDED: the scanner is no longer inline; it sits in a dialog the floating button opens.
+test('the dashboard scanner sits inside a dialog with triggers to open it', function () {
+    $content = $this->actingAs($this->student)->get(route('student.dashboard'))->getContent();
+
+    expect($content)->toContain('<dialog id="qr-scan-modal"');
+    // The dialog is rendered after the page content, so the viewfinder must come after its opening tag.
+    expect(strpos($content, '<dialog id="qr-scan-modal"'))->toBeLessThan(strpos($content, 'id="qr-viewfinder"'));
+    // The floating button is the only trigger.
+    expect(substr_count($content, 'class="js-open-scanner'))->toBe(1);
+    expect($content)->toContain('js-close-scanner');
+});
+
 // The dashboard still has one page heading after the scanner card is added.
 test('the dashboard has exactly one h1', function () {
     $content = $this->actingAs($this->student)->get(route('student.dashboard'))->getContent();
