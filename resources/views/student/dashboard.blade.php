@@ -117,25 +117,30 @@
     <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
         
         {{-- LEFT: Food Stalls Directory (2 Cols) --}}
-        <div class="lg:col-span-2 space-y-4">
-            
-            {{-- Stalls Directory Header Card with Search & Filters --}}
-            <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs">
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3.5 mb-4 border-b border-neutral-100 gap-3">
-                    <div>
-                        <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
-                            <ion-icon name="restaurant-outline" class="text-brand-700 text-base"></ion-icon>
-                            Campus Food Stalls
-                        </h2>
-                        {{-- CHANGED: stalls are no longer picked here; the list now tracks which ones you have rated. --}}
+        {{-- CHANGED: the stall list is collapsed until the student opens it (native <details>), instead of every stall showing on load. The summary row carries the title and the rated count; search and filters live inside. --}}
+        <details id="stallsDirectory" class="lg:col-span-2 group">
+            <summary class="list-none [&::-webkit-details-marker]:hidden cursor-pointer select-none bg-white rounded-xl border border-neutral-200/80 px-5 py-4 shadow-xs hover:border-brand-300 transition-colors flex items-center justify-between gap-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-600/40">
+                <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
+                        <ion-icon name="restaurant-outline" class="text-base" aria-hidden="true"></ion-icon>
+                    </div>
+                    <div class="min-w-0">
+                        <h2 class="text-sm sm:text-base font-bold text-neutral-900 tracking-tight">Campus Food Stalls</h2>
                         <p class="text-xs text-neutral-500 mt-0.5">
-                            Stalls open for evaluation and which ones you have rated
+                            You've rated <span class="font-bold text-neutral-700 tabular-nums">{{ $uniqueEvaluatedCount }}</span> of <span class="font-bold text-neutral-700 tabular-nums">{{ $totalStallsCount }}</span> open {{ Str::plural('stall', $totalStallsCount) }}
                         </p>
                     </div>
-
-                    {{-- CHANGED: removed the "Open Evaluation Form" button; it went to the same page as "Evaluate a Stall" in the header, and each card below has its own "Rate Stall" button. --}}
                 </div>
+                <span class="inline-flex items-center gap-1 text-xs font-bold text-brand-700 shrink-0">
+                    <span class="group-open:hidden">Show</span>
+                    <span class="hidden group-open:inline">Hide</span>
+                    <ion-icon name="chevron-down-outline" class="text-sm transition-transform duration-200 group-open:rotate-180" aria-hidden="true"></ion-icon>
+                </span>
+            </summary>
 
+            <div class="mt-4 space-y-4">
+            {{-- Stalls Directory Search & Filters --}}
+            <div class="bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs">
                 {{-- Search & Filter Bar --}}
                 <div class="flex flex-col sm:flex-row sm:items-center gap-2.5">
                     {{-- Search Input --}}
@@ -236,8 +241,9 @@
                     <p class="text-[11px] text-neutral-500 mt-0.5">Try adjusting your search terms or filter selection.</p>
                 </div>
             @endif
+            </div>
 
-        </div>
+        </details>
 
         {{-- RIGHT: Campus Spotlight & Review History (1 Col) --}}
         <div class="space-y-5">

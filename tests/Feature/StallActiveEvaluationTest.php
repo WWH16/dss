@@ -124,6 +124,13 @@ test('inactive stalls do not appear on the student dashboard', function () {
     $response->assertDontSee('Closed Canteen');
 });
 
+test('the stall list on the student dashboard starts collapsed', function () {
+    $this->actingAs($this->student)->get(route('student.dashboard'))
+        ->assertSee('<details id="stallsDirectory" class=', false)
+        ->assertDontSee('<details id="stallsDirectory" open', false)
+        ->assertSee('of <span class="font-bold text-neutral-700 tabular-nums">1</span> open stall', false);
+});
+
 test('the student dashboard has no direct evaluation links to stalls', function () {
     $this->actingAs($this->student)->get(route('student.dashboard'))
         ->assertDontSee('stall=' . $this->activeStallId, false);
