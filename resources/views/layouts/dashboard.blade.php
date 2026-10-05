@@ -147,6 +147,11 @@
 </head>
 <body class="font-sans antialiased text-ink-900">
 
+{{-- ADDED: keyboard users tabbed through every sidebar link before reaching the page content (WCAG 2.4.1). --}}
+<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2.5 focus:rounded-md focus:bg-brand-700 focus:text-white focus:text-xs focus:font-bold focus:shadow-md">
+    Skip to main content
+</a>
+
 <div class="dashboard-layout">
     {{-- ── Sidebar Mobile Overlay ────────────────────────────────────── --}}
     <div class="sidebar-overlay" id="sidebar-overlay"></div>
@@ -249,12 +254,14 @@
         <!-- Header -->
         <header class="dashboard-header">
             <div class="flex items-center gap-4">
-                <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu">
+                {{-- CHANGED: the button now reports whether the sidebar is open and what it controls; before, a screen reader heard only "Toggle Menu" with no state. --}}
+                <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu" aria-expanded="false" aria-controls="sidebar">
                     <ion-icon name="menu-outline" class="text-2xl text-ink-900"></ion-icon>
                 </button>
-                <h2 class="font-display font-semibold text-lg text-ink-900">
+                {{-- CHANGED: was an <h2>, which put a level-2 heading ahead of each page's <h1> and broke heading navigation. The header title is a label, not a section heading. --}}
+                <p class="font-display font-semibold text-lg text-ink-900">
                     @yield('header_title', 'Dashboard')
-                </h2>
+                </p>
             </div>
             <div class="flex items-center gap-3">
                 <div class="text-right hidden sm:block">
@@ -268,7 +275,8 @@
         </header>
 
         <!-- Main Content -->
-        <main class="flex-1 p-4 sm:p-6 lg:p-8">
+        {{-- CHANGED: id added as the skip link's target. --}}
+        <main id="main" class="flex-1 p-4 sm:p-6 lg:p-8">
             @yield('content')
         </main>
     </div>
@@ -302,13 +310,16 @@
         var overlay = document.getElementById('sidebar-overlay');
 
         if (toggle && sidebar && overlay) {
+            // CHANGED: both handlers now keep aria-expanded in step with the sidebar's open class.
             toggle.addEventListener('click', function () {
                 sidebar.classList.add('open');
                 overlay.classList.add('open');
+                toggle.setAttribute('aria-expanded', 'true');
             });
             overlay.addEventListener('click', function () {
                 sidebar.classList.remove('open');
                 overlay.classList.remove('open');
+                toggle.setAttribute('aria-expanded', 'false');
             });
         }
     })();

@@ -128,7 +128,8 @@ test('the stall list on the student dashboard starts collapsed', function () {
     $this->actingAs($this->student)->get(route('student.dashboard'))
         ->assertSee('<details id="stallsDirectory" class=', false)
         ->assertDontSee('<details id="stallsDirectory" open', false)
-        ->assertSee('of <span class="font-bold text-neutral-700 tabular-nums">1</span> open stall', false);
+        // CHANGED: the dashboard's greys moved from Tailwind's neutral-* defaults to the project's ink-* tokens.
+        ->assertSee('of <span class="font-bold text-ink-700 tabular-nums">1</span> open stall', false);
 });
 
 test('the student dashboard has no direct evaluation links to stalls', function () {

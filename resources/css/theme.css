@@ -22,10 +22,18 @@
     --color-brand-50:  oklch(0.97 0.03 155);
 
     /* Ink / Surface */
+    /* CHANGED: the ramp had four steps, so pages reached for Tailwind's achromatic neutral-* defaults
+       for borders, hairlines and mid greys. The in-between steps are added here, on the same 255° hue,
+       so a page can stay inside the token set. The original four keep their values. */
     --color-ink-900:    oklch(0.14 0.01 255);
+    --color-ink-800:    oklch(0.27 0.01 255);
     --color-ink-700:    oklch(0.32 0.01 255);
+    --color-ink-600:    oklch(0.44 0.01 255);
     --color-ink-500:    oklch(0.52 0.01 255);
     --color-ink-300:    oklch(0.72 0.01 255);
+    --color-ink-200:    oklch(0.87 0.008 255);
+    --color-ink-100:    oklch(0.93 0.006 255);
+    --color-ink-50:     oklch(0.97 0.004 255);
     --color-surface:    oklch(0.98 0.005 155);
     --color-surface-alt:oklch(0.95 0.01 155);
 
