@@ -9,6 +9,9 @@ use App\Services\Saw;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Mail\PasswordChangedMail; // ADDED
+use Illuminate\Support\Facades\Log; // ADDED
+use Illuminate\Support\Facades\Mail; // ADDED
 
 // CHANGED: role checks moved out of each method into the role middleware on this controller's routes (routes/web.php).
 class StudentDashboardController extends Controller
@@ -170,6 +173,14 @@ class StudentDashboardController extends Controller
             'password' => Hash::make($request->password),
             'updated_at' => now(),
         ]);
+
+        // ADDED: email the student that their password changed. The password is already saved,
+        // so a mail failure is logged and the change still succeeds.
+        try {
+            Mail::to($user->email)->send(new PasswordChangedMail($user->name, now()));
+        } catch (\Throwable $e) {
+            Log::error('Failed to send password changed email: ' . $e->getMessage());
+        }
 
         return redirect()->back()->with('success', 'Password updated successfully!');
     }
