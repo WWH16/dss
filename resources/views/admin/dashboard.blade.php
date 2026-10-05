@@ -42,10 +42,13 @@
                 Print Report
             </a>
             {{-- CHANGED: dropped the same dead size utilities so both header buttons share one size from .btn. --}}
+            {{-- CHANGED: Manage Stalls is admin-only; hidden for clinic users. --}}
+            @if(Auth::user()->role === 'admin')
             <a href="{{ route('admin.stalls') }}" class="btn btn-primary font-bold">
                 <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
                 Manage Stalls
             </a>
+            @endif
         </div>
     </div>
 
@@ -200,12 +203,13 @@
 
     {{-- ── 4. Minimalist Stat Cards ───────────────────────────────────────── --}}
     <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+        {{-- CHANGED: Students and Stalls cards link only for admins; clinic users cannot open those pages. --}}
         @foreach([
-            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',     'desc' => 'Registered evaluators', 'route' => route('admin.students')],
-            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active vendors',       'route' => route('admin.stalls')],
+            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',     'desc' => 'Registered evaluators', 'route' => Auth::user()->role === 'admin' ? route('admin.students') : null],
+            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active vendors',       'route' => Auth::user()->role === 'admin' ? route('admin.stalls') : null],
             ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'create-outline',     'desc' => 'Submissions logged',    'route' => route('admin.evaluations')],
         ] as $stat)
-            <a href="{{ $stat['route'] }}" class="group bg-white rounded-xl border border-neutral-200/70 p-5 shadow-sm hover:border-brand-300 hover:shadow-md transition-all flex flex-col justify-between">
+            <a @if($stat['route']) href="{{ $stat['route'] }}" @endif class="group bg-white rounded-xl border border-neutral-200/70 p-5 shadow-sm {{ $stat['route'] ? 'hover:border-brand-300 hover:shadow-md' : '' }} transition-all flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider group-hover:text-brand-800 transition-colors">{{ $stat['label'] }}</span>
@@ -220,9 +224,11 @@
                 <div class="flex items-center justify-between mt-3 pt-2 border-t border-neutral-100/70 text-xs">
                     <span class="text-neutral-400 font-medium">{{ $stat['desc'] }}</span>
                     {{-- CHANGED: dropped the "Manage" hover label, which repeated the header's "Manage Stalls" action; the chevron alone signals the card is a link. --}}
+                    @if($stat['route'])
                     <span class="text-brand-700 opacity-0 group-hover:opacity-100 transition-opacity flex items-center" aria-hidden="true">
                         <ion-icon name="chevron-forward-outline" class="text-sm"></ion-icon>
                     </span>
+                    @endif
                 </div>
             </a>
         @endforeach

@@ -15,7 +15,8 @@ class AdminController extends Controller
 {
     public function dashboard(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') {
+        // CHANGED: clinic users may view this monitoring page (read-only).
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'clinic'])) {
             return redirect('/login');
         }
 
@@ -245,7 +246,8 @@ class AdminController extends Controller
 
     public function report(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') {
+        // CHANGED: clinic users may view this monitoring page (read-only).
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'clinic'])) {
             return redirect('/login');
         }
 
@@ -425,7 +427,8 @@ class AdminController extends Controller
 
     public function evaluations(Request $request)
     {
-        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+        // CHANGED: clinic users may view this monitoring page (read-only).
+        if (!Auth::check() || !in_array(Auth::user()->role, ['admin', 'clinic'])) return redirect('/login');
 
         $query = DB::table('stall_evaluations')
             ->join('users','users.id','=','stall_evaluations.student_id')
@@ -678,6 +681,9 @@ class AdminController extends Controller
     // Delete Stall
     public function deleteStall($id)
     {
+        // ADDED: role guard. This method had none, so any signed-in user could delete a stall.
+        if (!Auth::check() || Auth::user()->role != 'admin') return redirect('/login');
+
         DB::table('stalls')
             ->where('id',$id)
             ->delete();

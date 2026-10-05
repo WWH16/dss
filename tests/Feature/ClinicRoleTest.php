@@ -90,3 +90,81 @@ test('registering with the clinic role is rejected', function () {
     $response->assertSessionHasErrors('role');
     expect(User::where('email', 'sneaky@example.com')->exists())->toBeFalse();
 });
+
+function seedStall(): int
+{
+    return DB::table('stalls')->insertGetId([
+        'name' => 'Snack Hub',
+        'is_active' => true,
+        'created_at' => now(),
+        'updated_at' => now(),
+    ]);
+}
+
+test('clinic user can open the monitoring pages', function (string $route) {
+    seedStall();
+
+    $this->actingAs(clinicUser())->get(route($route))->assertStatus(200);
+})->with(['admin.dashboard', 'admin.evaluations', 'admin.report']);
+
+test('clinic user is bounced from admin-only pages', function (string $route) {
+    $this->actingAs(clinicUser())->get(route($route))->assertRedirect('/login');
+})->with(['admin.stalls', 'admin.students', 'admin.users']);
+
+test('clinic user cannot change stalls or accounts', function () {
+    $stallId = seedStall();
+    $clinic = clinicUser();
+
+    $this->actingAs($clinic)->post(route('admin.stall.add'), ['name' => 'New'])->assertRedirect('/login');
+    $this->actingAs($clinic)->delete(route('admin.stall.delete', $stallId))->assertRedirect('/login');
+    $this->actingAs($clinic)->post(route('admin.users.create'), [
+        'role' => 'admin', 'name' => 'X', 'email' => 'x@example.com',
+        'password' => 'Password1!', 'password_confirmation' => 'Password1!',
+    ])->assertRedirect('/login');
+
+    expect(DB::table('stalls')->where('id', $stallId)->exists())->toBeTrue();
+    expect(DB::table('stalls')->count())->toBe(1);
+    expect(User::where('email', 'x@example.com')->exists())->toBeFalse();
+});
+
+test('student cannot delete a stall', function () {
+    $stallId = seedStall();
+    $student = User::create([
+        'name' => 'Student', 'email' => 'student@example.com', 'password' => bcrypt('password'),
+        'role' => 'student', 'email_verified_at' => now(),
+    ]);
+
+    $this->actingAs($student)->delete(route('admin.stall.delete', $stallId))->assertRedirect('/login');
+
+    expect(DB::table('stalls')->where('id', $stallId)->exists())->toBeTrue();
+});
+
+test('admin can still delete a stall', function () {
+    $stallId = seedStall();
+
+    $this->actingAs(adminUser())->delete(route('admin.stall.delete', $stallId));
+
+    expect(DB::table('stalls')->where('id', $stallId)->exists())->toBeFalse();
+});
+
+test('clinic dashboard hides admin-only links and shows clinic sidebar', function () {
+    seedStall();
+
+    $response = $this->actingAs(clinicUser())->get(route('admin.dashboard'));
+
+    $response->assertDontSee(route('admin.stalls'), false);
+    $response->assertDontSee(route('admin.students'), false);
+    $response->assertDontSee(route('admin.users'), false);
+    $response->assertSee(route('admin.evaluations'), false);
+    $response->assertSee(route('admin.report'), false);
+});
+
+test('admin dashboard still links to admin-only pages', function () {
+    seedStall();
+
+    $response = $this->actingAs(adminUser())->get(route('admin.dashboard'));
+
+    $response->assertSee(route('admin.stalls'), false);
+    $response->assertSee(route('admin.students'), false);
+    $response->assertSee(route('admin.users'), false);
+});

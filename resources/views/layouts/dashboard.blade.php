@@ -201,6 +201,20 @@
                     <ion-icon name="id-card-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
                     Staff &amp; Admins
                 </a>
+            {{-- ADDED: clinic sidebar. Monitoring pages only, no management links. --}}
+            @elseif($user && $user->role === 'clinic')
+                <a href="{{ route('admin.dashboard') }}" class="sidebar-link {{ request()->routeIs('admin.dashboard') ? 'active' : '' }}">
+                    <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                    Overview
+                </a>
+                <a href="{{ route('admin.evaluations') }}" class="sidebar-link {{ request()->routeIs('admin.evaluations') ? 'active' : '' }}">
+                    <ion-icon name="create-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                    Evaluations
+                </a>
+                <a href="{{ route('admin.report') }}" class="sidebar-link {{ request()->routeIs('admin.report') ? 'active' : '' }}">
+                    <ion-icon name="print-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
+                    Print Report
+                </a>
             @elseif($user && $user->role === 'staff')
                 @php
                     $isStaffAssigned = !empty($user->stall_id);
