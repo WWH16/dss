@@ -193,9 +193,10 @@ test('a second evaluation in the same month is rejected even for a different sta
     pastEvaluation($this->student->id, $otherStallId, '2026-10-02 01:00:00');
 
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->followingRedirects()
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertRedirect(route('student.evaluation'))
-        ->assertSessionHas('info', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.');
+        ->assertSee('Already evaluated this month')
+        ->assertSee('You have already submitted your evaluation for October. You can evaluate a stall again on November 1.');
 
     $this->assertDatabaseCount('stall_evaluations', 1);
 });
@@ -212,8 +213,9 @@ test('the month follows Philippine time, not UTC', function () {
     // The evaluation just saved counts for November, so a later November submission is blocked.
     $this->travelTo(Carbon::parse('2026-11-15 04:00:00', 'UTC'));
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->followingRedirects()
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSessionHas('info', 'You have already submitted your evaluation for November. You can evaluate a stall again on December 1.');
+        ->assertSee('You have already submitted your evaluation for November. You can evaluate a stall again on December 1.');
 
     $this->assertDatabaseCount('stall_evaluations', 2);
 });
@@ -223,8 +225,9 @@ test('a December evaluation opens again on January 1', function () {
     pastEvaluation($this->student->id, $this->activeStallId, '2026-12-01 03:00:00');
 
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->followingRedirects()
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSessionHas('info', 'You have already submitted your evaluation for December. You can evaluate a stall again on January 1.');
+        ->assertSee('You have already submitted your evaluation for December. You can evaluate a stall again on January 1.');
 });
 
 test("another student's evaluation does not use up this student's month", function () {
@@ -259,13 +262,12 @@ test("scanning a stall after this month's evaluation shows the limit instead of 
     pastEvaluation($this->student->id, $this->activeStallId, '2026-10-05 02:00:00');
 
     $this->actingAs($this->student)->get(scanUrl($this->activeStallId))
-        ->assertRedirect(route('student.evaluation'))
-        ->assertSessionHas('info', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.')
+        ->assertOk()
+        ->assertSee('Already evaluated this month')
+        ->assertSee('You have already submitted your evaluation for October. You can evaluate a stall again on November 1.')
+        ->assertDontSee('id="evaluationForm"', false)
+        ->assertDontSee('id="qr-start"', false)
         ->assertSessionMissing('qr_stall_id');
-
-    $this->actingAs($this->student)->get(route('student.evaluation'))
-        ->assertSee('You have already submitted your evaluation for October.')
-        ->assertDontSee('id="evaluationForm"', false);
 });
 
 test('a scan-and-submit lands on the success screen, not the limit error', function () {

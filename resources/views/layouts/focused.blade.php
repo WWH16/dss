@@ -39,9 +39,8 @@
             @if(session('warning'))
                 if (window.showToast) window.showToast(@json(session('warning')), 'warning', 4500);
             @endif
-            {{-- CHANGED: info is no longer toasted here; the evaluation page shows it inline (the monthly evaluation limit), so a toast would repeat it. --}}
-            @if(session('status'))
-                if (window.showToast) window.showToast(@json(session('status')), 'info', 4000);
+            @if(session('info') || session('status'))
+                if (window.showToast) window.showToast(@json(session('info') ?? session('status')), 'info', 4000);
             @endif
         });
     </script>

@@ -77,14 +77,14 @@ class StudentEvaluationController extends Controller
         // the student to scan the QR code at the stall.
         $stall = null;
 
-        if ($request->has('signature')) {
+        // ADDED: once this month's evaluation is used up, the page shows the limit screen instead of the
+        // scanner, and a scanned QR code is ignored, so the student does not fill in a form store() would reject.
+        $limit = $this->monthlyLimitMessage($user->id);
+
+        // CHANGED: skipped while $limit is set (see above).
+        if (! $limit && $request->has('signature')) {
             if (! $request->hasValidSignature(false)) {
                 return redirect()->route('student.evaluation')->with('error', 'This QR code is not valid. Scan the code posted at the stall.');
-            }
-
-            // ADDED: refuse the scan when this month's evaluation is used up, so the student does not fill in a form store() would reject.
-            if ($limit = $this->monthlyLimitMessage($user->id)) {
-                return redirect()->route('student.evaluation')->with('info', $limit);
             }
 
             $stall = DB::table('stalls')->where('id', (int) $request->stall)->first(['id', 'name', 'is_active']);
@@ -106,6 +106,8 @@ class StudentEvaluationController extends Controller
         return view('student.evaluation', compact(
             'profile',
             'stall',
+            // ADDED: the monthly limit message for the limit screen, or null.
+            'limit',
             'displayStatements'
         ));
     }
@@ -119,9 +121,9 @@ class StudentEvaluationController extends Controller
             return redirect()->route('student.evaluation')->with('error', 'Scan the QR code at the stall to evaluate it.');
         }
 
-        // ADDED: one evaluation per student per calendar month, for any one stall.
-        if ($limit = $this->monthlyLimitMessage($user->id)) {
-            return redirect()->route('student.evaluation')->with('info', $limit);
+        // ADDED: one evaluation per student per calendar month, for any one stall. The evaluation page shows the limit screen.
+        if ($this->monthlyLimitMessage($user->id)) {
+            return redirect()->route('student.evaluation');
         }
 
         $request->merge(['stall_id' => session('qr_stall_id')]);

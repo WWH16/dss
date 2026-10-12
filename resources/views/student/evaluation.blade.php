@@ -66,6 +66,25 @@
                     Back to Dashboard
                 </a>
             </div>
+        {{-- ADDED: monthly limit screen. A student who already evaluated a stall this month sees this instead of the scanner. --}}
+        @elseif($limit)
+            <div class="p-8 sm:p-14 md:p-20 text-center flex flex-col items-center justify-center">
+                <div class="w-20 h-20 rounded-2xl bg-neutral-50 border-2 border-neutral-200 text-brand-600 flex items-center justify-center mb-6 shadow-xs">
+                    <ion-icon name="calendar-outline" class="text-5xl" aria-hidden="true"></ion-icon>
+                </div>
+
+                <h2 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight mb-2">
+                    Already evaluated this month
+                </h2>
+
+                <p class="text-neutral-500 max-w-md mx-auto mb-8 text-xs sm:text-sm leading-relaxed">
+                    Each student can evaluate one stall per month. {{ $limit }}
+                </p>
+
+                <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center shadow-2xs">
+                    Back to Dashboard
+                </a>
+            </div>
         {{-- CHANGED: the "scan the QR code" notice is now an in-page scanner. The camera reads the stall's QR code and opens its evaluation; CHANGED: uploading a saved image of the code works too, for phones where live camera access is blocked. --}}
         @elseif(! $stall)
             <div class="px-5 py-8 sm:p-12 flex flex-col items-center text-center">
@@ -76,14 +95,6 @@
                     <p class="mt-4 inline-flex items-center gap-1.5 px-3 py-2 rounded-md bg-rose-50 border border-rose-200 text-rose-800 text-xs font-bold">
                         <ion-icon name="alert-circle" class="text-sm text-rose-600 shrink-0" aria-hidden="true"></ion-icon>
                         {{ session('error') }}
-                    </p>
-                @endif
-
-                {{-- ADDED: the monthly evaluation limit is a rule, not a mistake, so it shows as a calm note instead of a red error. --}}
-                @if(session('info'))
-                    <p class="mt-4 inline-flex items-start gap-1.5 max-w-sm px-3 py-2 rounded-md bg-neutral-50 border border-neutral-200 text-neutral-700 text-xs font-semibold text-left">
-                        <ion-icon name="calendar-outline" class="text-sm text-brand-600 shrink-0 mt-px" aria-hidden="true"></ion-icon>
-                        {{ session('info') }}
                     </p>
                 @endif
 
