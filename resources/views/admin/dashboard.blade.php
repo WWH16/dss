@@ -19,16 +19,15 @@
 @endsection
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6">
+{{-- CHANGED: was max-w-7xl mx-auto, which centred a 1280px column and left dead space beside the sidebar on wide screens. Content now starts at the main padding and grows to 1600px. --}}
+<div class="max-w-[1600px] space-y-6">
 
     {{-- ── 1. Page Header with Quick Actions ────────────────────────────── --}}
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200/80">
         <div>
-            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
-                <ion-icon name="grid-outline" class="text-brand-700 text-2xl"></ion-icon>
-                <span>Overview</span>
-            </h1>
-            <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
+            {{-- CHANGED: the visible "Overview" heading repeated the top bar title. The h1 stays for screen readers and heading navigation; the visible copy is the description below. --}}
+            <h1 class="sr-only">Overview</h1>
+            <p class="text-sm text-neutral-600 max-w-2xl">
                 Campus dining analytics, evaluation metrics, and decision support rankings.
             </p>
         </div>
@@ -44,8 +43,9 @@
                 Print Report
             </a>
             {{-- CHANGED: dropped the same dead size utilities so both header buttons share one size from .btn. --}}
-            <a href="{{ route('admin.stalls') }}" class="btn btn-primary font-bold">
-                <ion-icon name="add-circle-outline" class="text-base"></ion-icon>
+            {{-- CHANGED: btn-primary became btn-secondary; the solid green button drew the eye before the activity numbers. --}}
+            <a href="{{ route('admin.stalls') }}" class="btn btn-secondary font-bold">
+                <ion-icon name="add-circle-outline" class="text-base text-brand-700"></ion-icon>
                 Manage Stalls
             </a>
             @endif
@@ -74,155 +74,33 @@
         </div>
     @endif
 
-    @if($results->isNotEmpty())
-        @php
-            $podiumFirst  = $results->get(0);
-            $podiumSecond = $results->get(1);
-            $podiumThird  = $results->get(2);
-            $firstScore   = $podiumFirst  ? (float)$podiumFirst->overall_score  : 0;
-            $secondScore  = $podiumSecond ? (float)$podiumSecond->overall_score : 0;
-            $thirdScore   = $podiumThird  ? (float)$podiumThird->overall_score  : 0;
-        @endphp
-
-        {{-- ── 3. Podium + Campus Health ──────────────────────────────────── --}}
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
-
-            {{-- Stepped Podium Card --}}
-            <div class="lg:col-span-1 bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden flex flex-col">
-                <div class="px-5 pt-4 pb-1">
-                    <h2 class="text-sm font-bold text-neutral-900">Top Vendors</h2>
-                    <p class="text-[11px] text-neutral-500 mt-0.5">Ranked by DSS composite</p>
-                </div>
-
-                <div class="flex-1 flex flex-col justify-end px-3 pb-0 pt-4">
-                    {{-- Names + scores above bars --}}
-                    <div class="flex items-end justify-center gap-1">
-                        {{-- #2 label --}}
-                        {{-- CHANGED (all three podium labels): medal/trophy recoloured from slate/amber to the brand green and neutral grey; font-black dropped to font-bold; eval counts raised from 9px neutral-400 to 11px neutral-500 for WCAG AA contrast. --}}
-                        @if($podiumSecond)
-                            <div class="flex-1 text-center pb-1.5">
-                                <ion-icon name="medal" class="text-neutral-500 text-base"></ion-icon>
-                                <p class="text-[11px] font-bold text-neutral-900 truncate mt-0.5 px-1" title="{{ $podiumSecond->name }}">{{ $podiumSecond->name }}</p>
-                                <p class="text-sm font-bold text-neutral-800 tabular-nums leading-tight">{{ number_format($secondScore, 2) }}</p>
-                                <p class="text-[11px] text-neutral-500 font-mono">{{ $podiumSecond->eval_count }} {{ Str::plural('eval', $podiumSecond->eval_count) }}</p>
-                            </div>
-                        @endif
-
-                        {{-- #1 label --}}
-                        @if($podiumFirst)
-                            <div class="flex-1 text-center pb-1.5">
-                                <ion-icon name="trophy" class="text-brand-600 text-lg"></ion-icon>
-                                <p class="text-xs font-bold text-neutral-900 truncate mt-0.5 px-1" title="{{ $podiumFirst->name }}">{{ $podiumFirst->name }}</p>
-                                <p class="text-base font-bold text-neutral-900 tabular-nums leading-tight">{{ number_format($firstScore, 2) }}</p>
-                                <p class="text-[11px] text-neutral-500 font-mono">{{ $podiumFirst->eval_count }} {{ Str::plural('eval', $podiumFirst->eval_count) }}</p>
-                            </div>
-                        @endif
-
-                        {{-- #3 label --}}
-                        @if($podiumThird)
-                            <div class="flex-1 text-center pb-1.5">
-                                <ion-icon name="medal" class="text-neutral-400 text-sm"></ion-icon>
-                                <p class="text-[11px] font-bold text-neutral-900 truncate mt-0.5 px-1" title="{{ $podiumThird->name }}">{{ $podiumThird->name }}</p>
-                                <p class="text-sm font-bold text-neutral-800 tabular-nums leading-tight">{{ number_format($thirdScore, 2) }}</p>
-                                <p class="text-[11px] text-neutral-500 font-mono">{{ $podiumThird->eval_count }} {{ Str::plural('eval', $podiumThird->eval_count) }}</p>
-                            </div>
-                        @else
-                            <div class="flex-1"></div>
-                        @endif
-                    </div>
-
-                    {{-- Podium bars --}}
-                    {{-- CHANGED (all three bars): slate/amber/orange fills replaced with brand green for #1 and neutral grey for #2/#3; rank digits darkened from near-invisible 200/300 shades to 600/700 and dropped from font-black to font-bold. --}}
-                    <div class="flex items-end justify-center gap-1">
-                        @if($podiumSecond)
-                            <div class="flex-1 h-16 bg-neutral-100 border border-neutral-200 border-b-0 rounded-t-lg flex items-center justify-center">
-                                <span class="text-xl font-bold text-neutral-600">2</span>
-                            </div>
-                        @endif
-
-                        @if($podiumFirst)
-                            <div class="flex-1 h-24 bg-brand-50 border border-brand-200 border-b-0 rounded-t-lg flex items-center justify-center">
-                                <span class="text-2xl font-bold text-brand-700">1</span>
-                            </div>
-                        @endif
-
-                        @if($podiumThird)
-                            <div class="flex-1 h-11 bg-neutral-50 border border-neutral-200 border-b-0 rounded-t-lg flex items-center justify-center">
-                                <span class="text-lg font-bold text-neutral-600">3</span>
-                            </div>
-                        @else
-                            <div class="flex-1"></div>
-                        @endif
-                    </div>
-                </div>
-            </div>
-
-            {{-- Campus-Wide Criteria Health Barometer --}}
-            <div class="lg:col-span-2 bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1 mb-4 pb-3 border-b border-neutral-100">
-                        <div>
-                            <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
-                                <ion-icon name="pulse-outline" class="text-brand-700 text-lg"></ion-icon>
-                                Campus Dining Health Index
-                            </h2>
-                            <p class="text-xs text-neutral-500 mt-0.5">Aggregate performance rating across all campus food vendors</p>
-                        </div>
-                        @if($campusHealth)
-                            {{-- CHANGED: font-extrabold dropped to font-bold (one weight for values). --}}
-                            <div class="inline-flex items-center gap-1 bg-brand-50 border border-brand-200 text-brand-900 font-bold text-xs px-2.5 py-1 rounded-md self-start sm:self-auto tabular-nums">
-                                Campus Avg: {{ number_format($campusHealth->avg_overall, 2) }}★
-                            </div>
-                        @endif
-                    </div>
-
-                    @if($campusHealth)
-                        {{-- CHANGED: the four copy-pasted criterion tiles are now one @foreach over the same four averages. Tiles lost their inner border (fewer nested boxes), and the 10px neutral-400 labels and "/ 5.0" suffix became 11px neutral-500 for WCAG AA contrast. --}}
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                            @foreach(['avg_cleanliness' => 'Cleanliness', 'avg_service' => 'Service', 'avg_taste' => 'Food Taste', 'avg_price' => 'Affordability'] as $healthKey => $healthLabel)
-                                @php $healthValue = (float) $campusHealth->$healthKey; @endphp
-                                <div class="p-3 bg-neutral-50 rounded-lg space-y-1">
-                                    <span class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider block">{{ $healthLabel }}</span>
-                                    <div class="flex items-baseline justify-between">
-                                        <span class="text-lg font-bold tabular-nums {{ $healthValue >= 4 ? 'text-emerald-700' : ($healthValue >= 3 ? 'text-amber-700' : 'text-rose-600') }}">
-                                            {{ number_format($healthValue, 2) }}
-                                        </span>
-                                        <span class="text-[11px] font-semibold text-neutral-500">/ 5.0</span>
-                                    </div>
-                                    <div class="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
-                                        <div class="h-full {{ $healthValue >= 4 ? 'bg-emerald-500' : ($healthValue >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ ($healthValue / 5) * 100 }}%"></div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
-                    @endif
-                </div>
-            </div>
-        </div>
-    @endif
-
-    {{-- ── 4. Minimalist Stat Cards ───────────────────────────────────────── --}}
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+    {{-- ── 3. Minimalist Stat Cards ───────────────────────────────────────── --}}
+    {{-- CHANGED: stat cards moved from below the podium to the first row, ordered activity first (Evaluations, Students, Stalls, Campus average), and the grid went from 3 to 4 columns (2 on small screens). --}}
+    {{-- CHANGED: "Canteen Stalls" became "Stalls Evaluated" (stalls with at least one evaluation, out of all stalls), and "Campus Average" moved here from the Health Index header badge. Both read from data the controller already loads. The total counts every stall, active or not, so the caption makes no "active" claim. --}}
+    <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {{-- CHANGED: Students and Stalls cards link only for admins; clinic users cannot open those pages. --}}
+        @php $campusAvg = $campusHealth->avg_overall; @endphp
         @foreach([
-            ['label' => 'Total Students',   'value' => $studentCount,    'icon' => 'people-outline',     'desc' => 'Registered evaluators', 'route' => Auth::user()->role === 'admin' ? route('admin.students') : null],
-            ['label' => 'Canteen Stalls',   'value' => $stallCount,      'icon' => 'storefront-outline', 'desc' => 'Active vendors',       'route' => Auth::user()->role === 'admin' ? route('admin.stalls') : null],
-            ['label' => 'Evaluations',      'value' => $evaluationCount, 'icon' => 'create-outline',     'desc' => 'Submissions logged',    'route' => route('admin.evaluations')],
+            ['label' => 'Evaluations',      'value' => $evaluationCount, 'suffix' => null, 'icon' => 'create-outline',     'desc' => 'Submissions logged',    'route' => route('admin.evaluations')],
+            ['label' => 'Total Students',   'value' => $studentCount,    'suffix' => null, 'icon' => 'people-outline',     'desc' => 'Registered evaluators', 'route' => Auth::user()->role === 'admin' ? route('admin.students') : null],
+            ['label' => 'Stalls Evaluated', 'value' => $results->count(), 'suffix' => '/ ' . $stallCount, 'icon' => 'storefront-outline', 'desc' => 'With at least one evaluation', 'route' => Auth::user()->role === 'admin' ? route('admin.stalls') : null],
+            ['label' => 'Campus Average',   'value' => $campusAvg !== null ? number_format($campusAvg, 2) : 'N/A', 'suffix' => $campusAvg !== null ? '/ 5.00' : null, 'icon' => 'star-outline', 'desc' => 'Mean of all 4 criteria', 'route' => null],
         ] as $stat)
             <a @if($stat['route']) href="{{ $stat['route'] }}" @endif class="group bg-white rounded-xl border border-neutral-200/70 p-5 shadow-sm {{ $stat['route'] ? 'hover:border-brand-300 hover:shadow-md' : '' }} transition-all flex flex-col justify-between">
                 <div>
                     <div class="flex items-center justify-between mb-3">
                         <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider group-hover:text-brand-800 transition-colors">{{ $stat['label'] }}</span>
-                        <div class="w-9 h-9 rounded-lg bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700 group-hover:bg-brand-600 group-hover:text-white transition-all">
+                        {{-- CHANGED: icon hidden below 640px so the two-column stat labels fit on one line. --}}
+                        <div class="w-9 h-9 rounded-lg bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700 {{ $stat['route'] ? 'group-hover:bg-brand-600 group-hover:text-white' : '' }} transition-all">
                             <ion-icon name="{{ $stat['icon'] }}" class="text-lg"></ion-icon>
                         </div>
                     </div>
                     <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
-                        {{ $stat['value'] }}
+                        {{ $stat['value'] }}@if($stat['suffix'])<span class="text-sm sm:text-base font-semibold text-neutral-500 ml-1">{{ $stat['suffix'] }}</span>@endif
                     </div>
                 </div>
                 <div class="flex items-center justify-between mt-3 pt-2 border-t border-neutral-100/70 text-xs">
-                    <span class="text-neutral-400 font-medium">{{ $stat['desc'] }}</span>
+                    <span class="text-neutral-500 font-medium">{{ $stat['desc'] }}</span>
                     {{-- CHANGED: dropped the "Manage" hover label, which repeated the header's "Manage Stalls" action; the chevron alone signals the card is a link. --}}
                     @if($stat['route'])
                     <span class="text-brand-700 opacity-0 group-hover:opacity-100 transition-opacity flex items-center" aria-hidden="true">
@@ -235,8 +113,10 @@
     </div>
 
     @if($results->isNotEmpty())
-        {{-- ── 5. Primary Chart Card: Evaluation Activity ──────────────────── --}}
-        <div class="bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm print-break-inside-avoid">
+        {{-- CHANGED: the timeline was a full-width card and Recent Submissions was the last card on the page. They now share one row (8 + 4 columns from 1280px; stacked below, where the 4-column card would be about 224px wide) so recent activity reads together. --}}
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 sm:gap-6 print-break-inside-avoid">
+        {{-- ── 4. Primary Chart Card: Evaluation Activity ──────────────────── --}}
+        <div class="xl:col-span-8 bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-neutral-100">
                 <div>
                     <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Activity Timeline</h2>
@@ -272,82 +152,52 @@
                     </div>
                 </form>
             </div>
-            <div class="relative w-full" style="height: 240px;">
-                <canvas id="evalTrendChart" role="img" aria-label="Line chart showing evaluation submissions for {{ $activityPeriodLabel }}">
-                    <p>Line chart showing evaluation submissions for {{ $activityPeriodLabel }}.</p>
-                </canvas>
+            {{-- CHANGED: fixed 240px height became a 200px minimum that grows to the row height, so the chart fills the card beside Recent Submissions. The absolute inner box keeps Chart.js from feeding its own canvas height back into the layout. --}}
+            <div class="relative w-full flex-1 min-h-[200px]">
+                <div class="absolute inset-0">
+                    <canvas id="evalTrendChart" role="img" aria-label="Line chart showing evaluation submissions for {{ $activityPeriodLabel }}">
+                        <p>Line chart showing evaluation submissions for {{ $activityPeriodLabel }}.</p>
+                    </canvas>
+                </div>
             </div>
         </div>
 
-        {{-- ── 6. Secondary Chart Cards: Top Stalls & Share ─────────────────── --}}
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 sm:gap-6 print-break-inside-avoid">
-            @php
-                $allStallResults = collect($results)->map(function($stall) {
-                    $obj = clone $stall;
-                    $obj->cleanliness = round((float)$obj->cleanliness, 2);
-                    $obj->service = round((float)$obj->service, 2);
-                    $obj->taste = round((float)$obj->taste, 2);
-                    $obj->price = round((float)$obj->price, 2);
-                    $obj->avg = round(($obj->cleanliness + $obj->service + $obj->taste + $obj->price) / 4, 2);
-                    return $obj;
-                // CHANGED: removed sortByDesc('avg') so the chart keeps the controller's SAW order, the same order as the podium and leaderboard.
-                })->values();
-                $stallCountTotal = $allStallResults->count();
-            @endphp
-
-            {{-- Stall Performance Breakdown Card --}}
-            <div class="bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
+        {{-- ── 5. Recent Evaluations Card ──────────────────────────────────── --}}
+        {{-- CHANGED: the 8-column table became one compact list at every width so it fits a 4-column card. The stall name leads each row; "Anonymous student" moved to the muted meta line because it carries no information. --}}
+        <div class="xl:col-span-4 bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden flex flex-col">
+            <div class="p-5 sm:p-6 pb-4 flex items-center justify-between border-b border-neutral-100">
                 <div>
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5 pb-3 border-b border-neutral-100">
-                        <div>
-                            <h2 id="barChartTitle" class="text-base font-bold text-neutral-900 tracking-tight">Stall Performance Breakdown</h2>
-                            <p id="barChartSubtitle" class="text-xs text-neutral-500 mt-0.5">Top {{ min(5, $stallCountTotal) }} stalls across 4 evaluation criteria</p>
-                        </div>
-
-                        {{-- Interactive Filter Switcher for N-stalls --}}
-                        @if($stallCountTotal > 5)
-                            <div class="inline-flex items-center rounded-lg border border-neutral-200 bg-neutral-100/80 p-0.5 text-xs font-semibold self-start sm:self-auto shrink-0 no-print" role="tablist" aria-label="Stall chart filter">
-                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all bg-white text-neutral-900 shadow-2xs font-bold cursor-pointer" data-range="top5">Top 5</button>
-                                @if($stallCountTotal > 5)
-                                    <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium cursor-pointer" data-range="top10">Top {{ min(10, $stallCountTotal) }}</button>
-                                @endif
-                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium cursor-pointer" data-range="lowest5">Lowest 5</button>
-                                <button type="button" class="stall-filter-btn px-2.5 py-1 rounded-md transition-all text-neutral-500 hover:text-neutral-900 font-medium cursor-pointer" data-range="all">All ({{ $stallCountTotal }})</button>
-                            </div>
-                        @endif
-                    </div>
-
-                    <div id="barChartWrapper" class="relative w-full overflow-x-auto" style="height: 240px;">
-                        <canvas id="stallScoresChart" role="img" aria-label="Bar chart showing average scores per stall for Cleanliness, Service, Taste, and Price">
-                            <p>Bar chart showing the average scores per stall for Cleanliness, Service, Taste, and Price.</p>
-                        </canvas>
-                    </div>
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Recent Submissions</h2>
+                    <p class="text-xs text-neutral-500 mt-0.5">Latest {{ $recentEvaluations->count() }} evaluations</p>
                 </div>
+                <a href="{{ route('admin.evaluations') }}" class="text-xs text-brand-700 hover:text-brand-800 font-bold inline-flex items-center gap-1 transition-colors no-print">
+                    View Ledger <ion-icon name="arrow-forward-outline" class="text-xs"></ion-icon>
+                </a>
             </div>
 
-            {{-- Evaluation Share Donut Card --}}
-            <div class="bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-neutral-100">
-                        <div>
-                            <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Share</h2>
-                            <p class="text-xs text-neutral-500 mt-0.5">Distribution of student submissions per vendor</p>
+            <ul class="divide-y divide-neutral-100">
+                @foreach($recentEvaluations as $eval)
+                    @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
+                    <li class="px-5 sm:px-6 py-3 flex items-center justify-between gap-3">
+                        <div class="min-w-0">
+                            <p class="text-sm font-bold text-neutral-900 leading-tight truncate">{{ $eval->stall_name }}</p>
+                            {{-- CHANGED: criterion names written in full instead of "Clean" and "Serv". --}}
+                            <p class="text-[11px] text-neutral-500 mt-1 tabular-nums">
+                                Cleanliness {{ $eval->cleanliness }} · Service {{ $eval->service }} · Taste {{ $eval->taste }} · Price {{ $eval->price }}
+                            </p>
+                            <p class="text-[11px] text-neutral-500 mt-0.5">Anonymous student · {{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
                         </div>
-                        <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-800 border border-brand-200/70 text-[11px] font-bold px-2.5 py-1 rounded-md tabular-nums shrink-0">
-                            {{ $evaluationCount }} {{ Str::plural('Submission', $evaluationCount) }}
+                        {{-- CHANGED: averages below 3 now show red, matching the leaderboard's composite column. --}}
+                        <span class="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold tabular-nums {{ $avg >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200' : ($avg >= 3 ? 'bg-neutral-100 text-neutral-800' : 'bg-rose-50 text-rose-700 border border-rose-200') }}">
+                            {{ number_format($avg, 1) }}★
                         </span>
-                    </div>
-
-                    <div class="relative w-full flex items-center justify-center" style="height: 240px;">
-                        <canvas id="evalPieChart" role="img" aria-label="Donut chart showing the distribution of evaluations per stall">
-                            <p>Donut chart showing the distribution of evaluations per stall.</p>
-                        </canvas>
-                    </div>
-                </div>
-            </div>
+                    </li>
+                @endforeach
+            </ul>
+        </div>
         </div>
 
-        {{-- ── 7. Ranked Stall Leaderboard Table ───────────────────────────── --}}
+        {{-- ── 6. Ranked Stall Leaderboard Table ───────────────────────────── --}}
         <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden print-break-inside-avoid">
             <div class="p-5 sm:p-6 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-neutral-100">
                 <div>
@@ -355,7 +205,8 @@
                         <span>Ranked Stall Leaderboard</span>
                         <span class="text-xs font-semibold text-brand-700 bg-brand-50 border border-brand-200 px-2 py-0.5 rounded-md">DSS Rankings</span>
                     </h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Stalls ranked by SAW score across all criteria</p>
+                    {{-- CHANGED: subtitle states how many of the registered stalls have evaluations, so a short leaderboard next to the stall total is not confusing. --}}
+                    <p class="text-xs text-neutral-500 mt-0.5">{{ $results->count() }} of {{ $stallCount }} {{ Str::plural('stall', $stallCount) }} evaluated, ranked by SAW score across all criteria</p>
                     @if (!empty($ahpConsistency))
                         <p class="text-[11px] text-neutral-500 mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1">
                             <span class="font-semibold text-neutral-600">AHP weights</span>
@@ -429,26 +280,14 @@
                                 </td>
 
                                 {{-- Criteria Scores --}}
+                                {{-- CHANGED: the four cells use the Health Index rule (4 and up green, 3 to 3.99 amber, below 3 red). Before, 3 to 3.99 was plain grey and the red cutoff was 2.9, so a 2.95 showed red in one card and grey in the other. The four copy-pasted cells are now one @foreach. --}}
+                                @foreach(['cleanliness', 'service', 'taste', 'price'] as $criterion)
                                 <td class="py-3.5 px-3 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->cleanliness >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->cleanliness <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
-                                        {{ number_format($result->cleanliness, 2) }}★
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->$criterion >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->$criterion >= 3 ? 'text-amber-700 bg-amber-50' : 'text-rose-600 bg-rose-50') }}">
+                                        {{ number_format($result->$criterion, 2) }}★
                                     </span>
                                 </td>
-                                <td class="py-3.5 px-3 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->service >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->service <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
-                                        {{ number_format($result->service, 2) }}★
-                                    </span>
-                                </td>
-                                <td class="py-3.5 px-3 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->taste >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->taste <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
-                                        {{ number_format($result->taste, 2) }}★
-                                    </span>
-                                </td>
-                                <td class="py-3.5 px-3 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->price >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->price <= 2.9 ? 'text-rose-600 bg-rose-50' : 'text-neutral-700') }}">
-                                        {{ number_format($result->price, 2) }}★
-                                    </span>
-                                </td>
+                                @endforeach
 
                                 {{-- Overall Composite Score --}}
                                 <td class="py-3.5 px-5 text-center">
@@ -526,79 +365,71 @@
             </div>
         </div>
 
-        {{-- ── 8. Recent Evaluations Card ──────────────────────────────────── --}}
-        @if($recentEvaluations->isNotEmpty())
-        <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden print-break-inside-avoid">
-            <div class="p-5 sm:p-6 pb-4 flex items-center justify-between border-b border-neutral-100">
-                <div>
-                    <h2 class="text-base font-bold text-neutral-900 tracking-tight">Recent Submissions</h2>
-                    <p class="text-xs text-neutral-500 mt-0.5">Latest evaluations logged across campus</p>
+        {{-- CHANGED: the Health Index sat beside the podium in the first row and the Evaluation Share donut sat beside the "Top Performing Stalls" bar chart. The podium and bar chart are removed (the leaderboard ranks the same stalls with the same scores); Health Index and Share now share the last row (8 + 4 columns from 1280px; stacked below). --}}
+        <div class="grid grid-cols-1 xl:grid-cols-12 gap-5 sm:gap-6 print-break-inside-avoid">
+
+            {{-- Campus-Wide Criteria Health Barometer --}}
+            <div class="xl:col-span-8 bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4 pb-3 border-b border-neutral-100">
+                    <div>
+                        <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
+                            <ion-icon name="pulse-outline" class="text-brand-700 text-lg"></ion-icon>
+                            Campus Dining Health Index
+                        </h2>
+                        <p class="text-xs text-neutral-500 mt-0.5">Aggregate performance rating across all campus food vendors</p>
+                    </div>
+                    {{-- CHANGED: the "Campus Avg" badge moved to the stat cards. In its place, a legend for the green, amber, and red score colours, which had no key. --}}
+                    <ul class="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] font-semibold text-neutral-600 self-start sm:self-auto" aria-label="Score colour legend">
+                        <li class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-emerald-500" aria-hidden="true"></span>4.00 and up</li>
+                        <li class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-amber-500" aria-hidden="true"></span>3.00 to 3.99</li>
+                        <li class="inline-flex items-center gap-1.5"><span class="w-2 h-2 rounded-full bg-rose-500" aria-hidden="true"></span>Below 3.00</li>
+                    </ul>
                 </div>
-                <a href="{{ route('admin.evaluations') }}" class="text-xs text-brand-700 hover:text-brand-800 font-bold inline-flex items-center gap-1 transition-colors no-print">
-                    View Ledger <ion-icon name="arrow-forward-outline" class="text-xs"></ion-icon>
-                </a>
-            </div>
 
-            <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[640px] hidden md:table">
-                    <thead>
-                        <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/80 border-b border-neutral-200/70">
-                            <th class="py-3.5 px-5 font-semibold">Student</th>
-                            <th class="py-3.5 px-4 font-semibold">Stall</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Clean</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Serv</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Taste</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Price</th>
-                            <th class="py-3.5 px-4 text-center font-semibold">Average</th>
-                            <th class="py-3.5 px-5 text-right font-semibold">Date</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-neutral-100 text-sm">
-                        @foreach($recentEvaluations as $eval)
-                            @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
-                            <tr class="hover:bg-neutral-50/60 transition-colors">
-                                {{-- CHANGED: evaluations are anonymous. --}}
-                                <td class="py-3.5 px-5 font-bold text-neutral-900 truncate max-w-[150px]">Anonymous student</td>
-                                <td class="py-3.5 px-4 text-neutral-700 font-semibold truncate max-w-[130px]">{{ $eval->stall_name }}</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->cleanliness }}★</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->service }}★</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->taste }}★</td>
-                                <td class="py-3.5 px-3 text-center text-neutral-600 tabular-nums text-xs">{{ $eval->price }}★</td>
-                                <td class="py-3.5 px-4 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-bold tabular-nums {{ $avg >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200' : 'bg-neutral-100 text-neutral-800' }}">
-                                        {{ number_format($avg, 1) }}★
-                                    </span>
-                                </td>
-                                {{-- CHANGED: date text darkened from neutral-400 to neutral-500 for contrast. --}}
-                                <td class="py-3.5 px-5 text-right text-neutral-500 text-xs tabular-nums whitespace-nowrap">
-                                    {{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans(null, true, true) }}
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-
-                <!-- Mobile View -->
-                <div class="md:hidden divide-y divide-neutral-100">
-                    @foreach($recentEvaluations as $eval)
-                        @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
-                        <div class="p-4 flex items-start justify-between gap-3">
-                            <div class="min-w-0">
-                                {{-- CHANGED: evaluations are anonymous. --}}
-                                <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">Anonymous student</h3>
-                                <p class="text-xs font-medium text-brand-700 mt-0.5 truncate">{{ $eval->stall_name }}</p>
-                                {{-- CHANGED: timestamp raised from 10px neutral-400 to 11px neutral-500. --}}
-                                <p class="text-[11px] text-neutral-500 mt-0.5">{{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
+                {{-- CHANGED: the four copy-pasted criterion tiles are now one @foreach over the same four averages. Tiles lost their inner border (fewer nested boxes), and the 10px neutral-400 labels and "/ 5.0" suffix became 11px neutral-500 for WCAG AA contrast. --}}
+                {{-- CHANGED: tiles are a 2 x 2 grid that fills the card height instead of one row of four that left the lower half empty. Dropped the @if($campusHealth) guard: the aggregate query always returns a row. --}}
+                <div class="flex-1 grid grid-cols-2 gap-3">
+                    @foreach(['avg_cleanliness' => 'Cleanliness', 'avg_service' => 'Service', 'avg_taste' => 'Food Taste', 'avg_price' => 'Affordability'] as $healthKey => $healthLabel)
+                        @php $healthValue = (float) $campusHealth->$healthKey; @endphp
+                        <div class="p-4 bg-neutral-50 rounded-lg flex flex-col justify-between gap-2">
+                            <span class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider block">{{ $healthLabel }}</span>
+                            <div class="flex items-baseline justify-between">
+                                <span class="text-2xl font-bold tabular-nums {{ $healthValue >= 4 ? 'text-emerald-700' : ($healthValue >= 3 ? 'text-amber-700' : 'text-rose-600') }}">
+                                    {{ number_format($healthValue, 2) }}
+                                </span>
+                                <span class="text-[11px] font-semibold text-neutral-500">/ 5.0</span>
                             </div>
-                            <div class="shrink-0 inline-flex items-center gap-1 bg-brand-50 px-2 py-1 rounded-md text-xs font-bold text-brand-900 border border-brand-200">
-                                {{ number_format($avg, 1) }}★
+                            <div class="w-full bg-neutral-200 h-1.5 rounded-full overflow-hidden">
+                                <div class="h-full {{ $healthValue >= 4 ? 'bg-emerald-500' : ($healthValue >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" style="width: {{ ($healthValue / 5) * 100 }}%"></div>
                             </div>
                         </div>
                     @endforeach
                 </div>
             </div>
+
+            {{-- Evaluation Share Donut Card --}}
+            <div class="xl:col-span-4 bg-white rounded-xl border border-neutral-200/70 p-5 sm:p-6 shadow-sm flex flex-col">
+                <div class="flex items-center justify-between gap-3 mb-5 pb-3 border-b border-neutral-100">
+                    <div>
+                        <h2 class="text-base font-bold text-neutral-900 tracking-tight">Evaluation Share</h2>
+                        <p class="text-xs text-neutral-500 mt-0.5">Distribution of student submissions per vendor</p>
+                    </div>
+                    <span class="inline-flex items-center gap-1 bg-brand-50 text-brand-800 border border-brand-200/70 text-[11px] font-bold px-2.5 py-1 rounded-md tabular-nums shrink-0">
+                        {{ $evaluationCount }} {{ Str::plural('Submission', $evaluationCount) }}
+                    </span>
+                </div>
+
+                {{-- CHANGED: fixed 240px height became a 240px minimum that grows with the Health Index card beside it. --}}
+                <div class="relative w-full flex-1 min-h-[240px]">
+                    <div class="absolute inset-0">
+                        <canvas id="evalPieChart" role="img" aria-label="Donut chart showing the distribution of evaluations per stall">
+                            <p>Donut chart showing the distribution of evaluations per stall.</p>
+                        </canvas>
+                    </div>
+                </div>
+            </div>
         </div>
-        @endif
+
 
     @else
         {{-- Empty State Card --}}
@@ -618,27 +449,8 @@
 <style>
     :root {
         --chart-color-1: oklch(0.48 0.15 155);
-        --chart-color-1-alpha: oklch(0.48 0.15 155 / 0.85);
-        --chart-color-1-border: oklch(0.40 0.13 155);
-        
-        --chart-color-2: oklch(0.60 0.14 155);
-        --chart-color-2-alpha: oklch(0.60 0.14 155 / 0.80);
-        --chart-color-2-border: oklch(0.52 0.14 155);
-        
-        --chart-color-3: oklch(0.74 0.14 155);
-        --chart-color-3-alpha: oklch(0.74 0.14 155 / 0.75);
-        --chart-color-3-border: oklch(0.65 0.13 155);
-        
-        --chart-color-4: oklch(0.87 0.08 155);
-        --chart-color-4-alpha: oklch(0.87 0.08 155 / 0.80);
-        --chart-color-4-border: oklch(0.78 0.10 155);
-
+        /* CHANGED: removed the alpha, border, colour 2-4, and pie variables; only the removed bar chart read them. */
         --chart-line-bg: oklch(0.56 0.17 155 / 0.12);
-        
-        --pie-color-1: var(--chart-color-1);
-        --pie-color-2: var(--chart-color-2);
-        --pie-color-3: var(--chart-color-3);
-        --pie-color-4: var(--chart-color-4);
     }
 </style>
 
@@ -653,172 +465,12 @@ document.addEventListener('DOMContentLoaded', function() {
     // Cache computed styles once
     var rootStyles = getComputedStyle(document.documentElement);
     var c1 = rootStyles.getPropertyValue('--chart-color-1').trim();
-    var c1a = rootStyles.getPropertyValue('--chart-color-1-alpha').trim();
-    var c1b = rootStyles.getPropertyValue('--chart-color-1-border').trim();
-    var c2 = rootStyles.getPropertyValue('--chart-color-2').trim();
-    var c2a = rootStyles.getPropertyValue('--chart-color-2-alpha').trim();
-    var c2b = rootStyles.getPropertyValue('--chart-color-2-border').trim();
-    var c3 = rootStyles.getPropertyValue('--chart-color-3').trim();
-    var c3a = rootStyles.getPropertyValue('--chart-color-3-alpha').trim();
-    var c3b = rootStyles.getPropertyValue('--chart-color-3-border').trim();
-    var c4 = rootStyles.getPropertyValue('--chart-color-4').trim();
-    var c4a = rootStyles.getPropertyValue('--chart-color-4-alpha').trim();
-    var c4b = rootStyles.getPropertyValue('--chart-color-4-border').trim();
+    // CHANGED: dropped the alpha, border, and colour 2-4 reads; only the bar chart used them.
     var cLineBg = rootStyles.getPropertyValue('--chart-line-bg').trim();
 
 @if($results->isNotEmpty())
-    // ── 1. Scalable Bar Chart with Dynamic N-Stall Range Filtering ─────────
-    var rawStallData = @json($allStallResults);
-    var stallScoresChart = null;
-    var stallCtx = document.getElementById('stallScoresChart');
-    var barTitle = document.getElementById('barChartTitle');
-    var barSubtitle = document.getElementById('barChartSubtitle');
-
-    // CHANGED: every range now sorts by saw_score instead of the unweighted avg, so "Top 5" and "Lowest 5" match the DSS leaderboard; subtitles say "DSS (SAW) rank" instead of "composite rating".
-    function getSliceForRange(range) {
-        var sorted = [...rawStallData];
-        if (range === 'top5') {
-            return {
-                title: 'Top ' + Math.min(5, sorted.length) + ' Performing Stalls',
-                subtitle: 'Top ' + Math.min(5, sorted.length) + ' vendors by DSS (SAW) rank across 4 criteria',
-                items: sorted.sort((a, b) => b.saw_score - a.saw_score).slice(0, 5)
-            };
-        } else if (range === 'top10') {
-            return {
-                title: 'Top ' + Math.min(10, sorted.length) + ' Performing Stalls',
-                subtitle: 'Top ' + Math.min(10, sorted.length) + ' vendors by DSS (SAW) rank across 4 criteria',
-                items: sorted.sort((a, b) => b.saw_score - a.saw_score).slice(0, 10)
-            };
-        } else if (range === 'lowest5') {
-            return {
-                title: 'Lowest 5 Performing Stalls',
-                subtitle: 'Vendors with the lowest DSS (SAW) rank, needing attention',
-                items: sorted.sort((a, b) => a.saw_score - b.saw_score).slice(0, 5)
-            };
-        } else {
-            return {
-                title: 'All ' + sorted.length + ' Canteen Stalls',
-                subtitle: 'Complete vendor performance comparison across 4 criteria',
-                items: sorted.sort((a, b) => b.saw_score - a.saw_score)
-            };
-        }
-    }
-
-    function renderBarChart(range) {
-        var configData = getSliceForRange(range);
-        var items = configData.items;
-
-        if (barTitle) barTitle.textContent = configData.title;
-        if (barSubtitle) barSubtitle.textContent = configData.subtitle;
-
-        var labels = items.map(function(s) { return s.name; });
-        var cleanData = items.map(function(s) { return s.cleanliness; });
-        var servData  = items.map(function(s) { return s.service; });
-        var tasteData = items.map(function(s) { return s.taste; });
-        var priceData = items.map(function(s) { return s.price; });
-
-        if (!stallScoresChart && stallCtx) {
-            stallScoresChart = new Chart(stallCtx, {
-                type: 'bar',
-                data: {
-                    labels: labels,
-                    datasets: [
-                        { label: 'Cleanliness', data: cleanData, backgroundColor: c1a, borderColor: c1b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 },
-                        { label: 'Service',     data: servData,  backgroundColor: c2a, borderColor: c2b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 },
-                        { label: 'Taste',       data: tasteData, backgroundColor: c3a, borderColor: c3b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 },
-                        { label: 'Price',       data: priceData, backgroundColor: c4a, borderColor: c4b, borderWidth: 1, borderRadius: 3, borderSkipped: false, maxBarThickness: 16 }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    datasets: {
-                        bar: {
-                            categoryPercentage: 0.82,
-                            barPercentage: 0.90
-                        }
-                    },
-                    plugins: {
-                        legend: {
-                            position: 'bottom',
-                            labels: {
-                                font: { size: 11, weight: '600' },
-                                color: '#52525b',
-                                padding: 12,
-                                usePointStyle: true,
-                                pointStyle: 'rectRounded'
-                            }
-                        },
-                        tooltip: {
-                            backgroundColor: 'oklch(0.18 0.07 155)',
-                            titleFont: { size: 12, weight: '700' },
-                            bodyFont: { size: 11 },
-                            padding: 10,
-                            cornerRadius: 6,
-                            callbacks: {
-                                label: function(c) {
-                                    return ' ' + c.dataset.label + ': ' + c.parsed.y.toFixed(2) + ' / 5.00';
-                                }
-                            }
-                        }
-                    },
-                    scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: {
-                                font: { size: 11, weight: '600' },
-                                color: '#374151',
-                                maxRotation: 0,
-                                autoSkip: true,
-                                maxTicksLimit: 12,
-                                callback: function(val) {
-                                    var text = this.getLabelForValue(val) || '';
-                                    return text.length > 14 ? text.substring(0, 12) + '…' : text;
-                                }
-                            },
-                            border: { display: false }
-                        },
-                        y: {
-                            min: 0,
-                            max: 5,
-                            grid: { color: '#f1f5f9' },
-                            ticks: { stepSize: 1, font: { size: 10 }, color: '#94a3b8' },
-                            border: { display: false }
-                        }
-                    }
-                }
-            });
-        } else if (stallScoresChart) {
-            stallScoresChart.data.labels = labels;
-            stallScoresChart.data.datasets[0].data = cleanData;
-            stallScoresChart.data.datasets[1].data = servData;
-            stallScoresChart.data.datasets[2].data = tasteData;
-            stallScoresChart.data.datasets[3].data = priceData;
-            stallScoresChart.update();
-        }
-    }
-
-    if (stallCtx) {
-        renderBarChart('top5');
-
-        // Wire range filter buttons
-        document.querySelectorAll('.stall-filter-btn').forEach(function(btn) {
-            btn.addEventListener('click', function() {
-                document.querySelectorAll('.stall-filter-btn').forEach(function(b) {
-                    b.classList.remove('bg-white', 'text-neutral-900', 'shadow-2xs', 'font-bold');
-                    b.classList.add('text-neutral-500', 'hover:text-neutral-900', 'font-medium');
-                });
-                btn.classList.add('bg-white', 'text-neutral-900', 'shadow-2xs', 'font-bold');
-                btn.classList.remove('text-neutral-500', 'hover:text-neutral-900', 'font-medium');
-
-                var range = btn.getAttribute('data-range');
-                renderBarChart(range);
-            });
-        });
-    }
-
-    // ── 2. Line Chart: 30-Day Evaluation Activity ──────────────────────────
+    // CHANGED: removed the "Top Performing Stalls" bar chart and its Top 5 / Top 10 / Lowest 5 / All filter; the leaderboard shows the same per-criterion scores in the same SAW order.
+    // ── 1. Line Chart: 30-Day Evaluation Activity ──────────────────────────
     var trendCtx = document.getElementById('evalTrendChart');
     if (trendCtx) {
         var trendDates  = @json($trendDates);
@@ -887,7 +539,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
-    // ── 3. Evaluation Share Donut Chart with "Top 4 + Others" Cluster ────────
+    // ── 2. Evaluation Share Donut Chart with "Top 4 + Others" Cluster ────────
     var pieCtx = document.getElementById('evalPieChart');
     if (pieCtx) {
         var rawPie = @json($pieChartData);
