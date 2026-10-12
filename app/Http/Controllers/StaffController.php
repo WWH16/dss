@@ -263,9 +263,10 @@ class StaffController extends Controller
             'email' => 'required|email|max:255|unique:users,email,' . $user->id,
         ]);
 
+        // CHANGED: trim() dropped; Laravel's global TrimStrings middleware already trims request input.
         DB::table('users')->where('id', $user->id)->update([
-            'name' => trim($request->name),
-            'email' => trim($request->email),
+            'name' => $request->name,
+            'email' => $request->email,
             'updated_at' => now(),
         ]);
 
