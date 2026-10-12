@@ -277,78 +277,52 @@
 </div>
 
 {{-- ── 4. Evaluation Breakdown & Feedback Modal ────────────────────── --}}
-<dialog id="eval-details-modal" class="confirm-modal modal-sharp max-w-lg w-full rounded-lg p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    <div class="bg-brand-900 text-white px-5 py-4 flex items-center justify-between border-b border-brand-950">
-        <div class="flex items-center gap-3">
-            {{-- CHANGED: static person icon and "Anonymous student"; the modal no longer receives a name. --}}
-            <div class="w-10 h-10 rounded-md bg-brand-800 border border-brand-700/80 text-white text-lg flex items-center justify-center shrink-0">
-                <ion-icon name="person-outline" aria-hidden="true"></ion-icon>
+{{-- CHANGED: rebuilt to match the table. Same white header as the stalls dialogs instead of the dark green bar; the stall leads instead of "Anonymous student"; the average sits on top and every score uses the table's two-decimal, below-3/4-and-up colour rule with the caret; star glyphs, uppercase section labels and the italic comment are gone. --}}
+<dialog id="eval-details-modal" class="confirm-modal relative" aria-labelledby="modal-eval-stall">
+    <div class="flex items-start justify-between gap-3 pb-3 border-b border-neutral-100">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800 shrink-0">
+                <ion-icon name="receipt-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <div>
-                <h3 class="text-sm font-bold text-white leading-tight tracking-tight">Anonymous student</h3>
-                <p id="modal-eval-stall" class="text-xs text-brand-200 font-semibold mt-0.5"></p>
+            <div class="min-w-0">
+                <h3 id="modal-eval-stall" class="text-sm font-bold text-neutral-900 leading-tight truncate"></h3>
+                <p id="modal-eval-date" class="text-[11px] text-neutral-500 tabular-nums"></p>
             </div>
         </div>
-        <button type="button" class="js-close-eval-modal text-white/70 hover:text-white hover:bg-brand-800 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+        <button type="button" class="js-close-eval-modal text-neutral-400 hover:text-neutral-600 p-1 cursor-pointer" aria-label="Close">
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
-    <div class="p-5 sm:p-6 space-y-4 bg-white text-xs">
-        {{-- Criteria Breakdown Sheet --}}
+    {{-- CHANGED: the average panel takes the colour of its band (rose below 3, emerald 4 and up, the page's green-grey surface in between) and names the band in words, so the verdict reads before the numbers. --}}
+    <div id="modal-eval-avg-panel" class="mt-4 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4">
         <div>
-            {{-- CHANGED: section label raised from 10px neutral-400 to 11px neutral-500. --}}
-            <span class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                4-Criteria Evaluation Breakdown
-            </span>
-            <div class="grid grid-cols-2 gap-px bg-neutral-200 border border-neutral-200 rounded-md overflow-hidden">
-                <div class="bg-white p-3 flex items-center justify-between">
-                    <span class="text-neutral-500 font-medium">Cleanliness</span>
-                    <span id="modal-eval-cleanliness" class="font-bold text-neutral-900 flex items-center gap-1 tabular-nums"></span>
-                </div>
-                <div class="bg-white p-3 flex items-center justify-between">
-                    <span class="text-neutral-500 font-medium">Service Quality</span>
-                    <span id="modal-eval-service" class="font-bold text-neutral-900 flex items-center gap-1 tabular-nums"></span>
-                </div>
-                <div class="bg-white p-3 flex items-center justify-between">
-                    <span class="text-neutral-500 font-medium">Food Taste</span>
-                    <span id="modal-eval-taste" class="font-bold text-neutral-900 flex items-center gap-1 tabular-nums"></span>
-                </div>
-                <div class="bg-white p-3 flex items-center justify-between">
-                    <span class="text-neutral-500 font-medium">Price Affordability</span>
-                    <span id="modal-eval-price" class="font-bold text-neutral-900 flex items-center gap-1 tabular-nums"></span>
-                </div>
-            </div>
+            <p class="text-xs font-semibold text-neutral-900">Average of four criteria</p>
+            <p id="modal-eval-band" class="text-[11px] font-semibold mt-0.5"></p>
         </div>
-
-        {{-- Overall Score Box --}}
-        <div class="p-3.5 bg-neutral-50 border border-neutral-200 rounded-md flex items-center justify-between">
-            <div>
-                {{-- CHANGED: "Overall Average Score" to "Average score", matching the table header. --}}
-                <p class="text-xs font-bold text-neutral-900">Average score</p>
-                <p class="text-[11px] text-neutral-500" id="modal-eval-date"></p>
-            </div>
-            {{-- CHANGED: font-extrabold to font-bold; star ion-icon to ★ glyph. --}}
-            <div class="flex items-center gap-0.5 px-3 py-1 bg-brand-50 border border-brand-200 text-brand-900 font-bold text-sm rounded-md tabular-nums">
-                <span id="modal-eval-avg"></span>★
-            </div>
-        </div>
-
-        {{-- Student Feedback Comment --}}
-        <div>
-            {{-- CHANGED: section label raised from 10px neutral-400 to 11px neutral-500. --}}
-            <span class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                Written Feedback & Observations
-            </span>
-            <div id="modal-eval-comment-box" class="bg-neutral-50/80 p-3.5 rounded-md border border-neutral-200 text-neutral-700 italic text-xs leading-relaxed">
-            </div>
-        </div>
+        <span id="modal-eval-avg" class="text-3xl leading-none"></span>
     </div>
 
-    <div class="flex items-center justify-end px-5 py-3.5 bg-neutral-50 border-t border-neutral-200">
-        <button type="button" class="btn btn-primary text-xs px-4 py-2 font-bold rounded-md js-close-eval-modal cursor-pointer">
-            Done
-        </button>
+    {{-- CHANGED: each criterion gets a five-step meter, one step per rating point, filled in the same band colour as its number. Criterion scores are means of several statements (3.50, 4.33), so the last step fills partly. --}}
+    <dl class="mt-2 divide-y divide-neutral-100 text-sm">
+        @foreach(['cleanliness' => 'Cleanliness', 'service' => 'Service', 'taste' => 'Taste', 'price' => 'Price'] as $c => $label)
+            <div class="flex items-center justify-between gap-4 py-2.5">
+                <dt class="text-neutral-600">{{ $label }}</dt>
+                <dd class="flex items-center gap-3">
+                    <span id="modal-eval-{{ $c }}-meter" class="flex gap-0.5" aria-hidden="true"></span>
+                    <span id="modal-eval-{{ $c }}" class="w-11 text-right"></span>
+                </dd>
+            </div>
+        @endforeach
+    </dl>
+
+    <div class="pt-3">
+        <p class="text-xs font-semibold text-neutral-900 mb-1.5">Comment</p>
+        <p id="modal-eval-comment" class="bg-surface-alt rounded-lg px-3.5 py-3 text-sm leading-relaxed whitespace-pre-line break-words"></p>
+    </div>
+
+    <div class="flex justify-end pt-4 mt-4 border-t border-neutral-100">
+        <button type="button" class="btn btn-primary btn-sm text-xs font-semibold rounded-md js-close-eval-modal cursor-pointer">Done</button>
     </div>
 </dialog>
 
@@ -356,30 +330,50 @@
 <script>
 var evalModal = document.getElementById('eval-details-modal');
 
+// CHANGED: same rule and markup as the table's $score(): two decimals, below 3 red with a caret, 4 and up green.
+function evalScore(v, cls) {
+    v = Number(v);
+    var tone = v < 3 ? 'text-rose-700' : (v >= 4 ? 'text-emerald-700' : 'text-neutral-900');
+    var mark = v < 3 ? '<ion-icon name="caret-down" class="text-[length:max(10px,0.5em)]" aria-hidden="true"></ion-icon><span class="sr-only">Low:</span>' : '';
+    return '<span class="inline-flex items-center gap-0.5 tabular-nums ' + tone + ' ' + (cls || '') + '">' + mark + v.toFixed(2) + '</span>';
+}
+
 // CHANGED: the average and the Philippine-time date label arrive on evalData (avg, at_label), set by the server.
 function openEvalDetailsModal(evalData) {
-    // CHANGED: removed the student name and avatar letter lines; the modal header is static "Anonymous student".
-    document.getElementById('modal-eval-stall').textContent = 'Rated: ' + (evalData.stall_name || 'Stall');
+    document.getElementById('modal-eval-stall').textContent = evalData.stall_name || 'Stall';
+    document.getElementById('modal-eval-date').textContent = 'Anonymous student' + (evalData.at_label ? ' · ' + evalData.at_label : '');
 
-    // CHANGED: two decimals, matching the table and the leaderboard.
+    // CHANGED: panel tint, band label and meter fill all follow the table's thresholds.
+    var bands = {
+        low:  { panel: 'bg-rose-50',    label: 'text-rose-700',    fill: 'bg-rose-500',    text: 'Below 3.00' },
+        mid:  { panel: 'bg-surface-alt', label: 'text-neutral-600', fill: 'bg-neutral-400', text: '3.00 to 3.99' },
+        high: { panel: 'bg-emerald-50', label: 'text-emerald-800', fill: 'bg-emerald-600', text: '4.00 and up' }
+    };
+    var bandOf = function(v) { return bands[v < 3 ? 'low' : (v >= 4 ? 'high' : 'mid')]; };
+
+    var avg = Number(evalData.avg), band = bandOf(avg);
+    document.getElementById('modal-eval-avg-panel').className = 'mt-4 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4 ' + band.panel;
+    var bandLabel = document.getElementById('modal-eval-band');
+    bandLabel.textContent = band.text;
+    bandLabel.className = 'text-[11px] font-semibold mt-0.5 ' + band.label;
+    document.getElementById('modal-eval-avg').innerHTML = evalScore(avg, 'font-bold');
+
     ['cleanliness', 'service', 'taste', 'price'].forEach(function(k) {
-        document.getElementById('modal-eval-' + k).textContent = Number(evalData[k]).toFixed(2) + '★';
+        var v = Number(evalData[k]), fill = bandOf(v).fill, steps = '';
+        for (var i = 1; i <= 5; i++) {
+            // CHANGED: was Math.round(v), which drew 3.50 as four full steps; each step now fills by the fraction of that point reached.
+            var pct = Math.round(Math.max(0, Math.min(1, v - i + 1)) * 100);
+            steps += '<span class="relative w-3.5 h-1.5 rounded-full bg-neutral-200 overflow-hidden"><span class="absolute inset-y-0 left-0 ' + fill + '" style="width:' + pct + '%"></span></span>';
+        }
+        document.getElementById('modal-eval-' + k + '-meter').innerHTML = steps;
+        document.getElementById('modal-eval-' + k).innerHTML = evalScore(v, 'font-semibold');
     });
-    document.getElementById('modal-eval-avg').textContent = Number(evalData.avg).toFixed(2);
 
-    // CHANGED: uses the server-formatted date. new Date() on the raw "YYYY-MM-DD HH:MM:SS" value read the UTC time as local time, and Safari cannot parse that format at all, so it showed "Invalid Date".
-    document.getElementById('modal-eval-date').textContent = evalData.at_label ? 'Submitted on ' + evalData.at_label : '';
-
-    var commentBox = document.getElementById('modal-eval-comment-box');
-    if (evalData.comment && evalData.comment.trim() !== '') {
-        // CHANGED: typographic quotes.
-        commentBox.textContent = '“' + evalData.comment + '”';
-        commentBox.className = 'bg-neutral-50/80 p-3.5 rounded-md border border-neutral-200 text-neutral-700 italic text-xs leading-relaxed';
-    } else {
-        commentBox.textContent = 'No written comment provided with this evaluation submission.';
-        // CHANGED: neutral-400 to neutral-500 for contrast.
-        commentBox.className = 'bg-neutral-50/80 p-3.5 rounded-md border border-neutral-200 text-neutral-500 italic text-xs leading-relaxed';
-    }
+    var comment = document.getElementById('modal-eval-comment');
+    var hasComment = evalData.comment && evalData.comment.trim() !== '';
+    comment.textContent = hasComment ? evalData.comment : 'No comment.';
+    comment.classList.toggle('text-neutral-800', hasComment);
+    comment.classList.toggle('text-neutral-600', !hasComment);
 
     evalModal.showModal();
 }
