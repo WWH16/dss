@@ -383,84 +383,44 @@
     </div>
 </div>
 
-{{-- ── 5. Student Account Details Modal (Refined Balanced Radius) ────── --}}
-<dialog id="details-modal" class="confirm-modal modal-sharp max-w-lg w-full rounded-lg p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    {{-- Header --}}
-    <div class="bg-brand-900 text-white px-5 py-4 flex items-center justify-between border-b border-brand-950">
-        <div class="flex items-center gap-3">
-            <div id="modal-avatar" class="w-10 h-10 rounded-md bg-brand-800 border border-brand-700/80 text-white font-bold text-base flex items-center justify-center shrink-0 shadow-xs">
-            </div>
-            <div>
-                <h3 id="details-name" class="text-sm font-bold text-white leading-tight tracking-tight"></h3>
-                <p id="details-student-number-badge" class="text-[11px] text-brand-200 font-mono mt-0.5"></p>
+{{-- ── 5. Student Account Details Modal ────── --}}
+{{-- CHANGED: rebuilt in the evaluations dialog's layout, keeping this dialog's colours. Same width and shadow (plain confirm-modal, no modal-sharp) but no border: confirm-modal's pale 1px border showed as a light rim around the dark green header. The dark green header band holds the avatar, name and student number; a participation panel sits on top like the evaluations average panel; details are label/value rows instead of an uppercase-labelled grid; the "Account Role" line (always "Student") is gone and Registered joins the rows; the Done button is the small one. --}}
+<dialog id="details-modal" class="confirm-modal p-0! border-0!" aria-labelledby="details-name">
+    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div id="modal-avatar" class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 text-white font-bold text-sm flex items-center justify-center shrink-0" aria-hidden="true"></div>
+            <div class="min-w-0">
+                <h3 id="details-name" class="text-sm font-bold text-white leading-tight truncate"></h3>
+                <p id="details-student-number" class="text-[11px] text-brand-200 tabular-nums"></p>
             </div>
         </div>
-        <button type="button" class="js-close-details-modal text-white/70 hover:text-white hover:bg-brand-800 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+        <button type="button" class="js-close-details-modal text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
-    {{-- Body --}}
-    <div class="p-5 sm:p-6 space-y-4 bg-white text-xs">
-        {{-- Section 1: Academic & Identity Profile --}}
-        {{-- CHANGED (modal): section labels raised from 10px to 11px and field labels from 9px to 11px, all neutral-400 to neutral-500. --}}
-        <div>
-            <span class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                Academic & Identity Profile
-            </span>
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-px bg-neutral-200 border border-neutral-200 rounded-md overflow-hidden">
-                <div class="bg-white p-3 space-y-0.5">
-                    <span class="block text-neutral-500 font-bold uppercase text-[11px] tracking-wider">Student ID Number</span>
-                    <span id="details-student-number" class="font-mono font-bold text-neutral-900 text-xs"></span>
-                </div>
-                <div class="bg-white p-3 space-y-0.5">
-                    <span class="block text-neutral-500 font-bold uppercase text-[11px] tracking-wider">Department / College</span>
-                    <span id="details-dept-name" class="font-bold text-neutral-900 text-xs"></span>
-                </div>
-                <div class="bg-white p-3 space-y-0.5">
-                    <span class="block text-neutral-500 font-bold uppercase text-[11px] tracking-wider">Course / Degree</span>
-                    <span id="details-course" class="font-semibold text-neutral-900 text-xs"></span>
-                </div>
-                <div class="bg-white p-3 space-y-0.5">
-                    <span class="block text-neutral-500 font-bold uppercase text-[11px] tracking-wider">Year Level</span>
-                    <span id="details-year" class="font-semibold text-neutral-900 text-xs"></span>
-                </div>
+    <div class="px-6 pb-6">
+        {{-- CHANGED: the participation panel takes the evaluated badge's emerald when the student has evaluated this month and the old neutral-50 box colour when not; the count is the big number, in the old count chip's brand-900. The last-submitted date stays out: matched against the evaluations page it identified who wrote an anonymous evaluation. --}}
+        <div id="details-month-panel" class="mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold text-neutral-900">Evaluations submitted</p>
+                <p id="details-this-month" class="text-[11px] font-semibold mt-0.5"></p>
             </div>
+            <span id="details-eval-count" class="text-3xl leading-none font-bold text-brand-900 tabular-nums"></span>
         </div>
 
-        {{-- Section 2: Participation & Evaluation Record --}}
-        {{-- CHANGED: the "Last submitted" date line is gone; matched against the evaluations page it identified who wrote an anonymous evaluation. The count and this month's status show instead. --}}
-        <div>
-            <span class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
-                Participation & Evaluation Record
-            </span>
-            <div class="p-3.5 bg-neutral-50/80 border border-neutral-200 rounded-md flex items-center justify-between">
-                <div class="flex items-center gap-3">
-                    <div class="w-8 h-8 rounded-md bg-emerald-50 border border-emerald-200 text-emerald-700 flex items-center justify-center shrink-0">
-                        <ion-icon name="receipt-outline" class="text-base"></ion-icon>
-                    </div>
-                    <div>
-                        <p class="text-xs font-bold text-neutral-900">Evaluations submitted</p>
-                        <p id="details-this-month" class="text-[11px] text-neutral-600 font-medium"></p>
-                    </div>
+        <dl class="mt-2 divide-y divide-neutral-100 text-sm">
+            @foreach(['dept-name' => 'Department', 'course' => 'Program', 'year' => 'Year level', 'created-at' => 'Registered'] as $id => $label)
+                <div class="flex items-center justify-between gap-4 py-2.5">
+                    <dt class="text-neutral-600">{{ $label }}</dt>
+                    <dd id="details-{{ $id }}" class="font-medium text-neutral-900 text-right"></dd>
                 </div>
-                <span id="details-eval-count" class="text-xs font-bold font-mono text-brand-900 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-200 tabular-nums"></span>
-            </div>
-        </div>
+            @endforeach
+        </dl>
 
-        {{-- Section 3: Account Metadata --}}
-        {{-- CHANGED: footer text neutral-400 to neutral-500; role "Student Evaluator" became "Student", the page's one name. --}}
-        <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-500">
-            <span>Account Role: <strong class="text-neutral-700 font-semibold">Student</strong></span>
-            <span>Registered: <strong id="details-created-at" class="text-neutral-700 font-semibold"></strong></span>
+        <div class="flex justify-end pt-4 mt-4 border-t border-neutral-100">
+            <button type="button" class="btn btn-primary btn-sm text-xs font-semibold rounded-md js-close-details-modal cursor-pointer">Done</button>
         </div>
-    </div>
-
-    {{-- Action Footer --}}
-    <div class="flex items-center justify-end px-5 py-3.5 bg-neutral-50 border-t border-neutral-200">
-        <button type="button" class="btn btn-primary text-xs px-4 py-2 font-bold rounded-md js-close-details-modal cursor-pointer">
-            Done
-        </button>
     </div>
 </dialog>
 
@@ -471,19 +431,22 @@ var detailsModal = document.getElementById('details-modal');
 // CHANGED: takes only the student; department and the Philippine-time registration date arrive on it (dept, registered_label), set by the server. toggleFilterDrawer() is gone with the drawer.
 function openDetailsModal(student) {
     document.getElementById('details-name').textContent = student.name;
-    document.getElementById('details-student-number-badge').textContent = 'ID: ' + (student.student_number || 'N/A');
+    // CHANGED: the student number moved from a monospace "ID:" badge and a grid cell into the header subtitle.
+    document.getElementById('details-student-number').textContent = student.student_number || 'No student number';
     document.getElementById('modal-avatar').textContent = (student.name || 'S').charAt(0).toUpperCase();
 
-    document.getElementById('details-student-number').textContent = student.student_number || 'Not Set';
     document.getElementById('details-dept-name').textContent = student.dept.name;
     document.getElementById('details-course').textContent = student.course || 'Not Set';
     document.getElementById('details-year').textContent = student.year_level || 'Not Set';
-
-    // CHANGED: "N Submitted" became "1 evaluation" / "N evaluations"; the last-submitted date gave way to this month's status.
-    var evalCount = Number(student.evaluations_count) || 0;
-    document.getElementById('details-eval-count').textContent = evalCount + (evalCount === 1 ? ' evaluation' : ' evaluations');
-    document.getElementById('details-this-month').textContent = (Number(student.evaluated_this_month) ? 'Evaluated in ' : 'Not yet evaluated in ') + @json($month);
     document.getElementById('details-created-at').textContent = student.registered_label;
+
+    // CHANGED: the count is a bare number in the panel; the panel tint and status line follow this month's participation.
+    var evaluated = Number(student.evaluated_this_month) === 1;
+    document.getElementById('details-eval-count').textContent = Number(student.evaluations_count) || 0;
+    document.getElementById('details-month-panel').className = 'mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4 ' + (evaluated ? 'bg-emerald-50' : 'bg-neutral-50');
+    var monthLine = document.getElementById('details-this-month');
+    monthLine.textContent = (evaluated ? 'Evaluated in ' : 'Not yet evaluated in ') + @json($month);
+    monthLine.className = 'text-[11px] font-semibold mt-0.5 ' + (evaluated ? 'text-emerald-800' : 'text-neutral-600');
 
     detailsModal.showModal();
 }
