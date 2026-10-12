@@ -57,15 +57,14 @@
                 {{-- CHANGED: removed "logged anonymously". Each evaluation is stored with the student's account, and administrators see the student's name next to it on the Evaluations page, so the claim was not true. --}}
                 <p class="text-neutral-500 max-w-md mx-auto mb-8 text-xs sm:text-sm leading-relaxed">
                     Thank you for your valuable feedback. Your rating has been recorded to help maintain high quality dining standards across Isabela State University.
+                    {{-- ADDED: students get one evaluation per month, so the screen says when the next one opens. --}}
+                    You can evaluate a stall again on {{ now('Asia/Manila')->startOfMonth()->addMonth()->format('F j') }}.
                 </p>
-                
+
+                {{-- CHANGED: removed the "Evaluate Another Stall" button; a second evaluation this month is not allowed. --}}
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
-                    <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-neutral-100 hover:bg-neutral-200/80 text-neutral-700 font-bold rounded-md transition-colors text-xs text-center">
+                    <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center shadow-2xs">
                         Back to Dashboard
-                    </a>
-                    <a href="{{ route('student.evaluation') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center flex items-center justify-center gap-1.5 shadow-2xs">
-                        <ion-icon name="refresh-outline" class="text-sm"></ion-icon>
-                        Evaluate Another Stall
                     </a>
                 </div>
             </div>

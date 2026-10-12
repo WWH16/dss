@@ -4,6 +4,7 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\URL;
+use Illuminate\Support\Carbon;
 
 uses(RefreshDatabase::class);
 
@@ -170,4 +171,123 @@ test('the evaluation page renders the shared scanner partial in full', function 
         ->assertSee('was made for', false);
 
     expect(substr_count($response->getContent(), 'id="qr-start"'))->toBe(1);
+});
+
+// ADDED: a student may submit one evaluation per calendar month (Philippine time), whichever stall it is for.
+function pastEvaluation(int $studentId, int $stallId, string $createdAtUtc): void
+{
+    DB::table('stall_evaluations')->insert([
+        'student_id' => $studentId,
+        'stall_id' => $stallId,
+        'cleanliness' => 4, 'service' => 4, 'taste' => 4, 'price' => 4,
+        'created_at' => $createdAtUtc,
+        'updated_at' => $createdAtUtc,
+    ]);
+}
+
+test('a second evaluation in the same month is rejected even for a different stall', function () {
+    $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
+    $otherStallId = DB::table('stalls')->insertGetId([
+        'name' => 'Other Canteen', 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    pastEvaluation($this->student->id, $otherStallId, '2026-10-02 01:00:00');
+
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertRedirect(route('student.evaluation'))
+        ->assertSessionHas('error', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.');
+
+    $this->assertDatabaseCount('stall_evaluations', 1);
+});
+
+test('an evaluation from last month does not block this month', function () {
+    $this->travelTo(Carbon::parse('2026-11-03 02:00:00', 'UTC'));
+    pastEvaluation($this->student->id, $this->activeStallId, '2026-10-20 03:00:00');
+
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertSessionHas('success', 'Evaluation submitted successfully!');
+
+    $this->assertDatabaseCount('stall_evaluations', 2);
+});
+
+test('the month follows Philippine time, not UTC', function () {
+    // Nov 1, 00:30 in Manila is still Oct 31 in UTC.
+    $this->travelTo(Carbon::parse('2026-10-31 16:30:00', 'UTC'));
+    pastEvaluation($this->student->id, $this->activeStallId, '2026-10-10 04:00:00');
+
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertSessionHas('success', 'Evaluation submitted successfully!');
+
+    // The evaluation just saved counts for November, so a later November submission is blocked.
+    $this->travelTo(Carbon::parse('2026-11-15 04:00:00', 'UTC'));
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertSessionHas('error', 'You have already submitted your evaluation for November. You can evaluate a stall again on December 1.');
+
+    $this->assertDatabaseCount('stall_evaluations', 2);
+});
+
+test('a December evaluation opens again on January 1', function () {
+    $this->travelTo(Carbon::parse('2026-12-10 03:00:00', 'UTC'));
+    pastEvaluation($this->student->id, $this->activeStallId, '2026-12-01 03:00:00');
+
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertSessionHas('error', 'You have already submitted your evaluation for December. You can evaluate a stall again on January 1.');
+});
+
+test("another student's evaluation does not use up this student's month", function () {
+    $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
+    $classmate = User::create([
+        'name' => 'Classmate', 'email' => 'classmate@example.com', 'password' => bcrypt('password123'),
+        'role' => 'student', 'email_verified_at' => now(),
+    ]);
+    pastEvaluation($classmate->id, $this->activeStallId, '2026-10-05 02:00:00');
+
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertSessionHas('success', 'Evaluation submitted successfully!');
+
+    $this->assertDatabaseCount('stall_evaluations', 2);
+});
+
+test('the success screen says when the next evaluation opens and offers no second stall', function () {
+    $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
+
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->followingRedirects()
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertOk()
+        ->assertSee('Evaluation Submitted!')
+        ->assertSee('You can evaluate a stall again on November 1.')
+        ->assertDontSee('Evaluate Another Stall');
+});
+
+test("scanning a stall after this month's evaluation shows the limit instead of the form", function () {
+    $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
+    pastEvaluation($this->student->id, $this->activeStallId, '2026-10-05 02:00:00');
+
+    $this->actingAs($this->student)->get(scanUrl($this->activeStallId))
+        ->assertRedirect(route('student.evaluation'))
+        ->assertSessionHas('error', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.')
+        ->assertSessionMissing('qr_stall_id');
+
+    $this->actingAs($this->student)->get(route('student.evaluation'))
+        ->assertSee('You have already submitted your evaluation for October.')
+        ->assertDontSee('id="evaluationForm"', false);
+});
+
+test('a scan-and-submit lands on the success screen, not the limit error', function () {
+    $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
+
+    $this->actingAs($this->student)->get(scanUrl($this->activeStallId))->assertOk();
+
+    $this->actingAs($this->student)->from(scanUrl($this->activeStallId))
+        ->followingRedirects()
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertOk()
+        ->assertSee('Evaluation Submitted!')
+        ->assertDontSee('You have already submitted');
 });

@@ -82,6 +82,11 @@ class StudentEvaluationController extends Controller
                 return redirect()->route('student.evaluation')->with('error', 'This QR code is not valid. Scan the code posted at the stall.');
             }
 
+            // ADDED: refuse the scan when this month's evaluation is used up, so the student does not fill in a form store() would reject.
+            if ($limit = $this->monthlyLimitMessage($user->id)) {
+                return redirect()->route('student.evaluation')->with('error', $limit);
+            }
+
             $stall = DB::table('stalls')->where('id', (int) $request->stall)->first(['id', 'name', 'is_active']);
 
             if (! $stall) {
@@ -113,6 +118,12 @@ class StudentEvaluationController extends Controller
         if (! session('qr_stall_id')) {
             return redirect()->route('student.evaluation')->with('error', 'Scan the QR code at the stall to evaluate it.');
         }
+
+        // ADDED: one evaluation per student per calendar month, for any one stall.
+        if ($limit = $this->monthlyLimitMessage($user->id)) {
+            return redirect()->route('student.evaluation')->with('error', $limit);
+        }
+
         $request->merge(['stall_id' => session('qr_stall_id')]);
 
         // CHANGED: moved above validate() so the rating rules below are built from the same statement list the scores are computed from.
@@ -162,6 +173,29 @@ class StudentEvaluationController extends Controller
             'updated_at' => now(),
         ]);
 
-        return back()->with('success','Evaluation submitted successfully!');
+        // CHANGED: redirects to the plain evaluation page instead of back(). back() returned to the signed
+        // scan link, which now refuses the student because this month's evaluation is used up.
+        return redirect()->route('student.evaluation')->with('success', 'Evaluation submitted successfully!');
+    }
+
+    // ADDED: returns the reason the student cannot evaluate this month, or null if they can.
+    // The month runs in Philippine time; created_at is stored in UTC, so the month start is converted.
+    // ponytail: check-then-insert without a lock; two hand-crafted parallel requests could both pass.
+    // The submit button is disabled on click. Add a lockForUpdate() on the student's users row if that matters.
+    private function monthlyLimitMessage(int $studentId): ?string
+    {
+        $monthStart = now('Asia/Manila')->startOfMonth();
+
+        $used = DB::table('stall_evaluations')
+            ->where('student_id', $studentId)
+            ->where('created_at', '>=', $monthStart->copy()->utc())
+            ->exists();
+
+        if (! $used) {
+            return null;
+        }
+
+        return "You have already submitted your evaluation for {$monthStart->format('F')}. "
+            . "You can evaluate a stall again on {$monthStart->copy()->addMonth()->format('F j')}.";
     }
 }
