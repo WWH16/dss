@@ -296,6 +296,8 @@ class AdminController extends Controller
                 'users.stall_id',
                 'stalls.name as current_stall_name'
             )
+            // CHANGED: unassigned staff first, then by name, so the stall page's staff pickers list them first.
+            ->orderByRaw('users.stall_id is not null')
             ->orderBy('users.name')
             ->get();
 

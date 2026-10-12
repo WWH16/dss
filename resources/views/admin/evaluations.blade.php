@@ -5,7 +5,8 @@
 @section('header_title', 'Evaluations')
 
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6">
+{{-- CHANGED: was max-w-7xl mx-auto, which centred the page and left dead space beside the sidebar; same fix as the overview and stalls pages. --}}
+<div class="max-w-[1600px] space-y-6">
 
     {{-- ── 1. Page Header ─────────────────────────────────────────────── --}}
     <div class="pb-4 border-b border-neutral-200/80">

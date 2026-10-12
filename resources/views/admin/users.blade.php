@@ -5,7 +5,8 @@
 @section('header_title', 'Staff & Admins')
 {{-- CHANGED (whole file): every rounded-lg and plain rounded became rounded-md (cards stay rounded-xl), every 9px and 10px text became 11px, grey helper and label text went from neutral-400 to neutral-500 for contrast, and every sky-* colour (staff avatars, badges and the staff stat icon) became the matching neutral-* shade, so brand green is the only accent. --}}
 @section('content')
-<div class="max-w-7xl mx-auto space-y-6">
+{{-- CHANGED: was max-w-7xl mx-auto, which centred the page and left dead space beside the sidebar; same fix as the overview and stalls pages. --}}
+<div class="max-w-[1600px] space-y-6">
 
     {{-- ── Flash Messages (Success handled via layout toast) ────────────── --}}
     @if(session('error'))
