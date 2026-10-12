@@ -277,52 +277,54 @@
 </div>
 
 {{-- ── 4. Evaluation Breakdown & Feedback Modal ────────────────────── --}}
-{{-- CHANGED: rebuilt to match the table. Same white header as the stalls dialogs instead of the dark green bar; the stall leads instead of "Anonymous student"; the average sits on top and every score uses the table's two-decimal, below-3/4-and-up colour rule with the caret; star glyphs, uppercase section labels and the italic comment are gone. --}}
-<dialog id="eval-details-modal" class="confirm-modal relative" aria-labelledby="modal-eval-stall">
-    <div class="flex items-start justify-between gap-3 pb-3 border-b border-neutral-100">
+{{-- CHANGED: rebuilt to match the table, then given the student details dialog's frame: a dark green header band running to the edge (no padding or pale border on the dialog itself) with the content padded below it. The stall leads instead of "Anonymous student"; the average sits on top and every score uses the table's two-decimal, below-3/4-and-up colour rule with the caret; star glyphs, uppercase section labels and the italic comment are gone. --}}
+<dialog id="eval-details-modal" class="confirm-modal relative p-0! border-0!" aria-labelledby="modal-eval-stall">
+    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
-            <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800 shrink-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
                 <ion-icon name="receipt-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
             <div class="min-w-0">
-                <h3 id="modal-eval-stall" class="text-sm font-bold text-neutral-900 leading-tight truncate"></h3>
-                <p id="modal-eval-date" class="text-[11px] text-neutral-500 tabular-nums"></p>
+                <h3 id="modal-eval-stall" class="text-sm font-bold text-white leading-tight truncate"></h3>
+                <p id="modal-eval-date" class="text-[11px] text-brand-200 tabular-nums"></p>
             </div>
         </div>
-        <button type="button" class="js-close-eval-modal text-neutral-400 hover:text-neutral-600 p-1 cursor-pointer" aria-label="Close">
+        <button type="button" class="js-close-eval-modal text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
-    {{-- CHANGED: the average panel takes the colour of its band (rose below 3, emerald 4 and up, the page's green-grey surface in between) and names the band in words, so the verdict reads before the numbers. --}}
-    <div id="modal-eval-avg-panel" class="mt-4 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4">
-        <div>
-            <p class="text-xs font-semibold text-neutral-900">Average of four criteria</p>
-            <p id="modal-eval-band" class="text-[11px] font-semibold mt-0.5"></p>
-        </div>
-        <span id="modal-eval-avg" class="text-3xl leading-none"></span>
-    </div>
-
-    {{-- CHANGED: each criterion gets a five-step meter, one step per rating point, filled in the same band colour as its number. Criterion scores are means of several statements (3.50, 4.33), so the last step fills partly. --}}
-    <dl class="mt-2 divide-y divide-neutral-100 text-sm">
-        @foreach(['cleanliness' => 'Cleanliness', 'service' => 'Service', 'taste' => 'Taste', 'price' => 'Price'] as $c => $label)
-            <div class="flex items-center justify-between gap-4 py-2.5">
-                <dt class="text-neutral-600">{{ $label }}</dt>
-                <dd class="flex items-center gap-3">
-                    <span id="modal-eval-{{ $c }}-meter" class="flex gap-0.5" aria-hidden="true"></span>
-                    <span id="modal-eval-{{ $c }}" class="w-11 text-right"></span>
-                </dd>
+    <div class="px-6 pb-6">
+        {{-- CHANGED: the average panel takes the colour of its band (rose below 3, emerald 4 and up, the page's green-grey surface in between) and names the band in words, so the verdict reads before the numbers. --}}
+        <div id="modal-eval-avg-panel" class="mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold text-neutral-900">Average of four criteria</p>
+                <p id="modal-eval-band" class="text-[11px] font-semibold mt-0.5"></p>
             </div>
-        @endforeach
-    </dl>
+            <span id="modal-eval-avg" class="text-3xl leading-none"></span>
+        </div>
 
-    <div class="pt-3">
-        <p class="text-xs font-semibold text-neutral-900 mb-1.5">Comment</p>
-        <p id="modal-eval-comment" class="bg-surface-alt rounded-lg px-3.5 py-3 text-sm leading-relaxed whitespace-pre-line break-words"></p>
-    </div>
+        {{-- CHANGED: each criterion gets a five-step meter, one step per rating point, filled in the same band colour as its number. Criterion scores are means of several statements (3.50, 4.33), so the last step fills partly. --}}
+        <dl class="mt-2 divide-y divide-neutral-100 text-sm">
+            @foreach(['cleanliness' => 'Cleanliness', 'service' => 'Service', 'taste' => 'Taste', 'price' => 'Price'] as $c => $label)
+                <div class="flex items-center justify-between gap-4 py-2.5">
+                    <dt class="text-neutral-600">{{ $label }}</dt>
+                    <dd class="flex items-center gap-3">
+                        <span id="modal-eval-{{ $c }}-meter" class="flex gap-0.5" aria-hidden="true"></span>
+                        <span id="modal-eval-{{ $c }}" class="w-11 text-right"></span>
+                    </dd>
+                </div>
+            @endforeach
+        </dl>
 
-    <div class="flex justify-end pt-4 mt-4 border-t border-neutral-100">
-        <button type="button" class="btn btn-primary btn-sm text-xs font-semibold rounded-md js-close-eval-modal cursor-pointer">Done</button>
+        <div class="pt-3">
+            <p class="text-xs font-semibold text-neutral-900 mb-1.5">Comment</p>
+            <p id="modal-eval-comment" class="bg-surface-alt rounded-lg px-3.5 py-3 text-sm leading-relaxed whitespace-pre-line break-words"></p>
+        </div>
+
+        <div class="flex justify-end pt-4 mt-4 border-t border-neutral-100">
+            <button type="button" class="btn btn-primary btn-sm text-xs font-semibold rounded-md js-close-eval-modal cursor-pointer">Done</button>
+        </div>
     </div>
 </dialog>
 
@@ -352,7 +354,7 @@ function openEvalDetailsModal(evalData) {
     var bandOf = function(v) { return bands[v < 3 ? 'low' : (v >= 4 ? 'high' : 'mid')]; };
 
     var avg = Number(evalData.avg), band = bandOf(avg);
-    document.getElementById('modal-eval-avg-panel').className = 'mt-4 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4 ' + band.panel;
+    document.getElementById('modal-eval-avg-panel').className = 'mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4 ' + band.panel;
     var bandLabel = document.getElementById('modal-eval-band');
     bandLabel.textContent = band.text;
     bandLabel.className = 'text-[11px] font-semibold mt-0.5 ' + band.label;
