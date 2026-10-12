@@ -118,9 +118,36 @@ class StaffController extends Controller
             'activityTotalCount' => $activityTotalCount,
         ] = $this->activityTrend($request, $stall->id);
 
-        // 7. Paginated evaluations list for this stall (STRICT PRIVACY: zero student names or IDs)
+        // CHANGED: the paginated evaluations query moved to stallEvaluations(), shared with standings().
+        $evaluations = $this->stallEvaluations($request, $stall->id);
+
+        return view('staff.staff_dashboard', [
+            'hasStall' => true,
+            'stall' => $stall,
+            'user' => $user,
+            'totalEvaluations' => $totalEvaluations,
+            'uniqueStudents' => $uniqueStudents,
+            'averages' => $averages,
+            'campusCriteria' => $campusCriteria,
+            'ratingDistribution' => $ratingDistribution,
+            'trendDates' => $trendDates,
+            'trendCounts' => $trendCounts,
+            'availableYears' => $availableYears,
+            'selectedYear' => $selectedYear,
+            'selectedMonth' => $selectedMonth,
+            'activityPeriodLabel' => $activityPeriodLabel,
+            'activityTotalCount' => $activityTotalCount,
+            'evaluations' => $evaluations,
+            'stallRank' => $stallRank,
+            'totalStalls' => $totalStalls,
+        ]);
+    }
+
+    // 7. Paginated evaluations list for this stall (STRICT PRIVACY: zero student names or IDs)
+    private function stallEvaluations(Request $request, $stallId)
+    {
         $evaluationsQuery = DB::table('stall_evaluations')
-            ->where('stall_id', $stall->id)
+            ->where('stall_id', $stallId)
             ->select(
                 'id',
                 'cleanliness',
@@ -147,35 +174,14 @@ class StaffController extends Controller
             $evaluationsQuery->orderBy('created_at', 'desc');
         }
 
-        $evaluations = $evaluationsQuery->paginate(10)->withQueryString();
-
-        return view('staff.staff_dashboard', [
-            'hasStall' => true,
-            'stall' => $stall,
-            'user' => $user,
-            'totalEvaluations' => $totalEvaluations,
-            'uniqueStudents' => $uniqueStudents,
-            'averages' => $averages,
-            'campusCriteria' => $campusCriteria,
-            'ratingDistribution' => $ratingDistribution,
-            'trendDates' => $trendDates,
-            'trendCounts' => $trendCounts,
-            'availableYears' => $availableYears,
-            'selectedYear' => $selectedYear,
-            'selectedMonth' => $selectedMonth,
-            'activityPeriodLabel' => $activityPeriodLabel,
-            'activityTotalCount' => $activityTotalCount,
-            'evaluations' => $evaluations,
-            'stallRank' => $stallRank,
-            'totalStalls' => $totalStalls,
-        ]);
+        return $evaluationsQuery->paginate(10)->withQueryString();
     }
 
     /**
      * Other Stall Standings / Rankings:
      * Staff can view aggregate rankings across campus, but CANNOT view other stalls' individual feedback.
      */
-    public function standings()
+    public function standings(Request $request)
     {
         $user = Auth::user();
 
@@ -212,6 +218,8 @@ class StaffController extends Controller
             'standings' => $standings,
             'myStall' => $myStall,
             'user' => $user,
+            // ADDED: this stall's own evaluations, which replace the all-stalls leaderboard table.
+            'evaluations' => $this->stallEvaluations($request, $myStall->id),
         ]);
     }
 
