@@ -27,7 +27,8 @@
 @section('content')
 <div class="max-w-4xl mx-auto space-y-5">
     
-    @if(!session('success'))
+    {{-- CHANGED: also hidden on the monthly limit screen, which has its own Back to Dashboard button. --}}
+    @if(!session('success') && ! $limit)
         {{-- Back Navigation --}}
         <div class="flex items-center justify-between">
             <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-xs font-bold text-neutral-600 hover:text-brand-700 transition-colors bg-white px-3.5 py-2 rounded-md border border-neutral-200/80 shadow-2xs">

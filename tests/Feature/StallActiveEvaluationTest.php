@@ -267,6 +267,7 @@ test("scanning a stall after this month's evaluation shows the limit instead of 
         ->assertSee('You have already submitted your evaluation for October. You can evaluate a stall again on November 1.')
         ->assertDontSee('id="evaluationForm"', false)
         ->assertDontSee('id="qr-start"', false)
+        ->assertDontSee('arrow-back-outline', false)
         ->assertSessionMissing('qr_stall_id');
 });
 
