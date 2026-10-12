@@ -79,6 +79,14 @@
                     </p>
                 @endif
 
+                {{-- ADDED: the monthly evaluation limit is a rule, not a mistake, so it shows as a calm note instead of a red error. --}}
+                @if(session('info'))
+                    <p class="mt-4 inline-flex items-start gap-1.5 max-w-sm px-3 py-2 rounded-md bg-neutral-50 border border-neutral-200 text-neutral-700 text-xs font-semibold text-left">
+                        <ion-icon name="calendar-outline" class="text-sm text-brand-600 shrink-0 mt-px" aria-hidden="true"></ion-icon>
+                        {{ session('info') }}
+                    </p>
+                @endif
+
                 {{-- CHANGED: the scanner markup, CSS and script moved to partials/qr-scanner.blade.php; the student dashboard includes the same partial. --}}
                 @include('partials.qr-scanner')
 

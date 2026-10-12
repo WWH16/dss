@@ -84,7 +84,7 @@ class StudentEvaluationController extends Controller
 
             // ADDED: refuse the scan when this month's evaluation is used up, so the student does not fill in a form store() would reject.
             if ($limit = $this->monthlyLimitMessage($user->id)) {
-                return redirect()->route('student.evaluation')->with('error', $limit);
+                return redirect()->route('student.evaluation')->with('info', $limit);
             }
 
             $stall = DB::table('stalls')->where('id', (int) $request->stall)->first(['id', 'name', 'is_active']);
@@ -121,7 +121,7 @@ class StudentEvaluationController extends Controller
 
         // ADDED: one evaluation per student per calendar month, for any one stall.
         if ($limit = $this->monthlyLimitMessage($user->id)) {
-            return redirect()->route('student.evaluation')->with('error', $limit);
+            return redirect()->route('student.evaluation')->with('info', $limit);
         }
 
         $request->merge(['stall_id' => session('qr_stall_id')]);

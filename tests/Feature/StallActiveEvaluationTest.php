@@ -195,7 +195,7 @@ test('a second evaluation in the same month is rejected even for a different sta
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
         ->assertRedirect(route('student.evaluation'))
-        ->assertSessionHas('error', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.');
+        ->assertSessionHas('info', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.');
 
     $this->assertDatabaseCount('stall_evaluations', 1);
 });
@@ -213,7 +213,7 @@ test('the month follows Philippine time, not UTC', function () {
     $this->travelTo(Carbon::parse('2026-11-15 04:00:00', 'UTC'));
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSessionHas('error', 'You have already submitted your evaluation for November. You can evaluate a stall again on December 1.');
+        ->assertSessionHas('info', 'You have already submitted your evaluation for November. You can evaluate a stall again on December 1.');
 
     $this->assertDatabaseCount('stall_evaluations', 2);
 });
@@ -224,7 +224,7 @@ test('a December evaluation opens again on January 1', function () {
 
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSessionHas('error', 'You have already submitted your evaluation for December. You can evaluate a stall again on January 1.');
+        ->assertSessionHas('info', 'You have already submitted your evaluation for December. You can evaluate a stall again on January 1.');
 });
 
 test("another student's evaluation does not use up this student's month", function () {
@@ -260,7 +260,7 @@ test("scanning a stall after this month's evaluation shows the limit instead of 
 
     $this->actingAs($this->student)->get(scanUrl($this->activeStallId))
         ->assertRedirect(route('student.evaluation'))
-        ->assertSessionHas('error', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.')
+        ->assertSessionHas('info', 'You have already submitted your evaluation for October. You can evaluate a stall again on November 1.')
         ->assertSessionMissing('qr_stall_id');
 
     $this->actingAs($this->student)->get(route('student.evaluation'))
