@@ -43,44 +43,30 @@
 
     <div class="bg-white rounded-xl border border-neutral-200/80 shadow-xs overflow-hidden">
         
-        @if(session('success'))
+        {{-- CHANGED: the success screen also serves as the monthly limit screen (ADDED); only the icon, heading and first sentence differ. --}}
+        @if(session('success') || $limit)
             {{-- ── Success Screen ──────────────────────────────────────────── --}}
             <div class="p-8 sm:p-14 md:p-20 text-center flex flex-col items-center justify-center">
-                <div class="w-20 h-20 rounded-2xl bg-emerald-50 border-2 border-emerald-200/80 text-emerald-600 flex items-center justify-center mb-6 shadow-xs">
-                    <ion-icon name="checkmark-circle" class="text-5xl"></ion-icon>
+                <div class="w-20 h-20 rounded-2xl border-2 flex items-center justify-center mb-6 shadow-xs {{ session('success') ? 'bg-emerald-50 border-emerald-200/80 text-emerald-600' : 'bg-neutral-50 border-neutral-200 text-brand-600' }}">
+                    <ion-icon name="{{ session('success') ? 'checkmark-circle' : 'calendar-outline' }}" class="text-5xl"></ion-icon>
                 </div>
                 
                 <h2 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight mb-2">
-                    Evaluation Submitted!
+                    {{ session('success') ? 'Evaluation Submitted!' : 'Already evaluated this month' }}
                 </h2>
                 
                 {{-- CHANGED: removed "logged anonymously". Each evaluation is stored with the student's account, and administrators see the student's name next to it on the Evaluations page, so the claim was not true. --}}
                 <p class="text-neutral-500 max-w-md mx-auto mb-8 text-xs sm:text-sm leading-relaxed">
-                    Thank you for your valuable feedback. Your rating has been recorded to help maintain high quality dining standards across Isabela State University.
-                    {{-- ADDED: students get one evaluation per month, so the screen says when the next one opens. --}}
-                    You can evaluate a stall again on {{ now('Asia/Manila')->startOfMonth()->addMonth()->format('F j') }}.
+                    @if(session('success'))
+                        Thank you for your valuable feedback. Your rating has been recorded to help maintain high quality dining standards across Isabela State University.
+                        {{-- ADDED: students get one evaluation per month, so the screen says when the next one opens. --}}
+                        You can evaluate a stall again on {{ now('Asia/Manila')->startOfMonth()->addMonth()->format('F j') }}.
+                    @else
+                        Each student can evaluate one stall per month. {{ $limit }}
+                    @endif
                 </p>
 
                 {{-- CHANGED: removed the "Evaluate Another Stall" button; a second evaluation this month is not allowed. --}}
-                <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center shadow-2xs">
-                    Back to Dashboard
-                </a>
-            </div>
-        {{-- ADDED: monthly limit screen. A student who already evaluated a stall this month sees this instead of the scanner. --}}
-        @elseif($limit)
-            <div class="p-8 sm:p-14 md:p-20 text-center flex flex-col items-center justify-center">
-                <div class="w-20 h-20 rounded-2xl bg-neutral-50 border-2 border-neutral-200 text-brand-600 flex items-center justify-center mb-6 shadow-xs">
-                    <ion-icon name="calendar-outline" class="text-5xl" aria-hidden="true"></ion-icon>
-                </div>
-
-                <h2 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight mb-2">
-                    Already evaluated this month
-                </h2>
-
-                <p class="text-neutral-500 max-w-md mx-auto mb-8 text-xs sm:text-sm leading-relaxed">
-                    Each student can evaluate one stall per month. {{ $limit }}
-                </p>
-
                 <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center shadow-2xs">
                     Back to Dashboard
                 </a>

@@ -81,7 +81,6 @@ class StudentEvaluationController extends Controller
         // scanner, and a scanned QR code is ignored, so the student does not fill in a form store() would reject.
         $limit = $this->monthlyLimitMessage($user->id);
 
-        // CHANGED: skipped while $limit is set (see above).
         if (! $limit && $request->has('signature')) {
             if (! $request->hasValidSignature(false)) {
                 return redirect()->route('student.evaluation')->with('error', 'This QR code is not valid. Scan the code posted at the stall.');
