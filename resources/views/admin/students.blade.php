@@ -1,6 +1,6 @@
 @extends('layouts.dashboard')
-{{-- CHANGED: replaced the em-dash in the title with a hyphen. --}}
-@section('title', 'Student Accounts | Admin - DSS')
+{{-- CHANGED: replaced the em-dash in the title with a hyphen; "Student Accounts" became "Students", the one name the sidebar and top bar use. --}}
+@section('title', 'Students | Admin - DSS')
 {{-- CHANGED: added header_title so the top bar reads "Students" (the sidebar label) instead of the layout default "Dashboard". --}}
 @section('header_title', 'Students')
 
@@ -57,180 +57,139 @@
 {{-- CHANGED: was max-w-7xl mx-auto, which centred the page and left dead space beside the sidebar; same fix as the overview and stalls pages. --}}
 <div class="max-w-[1600px] space-y-6">
 
-    {{-- ── 1. Page Header ─────────────────────────────────────────────── --}}
-    <div class="pb-4 border-b border-neutral-200/80">
-        <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
-            <ion-icon name="people-outline" class="text-brand-700 text-2xl"></ion-icon>
-            <span>Student Evaluators</span>
-        </h1>
-        <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
-            Directory and survey participation records for registered student evaluators across campus.
-        </p>
-    </div>
+    {{-- CHANGED: the visible "Student Evaluators" heading and its description repeated the top bar under a second name; the h1 stays for screen readers and reads "Students", as on the evaluations page. --}}
+    <h1 class="sr-only">Students</h1>
 
-
-
+    {{-- CHANGED: the filter state is read here for the inline toolbar; the "Show Filters" drawer, its count badge and the active-filter chips are gone. --}}
     @php
-        $activeFilterCount = 0;
-        if (request('department')) $activeFilterCount++;
-        if (request('course')) $activeFilterCount++;
-        if (request('year_level')) $activeFilterCount++;
-        if (request('sort') && request('sort') !== 'latest') $activeFilterCount++;
-        $hasFilters = $activeFilterCount > 0 || request('q');
+        $sort = request('sort') ?: 'latest';
+        $status = in_array(request('status'), ['evaluated', 'pending']) ? request('status') : null;
+        $narrowed = request('q') || request('department') || request('course') || request('year_level');
+        $hasFilters = $narrowed || $status || $sort !== 'latest';
+        $sortUrl = fn ($s) => request()->fullUrlWithQuery(['sort' => $s, 'page' => null]);
+        $statusUrl = fn ($s) => request()->fullUrlWithQuery(['status' => $s, 'page' => null]);
+        $total = (int) $participation->total;
+        $evaluated = (int) $participation->evaluated;
+        $month = now('Asia/Manila')->format('F');
+        // CHANGED: the Department column and filter only appear once students come from more than one department; with one, every row repeated the same code.
+        $showDept = collect($departmentStats)->filter()->count() > 1;
+        // CHANGED: department and the Philippine-time registration date are set once per student here and travel to the details dialog on the student object.
+        $students->getCollection()->each(function ($s) {
+            $s->dept = getStudentDeptInfo($s->course);
+            $s->registered_at = \Carbon\Carbon::parse($s->created_at, 'UTC')->timezone('Asia/Manila');
+            $s->registered_label = $s->registered_at->format('M d, Y');
+        });
+        // CHANGED: this month's status in the filter's own words, shared by the table and the mobile cards. Only "Evaluated" is a badge; "Not yet" is plain neutral-600 text instead of a low-contrast grey pill.
+        $monthBadge = fn ($s) => $s->evaluated_this_month
+            ? '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60 whitespace-nowrap"><ion-icon name="checkmark-circle" class="text-sm text-emerald-600" aria-hidden="true"></ion-icon>Evaluated</span>'
+            : '<span class="text-xs text-neutral-600 whitespace-nowrap">Not yet</span>';
     @endphp
 
-    {{-- ── 2. Search & Filter Bar with Show/Hide Toggle ─────────────────── --}}
-    <div class="bg-white rounded-xl border border-neutral-200/70 shadow-2xs p-4 sm:p-5">
-        <form id="student-filter-form" method="GET" action="{{ route('admin.students') }}" class="space-y-4">
-            
-            {{-- Search & Toggle Row --}}
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-                {{-- Search Bar --}}
-                {{-- CHANGED: placeholder no longer says "or email"; the controller searches name and student number only, so typing an email found nothing. Field rounded-lg to rounded-md. --}}
-                <div class="flex-1 relative">
-                    <ion-icon name="search-outline" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
-                    <input type="text" name="q" value="{{ request('q') }}" placeholder="Search by name or student number…"
-                        class="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
-                </div>
-
-                {{-- Action Controls --}}
-                <div class="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                    {{-- Toggle Filters Button --}}
-                    {{-- CHANGED: rounded-lg to rounded-md; filter count badge raised from 10px to 11px. --}}
-                    <button type="button" id="toggle-filter-btn" onclick="toggleFilterDrawer()"
-                        class="inline-flex items-center gap-2 px-3.5 py-2 rounded-md text-xs sm:text-sm font-bold transition-all border cursor-pointer {{ $activeFilterCount > 0 ? 'bg-brand-50 text-brand-800 border-brand-300 shadow-2xs' : 'bg-white text-neutral-700 border-neutral-200 hover:bg-neutral-50' }}">
-                        <ion-icon name="options-outline" class="text-base text-brand-700"></ion-icon>
-                        <span id="filter-toggle-label">{{ $activeFilterCount > 0 ? 'Hide Filters' : 'Show Filters' }}</span>
-                        @if($activeFilterCount > 0)
-                            <span class="px-1.5 py-0.5 rounded-full text-[11px] bg-brand-600 text-white font-bold tabular-nums">
-                                {{ $activeFilterCount }}
-                            </span>
-                        @endif
-                    </button>
-
-                    {{-- Clear Filters Button --}}
-                    {{-- CHANGED: rounded-lg to rounded-md; icon neutral-400 to neutral-500. Now the only "clear" control; the duplicate "Clear filters" link below was removed. --}}
-                    @if($hasFilters)
-                        <a href="{{ route('admin.students') }}" class="btn btn-ghost text-xs sm:text-sm py-2 px-3 font-semibold flex items-center gap-1 border border-neutral-200 rounded-md text-neutral-600 hover:text-neutral-900" title="Reset all filters">
-                            <ion-icon name="close-circle-outline" class="text-sm text-neutral-500"></ion-icon>
-                            Clear
-                        </a>
+    {{-- CHANGED: search, filters, the participation summary and the table share one card, as on the evaluations page. --}}
+    <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden">
+        <div class="p-4 sm:px-5 border-b border-neutral-200/70 space-y-3">
+            <form method="GET" action="{{ route('admin.students') }}" class="flex flex-col lg:flex-row lg:items-center gap-2.5">
+                @foreach(['per_page', 'status'] as $keep)
+                    @if(request($keep))
+                        <input type="hidden" name="{{ $keep }}" value="{{ request($keep) }}">
                     @endif
+                @endforeach
+
+                {{-- CHANGED: placeholder no longer says "or email"; the controller searches name and student number only, so typing an email found nothing. --}}
+                <div class="flex-1 relative">
+                    <label for="filter_q" class="sr-only">Search</label>
+                    <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
+                    <input id="filter_q" type="search" name="q" value="{{ request('q') }}" placeholder="Search by name or student number…"
+                        class="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
                 </div>
-            </div>
 
-            {{-- Collapsible Filter Drawer --}}
-            {{-- CHANGED: the four filter selects rounded-lg to rounded-md (controls are md). --}}
-            <div id="filter-drawer" class="{{ $activeFilterCount > 0 ? '' : 'hidden' }} pt-3 border-t border-neutral-100/80">
-                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-                    {{-- Department Dropdown --}}
+                <div class="grid grid-cols-2 lg:flex gap-2.5">
+                    @if($showDept || request('department'))
+                        <div>
+                            <label for="filter_department" class="sr-only">Department</label>
+                            <select id="filter_department" name="department" onchange="this.form.submit()" class="w-full lg:w-48 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ request('department') ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
+                                <option value="">All departments</option>
+                                @foreach($departments as $dept)
+                                    <option value="{{ $dept['code'] }}" {{ request('department') == $dept['code'] ? 'selected' : '' }}>
+                                        {{ $dept['name'] }} ({{ $departmentStats[$dept['code']] ?? 0 }})
+                                    </option>
+                                @endforeach
+                            </select>
+                        </div>
+                    @endif
                     <div>
-                        <label for="filter_department" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Department / College</label>
-                        <select id="filter_department" name="department" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
-                            <option value="">All Academic Departments</option>
-                            @foreach($departments as $dept)
-                                @php $deptCount = $departmentStats[$dept['code']] ?? 0; @endphp
-                                <option value="{{ $dept['code'] }}" {{ request('department') == $dept['code'] ? 'selected' : '' }}>
-                                    {{ $dept['name'] }} ({{ $deptCount }})
-                                </option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    {{-- Course / Program Select --}}
-                    <div>
-                        <label for="filter_course" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Program / Degree</label>
-                        <select id="filter_course" name="course" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
-                            <option value="">All Programs / Courses</option>
+                        <label for="filter_course" class="sr-only">Program</label>
+                        <select id="filter_course" name="course" onchange="this.form.submit()" class="w-full lg:w-40 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ request('course') ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
+                            <option value="">All programs</option>
                             @foreach($courseOptions as $c)
                                 <option value="{{ $c }}" {{ request('course') == $c ? 'selected' : '' }}>{{ $c }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Year Level Select --}}
                     <div>
-                        <label for="filter_year" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Year Level</label>
-                        <select id="filter_year" name="year_level" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
-                            <option value="">All Year Levels</option>
+                        <label for="filter_year" class="sr-only">Year level</label>
+                        <select id="filter_year" name="year_level" onchange="this.form.submit()" class="w-full lg:w-40 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ request('year_level') ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
+                            <option value="">All year levels</option>
                             @foreach($yearOptions as $y)
                                 <option value="{{ $y }}" {{ request('year_level') == $y ? 'selected' : '' }}>{{ $y }}</option>
                             @endforeach
                         </select>
                     </div>
-
-                    {{-- Sort Select --}}
                     <div>
-                        <label for="filter_sort" class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Sort Order</label>
-                        <select id="filter_sort" name="sort" onchange="this.form.submit()" class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:border-brand-600">
-                            <option value="latest" {{ request('sort') == 'latest' ? 'selected' : '' }}>Newest Accounts</option>
-                            <option value="name_asc" {{ request('sort') == 'name_asc' ? 'selected' : '' }}>Name (A to Z)</option>
-                            <option value="evaluations_desc" {{ request('sort') == 'evaluations_desc' ? 'selected' : '' }}>Most Active Evaluators</option>
-                            <option value="oldest" {{ request('sort') == 'oldest' ? 'selected' : '' }}>Oldest Accounts</option>
+                        <label for="filter_sort" class="sr-only">Sort</label>
+                        <select id="filter_sort" name="sort" onchange="this.form.submit()" class="w-full lg:w-48 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ $sort !== 'latest' ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
+                            <option value="latest" {{ $sort === 'latest' ? 'selected' : '' }}>Newest accounts</option>
+                            <option value="oldest" {{ $sort === 'oldest' ? 'selected' : '' }}>Oldest accounts</option>
+                            <option value="name_asc" {{ $sort === 'name_asc' ? 'selected' : '' }}>Name A to Z</option>
+                            <option value="evaluations_desc" {{ $sort === 'evaluations_desc' ? 'selected' : '' }}>Most evaluations</option>
+                            <option value="evaluations_asc" {{ $sort === 'evaluations_asc' ? 'selected' : '' }}>Fewest evaluations</option>
                         </select>
                     </div>
                 </div>
 
-                {{-- Active Filter Chips (Only shown when filters are applied) --}}
                 @if($hasFilters)
-                    <div class="flex flex-wrap items-center justify-between gap-2 pt-4 border-t border-neutral-100 text-xs">
-                        <div class="flex flex-wrap items-center gap-1.5">
-                            {{-- CHANGED: neutral-400 to neutral-500 for contrast. --}}
-                            <span class="text-neutral-500 font-medium">Active filters:</span>
-                            @if(request('q'))
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
-                                    Search: "{{ request('q') }}"
-                                </span>
-                            @endif
-                            @if(request('department'))
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 border border-brand-200 text-brand-800 text-[11px] font-semibold">
-                                    Dept: {{ request('department') }}
-                                </span>
-                            @endif
-                            @if(request('course'))
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
-                                    Course: {{ request('course') }}
-                                </span>
-                            @endif
-                            @if(request('year_level'))
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
-                                    Year: {{ request('year_level') }}
-                                </span>
-                            @endif
-                            @if(request('sort') && request('sort') !== 'latest')
-                                <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
-                                    Sort: {{ request('sort') === 'name_asc' ? 'Name (A-Z)' : (request('sort') === 'evaluations_desc' ? 'Most Evaluations' : 'Oldest') }}
-                                </span>
-                            @endif
-                            {{-- CHANGED: result count recoloured from emerald to neutral; emerald is kept for positive status only. --}}
-                            <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-800 text-[11px] font-bold tabular-nums">
-                                {{ $students->total() }} results
-                            </span>
-                        </div>
-
-                        {{-- CHANGED: removed the "Clear filters" link; it repeated the "Clear" button in the toolbar. --}}
-                    </div>
+                    <a href="{{ route('admin.students') }}" class="self-start lg:self-auto inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50">
+                        <ion-icon name="close-outline" class="text-base"></ion-icon>
+                        Clear
+                    </a>
                 @endif
-            </div>
+            </form>
 
-        </form>
-    </div>
+            {{-- CHANGED: one-line participation summary and an All / Evaluated / Not yet filter, so finding who has not evaluated needs no scanning. Both cover the current month, since a student evaluates once a month. Counts follow the search and filters above. --}}
+            @if($total > 0)
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+                    <p class="text-sm text-neutral-600">
+                        <strong class="font-semibold text-neutral-900 tabular-nums">{{ $evaluated }} of {{ $total }}</strong>
+                        {{ $narrowed ? 'matching ' : '' }}{{ Str::plural('student', $total) }} {{ $evaluated === 1 ? 'has' : 'have' }} evaluated in {{ $month }}
+                        <span class="tabular-nums">({{ round($evaluated / $total * 100) }}%)</span>
+                    </p>
+                    <nav aria-label="Participation" class="self-start sm:self-auto inline-flex p-0.5 bg-neutral-100 rounded-md text-xs">
+                        @foreach(['' => ['All', $total], 'evaluated' => ['Evaluated', $evaluated], 'pending' => ['Not yet', $total - $evaluated]] as $key => [$label, $count])
+                            @php $active = $status === ($key ?: null); @endphp
+                            <a href="{{ $statusUrl($key ?: null) }}" @if($active) aria-current="page" @endif
+                                class="px-3 py-1.5 rounded inline-flex items-center gap-1.5 font-semibold transition-colors {{ $active ? 'bg-white text-neutral-900 shadow-2xs' : 'text-neutral-600 hover:text-neutral-900' }}">
+                                {{ $label }}
+                                <span class="tabular-nums font-medium text-neutral-500">{{ $count }}</span>
+                            </a>
+                        @endforeach
+                    </nav>
+                </div>
+            @endif
+        </div>
 
-    {{-- ── 4. Students Accounts Data Table ──────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden">
         @if($students->isEmpty())
             <div class="p-12 text-center flex flex-col items-center justify-center">
                 {{-- CHANGED: icon neutral-400 on neutral-50 to brand-700 on brand-50, like the other admin empty states. --}}
                 <div class="w-16 h-16 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-3 text-brand-700">
                     <ion-icon name="people-outline" class="text-3xl text-brand-700"></ion-icon>
                 </div>
-                {{-- CHANGED: the message and "Reset Filters" button now depend on $hasFilters. Before, a site with no students yet was told its filters matched nothing and offered a reset button that did nothing. --}}
+                {{-- CHANGED: the message and "Reset Filters" button now depend on $hasFilters. Before, a site with no students yet was told its filters matched nothing and offered a reset button that did nothing. "Student accounts" became "students". --}}
                 @if($hasFilters)
-                    <p class="text-base font-bold text-neutral-900 mb-1">No student accounts found</p>
+                    <p class="text-base font-bold text-neutral-900 mb-1">No students found</p>
                     <p class="text-xs text-neutral-500 max-w-sm">
-                        No student accounts matched your query or filter parameters. Try clearing or expanding your search filters.
+                        No students matched your search or filters. Try clearing or expanding your filters.
                     </p>
-                    <a href="{{ route('admin.students') }}" class="btn btn-primary btn-sm mt-4 font-bold inline-flex items-center gap-1">
+                    <a href="{{ route('admin.students') }}" class="btn btn-primary btn-sm mt-4 font-bold inline-flex items-center gap-1 rounded-md">
                         <ion-icon name="refresh-outline"></ion-icon>
                         Reset Filters
                     </a>
@@ -243,98 +202,77 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse min-w-[860px] hidden md:table">
+                {{-- CHANGED: "Student Evaluator" header became "Name"; Department shows only with more than one department. "Evaluations Submitted" split in two: "This month" carries the status badge, "Evaluations" the all-time count as a plain number; Evaluations and Registered sort through the sort parameter. Column widths are set so names no longer take the spare room. --}}
+                <table class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="bg-neutral-50/80 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200/80">
-                            <th class="px-5 py-3.5">Student Evaluator</th>
-                            <th class="px-5 py-3.5">Student ID</th>
-                            <th class="px-5 py-3.5">Department</th>
-                            <th class="px-5 py-3.5">Program & Year</th>
-                            <th class="px-5 py-3.5">Evaluations Submitted</th>
-                            <th class="px-5 py-3.5">Registered</th>
-                            <th class="px-5 py-3.5 text-right">Action</th>
+                            <th class="px-5 py-3 w-[25%]">Name</th>
+                            <th class="px-4 py-3 w-[14%]">Student ID</th>
+                            @if($showDept)
+                                <th class="px-4 py-3 w-[11%]">Department</th>
+                            @endif
+                            <th class="px-4 py-3 w-[18%]">Program & Year</th>
+                            <th class="px-4 py-3 w-[15%]">This month</th>
+                            <th class="px-4 py-3 w-[11%] text-right" aria-sort="{{ $sort === 'evaluations_asc' ? 'ascending' : ($sort === 'evaluations_desc' ? 'descending' : 'none') }}">
+                                <a href="{{ $sortUrl($sort === 'evaluations_desc' ? 'evaluations_asc' : 'evaluations_desc') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'evaluations') ? 'text-neutral-900' : '' }}">
+                                    Evaluations
+                                    <ion-icon name="{{ $sort === 'evaluations_asc' ? 'arrow-up-outline' : ($sort === 'evaluations_desc' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
+                                </a>
+                            </th>
+                            <th class="pl-8 pr-4 py-3" aria-sort="{{ $sort === 'oldest' ? 'ascending' : ($sort === 'latest' ? 'descending' : 'none') }}">
+                                <a href="{{ $sortUrl($sort === 'latest' ? 'oldest' : 'latest') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ in_array($sort, ['latest', 'oldest']) ? 'text-neutral-900' : '' }}">
+                                    Registered
+                                    <ion-icon name="{{ $sort === 'oldest' ? 'arrow-up-outline' : ($sort === 'latest' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
+                                </a>
+                            </th>
+                            <th class="w-12 px-3 py-3"><span class="sr-only">Details</span></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
                         @foreach($students as $student)
-                            @php
-                                $dept = getStudentDeptInfo($student->course);
-                                $hasEvaluations = $student->evaluations_count > 0;
-                                // CHANGED: dates are stored in UTC; format them in Philippine time on the server (as the printable report does) and pass them to the modal as strings.
-                                $registeredAt = \Carbon\Carbon::parse($student->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y');
-                                $lastEvalAt = $student->last_evaluation_at ? \Carbon\Carbon::parse($student->last_evaluation_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') : null;
-                                $modalDates = ['registered' => $registeredAt, 'last_eval' => $lastEvalAt];
-                            @endphp
-                            <tr class="hover:bg-neutral-50/70 transition-colors">
-                                {{-- Name & Avatar --}}
-                                {{-- CHANGED: avatar rounded-lg to rounded-md, matching the evaluations page. --}}
-                                <td class="px-5 py-3.5 font-bold text-neutral-900">
+                            {{-- CHANGED: the whole row opens the details dialog; the eye button is the keyboard target and its click bubbles here. --}}
+                            <tr class="hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openDetailsModal(@json($student))'>
+                                {{-- CHANGED: initial avatar is a neutral circle instead of a green square, so it no longer reads as a status badge next to the green evaluated badge. --}}
+                                <td class="px-5 py-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200/70 text-brand-800 font-bold text-xs flex items-center justify-center shrink-0 shadow-2xs">
+                                        <span class="w-8 h-8 rounded-full bg-neutral-100 text-neutral-600 text-xs font-semibold flex items-center justify-center shrink-0" aria-hidden="true">
                                             {{ strtoupper(substr($student->name, 0, 1)) }}
-                                        </div>
-                                        <div class="min-w-0">
-                                            <p class="font-bold text-neutral-900 leading-tight truncate">{{ $student->name }}</p>
-                                        </div>
+                                        </span>
+                                        <span class="font-medium text-neutral-900 leading-tight">{{ $student->name }}</span>
                                     </div>
                                 </td>
 
-                                {{-- Student ID --}}
-                                <td class="px-5 py-3.5">
-                                    {{-- CHANGED: rounded to rounded-md. --}}
-                                    <span class="font-mono text-xs font-semibold px-2 py-1 bg-neutral-100 text-neutral-800 rounded-md border border-neutral-200/60 tabular-nums">
-                                        {{ $student->student_number ?: 'N/A' }}
-                                    </span>
-                                </td>
+                                {{-- CHANGED: student ID and department are plain 13px text instead of chips; the ID is no longer monospace. --}}
+                                <td class="px-4 py-3 text-[13px] text-neutral-700 tabular-nums whitespace-nowrap">{{ $student->student_number ?: 'Not set' }}</td>
 
-                                {{-- Department --}}
-                                {{-- CHANGED: one neutral badge style for every department instead of a colour per department; the decorative coloured dot was removed; rounded-full to rounded-md. --}}
-                                <td class="px-5 py-3.5">
-                                    <span class="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold border bg-neutral-100 text-neutral-800 border-neutral-200/70">
-                                        {{ $dept['code'] }}
-                                    </span>
-                                </td>
+                                @if($showDept)
+                                    <td class="px-4 py-3 text-[13px] text-neutral-700" title="{{ $student->dept['name'] }}">{{ $student->dept['code'] }}</td>
+                                @endif
 
-                                {{-- Course & Year --}}
-                                <td class="px-5 py-3.5">
-                                    <div class="text-xs">
-                                        <span class="font-bold text-neutral-900">{{ $student->course ?: 'Not set' }}</span>
-                                        @if($student->year_level)
-                                            {{-- CHANGED: separator neutral-400 to neutral-500. --}}
-                                            <span class="text-neutral-500 mx-1">•</span>
-                                            <span class="text-neutral-600 font-medium">{{ $student->year_level }}</span>
-                                        @endif
-                                    </div>
-                                </td>
-
-                                {{-- Evaluation Count --}}
-                                <td class="px-5 py-3.5">
-                                    @if($hasEvaluations)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/60 tabular-nums">
-                                            <ion-icon name="checkmark-circle" class="text-sm text-emerald-600"></ion-icon>
-                                            {{ $student->evaluations_count }} {{ Str::plural('Evaluation', $student->evaluations_count) }}
-                                        </span>
-                                    @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium bg-neutral-100 text-neutral-500 border border-neutral-200/60">
-                                            0 Submitted
-                                        </span>
+                                <td class="px-4 py-3 text-[13px] whitespace-nowrap">
+                                    <span class="font-medium text-neutral-900">{{ $student->course ?: 'Not set' }}</span>
+                                    @if($student->year_level)
+                                        <span class="text-neutral-500 mx-1" aria-hidden="true">·</span>
+                                        <span class="text-neutral-600">{{ $student->year_level }}</span>
                                     @endif
                                 </td>
 
-                                {{-- Registered Date --}}
-                                {{-- CHANGED: shows $registeredAt (Philippine time) instead of the raw UTC date. --}}
-                                <td class="px-5 py-3.5 text-xs text-neutral-500 font-medium whitespace-nowrap">
-                                    {{ $registeredAt }}
+                                {{-- CHANGED: this month's status ($monthBadge). --}}
+                                <td class="px-4 py-3">{!! $monthBadge($student) !!}</td>
+
+                                {{-- CHANGED: all-time count as a plain number; one per month at most, so it also counts the months the student took part. --}}
+                                <td class="px-4 py-3 text-right text-[13px] text-neutral-700 tabular-nums">{{ $student->evaluations_count }}</td>
+
+                                {{-- CHANGED: shows the registration date in Philippine time instead of the raw UTC date. --}}
+                                <td class="pl-8 pr-4 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
+                                    <time datetime="{{ $student->registered_at->toIso8601String() }}">{{ $student->registered_label }}</time>
                                 </td>
 
-                                {{-- Action --}}
-                                {{-- CHANGED: passes $modalDates so the modal shows server-formatted dates; button rounded-lg to rounded-md. --}}
-                                <td class="px-5 py-3.5 text-right whitespace-nowrap">
-                                    <button type="button"
-                                        onclick='openDetailsModal(@json($student), @json($dept), @json($modalDates))'
-                                        class="text-brand-700 hover:text-brand-800 text-xs font-bold inline-flex items-center gap-1 transition-all bg-white px-3 py-1.5 rounded-md border border-brand-200/80 hover:bg-brand-50 shadow-2xs">
-                                        <ion-icon name="eye-outline" class="text-sm"></ion-icon>
-                                        View
+                                {{-- CHANGED: the bordered "View" button became an eye icon button, as on the evaluations page. --}}
+                                <td class="px-3 py-3 text-right">
+                                    <button type="button" aria-label="View {{ $student->name }}"
+                                        class="w-8 h-8 inline-flex items-center justify-center rounded-md text-neutral-500 hover:text-brand-700 hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-brand-600 cursor-pointer">
+                                        <ion-icon name="eye-outline" class="text-base" aria-hidden="true"></ion-icon>
                                     </button>
                                 </td>
                             </tr>
@@ -343,63 +281,24 @@
                 </table>
 
                 <!-- Mobile Card View -->
+                {{-- CHANGED: one row per student: neutral avatar, name with ID and program underneath, status and an eye button on the right. The whole card opens the details dialog. The labelled grey box and the department chip are gone; department shows only with more than one department. --}}
                 <div class="md:hidden divide-y divide-neutral-100">
                     @foreach($students as $student)
-                        @php
-                            $dept = getStudentDeptInfo($student->course);
-                            $hasEvaluations = $student->evaluations_count > 0;
-                            // CHANGED: same Philippine-time dates as the desktop table.
-                            $registeredAt = \Carbon\Carbon::parse($student->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y');
-                            $lastEvalAt = $student->last_evaluation_at ? \Carbon\Carbon::parse($student->last_evaluation_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') : null;
-                            $modalDates = ['registered' => $registeredAt, 'last_eval' => $lastEvalAt];
-                        @endphp
-                        <div class="p-4 flex flex-col gap-3 hover:bg-neutral-50/70 transition-colors">
-                            <div class="flex items-start justify-between gap-2">
-                                {{-- CHANGED: avatar rounded-lg to rounded-md. --}}
-                                <div class="flex items-center gap-2.5 min-w-0">
-                                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200 text-brand-800 font-bold text-xs flex items-center justify-center shrink-0">
-                                        {{ strtoupper(substr($student->name, 0, 1)) }}
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">{{ $student->name }}</h3>
-                                    </div>
-                                </div>
-                                {{-- CHANGED: neutral department badge (no per-department colour), 10px to 11px, rounded-full to rounded-md. --}}
-                                <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-bold border bg-neutral-100 text-neutral-800 border-neutral-200/70 shrink-0">
-                                    {{ $dept['code'] }}
-                                </span>
+                        <div class="p-4 flex items-center gap-3 hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openDetailsModal(@json($student))'>
+                            <span class="w-8 h-8 rounded-full bg-neutral-100 text-neutral-600 text-xs font-semibold flex items-center justify-center shrink-0" aria-hidden="true">
+                                {{ strtoupper(substr($student->name, 0, 1)) }}
+                            </span>
+                            <div class="min-w-0 flex-1">
+                                <h3 class="text-sm font-semibold text-neutral-900 leading-tight truncate">{{ $student->name }}</h3>
+                                <p class="text-xs text-neutral-600 mt-0.5 truncate tabular-nums">
+                                    {{ $student->student_number ?: 'No ID' }} · {{ $showDept ? $student->dept['code'] . ' · ' : '' }}{{ $student->course ?: 'Not set' }}{{ $student->year_level ? ' · ' . $student->year_level : '' }}
+                                </p>
                             </div>
-
-                            {{-- CHANGED: labels raised from 10px neutral-400 to 11px neutral-500; em-dash placeholders for a missing course or year replaced with "Not set"; box rounded-lg to rounded-md. --}}
-                            <div class="grid grid-cols-2 gap-2 text-xs bg-neutral-50/70 p-2.5 rounded-md border border-neutral-100">
-                                <div>
-                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Student Number</span>
-                                    <span class="font-mono font-semibold text-neutral-900">{{ $student->student_number ?: 'N/A' }}</span>
-                                </div>
-                                <div>
-                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Program / Year</span>
-                                    <span class="font-medium text-neutral-900">{{ $student->course ?: 'Not set' }} ({{ $student->year_level ?: 'Not set' }})</span>
-                                </div>
-                            </div>
-
-                            <div class="flex items-center justify-between pt-1">
-                                {{-- CHANGED: count uses Str::plural (it printed "1 evaluations"); the zero state darkened from neutral-400 to neutral-500. --}}
-                                <div class="text-xs">
-                                    @if($hasEvaluations)
-                                        <span class="text-emerald-700 font-bold flex items-center gap-1">
-                                            <ion-icon name="checkmark-circle" class="text-sm"></ion-icon>
-                                            {{ $student->evaluations_count }} {{ Str::plural('evaluation', $student->evaluations_count) }}
-                                        </span>
-                                    @else
-                                        <span class="text-neutral-500 font-medium">0 evaluations</span>
-                                    @endif
-                                </div>
-                                {{-- CHANGED: "Details" renamed "View" to match the desktop table; passes $modalDates; rounded-lg to rounded-md. --}}
-                                <button type="button"
-                                    onclick='openDetailsModal(@json($student), @json($dept), @json($modalDates))'
-                                    class="text-brand-700 hover:text-brand-800 text-xs font-bold inline-flex items-center gap-1 bg-white px-3 py-1.5 rounded-md border border-brand-200 shadow-2xs">
-                                    <ion-icon name="eye-outline" class="text-sm"></ion-icon>
-                                    View
+                            <div class="shrink-0 flex items-center gap-1">
+                                {!! $monthBadge($student) !!}
+                                <button type="button" aria-label="View {{ $student->name }}"
+                                    class="w-9 h-9 -mr-2 inline-flex items-center justify-center rounded-md text-neutral-500 hover:text-brand-700 cursor-pointer">
+                                    <ion-icon name="eye-outline" class="text-base" aria-hidden="true"></ion-icon>
                                 </button>
                             </div>
                         </div>
@@ -410,14 +309,15 @@
             {{-- ── Pagination Footer Bar ───────────────────────────────── --}}
             <div class="px-5 py-4 bg-neutral-50/70 border-t border-neutral-200/70 flex flex-col sm:flex-row items-center justify-between gap-3">
                 <div class="flex items-center gap-3 text-xs text-neutral-500 font-medium order-2 sm:order-1">
+                    {{-- CHANGED: "accounts" became "students". --}}
                     <span>
-                        Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->firstItem() ?? 0 }}</strong> to <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->lastItem() ?? 0 }}</strong> of <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->total() }}</strong> accounts
+                        Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->firstItem() ?? 0 }}</strong> to <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->lastItem() ?? 0 }}</strong> of <strong class="text-neutral-900 font-bold tabular-nums">{{ $students->total() }}</strong> students
                     </span>
 
                     {{-- Per Page Selector --}}
+                    {{-- CHANGED: "PER PAGE" uppercase bold became sentence-case "Per page", as on the evaluations page. --}}
                     <div class="flex items-center gap-1.5 border-l border-neutral-200 pl-3">
-                        {{-- CHANGED: label neutral-400 to neutral-500; select rounded to rounded-md. --}}
-                        <label for="per_page_select" class="text-[11px] font-bold text-neutral-500 uppercase">Per Page</label>
+                        <label for="per_page_select" class="text-xs text-neutral-500">Per page</label>
                         <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded-md px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
                             @foreach([10, 25, 50] as $size)
                                 <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" {{ $students->perPage() == $size ? 'selected' : '' }}>
@@ -529,6 +429,7 @@
         </div>
 
         {{-- Section 2: Participation & Evaluation Record --}}
+        {{-- CHANGED: the "Last submitted" date line is gone; matched against the evaluations page it identified who wrote an anonymous evaluation. The count and this month's status show instead. --}}
         <div>
             <span class="block text-[11px] font-bold text-neutral-500 uppercase tracking-wider mb-2">
                 Participation & Evaluation Record
@@ -539,8 +440,8 @@
                         <ion-icon name="receipt-outline" class="text-base"></ion-icon>
                     </div>
                     <div>
-                        <p class="text-xs font-bold text-neutral-900">Total Evaluations Submitted</p>
-                        <p class="text-[11px] text-neutral-500 font-medium" id="details-last-submitted"></p>
+                        <p class="text-xs font-bold text-neutral-900">Evaluations submitted</p>
+                        <p id="details-this-month" class="text-[11px] text-neutral-600 font-medium"></p>
                     </div>
                 </div>
                 <span id="details-eval-count" class="text-xs font-bold font-mono text-brand-900 bg-brand-50 px-2.5 py-1 rounded-md border border-brand-200 tabular-nums"></span>
@@ -548,9 +449,9 @@
         </div>
 
         {{-- Section 3: Account Metadata --}}
-        {{-- CHANGED: footer text neutral-400 to neutral-500. --}}
+        {{-- CHANGED: footer text neutral-400 to neutral-500; role "Student Evaluator" became "Student", the page's one name. --}}
         <div class="pt-3 border-t border-neutral-100 flex items-center justify-between text-[11px] text-neutral-500">
-            <span>Account Role: <strong class="text-neutral-700 font-semibold">Student Evaluator</strong></span>
+            <span>Account Role: <strong class="text-neutral-700 font-semibold">Student</strong></span>
             <span>Registered: <strong id="details-created-at" class="text-neutral-700 font-semibold"></strong></span>
         </div>
     </div>
@@ -567,39 +468,22 @@
 <script>
 var detailsModal = document.getElementById('details-modal');
 
-function toggleFilterDrawer() {
-    var drawer = document.getElementById('filter-drawer');
-    var label = document.getElementById('filter-toggle-label');
-    if (!drawer) return;
-
-    var isHidden = drawer.classList.contains('hidden');
-    if (isHidden) {
-        drawer.classList.remove('hidden');
-        if (label) label.textContent = 'Hide Filters';
-    } else {
-        drawer.classList.add('hidden');
-        if (label) label.textContent = 'Show Filters';
-    }
-}
-
-// CHANGED: takes a third argument with the registered and last-evaluation dates already formatted in Philippine time by the server.
-function openDetailsModal(student, dept, dates) {
-    dates = dates || {};
+// CHANGED: takes only the student; department and the Philippine-time registration date arrive on it (dept, registered_label), set by the server. toggleFilterDrawer() is gone with the drawer.
+function openDetailsModal(student) {
     document.getElementById('details-name').textContent = student.name;
     document.getElementById('details-student-number-badge').textContent = 'ID: ' + (student.student_number || 'N/A');
     document.getElementById('modal-avatar').textContent = (student.name || 'S').charAt(0).toUpperCase();
 
     document.getElementById('details-student-number').textContent = student.student_number || 'Not Set';
-    document.getElementById('details-dept-name').textContent = (dept && dept.name) ? dept.name : (student.course || 'General');
+    document.getElementById('details-dept-name').textContent = student.dept.name;
     document.getElementById('details-course').textContent = student.course || 'Not Set';
     document.getElementById('details-year').textContent = student.year_level || 'Not Set';
 
-    var evalCount = student.evaluations_count || 0;
-    document.getElementById('details-eval-count').textContent = evalCount + ' Submitted';
-
-    // CHANGED: uses the server-formatted dates. new Date() on the raw "YYYY-MM-DD HH:MM:SS" value read UTC as local time, and Safari cannot parse that format at all ("Invalid Date"). The missing-date fallback is "Not set" instead of an em-dash.
-    document.getElementById('details-last-submitted').textContent = dates.last_eval ? 'Last submitted: ' + dates.last_eval : 'No submissions yet';
-    document.getElementById('details-created-at').textContent = dates.registered || 'Not set';
+    // CHANGED: "N Submitted" became "1 evaluation" / "N evaluations"; the last-submitted date gave way to this month's status.
+    var evalCount = Number(student.evaluations_count) || 0;
+    document.getElementById('details-eval-count').textContent = evalCount + (evalCount === 1 ? ' evaluation' : ' evaluations');
+    document.getElementById('details-this-month').textContent = (Number(student.evaluated_this_month) ? 'Evaluated in ' : 'Not yet evaluated in ') + @json($month);
+    document.getElementById('details-created-at').textContent = student.registered_label;
 
     detailsModal.showModal();
 }

@@ -384,6 +384,10 @@ class AdminController extends Controller
             'CAS'    => ['BA COMM', 'BS PSYCH', 'BS BIO', 'BACOMM', 'BSPSYCH'],
         ];
 
+        // CHANGED: a student may evaluate once per calendar month in Philippine time (StudentEvaluationController::monthlyLimitMessage), so participation is tracked for the current month. created_at is stored in UTC, so the month start is converted.
+        $monthStart = now('Asia/Manila')->startOfMonth()->utc();
+        $thisMonthSql = 'MAX(CASE WHEN stall_evaluations.created_at >= ? THEN 1 ELSE 0 END)';
+
         $query = DB::table('users')
             ->leftJoin('stall_evaluations', 'stall_evaluations.student_id', '=', 'users.id')
             ->where('users.role', 'student')
@@ -394,9 +398,11 @@ class AdminController extends Controller
                 'users.course',
                 'users.year_level',
                 'users.created_at',
-                DB::raw('COUNT(stall_evaluations.id) as evaluations_count'),
-                DB::raw('MAX(stall_evaluations.created_at) as last_evaluation_at')
+                // CHANGED: dropped MAX(stall_evaluations.created_at) as last_evaluation_at. The Students page showed it as "Last submitted", and matching that date against the Evaluations page identified who wrote an "anonymous" evaluation.
+                DB::raw('COUNT(stall_evaluations.id) as evaluations_count')
             )
+            // CHANGED: 1 if the student has evaluated this month, else 0.
+            ->selectRaw("{$thisMonthSql} as evaluated_this_month", [$monthStart])
             ->groupBy(
                 'users.id',
                 'users.name',
@@ -435,12 +441,28 @@ class AdminController extends Controller
             $query->whereRaw('LOWER(users.year_level) = ?', [strtolower($request->year_level)]);
         }
 
+        // CHANGED: this month's participation counts for the summary line and the All / Evaluated / Not yet filter. Taken after search and the other filters but before the status filter, so each count matches what its option returns.
+        $participation = DB::query()->fromSub(clone $query, 'filtered')
+            ->selectRaw('COUNT(*) AS total, SUM(evaluated_this_month) AS evaluated')
+            ->first();
+
+        // CHANGED: status filter: students who have evaluated this month, or have not yet.
+        if ($request->get('status') === 'evaluated') {
+            $query->havingRaw("{$thisMonthSql} = 1", [$monthStart]);
+        } elseif ($request->get('status') === 'pending') {
+            $query->havingRaw("{$thisMonthSql} = 0", [$monthStart]);
+        }
+
         // Sort order
         $sortBy = $request->get('sort', 'latest');
         if ($sortBy === 'name_asc') {
             $query->orderBy('users.name', 'asc');
         } elseif ($sortBy === 'evaluations_desc') {
-            $query->orderByDesc('evaluations_count');
+            // CHANGED: ties ordered by name, so students with equal counts keep a stable order across pages.
+            $query->orderByDesc('evaluations_count')->orderBy('users.name');
+        } elseif ($sortBy === 'evaluations_asc') {
+            // CHANGED: new "fewest evaluations first" order, used by the sortable Evaluations header.
+            $query->orderBy('evaluations_count')->orderBy('users.name');
         } elseif ($sortBy === 'oldest') {
             $query->orderBy('users.created_at', 'asc');
         } else {
@@ -490,8 +512,10 @@ class AdminController extends Controller
 
         $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
 
+        // CHANGED: passes $participation for the summary line and status filter counts.
         return view('admin.students', compact(
             'students',
+            'participation',
             'departmentStats',
             'departments',
             'courseOptions',
