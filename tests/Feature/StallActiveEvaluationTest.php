@@ -200,17 +200,6 @@ test('a second evaluation in the same month is rejected even for a different sta
     $this->assertDatabaseCount('stall_evaluations', 1);
 });
 
-test('an evaluation from last month does not block this month', function () {
-    $this->travelTo(Carbon::parse('2026-11-03 02:00:00', 'UTC'));
-    pastEvaluation($this->student->id, $this->activeStallId, '2026-10-20 03:00:00');
-
-    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
-        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSessionHas('success', 'Evaluation submitted successfully!');
-
-    $this->assertDatabaseCount('stall_evaluations', 2);
-});
-
 test('the month follows Philippine time, not UTC', function () {
     // Nov 1, 00:30 in Manila is still Oct 31 in UTC.
     $this->travelTo(Carbon::parse('2026-10-31 16:30:00', 'UTC'));

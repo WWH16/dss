@@ -186,16 +186,12 @@ class StudentEvaluationController extends Controller
     {
         $monthStart = now('Asia/Manila')->startOfMonth();
 
-        $used = DB::table('stall_evaluations')
+        return DB::table('stall_evaluations')
             ->where('student_id', $studentId)
             ->where('created_at', '>=', $monthStart->copy()->utc())
-            ->exists();
-
-        if (! $used) {
-            return null;
-        }
-
-        return "You have already submitted your evaluation for {$monthStart->format('F')}. "
-            . "You can evaluate a stall again on {$monthStart->copy()->addMonth()->format('F j')}.";
+            ->exists()
+            ? "You have already submitted your evaluation for {$monthStart->format('F')}. "
+                . "You can evaluate a stall again on {$monthStart->copy()->addMonth()->format('F j')}."
+            : null;
     }
 }

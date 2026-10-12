@@ -62,11 +62,9 @@
                 </p>
 
                 {{-- CHANGED: removed the "Evaluate Another Stall" button; a second evaluation this month is not allowed. --}}
-                <div class="flex flex-col sm:flex-row items-center justify-center gap-3 w-full sm:w-auto">
-                    <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center shadow-2xs">
-                        Back to Dashboard
-                    </a>
-                </div>
+                <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center shadow-2xs">
+                    Back to Dashboard
+                </a>
             </div>
         {{-- CHANGED: the "scan the QR code" notice is now an in-page scanner. The camera reads the stall's QR code and opens its evaluation; CHANGED: uploading a saved image of the code works too, for phones where live camera access is blocked. --}}
         @elseif(! $stall)
