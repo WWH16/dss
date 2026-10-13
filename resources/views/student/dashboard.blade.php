@@ -218,7 +218,8 @@
                                     @if($isRated)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-emerald-50 text-emerald-800 border border-emerald-200/80 shrink-0">
                                             <ion-icon name="checkmark-circle" class="text-xs text-emerald-600" aria-hidden="true"></ion-icon>
-                                            Rated ({{ number_format($evalInfo['latest_avg'], 1) }}{!! $star !!})
+                                            {{-- CHANGED: says "Rated this month" when this stall's evaluation for the month is used. --}}
+                                            {{ $evalInfo['this_month'] ? 'Rated this month' : 'Rated' }} ({{ number_format($evalInfo['latest_avg'], 1) }}{!! $star !!})
                                         </span>
                                     @else
                                         {{-- CHANGED: neutral "Not yet rated" chip instead of an amber warning; an unrated stall is not a problem to fix. --}}

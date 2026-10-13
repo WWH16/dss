@@ -94,3 +94,22 @@ test('an evaluation this month leaves the scanner open for other stalls', functi
         ->assertDontSee('evaluation done')
         ->assertDontSee('Next evaluation opens');
 });
+
+// ADDED: a stall evaluated this month says so on its card; one evaluated last month does not.
+test('the stall card shows Rated this month only for this month', function () {
+    $stall = fn ($name) => DB::table('stalls')->insertGetId([
+        'name' => $name, 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $rate = fn ($stallId, $at) => DB::table('stall_evaluations')->insert([
+        'student_id' => $this->student->id, 'stall_id' => $stallId,
+        'cleanliness' => 4, 'service' => 4, 'taste' => 4, 'price' => 4,
+        'created_at' => $at, 'updated_at' => $at,
+    ]);
+    $rate($stall('Rice Corner'), now());
+    $rate($stall('Noodle Bar'), now('Asia/Manila')->startOfMonth()->subDay()->utc());
+
+    $content = $this->actingAs($this->student)->get(route('student.dashboard'))->assertOk()->getContent();
+
+    expect(substr_count($content, 'Rated this month ('))->toBe(1);
+    expect(substr_count($content, 'Rated (4.0'))->toBe(1);
+});

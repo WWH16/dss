@@ -48,17 +48,21 @@ class StudentDashboardController extends Controller
             ->get();
 
         // Map evaluations by stall ID for fast status badge lookup
-        $evaluatedStallsMap = $myStudentEvals->groupBy('stall_id')->map(function ($evals) {
+        // CHANGED: the month start (Philippine time, converted to UTC like created_at) is passed in for 'this_month'.
+        $monthStart = now('Asia/Manila')->startOfMonth()->utc();
+        $evaluatedStallsMap = $myStudentEvals->groupBy('stall_id')->map(function ($evals) use ($monthStart) {
             $latest = $evals->first();
             $avg = ($latest->cleanliness + $latest->service + $latest->taste + $latest->price) / 4;
             return [
                 'eval_count' => $evals->count(),
                 'latest_avg' => round($avg, 1),
                 'latest_date' => $latest->created_at,
+                // ADDED: true when this stall's evaluation for the month is used (one per stall per month).
+                'this_month' => \Carbon\Carbon::parse($latest->created_at)->gte($monthStart),
             ];
         });
 
-        // CHANGED: removed $monthStart and $thisMonthEval. The limit is one evaluation per stall per month,
+        // CHANGED: removed $thisMonthEval. The limit is one evaluation per stall per month,
         // so one evaluation no longer closes the month for the whole dashboard.
 
         // Summary Stats
