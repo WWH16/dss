@@ -70,7 +70,7 @@ class StudentDashboardController extends Controller
         $uniqueEvaluatedCount = $stalls->filter(function ($s) use ($evaluatedStallsMap) {
             return $evaluatedStallsMap->has($s->id);
         })->count();
-        $coveragePct = $totalStallsCount > 0 ? round(($uniqueEvaluatedCount / $totalStallsCount) * 100) : 0;
+        // CHANGED: removed $coveragePct; the dashboard no longer shows a coverage percentage.
         $totalEvalsCount = $myStudentEvals->count();
 
         $overallAvgGiven = $totalEvalsCount > 0
@@ -109,7 +109,6 @@ class StudentDashboardController extends Controller
             'evaluatedStallsMap',
             'totalStallsCount',
             'uniqueEvaluatedCount',
-            'coveragePct',
             'totalEvalsCount',
             'overallAvgGiven',
             'topCampusStall',

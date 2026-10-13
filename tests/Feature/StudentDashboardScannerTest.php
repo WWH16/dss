@@ -75,7 +75,7 @@ test('the dashboard has exactly one h1', function () {
     expect(substr_count($content, '<h1'))->toBe(1);
 });
 
-// ADDED: one evaluation per month. Once this month's is used, the dashboard says so; the Scan QR button stays.
+// ADDED: one evaluation per month. Once this month's is used, the dashboard says so; the Scan QR button stays but opens a notice, not the camera.
 test('the dashboard shows this month as done after an evaluation this month', function () {
     $stallId = DB::table('stalls')->insertGetId([
         'name' => 'Rice Corner', 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
@@ -93,7 +93,8 @@ test('the dashboard shows this month as done after an evaluation this month', fu
         ->assertSee('Rice Corner')
         ->assertSee($month->copy()->addMonth()->format('F j'))
         ->assertSee('class="js-open-scanner', false)
-        ->assertSee('id="qr-start"', false);
+        ->assertSee('Next evaluation opens')
+        ->assertDontSee('id="qr-start"', false);
 });
 
 test('an evaluation from last month leaves this month open', function () {
@@ -110,5 +111,6 @@ test('an evaluation from last month leaves this month open', function () {
     $this->actingAs($this->student)->get(route('student.dashboard'))
         ->assertOk()
         ->assertSee('Your ' . now('Asia/Manila')->format('F') . ' evaluation is open')
+        ->assertSee("Find the QR code posted at the stall's counter.")
         ->assertSee('id="qr-start"', false);
 });

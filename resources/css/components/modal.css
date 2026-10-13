@@ -59,6 +59,13 @@ dialog.confirm-modal[open] {
     animation: modal-enter 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+/* ADDED: with reduced motion the dialog appears in place, without the scale and slide. */
+@media (prefers-reduced-motion: reduce) {
+    dialog.confirm-modal[open] {
+        animation: none;
+    }
+}
+
 @keyframes modal-enter {
     from {
         opacity: 0;
