@@ -32,8 +32,9 @@
                     <ion-icon name="people" class="text-lg text-amber-700"></ion-icon>
                 </div>
                 <div>
+                    {{-- CHANGED: "N Staff Accounts Pending Assignment" became "N Unassigned Staff Accounts", the word the Staff & Admins page and the staff pickers use. --}}
                     <h3 class="text-xs font-bold text-amber-950">
-                        {{ $unassignedStaff->count() }} {{ Str::plural('Staff Account', $unassignedStaff->count()) }} Pending Assignment
+                        {{ $unassignedStaff->count() }} Unassigned {{ Str::plural('Staff Account', $unassignedStaff->count()) }}
                     </h3>
                     {{-- CHANGED: amber-800 at 90% opacity became solid amber-900 for contrast on the amber background. --}}
                     <p class="text-[11px] text-amber-900 mt-0.5">

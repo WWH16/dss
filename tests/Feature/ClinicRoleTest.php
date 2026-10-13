@@ -186,7 +186,8 @@ test('admin users page lists and filters clinic accounts', function () {
 
     $this->actingAs($admin)->get(route('admin.users'))
         ->assertSee('Clinic Nurse')
-        ->assertSee('Clinic (1)');
+        // CHANGED: the role tabs show the count beside the label instead of in brackets (was "Clinic (1)").
+        ->assertSeeInOrder(['role=clinic', 'Clinic', '>1</span>'], false);
 
     $this->actingAs($admin)->get(route('admin.users', ['role' => 'clinic']))
         ->assertSee('Clinic Nurse')

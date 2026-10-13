@@ -643,6 +643,7 @@ class AdminController extends Controller
     {
         // Total system counts for stat cards & filter pill badges
         // CHANGED: include clinic accounts and count them.
+        // CHANGED: dropped assigned_staff_count; only the removed stat card showed it.
         $stats = DB::table('users')
             ->whereIn('role', ['admin', 'staff', 'clinic'])
             ->selectRaw("
@@ -650,7 +651,6 @@ class AdminController extends Controller
                 COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_count,
                 COUNT(CASE WHEN role = 'clinic' THEN 1 END) as clinic_count,
                 COUNT(CASE WHEN role = 'staff' THEN 1 END) as staff_count,
-                COUNT(CASE WHEN role = 'staff' AND stall_id IS NOT NULL THEN 1 END) as assigned_staff_count,
                 COUNT(CASE WHEN role = 'staff' AND stall_id IS NULL THEN 1 END) as unassigned_staff_count
             ")
             ->first();
@@ -695,7 +695,11 @@ class AdminController extends Controller
             $perPage = 10;
         }
 
-        $users = $query->orderByDesc('users.created_at')->paginate($perPage)->withQueryString();
+        // CHANGED: admins first, then clinic, then staff, newest first within each role. Sorting by date alone filled page 1 with staff.
+        $users = $query
+            ->orderByRaw("CASE users.role WHEN 'admin' THEN 0 WHEN 'clinic' THEN 1 ELSE 2 END")
+            ->orderByDesc('users.created_at')
+            ->paginate($perPage)->withQueryString();
 
         $stalls = DB::table('stalls')
             ->select('id', 'name', 'is_active')

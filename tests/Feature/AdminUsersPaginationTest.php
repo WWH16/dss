@@ -53,10 +53,11 @@ test('admin can access users directory with pagination and system stats', functi
     $response = $this->actingAs($this->admin)->get(route('admin.users'));
 
     $response->assertStatus(200);
-    $response->assertSee('Staff &amp; Administrators', false);
-    $response->assertSee('Total Accounts');
+    // CHANGED: the visible heading and the stat cards are gone; the screen-reader h1 matches the top bar and the footer reads "Per page".
+    $response->assertSee('<h1 class="sr-only">Staff &amp; Admins</h1>', false);
+    $response->assertDontSee('Total Accounts');
     $response->assertSee('Showing');
-    $response->assertSee('Per Page');
+    $response->assertSee('Per page');
     $response->assertSee('Second Administrator');
     $response->assertSee('Assigned Vendor');
     $response->assertSee('Unassigned Staff');
@@ -241,3 +242,21 @@ test('users page includes enter key modal navigation configuration', function ()
     $response->assertSee('create-user-submit-btn', false);
 });
 
+// ADDED: page 1 starts with the admins; every row but your own has Delete beside Edit.
+test('users directory lists admins first with delete beside edit', function () {
+    User::create([
+        'name' => 'Newest Staff',
+        'email' => 'newest@example.com',
+        'password' => bcrypt('StaffPassword123!'),
+        'role' => 'staff',
+        'email_verified_at' => now(),
+        'created_at' => now()->addDay(),
+    ]);
+
+    $content = $this->actingAs($this->admin)->get(route('admin.users'))->getContent();
+    $table = substr($content, strpos($content, 'id="users-desktop-table"'), strpos($content, 'id="users-mobile-list"') - strpos($content, 'id="users-desktop-table"'));
+
+    expect(strpos($table, 'Second Administrator'))->toBeLessThan(strpos($table, 'Newest Staff'));
+    expect(substr_count($table, 'openDeleteUserModal('))->toBe(4);
+    expect($table)->toContain('Current User');
+});

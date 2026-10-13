@@ -35,113 +35,35 @@
         </div>
     @endif
 
-    {{-- ── 1. Page Header & Primary Actions ────────────────────────────── --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200/80">
-        <div>
-            <h1 class="text-2xl font-bold text-neutral-900 tracking-tight flex items-center gap-2.5">
-                <ion-icon name="shield-checkmark-outline" class="text-brand-700 text-2xl"></ion-icon>
-                <span>Staff &amp; Administrators</span>
-            </h1>
-            <p class="text-xs text-neutral-500 mt-0.5 max-w-2xl">
-                Directory and access management for canteen staff and system administrators.
-            </p>
-        </div>
-        <div class="flex items-center gap-2.5 self-start sm:self-auto shrink-0">
-            <button type="button" onclick="openCreateUserModal()"
-                class="btn btn-primary text-xs font-bold px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all">
-                <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
-                <span>New Account</span>
-            </button>
-        </div>
-    </div>
+    {{-- CHANGED: the visible "Staff & Administrators" heading and its description repeated the top bar under a second name; the h1 stays for screen readers and matches the top bar, as on the students and evaluations pages. New Account moved into the toolbar below. --}}
+    <h1 class="sr-only">Staff &amp; Admins</h1>
 
-    {{-- ── 2. Stat Metric Cards ────────────────────────────────────────── --}}
     @php
-        $totalCount = $stats->total_count ?? $users->total();
-        $adminCount = $stats->admin_count ?? 0;
-        $clinicCount = $stats->clinic_count ?? 0; // ADDED: clinic accounts
-        $staffCount = $stats->staff_count ?? 0;
-        $assignedStaffCount = $stats->assigned_staff_count ?? 0;
-        $unassignedStaffCount = $stats->unassigned_staff_count ?? 0;
         $currentRole = request('role', 'all');
         $hasFilters = request()->filled('q') || ($currentRole !== 'all') || (request()->filled('per_page') && request('per_page') != 10);
+        // CHANGED: the role tabs come from one list instead of five copied links, and read their counts straight from $stats; the separate count variables (with fallbacks that never ran, since a COUNT query always returns a row) only fed the removed stat cards.
+        $roleTabs = ['all' => ['All', $stats->total_count], 'admin' => ['Admins', $stats->admin_count], 'clinic' => ['Clinic', $stats->clinic_count], 'staff' => ['Staff', $stats->staff_count], 'unassigned' => ['Unassigned', $stats->unassigned_staff_count]];
     @endphp
 
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-        {{-- Total Accounts Card --}}
-        <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
-            <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Accounts</span>
-                <div class="w-8 h-8 rounded-md bg-neutral-100 text-neutral-700 flex items-center justify-center">
-                    <ion-icon name="id-card" class="text-base"></ion-icon>
-                </div>
-            </div>
-            <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-2xl font-bold font-display text-neutral-900">{{ $totalCount }}</span>
-                <span class="text-xs text-neutral-500 font-medium">accounts</span>
-            </div>
-            {{-- CHANGED: added clinic count. --}}
-            <p class="text-[11px] text-neutral-500 mt-1">{{ $adminCount }} administrators · {{ $clinicCount }} clinic · {{ $staffCount }} canteen staff</p>
-        </div>
+    {{-- CHANGED: removed the three stat cards. Every count they showed (total, admins, staff, unassigned) is already on the role tabs, so the table now starts at the top of the page. --}}
 
-        {{-- System Administrators Card --}}
-        <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
-            <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-brand-800 uppercase tracking-wider">System Administrators</span>
-                <div class="w-8 h-8 rounded-md bg-brand-50 text-brand-700 border border-brand-200/80 flex items-center justify-center">
-                    <ion-icon name="shield-checkmark" class="text-base"></ion-icon>
-                </div>
-            </div>
-            <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-2xl font-bold font-display text-neutral-900">{{ $adminCount }}</span>
-                <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-brand-50 text-brand-700 border border-brand-200 text-[11px]">
-                    Full Access
-                </span>
-            </div>
-            <p class="text-[11px] text-neutral-500 mt-1">Full management of stalls, evaluations, and settings</p>
-        </div>
-
-        {{-- Canteen Staff Card --}}
-        <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs relative overflow-hidden">
-            <div class="flex items-center justify-between">
-                <span class="text-[11px] font-bold text-neutral-600 uppercase tracking-wider">Canteen Staff</span>
-                <div class="w-8 h-8 rounded-md bg-neutral-50 text-neutral-700 border border-neutral-200/80 flex items-center justify-center">
-                    <ion-icon name="storefront" class="text-base"></ion-icon>
-                </div>
-            </div>
-            <div class="mt-3 flex items-baseline gap-2">
-                <span class="text-2xl font-bold font-display text-neutral-900">{{ $staffCount }}</span>
-                @if($unassignedStaffCount > 0)
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200 text-[11px] flex items-center gap-1">
-                        <ion-icon name="alert-circle" class="text-xs"></ion-icon>
-                        {{ $unassignedStaffCount }} Unassigned
-                    </span>
-                @else
-                    <span class="text-xs font-semibold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200 text-[11px]">
-                        All Assigned
-                    </span>
+    {{-- CHANGED: search, role tabs and the table share one card, as on the students and evaluations pages. The active-filter chips are gone: the tabs and the search box already show the filter, and the footer shows the count. --}}
+    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs overflow-hidden">
+        <div class="p-4 sm:px-5 border-b border-neutral-200/70 flex flex-col lg:flex-row lg:items-center gap-2.5">
+            <form id="user-filter-form" method="GET" action="{{ route('admin.users') }}" class="flex-1 flex flex-col sm:flex-row sm:items-center gap-2.5 min-w-0">
+                @if(request('role') && request('role') !== 'all')
+                    <input type="hidden" name="role" value="{{ request('role') }}">
                 @endif
-            </div>
-            <p class="text-[11px] text-neutral-500 mt-1">{{ $assignedStaffCount }} assigned to canteen stalls</p>
-        </div>
-    </div>
+                @if(request('per_page'))
+                    <input type="hidden" name="per_page" value="{{ request('per_page') }}">
+                @endif
 
-    {{-- ── 3. Search & Filter Bar ───────────────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs p-4 sm:p-5">
-        <form id="user-filter-form" method="GET" action="{{ route('admin.users') }}" class="space-y-3">
-            @if(request('role') && request('role') !== 'all')
-                <input type="hidden" name="role" value="{{ request('role') }}">
-            @endif
-            @if(request('per_page'))
-                <input type="hidden" name="per_page" value="{{ request('per_page') }}">
-            @endif
-
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
                 {{-- Search Input --}}
-                <div class="flex-1 relative">
-                    <ion-icon name="search-outline" class="absolute left-3.5 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
+                <div class="flex-1 relative min-w-0">
+                    <label for="user-search-input" class="sr-only">Search accounts</label> {{-- ADDED --}}
+                    <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
                     <input type="text" name="q" id="user-search-input" value="{{ request('q') }}" placeholder="Search by name, email, or stall…"
-                        class="w-full pl-9 pr-9 py-2 bg-neutral-50/70 border border-neutral-200 rounded-md text-xs sm:text-sm font-medium focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
+                        class="w-full pl-9 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
                     @if(request('q'))
                         <a href="{{ route('admin.users', array_filter(['role' => $currentRole !== 'all' ? $currentRole : null, 'per_page' => request('per_page')])) }}"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Clear search">
@@ -150,68 +72,43 @@
                     @endif
                 </div>
 
-                {{-- Role Filter Pills --}}
-                {{-- CHANGED: the active pill is brand-700 instead of neutral-900, matching the stalls page. The active "Unassigned" pill was white on amber-500 (about 2.1:1 contrast, unreadable) and is now brand-700 like the others. --}}
-                <div class="flex items-center gap-1.5 overflow-x-auto pb-1 sm:pb-0 shrink-0 text-xs">
-                    <a href="{{ route('admin.users', array_filter(['q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'all' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
-                        All ({{ $totalCount }})
-                    </a>
-                    <a href="{{ route('admin.users', array_filter(['role' => 'admin', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'admin' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
-                        Admins ({{ $adminCount }})
-                    </a>
-                    {{-- ADDED: clinic filter pill. --}}
-                    <a href="{{ route('admin.users', array_filter(['role' => 'clinic', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'clinic' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
-                        Clinic ({{ $clinicCount }})
-                    </a>
-                    <a href="{{ route('admin.users', array_filter(['role' => 'staff', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'staff' ? 'font-bold bg-brand-700 text-white shadow-2xs' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200' }}">
-                        Staff ({{ $staffCount }})
-                    </a>
-                    <a href="{{ route('admin.users', array_filter(['role' => 'unassigned', 'q' => request('q'), 'per_page' => request('per_page')])) }}"
-                        class="px-3 py-1.5 rounded-md transition-all cursor-pointer {{ $currentRole === 'unassigned' ? 'font-bold bg-brand-700 text-white shadow-2xs' : ($unassignedStaffCount > 0 ? 'font-semibold bg-amber-50 text-amber-800 border border-amber-300 hover:bg-amber-100' : 'font-semibold bg-neutral-100 text-neutral-600 hover:bg-neutral-200') }} flex items-center gap-1">
-                        @if($unassignedStaffCount > 0 && $currentRole !== 'unassigned')
-                            <ion-icon name="alert-circle" class="text-xs text-amber-600"></ion-icon>
-                        @endif
-                        <span>Unassigned ({{ $unassignedStaffCount }})</span>
-                    </a>
+                {{-- Role Filter Tabs --}}
+                {{-- CHANGED: the filled pills became the segmented tabs of the students page (white on grey for the active tab, count beside the label). "Unassigned" keeps its amber text and alert icon while any staff wait for a stall. --}}
+                <div class="overflow-x-auto shrink-0 -mx-1 px-1">
+                    <nav aria-label="Filter by role" class="inline-flex p-0.5 bg-neutral-100 rounded-md text-xs whitespace-nowrap">
+                        @foreach($roleTabs as $key => [$label, $count])
+                            @php
+                                $active = $currentRole === $key;
+                                $warn = $key === 'unassigned' && $count > 0;
+                            @endphp
+                            <a href="{{ route('admin.users', array_filter(['role' => $key !== 'all' ? $key : null, 'q' => request('q'), 'per_page' => request('per_page')])) }}" @if($active) aria-current="page" @endif
+                                class="px-3 py-1.5 rounded inline-flex items-center gap-1.5 font-semibold transition-colors {{ $active ? 'bg-white text-neutral-900 shadow-2xs' : ($warn ? 'text-amber-800 hover:text-amber-950' : 'text-neutral-600 hover:text-neutral-900') }}">
+                                @if($warn)
+                                    <ion-icon name="alert-circle" class="text-sm text-amber-600" aria-hidden="true"></ion-icon>
+                                @endif
+                                {{ $label }}
+                                <span class="tabular-nums font-medium {{ $warn && !$active ? 'text-amber-800' : 'text-neutral-500' }}">{{ $count }}</span>
+                            </a>
+                        @endforeach
+                    </nav>
                 </div>
-            </div>
 
-            {{-- Active Filter Chips (Only rendered when filters are active) --}}
-            @if($hasFilters)
-                <div class="flex flex-wrap items-center justify-between gap-2 pt-3 border-t border-neutral-100 text-xs">
-                    <div class="flex flex-wrap items-center gap-1.5">
-                        <span class="text-neutral-500 font-medium text-[11px]">Active filters:</span>
-                        @if(request('q'))
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-neutral-100 text-neutral-800 text-[11px] font-semibold">
-                                Search: "{{ request('q') }}"
-                            </span>
-                        @endif
-                        @if($currentRole !== 'all')
-                            <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-brand-50 border border-brand-200 text-brand-800 text-[11px] font-semibold">
-                                Role: {{ ucfirst($currentRole) }}
-                            </span>
-                        @endif
-                        {{-- CHANGED: result count recoloured from emerald to neutral; emerald is kept for positive status only. --}}
-                        <span class="inline-flex items-center px-2 py-0.5 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-800 text-[11px] font-bold tabular-nums">
-                            {{ $users->total() }} {{ Str::plural('result', $users->total()) }}
-                        </span>
-                    </div>
-
-                    <a href="{{ route('admin.users') }}" class="text-neutral-500 hover:text-neutral-900 font-semibold text-xs inline-flex items-center gap-1">
-                        <ion-icon name="close-circle-outline" class="text-sm"></ion-icon>
-                        Clear filters
+                @if($hasFilters)
+                    <a href="{{ route('admin.users') }}" class="self-start sm:self-auto inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 shrink-0">
+                        <ion-icon name="close-outline" class="text-base"></ion-icon>
+                        Clear
                     </a>
-                </div>
-            @endif
-        </form>
-    </div>
+                @endif
+            </form>
 
-    {{-- ── 4. Main Account Directory ───────────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs overflow-hidden">
+            {{-- CHANGED: moved here from the removed page header; on phones it sits above the search box, on the right. --}}
+            <button type="button" onclick="openCreateUserModal()"
+                class="order-first lg:order-none self-end lg:self-auto btn btn-primary text-xs font-bold px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all shrink-0">
+                <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
+                <span>New Account</span>
+            </button>
+        </div>
+
         @if($users->isEmpty())
             <div class="p-16 text-center">
                 {{-- CHANGED: empty-state icon neutral-400 on neutral-100 to brand-700 on brand-50, like the other admin empty states. --}}
@@ -239,93 +136,81 @@
         @else
             <div id="users-directory-container" class="overflow-x-auto">
                 {{-- Desktop Table View --}}
+                {{-- CHANGED: columns have set widths so Role no longer takes spare room and Created sits next to the Edit button; "Stall Assignment" became "Stall"; the Actions header stays visible. --}}
                 <table id="users-desktop-table" class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="border-b border-neutral-200/70 bg-neutral-50/75">
-                            <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Account</th>
-                            <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Role</th>
-                            <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stall Assignment</th>
-                            <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Created</th>
+                            <th class="px-5 py-3 w-[38%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Account</th>
+                            <th class="px-4 py-3 w-[16%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Role</th>
+                            <th class="px-4 py-3 w-[26%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stall</th>
+                            <th class="px-4 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Created</th>
                             <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100/80" id="users-table-body">
+                        {{-- CHANGED: dropped the user-row class and data-* attributes from the rows; no script read them since search moved to the server. --}}
                         @foreach($users as $u)
                             @php
                                 $isCurrentUser = $u->id === Auth::id();
                                 $isAdmin = $u->role === 'admin';
-                                $isStaff = $u->role === 'staff';
                                 $isClinic = $u->role === 'clinic'; // ADDED
                                 $isAssigned = !empty($u->stall_id);
                             @endphp
-                            <tr class="user-row hover:bg-neutral-50/70 transition-colors {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}"
-                                data-name="{{ strtolower($u->name) }}"
-                                data-email="{{ strtolower($u->email) }}"
-                                data-role="{{ $u->role }}"
-                                data-stall="{{ strtolower($u->stall_name ?? 'unassigned') }}"
-                                data-assigned="{{ $isAssigned ? '1' : '0' }}">
+                            <tr class="hover:bg-neutral-50/70 transition-colors {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}">
 
                                 {{-- User Column --}}
-                                <td class="px-5 py-3.5">
+                                {{-- CHANGED: the initial avatar is neutral for every role, as on the students page; green avatars repeated the Administrator badge. The email is 13px plain text instead of 11px monospace, and the whole address is the copy button instead of a 12px icon beside it. --}}
+                                <td class="px-5 py-3">
                                     <div class="flex items-center gap-3">
-                                        <div class="w-9 h-9 rounded-full {{ $isAdmin ? 'bg-brand-100 text-brand-800 border border-brand-200/70' : 'bg-neutral-100 text-neutral-800 border border-neutral-200/70' }} flex items-center justify-center font-bold text-xs shrink-0 font-display">
+                                        <span class="w-8 h-8 rounded-full bg-neutral-100 text-neutral-600 text-xs font-semibold flex items-center justify-center shrink-0" aria-hidden="true">
                                             {{ strtoupper(substr($u->name, 0, 1)) }}
-                                        </div>
+                                        </span>
                                         <div class="min-w-0">
-                                            <div class="text-xs font-bold text-neutral-900 truncate flex items-center gap-1.5">
-                                                <span>{{ $u->name }}</span>
+                                            <div class="text-sm font-semibold text-neutral-900 flex items-center gap-1.5 min-w-0">
+                                                <span class="truncate">{{ $u->name }}</span>
                                                 @if($isCurrentUser)
-                                                    <span class="text-[11px] font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200/80">YOU</span>
+                                                    <span class="shrink-0 text-[11px] font-semibold text-brand-800 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200/80">You</span>
                                                 @endif
                                             </div>
-                                            <div class="flex items-center gap-1.5 mt-0.5 text-[11px] text-neutral-500">
-                                                <span class="truncate font-mono">{{ $u->email }}</span>
-                                                {{-- CHANGED: Js::from() for the email. It was inserted raw between single quotes, so an address with an apostrophe (valid, e.g. o'neil@...) broke the button. --}}
-                                                <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }}, this)" class="text-neutral-400 hover:text-neutral-700 transition-colors cursor-pointer" title="Copy email">
-                                                    <ion-icon name="copy-outline" class="text-xs leading-none"></ion-icon>
-                                                </button>
-                                            </div>
+                                            <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }})" title="Copy email"
+                                                class="group max-w-full min-h-6 inline-flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-brand-800 cursor-pointer">
+                                                <span class="truncate">{{ $u->email }}</span>
+                                                <ion-icon name="copy-outline" class="text-sm shrink-0 text-neutral-400 group-hover:text-brand-700" aria-hidden="true"></ion-icon>
+                                                <span class="sr-only">Copy email</span>
+                                            </button>
                                         </div>
                                     </div>
                                 </td>
 
                                 {{-- Role Column --}}
-                                <td class="px-5 py-3.5">
+                                {{-- CHANGED: only Administrator keeps a badge; Clinic and Canteen Staff are plain text, so the badge marks the accounts with full access. --}}
+                                <td class="px-4 py-3">
                                     @if($isAdmin)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-brand-50 text-brand-800 border border-brand-200/80">
-                                            <ion-icon name="shield-checkmark" class="text-xs text-brand-600"></ion-icon>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200/80 whitespace-nowrap">
+                                            <ion-icon name="shield-checkmark" class="text-xs text-brand-600" aria-hidden="true"></ion-icon>
                                             <span>Administrator</span>
                                         </span>
-                                    {{-- ADDED: clinic badge. --}}
-                                    @elseif($isClinic)
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200/80">
-                                            <ion-icon name="medkit" class="text-xs text-sky-600"></ion-icon>
-                                            <span>Clinic</span>
-                                        </span>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[11px] font-bold bg-neutral-50 text-neutral-800 border border-neutral-200/80">
-                                            <ion-icon name="person" class="text-xs text-neutral-600"></ion-icon>
-                                            <span>Canteen Staff</span>
-                                        </span>
+                                        <span class="text-[13px] text-neutral-700 whitespace-nowrap">{{ $u->role === 'clinic' ? 'Clinic' : 'Canteen Staff' }}</span>
                                     @endif
                                 </td>
 
                                 {{-- Stall Assignment Column --}}
-                                <td class="px-5 py-3.5">
+                                <td class="px-4 py-3">
                                     {{-- CHANGED: clinic accounts are system-wide like admins. --}}
                                     @if($isAdmin || $isClinic)
-                                        <span class="text-neutral-500 text-xs font-medium flex items-center gap-1.5">
-                                            <ion-icon name="globe-outline" class="text-xs text-neutral-400"></ion-icon>
+                                        <span class="text-neutral-500 text-[13px] flex items-center gap-1.5">
+                                            <ion-icon name="globe-outline" class="text-sm text-neutral-400" aria-hidden="true"></ion-icon>
                                             <span>System-wide</span>
                                         </span>
                                     @elseif($isAssigned)
-                                        <div class="flex items-center gap-1.5 text-xs font-semibold text-neutral-800">
-                                            <ion-icon name="storefront-outline" class="text-brand-700 text-sm shrink-0"></ion-icon>
-                                            <span class="truncate max-w-[200px]" title="{{ $u->stall_name }}">{{ $u->stall_name }}</span>
+                                        <div class="flex items-center gap-1.5 text-[13px] font-medium text-neutral-800 min-w-0">
+                                            <ion-icon name="storefront-outline" class="text-brand-700 text-sm shrink-0" aria-hidden="true"></ion-icon>
+                                            <span class="truncate" title="{{ $u->stall_name }}">{{ $u->stall_name }}</span>
                                         </div>
                                     @else
-                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                                            <ion-icon name="alert-circle" class="text-xs text-amber-600"></ion-icon>
+                                        <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-amber-50 text-amber-900 border border-amber-300">
+                                            <ion-icon name="alert-circle" class="text-xs text-amber-600" aria-hidden="true"></ion-icon>
                                             <span>Unassigned</span>
                                         </span>
                                     @endif
@@ -333,15 +218,13 @@
 
                                 {{-- Created Date Column --}}
                                 {{-- CHANGED: created_at is stored in UTC; shown in Philippine time, as on the printable report. --}}
-                                <td class="px-5 py-3.5">
-                                    <span class="text-xs text-neutral-600 font-medium">
-                                        {{ \Carbon\Carbon::parse($u->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
-                                    </span>
+                                <td class="px-4 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
+                                    {{ \Carbon\Carbon::parse($u->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                 </td>
 
                                 {{-- Actions Column --}}
                                 {{-- CHANGED: Edit and Delete pass name and email through Js::from() instead of quoted addslashes() output, the same fix as the stalls page. --}}
-                                <td class="px-5 py-3.5 text-right">
+                                <td class="px-5 py-3 text-right">
                                     <div class="flex items-center justify-end gap-1.5">
                                         <button type="button"
                                             onclick="openEditUserModal({{ $u->id }}, {{ Js::from($u->name) }}, {{ Js::from($u->email) }}, '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
@@ -370,88 +253,74 @@
                 </table>
 
                 {{-- Mobile Card List View --}}
+                {{-- CHANGED: one row per account, as on the students page: neutral avatar, name, the email copy button, then role and stall on one line, with Edit and Delete underneath. The labelled "Assignment:" strip is gone. --}}
                 <div class="md:hidden divide-y divide-neutral-100" id="users-mobile-list">
                 @foreach($users as $u)
                     @php
                         $isCurrentUser = $u->id === Auth::id();
                         $isAdmin = $u->role === 'admin';
-                        $isStaff = $u->role === 'staff';
                         $isClinic = $u->role === 'clinic'; // ADDED
                         $isAssigned = !empty($u->stall_id);
                     @endphp
-                    <div class="user-row p-4 space-y-3 {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}"
-                        data-name="{{ strtolower($u->name) }}"
-                        data-email="{{ strtolower($u->email) }}"
-                        data-role="{{ $u->role }}"
-                        data-stall="{{ strtolower($u->stall_name ?? 'unassigned') }}"
-                        data-assigned="{{ $isAssigned ? '1' : '0' }}">
-
-                        <div class="flex items-start justify-between gap-3">
-                            <div class="flex items-center gap-3">
-                                <div class="w-10 h-10 rounded-full {{ $isAdmin ? 'bg-brand-100 text-brand-800 border border-brand-200' : 'bg-neutral-100 text-neutral-800 border border-neutral-200' }} flex items-center justify-center font-bold text-sm shrink-0 font-display">
-                                    {{ strtoupper(substr($u->name, 0, 1)) }}
-                                </div>
-                                <div>
-                                    <div class="text-sm font-bold text-neutral-900 flex items-center gap-1.5">
-                                        <span>{{ $u->name }}</span>
-                                        @if($isCurrentUser)
-                                            <span class="text-[11px] font-bold text-brand-700 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200">YOU</span>
-                                        @endif
-                                    </div>
-                                    <div class="text-xs text-neutral-500 font-mono mt-0.5">{{ $u->email }}</div>
-                                </div>
+                    <div class="p-4 flex items-start gap-3 {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}">
+                        <span class="w-9 h-9 rounded-full bg-neutral-100 text-neutral-600 text-sm font-semibold flex items-center justify-center shrink-0" aria-hidden="true">
+                            {{ strtoupper(substr($u->name, 0, 1)) }}
+                        </span>
+                        <div class="min-w-0 flex-1">
+                            <div class="text-sm font-semibold text-neutral-900 flex items-center gap-1.5 min-w-0">
+                                <span class="truncate">{{ $u->name }}</span>
+                                @if($isCurrentUser)
+                                    <span class="shrink-0 text-[11px] font-semibold text-brand-800 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200">You</span>
+                                @endif
                             </div>
-                            <div>
+                            <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }})" title="Copy email"
+                                class="group max-w-full min-h-6 inline-flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-brand-800 cursor-pointer">
+                                <span class="truncate">{{ $u->email }}</span>
+                                <ion-icon name="copy-outline" class="text-sm shrink-0 text-neutral-400 group-hover:text-brand-700" aria-hidden="true"></ion-icon>
+                                <span class="sr-only">Copy email</span>
+                            </button>
+                            <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-600">
                                 @if($isAdmin)
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-brand-50 text-brand-800 border border-brand-200">
-                                        Admin
-                                    </span>
-                                {{-- ADDED: clinic badge. --}}
-                                @elseif($isClinic)
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-sky-50 text-sky-800 border border-sky-200">
-                                        Clinic
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold bg-brand-50 text-brand-800 border border-brand-200">
+                                        <ion-icon name="shield-checkmark" class="text-xs text-brand-600" aria-hidden="true"></ion-icon>
+                                        Administrator
                                     </span>
                                 @else
-                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-bold bg-neutral-50 text-neutral-800 border border-neutral-200">
-                                        Staff
+                                    <span>{{ $u->role === 'clinic' ? 'Clinic' : 'Canteen Staff' }}</span>
+                                @endif
+                                <span class="text-neutral-400" aria-hidden="true">·</span>
+                                {{-- CHANGED: clinic accounts are system-wide like admins. --}}
+                                @if($isAdmin || $isClinic)
+                                    <span class="text-neutral-500">System-wide</span>
+                                @elseif($isAssigned)
+                                    <span class="font-medium text-neutral-800 inline-flex items-center gap-1 min-w-0">
+                                        <ion-icon name="storefront-outline" class="text-brand-700 text-sm shrink-0" aria-hidden="true"></ion-icon>
+                                        <span class="truncate">{{ $u->stall_name }}</span>
+                                    </span>
+                                @else
+                                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md font-semibold bg-amber-50 text-amber-900 border border-amber-300">
+                                        <ion-icon name="alert-circle" class="text-xs text-amber-600" aria-hidden="true"></ion-icon>
+                                        Unassigned
                                     </span>
                                 @endif
                             </div>
-                        </div>
 
-                        {{-- Stall Details for Mobile --}}
-                        <div class="flex items-center justify-between text-xs pt-2 border-t border-neutral-100 text-neutral-600">
-                            <span class="text-[11px] text-neutral-500 font-semibold">Assignment:</span>
-                            {{-- CHANGED: clinic accounts are system-wide like admins. --}}
-                            @if($isAdmin || $isClinic)
-                                <span class="font-medium text-neutral-500">System-wide</span>
-                            @elseif($isAssigned)
-                                <span class="font-bold text-neutral-800 flex items-center gap-1 truncate max-w-[180px]">
-                                    <ion-icon name="storefront" class="text-brand-700 text-xs"></ion-icon>
-                                    {{ $u->stall_name }}
-                                </span>
-                            @else
-                                <span class="px-2 py-0.5 rounded-md text-[11px] font-bold bg-amber-50 text-amber-800 border border-amber-300">
-                                    Unassigned
-                                </span>
-                            @endif
-                        </div>
-
-                        {{-- Actions for Mobile --}}
-                        {{-- CHANGED: Js::from() for the name and email arguments, as in the desktop table. --}}
-                        <div class="flex items-center justify-end gap-2 pt-1">
-                            <button type="button"
-                                onclick="openEditUserModal({{ $u->id }}, {{ Js::from($u->name) }}, {{ Js::from($u->email) }}, '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
-                                class="btn btn-ghost text-xs font-semibold px-3 py-1.5 rounded-md border border-neutral-200 text-neutral-700">
-                                Edit
-                            </button>
-                            @if(!$isCurrentUser)
+                            {{-- Actions for Mobile --}}
+                            {{-- CHANGED: Js::from() for the name and email arguments, as in the desktop table. --}}
+                            <div class="flex items-center gap-2 mt-3">
                                 <button type="button"
-                                    onclick="openDeleteUserModal({{ $u->id }}, {{ Js::from($u->name) }}, '{{ $u->role }}')"
-                                    class="text-xs font-semibold px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-200">
-                                    Delete
+                                    onclick="openEditUserModal({{ $u->id }}, {{ Js::from($u->name) }}, {{ Js::from($u->email) }}, '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
+                                    class="btn btn-ghost text-xs font-semibold px-3 py-1.5 rounded-md border border-neutral-200 text-neutral-700">
+                                    Edit
                                 </button>
-                            @endif
+                                @if(!$isCurrentUser)
+                                    <button type="button"
+                                        onclick="openDeleteUserModal({{ $u->id }}, {{ Js::from($u->name) }}, '{{ $u->role }}')"
+                                        class="text-xs font-semibold px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-200">
+                                        Delete
+                                    </button>
+                                @endif
+                            </div>
                         </div>
                     </div>
                 @endforeach
@@ -466,8 +335,9 @@
                     </span>
 
                     {{-- Per Page Selector --}}
+                    {{-- CHANGED: "PER PAGE" uppercase bold became sentence-case "Per page", as on the students and evaluations pages. --}}
                     <div class="flex items-center gap-1.5 border-l border-neutral-200 pl-3">
-                        <label for="per_page_select" class="text-[11px] font-bold text-neutral-500 uppercase">Per Page</label>
+                        <label for="per_page_select" class="text-xs text-neutral-500">Per page</label>
                         <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded-md px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
                             @foreach([10, 25, 50] as $size)
                                 <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" {{ $users->perPage() == $size ? 'selected' : '' }}>
@@ -784,17 +654,18 @@
             </div>
 
             {{-- Optional Password Reset Section --}}
+            {{-- CHANGED: "Change Account Password" became "Reset password", the name admins look for; the field labels are sentence case instead of uppercase. --}}
             <div class="pt-2 border-t border-neutral-100">
                 <button type="button" onclick="toggleEditPasswordSection()" class="text-xs font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1 cursor-pointer">
                     <ion-icon name="key-outline" class="text-sm"></ion-icon>
-                    <span id="edit-pwd-toggle-text">Change Account Password</span>
+                    <span id="edit-pwd-toggle-text">Reset password</span>
                 </button>
 
                 <div id="edit-password-fields" class="hidden space-y-2.5 mt-2.5 p-3 bg-neutral-50 rounded-md border border-neutral-200/80">
                     <p class="text-[11px] text-neutral-500">Leave blank to keep existing password.</p>
                     <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                         <div>
-                            <label for="edit_password" class="block text-[11px] font-bold text-neutral-600 uppercase mb-1">New Password</label>
+                            <label for="edit_password" class="block text-xs font-bold text-neutral-700 mb-1">New password</label>
                             <div class="relative">
                                 <input type="password" id="edit_password" name="password" placeholder="••••••••"
                                     class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
@@ -808,7 +679,7 @@
                             </p>
                         </div>
                         <div>
-                            <label for="edit_password_confirmation" class="block text-[11px] font-bold text-neutral-600 uppercase mb-1">Confirm</label>
+                            <label for="edit_password_confirmation" class="block text-xs font-bold text-neutral-700 mb-1">Confirm</label>
                             <div class="relative">
                                 <input type="password" id="edit_password_confirmation" name="password_confirmation" placeholder="••••••••"
                                     class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
@@ -1200,7 +1071,7 @@
         var pwdFields = document.getElementById('edit-password-fields');
         if (pwdFields) pwdFields.classList.add('hidden');
         var pwdToggleText = document.getElementById('edit-pwd-toggle-text');
-        if (pwdToggleText) pwdToggleText.textContent = 'Change Account Password';
+        if (pwdToggleText) pwdToggleText.textContent = 'Reset password'; // CHANGED: was "Change Account Password"
         var pwdInput = document.getElementById('edit_password');
         var pwdConfirm = document.getElementById('edit_password_confirmation');
         if (pwdInput) {
@@ -1326,10 +1197,10 @@
         var toggleText = document.getElementById('edit-pwd-toggle-text');
         if (pwdFields.classList.contains('hidden')) {
             pwdFields.classList.remove('hidden');
-            toggleText.textContent = 'Hide Password Fields';
+            toggleText.textContent = 'Keep current password'; // CHANGED: was "Hide Password Fields"
         } else {
             pwdFields.classList.add('hidden');
-            toggleText.textContent = 'Change Account Password';
+            toggleText.textContent = 'Reset password'; // CHANGED: was "Change Account Password"
         }
     }
 
@@ -1518,13 +1389,10 @@
     }
 
     // ── Copy to Clipboard Helper ──────────────────────────────────────────
-    function copyToClipboard(text, btn) {
+    // CHANGED: the email itself is the button now, so a toast confirms the copy (visible and announced to screen readers) instead of swapping the button's contents, which hid the address.
+    function copyToClipboard(text) {
         navigator.clipboard.writeText(text).then(function() {
-            var originalHtml = btn.innerHTML;
-            btn.innerHTML = '<ion-icon name="checkmark-outline" class="text-xs text-emerald-600 leading-none"></ion-icon>';
-            setTimeout(function() {
-                btn.innerHTML = originalHtml;
-            }, 1500);
+            window.showToast('Email copied', 'success', 2000);
         });
     }
 
