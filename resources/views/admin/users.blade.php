@@ -172,11 +172,11 @@
                                                     <span class="shrink-0 text-[11px] font-semibold text-brand-800 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200/80">You</span>
                                                 @endif
                                             </div>
-                                            <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }})" title="Copy email"
+                                            <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }}, this)" title="Copy email"
                                                 class="group max-w-full min-h-6 inline-flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-brand-800 cursor-pointer">
                                                 <span class="truncate">{{ $u->email }}</span>
                                                 <ion-icon name="copy-outline" class="text-sm shrink-0 text-neutral-400 group-hover:text-brand-700" aria-hidden="true"></ion-icon>
-                                                <span class="sr-only">Copy email</span>
+                                                <span class="sr-only" aria-live="polite">Copy email</span>
                                             </button>
                                         </div>
                                     </div>
@@ -273,11 +273,11 @@
                                     <span class="shrink-0 text-[11px] font-semibold text-brand-800 bg-brand-50 px-1.5 py-0.5 rounded-md border border-brand-200">You</span>
                                 @endif
                             </div>
-                            <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }})" title="Copy email"
+                            <button type="button" onclick="copyToClipboard({{ Js::from($u->email) }}, this)" title="Copy email"
                                 class="group max-w-full min-h-6 inline-flex items-center gap-1.5 text-[13px] text-neutral-600 hover:text-brand-800 cursor-pointer">
                                 <span class="truncate">{{ $u->email }}</span>
                                 <ion-icon name="copy-outline" class="text-sm shrink-0 text-neutral-400 group-hover:text-brand-700" aria-hidden="true"></ion-icon>
-                                <span class="sr-only">Copy email</span>
+                                <span class="sr-only" aria-live="polite">Copy email</span>
                             </button>
                             <div class="mt-1.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-neutral-600">
                                 @if($isAdmin)
@@ -1348,10 +1348,20 @@
     }
 
     // ── Copy to Clipboard Helper ──────────────────────────────────────────
-    // CHANGED: the email itself is the button now, so a toast confirms the copy (visible and announced to screen readers) instead of swapping the button's contents, which hid the address.
-    function copyToClipboard(text) {
+    // CHANGED: the email itself is the button now, so the answer stays at the copy icon: it turns into a green check and the hidden "Copy email" label shows as a small green "Copied" beside it for 1.5s (no toast). The label is a live region, so screen readers hear it too. Swapping the whole button, as before, hid the address.
+    function copyToClipboard(text, btn) {
         navigator.clipboard.writeText(text).then(function() {
-            window.showToast('Email copied', 'success', 2000);
+            var icon = btn.querySelector('ion-icon'), label = btn.querySelector('[aria-live]');
+            icon.setAttribute('name', 'checkmark-outline');
+            icon.classList.add('text-emerald-600!');
+            label.textContent = 'Copied';
+            label.className = 'text-[11px] font-semibold text-emerald-700 shrink-0';
+            setTimeout(function() {
+                icon.setAttribute('name', 'copy-outline');
+                icon.classList.remove('text-emerald-600!');
+                label.textContent = 'Copy email';
+                label.className = 'sr-only';
+            }, 1500);
         });
     }
 
