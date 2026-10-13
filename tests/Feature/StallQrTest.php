@@ -50,7 +50,8 @@ test('admin gets a QR page whose link is the signed evaluation link for that sta
         ->assertSee('Snack Hub')
         ->assertSee('data:image/svg+xml;base64,', false)
         ->assertSee('Download PNG')
-        ->assertSee('snack-hub-qr.svg', false)
+        // CHANGED: the SVG download was removed; this used to check for the .svg file name.
+        ->assertDontSee('Download SVG')
         ->assertDontSee('currently closed');
 
     $url = $response->viewData('url');
@@ -163,7 +164,8 @@ test('assigned staff see their stall QR code with the same signed link as the ad
         ->assertSee('Snack Hub')
         ->assertSee('data:image/svg+xml;base64,', false)
         ->assertSee('Download PNG')
-        ->assertSee('snack-hub-qr.svg', false);
+        // CHANGED: the SVG download was removed; this used to check for the .svg file name.
+        ->assertDontSee('Download SVG');
 });
 
 test('staff sidebar shows the QR Code tab only when assigned to a stall', function () {

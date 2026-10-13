@@ -11,10 +11,7 @@
         <ion-icon name="download-outline" class="text-sm" aria-hidden="true"></ion-icon>
         Download PNG
     </button>
-    <a href="{{ $qr }}" download="{{ $fileName }}.svg" class="btn btn-secondary btn-sm font-bold hidden! sm:inline-flex!">
-        <ion-icon name="download-outline" class="text-sm" aria-hidden="true"></ion-icon>
-        Download SVG
-    </a>
+    {{-- CHANGED: the Download SVG link is gone; Print and Download PNG cover the poster. --}}
 </div>
 
 @if(! $stall->is_active)
