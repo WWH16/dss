@@ -157,6 +157,17 @@
                 </div>
             </div>
         </div>
+    {{-- ADDED: a stall with no evaluations is left out of $standings, so it gets this note instead of a rank card. --}}
+    @elseif($myStall)
+        <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-2xs flex items-center gap-3.5">
+            <div class="w-12 h-12 rounded-xl bg-neutral-50 border border-neutral-200 text-neutral-600 flex items-center justify-center shrink-0 shadow-2xs">
+                <ion-icon name="storefront-outline" class="text-lg"></ion-icon>
+            </div>
+            <div class="space-y-1">
+                <h2 class="text-base font-bold text-neutral-900 tracking-tight">{{ $myStall->name }}</h2>
+                <p class="text-xs text-neutral-600">Your stall isn't ranked yet.</p>
+            </div>
+        </div>
     @endif
 
     {{-- ── 3. Stepped Podium ──────────────────────────────────────────────── --}}

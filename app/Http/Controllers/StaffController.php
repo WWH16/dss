@@ -198,8 +198,9 @@ class StaffController extends Controller
         }
 
         // Fetch aggregate standing data only (no student evaluations or comments)
+        // CHANGED: join instead of leftJoin, so stalls with no evaluations take no rank or podium spot.
         $standings = DB::table('stalls')
-            ->leftJoin('stall_evaluations', 'stalls.id', '=', 'stall_evaluations.stall_id')
+            ->join('stall_evaluations', 'stalls.id', '=', 'stall_evaluations.stall_id')
             ->select(
                 'stalls.id',
                 'stalls.name',
