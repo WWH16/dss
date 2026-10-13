@@ -9,7 +9,8 @@
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js" defer></script>
     <style>
         @page { margin: 16mm; }
-        @media print { .no-print { display: none !important; } body { background: #fff; } .qr-poster { border: 0 !important; } }
+        /* CHANGED: the poster's print border rule is gone; its print:border-0 class covers it. */
+        @media print { .no-print { display: none !important; } body { background: #fff; } }
     </style>
 </head>
 <body class="bg-neutral-50 font-sans antialiased text-neutral-900">

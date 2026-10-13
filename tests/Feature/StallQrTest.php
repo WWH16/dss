@@ -55,7 +55,8 @@ test('admin gets a QR page whose link is the signed evaluation link for that sta
 
     $url = $response->viewData('url');
     expect($url)->toStartWith(url('/student/evaluation?stall=' . $stallId . '&signature='));
-    $response->assertSee(e($url), false);
+    // CHANGED: the signed URL lives only inside the QR image; the card no longer prints it as text.
+    $response->assertDontSee(e($url), false);
 });
 
 test('a signed-out student who scans lands on that stall form after signing in', function () {

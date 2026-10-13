@@ -11,7 +11,7 @@
         .dashboard-layout { display: block !important; }
         main { padding: 0 !important; }
         body { background: #fff !important; }
-        .qr-poster { border: 0 !important; }
+        /* CHANGED: the poster's print border rule is gone; its print:border-0 class covers it. */
     }
 </style>
 @endsection
@@ -20,8 +20,9 @@
 <div class="max-w-xl mx-auto">
     <div class="no-print mb-4">
         <h1 class="text-lg sm:text-xl font-bold text-neutral-900 tracking-tight">Your stall's QR code</h1>
-        <p class="text-xs text-neutral-500 mt-1">
-            Students scan this code to rate {{ $stall->name }}. Post it at your counter, or download it and share it in your group chats and pages.
+        {{-- CHANGED: darker text, and the code is for the counter only, so the group-chat suggestion is gone. --}}
+        <p class="text-xs text-neutral-600 mt-1">
+            Students scan this code at your counter to rate {{ $stall->name }}. Print it and post it where customers order.
         </p>
     </div>
 
