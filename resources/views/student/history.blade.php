@@ -165,10 +165,10 @@
                                 </td>
 
                                 {{-- Action --}}
-                                {{-- CHANGED: passes the Philippine-time date string to the modal; label "Details" became "View", the same word as the mobile list and the admin pages. --}}
+                                {{-- CHANGED: passes the Philippine-time date string to the modal (the rounded average is no longer passed; the dialog works it out from the four scores); label "Details" became "View", the same word as the mobile list and the admin pages. --}}
                                 <td class="py-3.5 px-4 text-right whitespace-nowrap">
                                     <button type="button"
-                                        onclick='openEvalDetailsModal(@json($eval), {{ number_format($avg, 1) }}, @json($evalAtLabel))'
+                                        onclick='openEvalDetailsModal(@json($eval), @json($evalAtLabel))'
                                         class="inline-flex items-center gap-1 text-xs font-bold text-brand-700 hover:text-brand-800 hover:bg-brand-50 px-2.5 py-1 rounded-md transition-colors cursor-pointer">
                                         View
                                     </button>
@@ -232,10 +232,10 @@
                                 </p>
                             @endif
 
-                            {{-- CHANGED: "View Full Details →" shortened to "View", matching the desktop table; passes the Philippine-time date to the modal. --}}
+                            {{-- CHANGED: "View Full Details →" shortened to "View", matching the desktop table; passes the Philippine-time date to the modal and no longer the rounded average. --}}
                             <div class="flex justify-end pt-1">
                                 <button type="button"
-                                    onclick='openEvalDetailsModal(@json($eval), {{ number_format($avg, 1) }}, @json($evalAtLabel))'
+                                    onclick='openEvalDetailsModal(@json($eval), @json($evalAtLabel))'
                                     class="text-xs font-bold text-brand-700 hover:underline">
                                     View
                                 </button>
@@ -258,68 +258,52 @@
 </div>
 
 {{-- ── 3. Evaluation Detail Dialog Modal ───────────────────────────────── --}}
-<dialog id="eval-details-modal" class="confirm-modal modal-sharp max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    <div class="bg-white">
-        {{-- Modal Header --}}
-        <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
-                    <ion-icon name="storefront-outline" class="text-lg"></ion-icon>
-                </div>
-                <div>
-                    <h3 id="modal-stall-name" class="text-sm font-bold text-neutral-900 leading-tight"></h3>
-                    <p id="modal-eval-date" class="text-[11px] text-neutral-500 mt-0.5"></p>
-                </div>
+{{-- CHANGED: rebuilt to match the admin evaluation dialog. Dark green header band running to the edge (no padding or pale border on the dialog itself) with the stall and submission date; the average sits on top in a panel tinted by its band and names the band in words; each criterion is a row with a five-step meter and a two-decimal score; star glyphs, uppercase section labels, the boxed criteria grid and the italic quoted comment are gone; the black "Close" button became the small "Done" button. --}}
+<dialog id="eval-details-modal" class="confirm-modal relative p-0! border-0!" aria-labelledby="modal-stall-name">
+    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="storefront-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <button type="button" class="js-close-eval-modal text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
-                <ion-icon name="close-outline" class="text-lg"></ion-icon>
-            </button>
+            <div class="min-w-0">
+                <h3 id="modal-stall-name" class="text-sm font-bold text-white leading-tight truncate"></h3>
+                <p id="modal-eval-date" class="text-[11px] text-brand-200 tabular-nums"></p>
+            </div>
+        </div>
+        <button type="button" class="js-close-eval-modal text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
+
+    <div class="px-6 pb-6">
+        <div id="modal-eval-avg-panel" class="mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4">
+            <div>
+                <p class="text-xs font-semibold text-neutral-900">Average of four criteria</p>
+                <p id="modal-eval-band" class="text-[11px] font-semibold mt-0.5"></p>
+            </div>
+            <span id="modal-eval-avg" class="text-3xl leading-none"></span>
         </div>
 
-        <div class="p-6 space-y-4">
-            {{-- Overall Score Banner --}}
-            <div class="flex items-center justify-between p-3.5 rounded-md bg-brand-50/50 border border-brand-200/80">
-                <span class="text-xs font-bold text-brand-900">Overall Rating Given</span>
-                <span id="modal-eval-avg" class="text-base font-bold text-brand-900 tabular-nums"></span>
-            </div>
-
-            {{-- 4 Criteria Breakdown --}}
-            <div>
-                <h4 class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-2">Criteria Breakdown</h4>
-                <div class="grid grid-cols-2 gap-2.5">
-                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
-                        <span class="text-xs font-medium text-neutral-600">Cleanliness</span>
-                        <span id="modal-cleanliness" class="text-xs font-bold text-neutral-900"></span>
-                    </div>
-                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
-                        <span class="text-xs font-medium text-neutral-600">Service</span>
-                        <span id="modal-service" class="text-xs font-bold text-neutral-900"></span>
-                    </div>
-                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
-                        <span class="text-xs font-medium text-neutral-600">Taste</span>
-                        <span id="modal-taste" class="text-xs font-bold text-neutral-900"></span>
-                    </div>
-                    <div class="p-2.5 rounded-md bg-neutral-50 border border-neutral-200/70 flex items-center justify-between">
-                        <span class="text-xs font-medium text-neutral-600">Price</span>
-                        <span id="modal-price" class="text-xs font-bold text-neutral-900"></span>
-                    </div>
+        <dl class="mt-2 divide-y divide-neutral-100 text-sm">
+            @foreach(['cleanliness' => 'Cleanliness', 'service' => 'Service', 'taste' => 'Taste', 'price' => 'Price'] as $c => $label)
+                <div class="flex items-center justify-between gap-4 py-2.5">
+                    <dt class="text-neutral-600">{{ $label }}</dt>
+                    <dd class="flex items-center gap-3">
+                        <span id="modal-{{ $c }}-meter" class="flex gap-0.5" aria-hidden="true"></span>
+                        <span id="modal-{{ $c }}" class="w-11 text-right"></span>
+                    </dd>
                 </div>
-            </div>
+            @endforeach
+        </dl>
 
-            {{-- Comment / Feedback --}}
-            <div>
-                <h4 class="text-xs font-bold text-neutral-500 uppercase tracking-wider mb-1.5">Your Feedback &amp; Comments</h4>
-                <div id="modal-comment-box" class="p-3 rounded-md bg-neutral-50 border border-neutral-200/70 text-xs text-neutral-700 italic leading-relaxed">
-                </div>
-            </div>
+        <div class="pt-3">
+            <p class="text-xs font-semibold text-neutral-900 mb-1.5">Your comment</p>
+            <p id="modal-comment-box" class="bg-surface-alt rounded-lg px-3.5 py-3 text-sm leading-relaxed whitespace-pre-line break-words"></p>
+        </div>
 
-            {{-- Footer Action --}}
-            {{-- CHANGED: removed "Rate this stall again" (evaluations open only from the stall's QR code); Close now sits on the right via justify-end. --}}
-            <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" class="js-close-eval-modal px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                    Close
-                </button>
-            </div>
+        {{-- CHANGED: removed "Rate this stall again" (evaluations open only from the stall's QR code). --}}
+        <div class="flex justify-end pt-4 mt-4 border-t border-neutral-100">
+            <button type="button" class="btn btn-primary btn-sm text-xs font-semibold rounded-md js-close-eval-modal cursor-pointer">Done</button>
         </div>
     </div>
 </dialog>
@@ -329,30 +313,51 @@
 document.addEventListener('DOMContentLoaded', () => {
     const evalModal = document.getElementById('eval-details-modal');
 
-    // CHANGED: takes a third argument, the submission date already formatted in Philippine time by the server. new Date() on the raw UTC string read it as local time and shows "Invalid Date" in Safari.
-    window.openEvalDetailsModal = function(evalData, avgScore, submittedAt) {
-        document.getElementById('modal-stall-name').textContent = evalData.stall_name || 'Food Stall';
+    // CHANGED: same score rule and markup as the admin evaluation dialog: two decimals, below 3 red with a caret, 4 and up green.
+    const evalScore = (v, cls) => {
+        const tone = v < 3 ? 'text-rose-700' : (v >= 4 ? 'text-emerald-700' : 'text-neutral-900');
+        const mark = v < 3 ? '<ion-icon name="caret-down" class="text-[length:max(10px,0.5em)]" aria-hidden="true"></ion-icon><span class="sr-only">Low:</span>' : '';
+        return '<span class="inline-flex items-center gap-0.5 tabular-nums ' + tone + ' ' + (cls || '') + '">' + mark + v.toFixed(2) + '</span>';
+    };
+    const bands = {
+        low:  { panel: 'bg-rose-50',     label: 'text-rose-700',    fill: 'bg-rose-500',    text: 'Below 3.00' },
+        mid:  { panel: 'bg-surface-alt', label: 'text-neutral-600', fill: 'bg-neutral-400', text: '3.00 to 3.99' },
+        high: { panel: 'bg-emerald-50',  label: 'text-emerald-800', fill: 'bg-emerald-600', text: '4.00 and up' }
+    };
+    const bandOf = v => bands[v < 3 ? 'low' : (v >= 4 ? 'high' : 'mid')];
 
+    // CHANGED: takes the evaluation and the submission date already formatted in Philippine time by the server; the average is worked out here from the four scores instead of arriving rounded to one decimal. new Date() on the raw UTC string read it as local time and shows "Invalid Date" in Safari.
+    window.openEvalDetailsModal = function(evalData, submittedAt) {
+        document.getElementById('modal-stall-name').textContent = evalData.stall_name || 'Food Stall';
         document.getElementById('modal-eval-date').textContent = submittedAt ? 'Submitted on ' + submittedAt : '';
 
-        document.getElementById('modal-eval-avg').textContent = avgScore + '★';
-        // CHANGED: textContent with the ★ glyph instead of innerHTML with an amber star ion-icon.
-        document.getElementById('modal-cleanliness').textContent = evalData.cleanliness + '★';
-        document.getElementById('modal-service').textContent = evalData.service + '★';
-        document.getElementById('modal-taste').textContent = evalData.taste + '★';
-        document.getElementById('modal-price').textContent = evalData.price + '★';
+        const keys = ['cleanliness', 'service', 'taste', 'price'];
+        const avg = keys.reduce((sum, k) => sum + Number(evalData[k]), 0) / keys.length;
+        const band = bandOf(avg);
+        document.getElementById('modal-eval-avg-panel').className = 'mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4 ' + band.panel;
+        const bandLabel = document.getElementById('modal-eval-band');
+        bandLabel.textContent = band.text;
+        bandLabel.className = 'text-[11px] font-semibold mt-0.5 ' + band.label;
+        document.getElementById('modal-eval-avg').innerHTML = evalScore(avg, 'font-bold');
 
+        // CHANGED: each criterion gets a five-step meter in its band colour; the last step fills partly for scores such as 3.50.
+        keys.forEach(k => {
+            const v = Number(evalData[k]);
+            let steps = '';
+            for (let i = 1; i <= 5; i++) {
+                const pct = Math.round(Math.max(0, Math.min(1, v - i + 1)) * 100);
+                steps += '<span class="relative w-3.5 h-1.5 rounded-full bg-neutral-200 overflow-hidden"><span class="absolute inset-y-0 left-0 ' + bandOf(v).fill + '" style="width:' + pct + '%"></span></span>';
+            }
+            document.getElementById('modal-' + k + '-meter').innerHTML = steps;
+            document.getElementById('modal-' + k).innerHTML = evalScore(v, 'font-semibold');
+        });
+
+        // CHANGED: plain comment text in the green-grey box instead of italic with typographic quotes; an empty comment reads "No comment."
         const commentBox = document.getElementById('modal-comment-box');
-        // CHANGED: typographic quotes; the no-comment text uses neutral-500 instead of neutral-400.
-        if (evalData.comment && evalData.comment.trim().length > 0) {
-            commentBox.textContent = '“' + evalData.comment + '”';
-            commentBox.classList.remove('text-neutral-500', 'not-italic');
-        } else {
-            commentBox.textContent = 'No written feedback was included with this evaluation.';
-            commentBox.classList.add('text-neutral-500', 'not-italic');
-        }
-
-        // CHANGED: removed the rate-again link setup along with the link.
+        const hasComment = evalData.comment && evalData.comment.trim().length > 0;
+        commentBox.textContent = hasComment ? evalData.comment : 'No comment.';
+        commentBox.classList.toggle('text-neutral-800', hasComment);
+        commentBox.classList.toggle('text-neutral-600', !hasComment);
 
         if (evalModal) evalModal.showModal();
     };
