@@ -88,7 +88,7 @@
                 {{-- CHANGED: the scanner markup, CSS and script moved to partials/qr-scanner.blade.php; the student dashboard includes the same partial. --}}
                 @include('partials.qr-scanner')
 
-                <a href="{{ route('student.dashboard') }}" class="mt-4 inline-flex items-center min-h-11 text-xs font-bold text-neutral-500 hover:text-brand-700 transition-colors">Back to Dashboard</a>
+                {{-- CHANGED: removed the second Back to Dashboard link under the scanner; the back bar above the card already has one. --}}
             </div>
         @else
             {{-- ── Form Header & Institutional Identity ────────────────────── --}}
