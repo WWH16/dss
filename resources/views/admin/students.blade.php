@@ -63,7 +63,7 @@
     {{-- CHANGED: the filter state is read here for the inline toolbar; the "Show Filters" drawer, its count badge and the active-filter chips are gone. --}}
     @php
         $sort = request('sort') ?: 'latest';
-        $status = in_array(request('status'), ['evaluated', 'pending']) ? request('status') : null;
+        $status = request('status');
         $narrowed = request('q') || request('department') || request('course') || request('year_level');
         $hasFilters = $narrowed || $status || $sort !== 'latest';
         $sortUrl = fn ($s) => request()->fullUrlWithQuery(['sort' => $s, 'page' => null]);
@@ -440,13 +440,16 @@ function openDetailsModal(student) {
     document.getElementById('details-year').textContent = student.year_level || 'Not Set';
     document.getElementById('details-created-at').textContent = student.registered_label;
 
-    // CHANGED: the count is a bare number in the panel; the panel tint and status line follow this month's participation.
+    // CHANGED: the count is a bare number in the panel; the panel tint and status line colour follow this month's participation. Only the colour classes are toggled, so the base classes live in the markup alone.
     var evaluated = Number(student.evaluated_this_month) === 1;
-    document.getElementById('details-eval-count').textContent = Number(student.evaluations_count) || 0;
-    document.getElementById('details-month-panel').className = 'mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4 ' + (evaluated ? 'bg-emerald-50' : 'bg-neutral-50');
+    document.getElementById('details-eval-count').textContent = student.evaluations_count;
+    var panel = document.getElementById('details-month-panel').classList;
+    panel.toggle('bg-emerald-50', evaluated);
+    panel.toggle('bg-neutral-50', !evaluated);
     var monthLine = document.getElementById('details-this-month');
     monthLine.textContent = (evaluated ? 'Evaluated in ' : 'Not yet evaluated in ') + @json($month);
-    monthLine.className = 'text-[11px] font-semibold mt-0.5 ' + (evaluated ? 'text-emerald-800' : 'text-neutral-600');
+    monthLine.classList.toggle('text-emerald-800', evaluated);
+    monthLine.classList.toggle('text-neutral-600', !evaluated);
 
     detailsModal.showModal();
 }
