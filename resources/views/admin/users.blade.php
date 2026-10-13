@@ -404,293 +404,253 @@
 </div>
 
 {{-- ── 5. CREATE ACCOUNT MODAL ─────────────────────────────────────────── --}}
-<dialog id="create-user-modal" class="confirm-modal modal-sharp max-w-[400px] w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60" aria-labelledby="create-modal-title">
+{{-- CHANGED (all three dialogs): rebuilt in the frame of the evaluations and students dialogs. Plain confirm-modal width and shadow with no padding or border (modal-sharp max-w-[400px] dropped), a dark green header band that runs to the edge with a tile, the title and a pale green subtitle, and the content padded below it. The grey footer bar became a hairline-topped row of small buttons inside the body, and inputs are 14px instead of 12px. Each field-error line is written on one line and the submit buttons are plain text; the markup the script reads (data-error-for, the inner span) is unchanged. --}}
+<dialog id="create-user-modal" class="confirm-modal p-0! border-0!" aria-labelledby="create-modal-title">
     <div id="create-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    {{-- Modal Header --}}
-    <div class="px-5 py-3.5 bg-neutral-50/80 border-b border-neutral-100 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-200/80 text-brand-700 flex items-center justify-center shrink-0">
-                <ion-icon name="person-add-outline" class="text-base"></ion-icon>
+    <div class="bg-brand-900 text-white px-6 py-4 flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="person-add-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <h3 id="create-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Create Account</h3>
+            <h3 id="create-modal-title" class="text-sm font-bold text-white leading-tight">Create Account</h3>
         </div>
-        <button type="button" onclick="closeCreateUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
-            <ion-icon name="close-outline" class="text-lg"></ion-icon>
+        <button type="button" onclick="closeCreateUserModal()" class="text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
-    <form id="create-user-form" method="POST" action="{{ route('admin.users.create') }}">
+    <form id="create-user-form" method="POST" action="{{ route('admin.users.create') }}" class="px-6 pb-6">
         @csrf
 
-        <div class="p-5 space-y-3.5">
+        <div class="mt-5 space-y-4">
             {{-- General Error Box --}}
-            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-md text-xs text-rose-800 flex items-center gap-2">
+            <div data-general-error class="general-error-box hidden p-3 bg-rose-50 rounded-lg text-xs text-rose-800 flex items-center gap-2">
                 <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
                 <span class="leading-tight font-medium"></span>
             </div>
 
             {{-- Role Selection Segmented Control --}}
+            {{-- CHANGED: the segmented control takes the role tabs' look (white on grey for the chosen role) and their short labels, Admin / Staff / Clinic, which fit three across in the narrower dialog. aria-pressed marks the chosen role. --}}
             <div>
-                <label class="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Account Role <span class="text-red-500">*</span>
-                </label>
-                {{-- CHANGED: three columns for the added Clinic option. --}}
-                <div class="grid grid-cols-3 p-1 bg-neutral-100/90 rounded-md border border-neutral-200/80 gap-1 text-xs">
-                    <button type="button" id="create-role-admin-btn" onclick="toggleCreateRole('admin')"
-                        class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer">
-                        <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
-                        <span>Administrator</span>
+                <p class="text-xs font-semibold text-neutral-900 mb-1.5">Account role <span class="text-rose-600">*</span></p>
+                <div class="grid grid-cols-3 p-0.5 bg-neutral-100 rounded-md gap-0.5 text-xs">
+                    <button type="button" id="create-role-admin-btn" onclick="toggleCreateRole('admin')" aria-pressed="true"
+                        class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded font-semibold transition-colors cursor-pointer bg-white text-neutral-900 shadow-2xs">
+                        <ion-icon name="shield-checkmark-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                        <span>Admin</span>
                     </button>
-                    <button type="button" id="create-role-staff-btn" onclick="toggleCreateRole('staff')"
-                        class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer">
-                        <ion-icon name="restaurant-outline" class="text-sm"></ion-icon>
-                        <span>Canteen Staff</span>
+                    <button type="button" id="create-role-staff-btn" onclick="toggleCreateRole('staff')" aria-pressed="false"
+                        class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded font-semibold transition-colors cursor-pointer text-neutral-600 hover:text-neutral-900">
+                        <ion-icon name="restaurant-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                        <span>Staff</span>
                     </button>
                     {{-- ADDED: clinic role option. --}}
-                    <button type="button" id="create-role-clinic-btn" onclick="toggleCreateRole('clinic')"
-                        class="flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer">
-                        <ion-icon name="medkit-outline" class="text-sm"></ion-icon>
+                    <button type="button" id="create-role-clinic-btn" onclick="toggleCreateRole('clinic')" aria-pressed="false"
+                        class="flex items-center justify-center gap-1.5 py-1.5 px-2 rounded font-semibold transition-colors cursor-pointer text-neutral-600 hover:text-neutral-900">
+                        <ion-icon name="medkit-outline" class="text-sm" aria-hidden="true"></ion-icon>
                         <span>Clinic</span>
                     </button>
                 </div>
                 <input type="hidden" name="role" id="create-role-input" value="admin">
-                <p data-error-for="role" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
+                <p data-error-for="role" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
             {{-- Dynamic Stall Assignment Selector (for staff) --}}
-            <div id="create-stall-container" class="hidden space-y-1.5">
-                <label for="create_stall_id" class="block text-xs font-bold text-neutral-700">
-                    Assigned Stall <span class="text-neutral-500 font-normal">(Optional)</span>
+            <div id="create-stall-container" class="hidden">
+                <label for="create_stall_id" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Assigned stall <span class="text-neutral-500 font-normal">(optional)</span>
                 </label>
                 <select id="create_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">-- Unassigned (Assign Later) --</option>
                     @foreach($stalls as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
                     @endforeach
                 </select>
-                <p data-error-for="stall_id" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
+                <p data-error-for="stall_id" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
             {{-- Full Name --}}
             <div>
-                <label for="create_name" class="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Full Name <span class="text-red-500">*</span>
+                <label for="create_name" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Full name <span class="text-rose-600">*</span>
                 </label>
                 <input type="text" id="create_name" name="name" placeholder="e.g. Maria Santos" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
             {{-- Email Address --}}
             <div>
-                <label for="create_email" class="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Email Address <span class="text-red-500">*</span>
+                <label for="create_email" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Email address <span class="text-rose-600">*</span>
                 </label>
                 <input type="email" id="create_email" name="email" placeholder="e.g. maria@isu.edu.ph" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
             {{-- Password Fields --}}
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-                <div>
-                    <label for="create_password" class="block text-xs font-bold text-neutral-700 mb-1.5">
-                        Password <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <input type="password" id="create_password" name="password" placeholder="••••••••" required
-                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                        <button type="button" onclick="togglePasswordVisibility('create_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Toggle password visibility">
-                            <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
-                        </button>
+            <div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                        <label for="create_password" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                            Password <span class="text-rose-600">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="create_password" name="password" placeholder="••••••••" required
+                                class="w-full pl-3 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                            <button type="button" onclick="togglePasswordVisibility('create_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
+                                <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
+                            </button>
+                        </div>
+                        <p data-error-for="password" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                     </div>
-                    <p data-error-for="password" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                        <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                        <span></span>
-                    </p>
-                </div>
-                <div>
-                    <label for="create_password_confirmation" class="block text-xs font-bold text-neutral-700 mb-1.5">
-                        Confirm <span class="text-red-500">*</span>
-                    </label>
-                    <div class="relative">
-                        <input type="password" id="create_password_confirmation" name="password_confirmation" placeholder="••••••••" required
-                            class="w-full pl-3 pr-8 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                        <button type="button" onclick="togglePasswordVisibility('create_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Toggle password visibility">
-                            <ion-icon name="eye-outline" class="text-sm leading-none"></ion-icon>
-                        </button>
+                    <div>
+                        <label for="create_password_confirmation" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                            Confirm <span class="text-rose-600">*</span>
+                        </label>
+                        <div class="relative">
+                            <input type="password" id="create_password_confirmation" name="password_confirmation" placeholder="••••••••" required
+                                class="w-full pl-3 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                            <button type="button" onclick="togglePasswordVisibility('create_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
+                                <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
+                            </button>
+                        </div>
+                        <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                     </div>
-                    <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                        <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                        <span></span>
-                    </p>
                 </div>
+                <p class="text-[11px] text-neutral-600 mt-1.5">Min. 8 characters with letters, numbers & symbols.</p>
             </div>
-            <p class="text-[11px] text-neutral-500 -mt-1">Min. 8 characters with letters, numbers & symbols.</p>
         </div>
 
         {{-- Form Footer Actions --}}
-        <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeCreateUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
-                Cancel
-            </button>
-            <button type="submit" id="create-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                <ion-icon name="person-add" class="text-sm"></ion-icon>
-                <span>Create Account</span>
-            </button>
+        <div class="flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" onclick="closeCreateUserModal()" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
+            <button type="submit" id="create-user-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Create Account</button>
         </div>
     </form>
 </dialog>
 
 {{-- ── 6. EDIT ACCOUNT MODAL ───────────────────────────────────────────── --}}
-<dialog id="edit-user-modal" class="confirm-modal modal-sharp max-w-[400px] w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60" aria-labelledby="edit-modal-title">
+{{-- CHANGED: the header tile shows the account's initial, as in the students dialog, and the subtitle names the account being edited. --}}
+<dialog id="edit-user-modal" class="confirm-modal p-0! border-0!" aria-labelledby="edit-modal-title">
     <div id="edit-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    {{-- Modal Header --}}
-    <div class="px-5 py-3.5 bg-neutral-50/80 border-b border-neutral-100 flex items-center justify-between">
-        <div class="flex items-center gap-2.5">
-            <div class="w-8 h-8 rounded-md bg-neutral-100 border border-neutral-200/80 text-neutral-700 flex items-center justify-center shrink-0">
-                <ion-icon name="create-outline" class="text-base"></ion-icon>
+    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div id="edit-modal-avatar" class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 text-white font-bold text-sm flex items-center justify-center shrink-0" aria-hidden="true"></div>
+            <div class="min-w-0">
+                <h3 id="edit-modal-title" class="text-sm font-bold text-white leading-tight">Edit Account</h3>
+                <p id="edit-modal-subtitle" class="text-[11px] text-brand-200 truncate"></p>
             </div>
-            <h3 id="edit-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Edit Account</h3>
         </div>
-        <button type="button" onclick="closeEditUserModal()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
-            <ion-icon name="close-outline" class="text-lg"></ion-icon>
+        <button type="button" onclick="closeEditUserModal()" class="text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
-    <form id="edit-user-form" method="POST" action="">
+    <form id="edit-user-form" method="POST" action="" class="px-6 pb-6">
         @csrf
         @method('PUT')
 
-        <div class="p-5 space-y-3.5">
+        <div class="mt-5 space-y-4">
             {{-- General Error Box --}}
-            <div data-general-error class="general-error-box hidden p-2.5 bg-rose-50 border border-rose-200/80 rounded-md text-xs text-rose-800 flex items-center gap-2">
+            <div data-general-error class="general-error-box hidden p-3 bg-rose-50 rounded-lg text-xs text-rose-800 flex items-center gap-2">
                 <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
                 <span class="leading-tight font-medium"></span>
             </div>
 
             {{-- Role Selection --}}
             <div>
-                <label for="edit_role" class="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Role <span class="text-red-500">*</span>
+                <label for="edit_role" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Role <span class="text-rose-600">*</span>
                 </label>
                 <select id="edit_role" name="role" onchange="toggleEditRole(this.value)"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors disabled:text-neutral-500 disabled:cursor-not-allowed">
                     <option value="admin">Administrator</option>
                     <option value="staff">Canteen Staff</option>
                     <option value="clinic">Clinic</option> {{-- ADDED --}}
                 </select>
-                <p data-error-for="role" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
-                <div id="edit-self-warning" class="hidden mt-2 p-2 bg-amber-50 border border-amber-200/80 rounded-md text-[11px] text-amber-800 flex items-center gap-1.5">
+                <p data-error-for="role" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
+                <div id="edit-self-warning" class="hidden mt-2 px-3 py-2 bg-amber-50 rounded-lg text-[11px] text-amber-900 flex items-center gap-1.5">
                     <ion-icon name="information-circle" class="text-sm shrink-0 text-amber-600"></ion-icon>
                     <span>You are editing your own account. Role cannot be changed.</span>
                 </div>
             </div>
 
             {{-- Dynamic Stall Assignment Selector (for staff) --}}
-            <div id="edit-stall-container" class="hidden space-y-1.5">
-                <label for="edit_stall_id" class="block text-xs font-bold text-neutral-700">
-                    Assigned Canteen Stall
+            <div id="edit-stall-container" class="hidden">
+                <label for="edit_stall_id" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Assigned canteen stall
                 </label>
                 <select id="edit_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">-- Unassigned (No Stall) --</option>
                     @foreach($stalls as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
                     @endforeach
                 </select>
-                <p data-error-for="stall_id" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
+                <p data-error-for="stall_id" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
             {{-- Full Name --}}
             <div>
-                <label for="edit_name" class="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Full Name <span class="text-red-500">*</span>
+                <label for="edit_name" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Full name <span class="text-rose-600">*</span>
                 </label>
                 <input type="text" id="edit_name" name="name" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
             {{-- Email Address --}}
             <div>
-                <label for="edit_email" class="block text-xs font-bold text-neutral-700 mb-1.5">
-                    Email Address <span class="text-red-500">*</span>
+                <label for="edit_email" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Email address <span class="text-rose-600">*</span>
                 </label>
                 <input type="email" id="edit_email" name="email" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                    <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                    <span></span>
-                </p>
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
             {{-- Optional Password Reset Section --}}
-            {{-- CHANGED: "Change Account Password" became "Reset password", the name admins look for; the field labels are sentence case instead of uppercase. --}}
-            <div class="pt-2 border-t border-neutral-100">
-                <button type="button" onclick="toggleEditPasswordSection()" class="text-xs font-bold text-brand-700 hover:text-brand-900 flex items-center gap-1 cursor-pointer">
-                    <ion-icon name="key-outline" class="text-sm"></ion-icon>
+            {{-- CHANGED: "Change Account Password" became "Reset password", the name admins look for; the field labels are sentence case instead of uppercase, and the fields sit in the evaluations dialog's tinted comment panel. The eye buttons got the aria-label the create dialog's already had. --}}
+            <div>
+                <button type="button" onclick="toggleEditPasswordSection()" class="text-xs font-semibold text-brand-700 hover:text-brand-900 flex items-center gap-1 cursor-pointer">
+                    <ion-icon name="key-outline" class="text-sm" aria-hidden="true"></ion-icon>
                     <span id="edit-pwd-toggle-text">Reset password</span>
                 </button>
 
-                <div id="edit-password-fields" class="hidden space-y-2.5 mt-2.5 p-3 bg-neutral-50 rounded-md border border-neutral-200/80">
-                    <p class="text-[11px] text-neutral-500">Leave blank to keep existing password.</p>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <div id="edit-password-fields" class="hidden mt-2.5 p-3.5 bg-surface-alt rounded-lg space-y-3">
+                    <p class="text-[11px] text-neutral-600">Leave blank to keep existing password.</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div>
-                            <label for="edit_password" class="block text-xs font-bold text-neutral-700 mb-1">New password</label>
+                            <label for="edit_password" class="block text-xs font-semibold text-neutral-900 mb-1.5">New password</label>
                             <div class="relative">
                                 <input type="password" id="edit_password" name="password" placeholder="••••••••"
-                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
-                                <button type="button" onclick="togglePasswordVisibility('edit_password', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
-                                    <ion-icon name="eye-outline" class="text-xs leading-none"></ion-icon>
+                                    class="w-full pl-3 pr-9 py-2 bg-white border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                                <button type="button" onclick="togglePasswordVisibility('edit_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
+                                    <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                                 </button>
                             </div>
-                            <p data-error-for="password" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                                <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                                <span></span>
-                            </p>
+                            <p data-error-for="password" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                         </div>
                         <div>
-                            <label for="edit_password_confirmation" class="block text-xs font-bold text-neutral-700 mb-1">Confirm</label>
+                            <label for="edit_password_confirmation" class="block text-xs font-semibold text-neutral-900 mb-1.5">Confirm</label>
                             <div class="relative">
                                 <input type="password" id="edit_password_confirmation" name="password_confirmation" placeholder="••••••••"
-                                    class="w-full pl-2.5 pr-7 py-1.5 bg-white border border-neutral-200 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
-                                <button type="button" onclick="togglePasswordVisibility('edit_password_confirmation', this)" class="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer">
-                                    <ion-icon name="eye-outline" class="text-xs leading-none"></ion-icon>
+                                    class="w-full pl-3 pr-9 py-2 bg-white border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                                <button type="button" onclick="togglePasswordVisibility('edit_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
+                                    <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                                 </button>
                             </div>
-                            <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1">
-                                <ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon>
-                                <span></span>
-                            </p>
+                            <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                         </div>
                     </div>
                 </div>
@@ -698,56 +658,49 @@
         </div>
 
         {{-- Form Footer Actions --}}
-        <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeEditUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
-                Cancel
-            </button>
-            <button type="submit" id="edit-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                <ion-icon name="save-outline" class="text-sm"></ion-icon>
-                <span>Save Changes</span>
-            </button>
+        <div class="flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" onclick="closeEditUserModal()" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
+            <button type="submit" id="edit-user-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Save Changes</button>
         </div>
     </form>
 </dialog>
 
 {{-- ── 7. DELETE CONFIRMATION MODAL ───────────────────────────────────── --}}
-<dialog id="delete-user-modal" class="confirm-modal modal-sharp max-w-[380px] w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60" aria-labelledby="delete-modal-title">
-    <div class="p-5">
-        <div class="flex items-start gap-3.5">
-            <div class="w-10 h-10 rounded-full bg-rose-50 border border-rose-200 text-rose-600 flex items-center justify-center shrink-0">
-                <ion-icon name="trash-outline" class="text-xl"></ion-icon>
+{{-- CHANGED: the subtitle names the account and its role; the warning is a rose panel in the place of the evaluations dialog's average panel. The error box moved inside the form: showGeneralError(deleteForm) only searches the form, so a refused delete (such as the last administrator) never showed its message before. --}}
+<dialog id="delete-user-modal" class="confirm-modal p-0! border-0!" aria-labelledby="delete-modal-title">
+    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="trash-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <div>
-                <h3 id="delete-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Delete Account</h3>
-                <p class="text-xs text-neutral-500 mt-1 leading-relaxed">
-                    Are you sure you want to delete <strong id="delete-modal-name" class="text-neutral-900"></strong>?
-                </p>
+            <div class="min-w-0">
+                <h3 id="delete-modal-title" class="text-sm font-bold text-white leading-tight">Delete Account</h3>
+                <p id="delete-modal-name" class="text-[11px] text-brand-200 truncate"></p>
             </div>
         </div>
-
-        <div class="mt-4 p-3 bg-rose-50/70 border border-rose-200/70 rounded-md text-xs text-rose-800 leading-relaxed">
-            This will permanently delete the account and revoke all access. This action cannot be undone.
-        </div>
-
-        {{-- General Error Box for Delete --}}
-        <div data-general-error class="general-error-box hidden mt-3 p-2.5 bg-rose-100/90 border border-rose-300 rounded-md text-xs text-rose-900 flex items-center gap-2">
-            <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
-            <span class="leading-tight font-medium"></span>
-        </div>
+        <button type="button" onclick="closeDeleteUserModal()" class="text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
     </div>
 
-    <form id="delete-user-form" method="POST" action="">
+    <form id="delete-user-form" method="POST" action="" class="px-6 pb-6">
         @csrf
         @method('DELETE')
 
-        <div class="px-5 py-3.5 bg-neutral-50 border-t border-neutral-100 flex items-center justify-end gap-2">
-            <button type="button" onclick="closeDeleteUserModal()" class="px-3.5 py-2 text-xs font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
-                Cancel
-            </button>
-            <button type="submit" id="delete-user-submit-btn" class="inline-flex items-center justify-center gap-1.5 px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                <ion-icon name="trash-outline" class="text-sm"></ion-icon>
-                <span>Delete Account</span>
-            </button>
+        <div class="mt-5 rounded-lg px-4 py-3.5 bg-rose-50">
+            <p class="text-xs font-semibold text-rose-900">This action cannot be undone.</p>
+            <p class="text-xs text-rose-800 mt-0.5 leading-relaxed">This will permanently delete the account and revoke all access.</p>
+        </div>
+
+        {{-- General Error Box for Delete --}}
+        <div data-general-error class="general-error-box hidden mt-3 p-3 bg-rose-100 rounded-lg text-xs text-rose-900 flex items-center gap-2">
+            <ion-icon name="alert-circle" class="text-base shrink-0 text-rose-600"></ion-icon>
+            <span class="leading-tight font-medium"></span>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" onclick="closeDeleteUserModal()" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
+            <button type="submit" id="delete-user-submit-btn" class="btn btn-sm text-xs font-semibold rounded-md bg-rose-600 hover:bg-rose-700 text-white cursor-pointer">Delete Account</button>
         </div>
     </form>
 </dialog>
@@ -911,7 +864,7 @@
         if (submitBtn) {
             submitBtn.disabled = false;
             submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
-            submitBtn.innerHTML = '<ion-icon name="person-add" class="text-sm"></ion-icon><span>Create Account</span>';
+            submitBtn.innerHTML = 'Create Account'; // CHANGED: the submit button is plain text now (was icon plus span).
         }
         var loader = document.getElementById('create-modal-loader');
         if (loader) loader.classList.add('hidden');
@@ -945,8 +898,6 @@
     function toggleCreateRole(role) {
         var stallContainer = document.getElementById('create-stall-container');
         var roleInput = document.getElementById('create-role-input');
-        var activeClass = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-bold text-xs transition-all shadow-xs bg-white text-brand-900 border border-neutral-200/80 cursor-pointer";
-        var idleClass = "flex items-center justify-center gap-1.5 py-1.5 px-3 rounded-md font-medium text-xs text-neutral-600 hover:text-neutral-900 transition-all cursor-pointer";
 
         if (roleInput) roleInput.value = role;
 
@@ -962,9 +913,14 @@
 
         if (stallContainer) stallContainer.classList.toggle('hidden', role !== 'staff');
 
+        // CHANGED: only the colour classes and aria-pressed are toggled, so the base classes live in the markup alone (was: full activeClass/idleClass strings).
         ['admin', 'staff', 'clinic'].forEach(function (r) {
             var btn = document.getElementById('create-role-' + r + '-btn');
-            if (btn) btn.className = r === role ? activeClass : idleClass;
+            if (!btn) return;
+            var on = r === role;
+            ['bg-white', 'text-neutral-900', 'shadow-2xs'].forEach(function (c) { btn.classList.toggle(c, on); });
+            ['text-neutral-600', 'hover:text-neutral-900'].forEach(function (c) { btn.classList.toggle(c, !on); });
+            btn.setAttribute('aria-pressed', on);
         });
     }
 
@@ -1051,6 +1007,9 @@
         editForm.action = "/admin/users/" + id;
         document.getElementById('edit_name').value = name;
         document.getElementById('edit_email').value = email;
+        // ADDED: the header shows whose account this is.
+        document.getElementById('edit-modal-avatar').textContent = (name || 'U').charAt(0).toUpperCase();
+        document.getElementById('edit-modal-subtitle').textContent = name;
         if (roleSelect) roleSelect.value = role;
 
         var stallSelect = document.getElementById('edit_stall_id');
@@ -1304,8 +1263,8 @@
         if (!deleteModal || !deleteForm) return;
         clearFormErrors(deleteForm);
         deleteForm.action = "/admin/users/" + id;
-        // CHANGED: label for clinic accounts.
-        if (deleteName) deleteName.textContent = name + ' (' + ({ admin: 'Administrator', staff: 'Staff', clinic: 'Clinic' }[role] || role) + ')';
+        // CHANGED: label for clinic accounts; the name and role are the header subtitle, "Name · Role" (was "Name (Role)" in the sentence).
+        if (deleteName) deleteName.textContent = name + ' · ' + ({ admin: 'Administrator', staff: 'Canteen Staff', clinic: 'Clinic' }[role] || role);
         deleteModal.showModal();
     }
 

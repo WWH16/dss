@@ -95,8 +95,11 @@ test('users page renders unified modal-sharp dialogs with shrunken width and no 
 
     $response->assertStatus(200);
 
-    // Verify modal-sharp and shrunken max-w-[400px] classes are present
-    $response->assertSee('modal-sharp max-w-[400px]', false);
+    // CHANGED: the three dialogs use the evaluations and students dialog frame (borderless confirm-modal, dark green header) instead of modal-sharp max-w-[400px].
+    $content = $response->getContent();
+    expect(substr_count($content, 'class="confirm-modal p-0! border-0!"'))->toBe(3);
+    expect(substr_count($content, 'bg-brand-900 text-white px-6 py-4'))->toBe(3);
+    $response->assertDontSee('modal-sharp', false);
 
     // Verify clean titles
     $response->assertSee('Create Account');
