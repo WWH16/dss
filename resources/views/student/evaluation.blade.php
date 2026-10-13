@@ -42,7 +42,8 @@
         </div>
     @endif
 
-    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-xs overflow-hidden">
+    {{-- CHANGED: overflow-clip instead of overflow-hidden; it still clips the rounded corners but lets the progress bar below stick to the top of the screen. --}}
+    <div class="bg-white rounded-xl border border-neutral-200/80 shadow-xs overflow-clip">
         
         {{-- CHANGED: the success screen also serves as the monthly limit screen (ADDED); only the icon, heading and first sentence differ. --}}
         @if(session('success') || $limit)
@@ -92,11 +93,12 @@
             </div>
         @else
             {{-- ── Form Header & Institutional Identity ────────────────────── --}}
-            <div class="p-6 sm:p-8 border-b border-neutral-100 bg-neutral-50/50">
+            {{-- CHANGED: p-5 and a 48px logo on phones (were p-6 and 56px), so the first statement starts higher on the screen. --}}
+            <div class="p-5 sm:p-8 border-b border-neutral-100 bg-neutral-50/50">
                 <div class="flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
                     {{-- Logos --}}
                     <div class="flex items-center gap-4 shrink-0">
-                        <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-14 h-14 sm:w-16 sm:h-16 object-contain" alt="ISU Logo">
+                        <img src="{{ asset('assets/images/isu_logo.png') }}" class="w-12 h-12 sm:w-16 sm:h-16 object-contain" alt="ISU Logo">
                         {{-- CHANGED: removed the Bagong Pilipinas logo; only the ISU logo remains. --}}
                     </div>
 
@@ -157,13 +159,8 @@
 
                 {{-- 2. Rating Scale Legend --}}
                 <div class="bg-neutral-50/70 rounded-xl border border-neutral-200/70 p-3.5 sm:p-4">
-                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 mb-2.5 border-b border-neutral-200/60">
-                        <span class="text-xs font-bold text-neutral-700 uppercase tracking-wider">Rating Scale Reference</span>
-                        <div class="flex items-center gap-2 text-xs font-bold text-neutral-600" id="progressIndicator">
-                            <span>Completion:</span>
-                            <span id="progressText" class="text-brand-700 font-mono">0 / {{ count($displayStatements) }} answered</span>
-                        </div>
-                    </div>
+                    {{-- CHANGED: the completion count and progress bar moved out of this legend into the sticky bar below it. --}}
+                    <span class="block pb-2 mb-2.5 border-b border-neutral-200/60 text-xs font-bold text-neutral-700 uppercase tracking-wider">Rating Scale Reference</span>
 
                     {{-- Scale Badges --}}
                     {{-- CHANGED: on phones the legend is a wrapping row of "5★ Excellent" chips instead of a fixed 5-column grid; at 9px the labels were unreadable and "Excellent" / "Very Good" were cut off. From sm up it is the same 5-column grid. Labels are 11px, font-bold became font-bold, and the chips use rounded-md. --}}
@@ -175,12 +172,17 @@
                             </div>
                         @endforeach
                     </div>
+                </div>
 
-                    {{-- Progress Bar --}}
-                    <div class="mt-2.5">
-                        <div class="w-full bg-neutral-200/80 h-1.5 rounded-full overflow-hidden">
-                            <div id="surveyProgressBar" class="bg-brand-600 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
-                        </div>
+                {{-- ADDED: the completion count and bar stick to the top of the screen while the student scrolls
+                     through the statements, so on a phone they stay in view instead of scrolling away with the legend. --}}
+                <div class="sticky top-0 z-10 -mx-3.5 sm:mx-0 px-3.5 sm:px-4 py-2.5 bg-white border-b sm:border border-neutral-200/80 sm:rounded-xl shadow-2xs">
+                    <div class="flex items-center justify-between gap-2 text-xs font-bold text-neutral-600">
+                        <span>Completion</span>
+                        <span id="progressText" class="text-brand-700 font-mono">0 / {{ count($displayStatements) }} answered</span>
+                    </div>
+                    <div class="mt-2 w-full bg-neutral-200/80 h-1.5 rounded-full overflow-hidden">
+                        <div id="surveyProgressBar" class="bg-brand-600 h-full rounded-full transition-[width] duration-300" style="width: 0%"></div>
                     </div>
                 </div>
 
@@ -252,7 +254,8 @@
                                     {{ $index + 1 }}
                                 </span>
                                 <div>
-                                    <p class="text-xs font-semibold text-neutral-900 leading-snug">
+                                    {{-- CHANGED: text-sm (14px, was 12px) for the statement, the part a student actually reads on a phone. --}}
+                                    <p class="text-sm font-semibold text-neutral-900 leading-snug">
                                         {{ $statement['statement'] }}
                                     </p>
                                     <span class="inline-block text-[11px] font-bold uppercase tracking-wider text-neutral-500 mt-1">
@@ -275,8 +278,9 @@
                                                 data-statement-id="{{ $statement['id'] }}"
                                                 data-val="{{ $val }}">
                                             {{-- CHANGED: the visible 8px sub-labels ("Excel", "V.Good") were too small to read and do not fit five columns at 11px, so the rating number is shown larger and the full label is kept for screen readers; the legend above gives the words. rounded-md to rounded-md. --}}
-                                            <div class="peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 peer-checked:shadow-2xs flex flex-col items-center justify-center min-h-[46px] rounded-md border border-neutral-200 bg-neutral-50/50 transition-all active:scale-95 select-none text-center">
-                                                <span class="text-sm font-bold leading-none">{{ $val }}★</span>
+                                            <div class="peer-checked:bg-brand-600 peer-checked:text-white peer-checked:border-brand-600 peer-checked:shadow-2xs flex flex-col items-center justify-center min-h-12 rounded-md border border-neutral-200 bg-neutral-50/50 transition-all active:scale-95 select-none text-center">
+                                                {{-- CHANGED: 48px tall (min-h-12, was 46px); the ★ is hidden from screen readers, which hear the number and the label. --}}
+                                                <span class="text-sm font-bold leading-none">{{ $val }}<span aria-hidden="true">★</span></span>
                                                 <span class="sr-only">
                                                     @if($val === 5) Excellent @elseif($val === 4) Very Good @elseif($val === 3) Good @elseif($val === 2) Fair @else Poor @endif
                                                 </span>
@@ -300,8 +304,9 @@
                     <label for="comment" class="block text-xs font-bold uppercase tracking-wider text-neutral-700">
                         Comments / Suggestions / Compliments <span class="text-neutral-500 font-normal">(Optional)</span>
                     </label>
+                    {{-- CHANGED: text-base on phones; iOS Safari zooms the page into any field under 16px. The placeholder is neutral-500 (was neutral-400, ~2.6:1) for contrast. --}}
                     <textarea id="comment" name="comment" rows="3" 
-                        class="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-md text-xs text-neutral-900 placeholder:text-neutral-400 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors resize-none"
+                        class="w-full px-3.5 py-2.5 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-xs text-neutral-900 placeholder:text-neutral-500 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors resize-none"
                         placeholder="Share any specific feedback about food quality, taste, cleanliness, or staff service...">{{ old('comment') }}</textarea>
                     {{-- CHANGED: the textarea now restores old('comment') after a failed submission. The helper no longer says comments are "strictly anonymous" (administrators see the student's name); it now says who reads them, and is neutral-500 for contrast. --}}
                     <p class="text-[11px] text-neutral-500">Comments are read by the canteen administrators to help stalls improve.</p>
@@ -315,8 +320,9 @@
                     </div>
 
                     <div class="flex flex-col items-center sm:items-end gap-1 w-full sm:w-auto">
+                        {{-- CHANGED: 48px tall with 14px text on phones (min-h-12, text-sm); it is the last thumb tap of the survey. --}}
                         <button type="submit" id="submitEvaluationBtn" 
-                            class="btn btn-primary w-full sm:w-auto text-xs px-6 py-2.5 shadow-2xs flex items-center justify-center gap-2">
+                            class="btn btn-primary w-full sm:w-auto text-sm sm:text-xs px-6 py-2.5 min-h-12 sm:min-h-0 shadow-2xs flex items-center justify-center gap-2">
                             <span id="submitText">Submit Evaluation</span>
                             <ion-icon id="submitIcon" name="paper-plane-outline" class="text-sm"></ion-icon>
                             <ion-icon id="submitLoader" name="hourglass-outline" class="text-sm leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
@@ -402,7 +408,8 @@ document.addEventListener('DOMContentLoaded', () => {
         const pct = totalStatements > 0 ? Math.round((count / totalStatements) * 100) : 0;
 
         if (progressBar) progressBar.style.width = pct + '%';
-        if (progressText) progressText.textContent = count + ' / ' + totalStatements + ' answered (' + pct + '%)';
+        // CHANGED: dropped the "(30%)" suffix; the progress bar beside it shows the same share.
+        if (progressText) progressText.textContent = count + ' / ' + totalStatements + ' answered';
     }
 
     // Attach listeners to Desktop radios
