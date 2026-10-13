@@ -122,7 +122,8 @@
         <div class="px-5 py-4 sm:px-8 sm:py-4 bg-neutral-50/70 border-t border-neutral-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
             <div class="flex flex-wrap items-center gap-x-4 gap-y-1.5 text-neutral-600 font-medium">
                 <span class="flex items-center gap-1">
-                    <strong class="text-neutral-900 font-bold tabular-nums">{{ $totalEvals ?? 0 }}</strong> Reviews Logged
+                    {{-- CHANGED: "Reviews Logged" became "Evaluations", the one word the student pages use for a submission. --}}
+                    <strong class="text-neutral-900 font-bold tabular-nums">{{ $totalEvals ?? 0 }}</strong> Evaluations
                 </span>
                 <span class="hidden sm:inline text-neutral-300" aria-hidden="true">•</span>
                 <span class="flex items-center gap-1">

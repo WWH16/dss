@@ -7,32 +7,17 @@
 @section('content')
 <div class="space-y-6">
 
-    {{-- ── 1. Page Header & Action Bar ───────────────────────────────────── --}}
-    <div class="bg-white rounded-xl border border-neutral-200/80 p-5 sm:p-6 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-        <div>
-            <div class="flex items-center gap-2">
-                <h1 class="text-xl font-bold text-neutral-900 tracking-tight leading-tight">
-                    My Evaluation History
-                </h1>
-                <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-bold bg-brand-50 text-brand-800 border border-brand-200/70 tabular-nums">
-                    {{ $myStudentEvals->total() }} {{ Str::plural('Review', $myStudentEvals->total()) }}
-                </span>
-            </div>
-            <p class="text-xs text-neutral-500 mt-1">
-                A complete record of all your submitted ratings, criteria scores, and feedback for campus food stalls.
-            </p>
-        </div>
-
-        <a href="{{ route('student.evaluation') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs shrink-0 self-start sm:self-auto">
-            <ion-icon name="create-outline" class="text-sm"></ion-icon>
-            Evaluate a Stall
-        </a>
-    </div>
+    {{-- CHANGED: the header card is gone. Its title repeated the top bar ("Evaluation History") and its count
+         repeated the rows below, so the heading stays for screen readers only and the action moved into the
+         search row. --}}
+    <h1 class="sr-only">My Evaluation History</h1>
 
     {{-- ── 2. Table Container Card ────────────────────────────────────────── --}}
     <div class="bg-white rounded-xl border border-neutral-200/80 shadow-xs overflow-hidden">
         
         {{-- Search & Sort Toolbar --}}
+        {{-- CHANGED: shown only once the student has an evaluation; with none there is nothing to search or sort. --}}
+        @if($hasEvaluations)
         <div class="p-4 sm:p-5 border-b border-neutral-100 flex flex-col sm:flex-row items-center justify-between gap-3">
             <form action="{{ route('student.history') }}" method="GET" class="w-full sm:w-auto flex-1 flex flex-col sm:flex-row items-center gap-2.5">
                 {{-- Search Input --}}
@@ -60,7 +45,23 @@
                     </a>
                 @endif
             </form>
+
+            {{-- CHANGED: moved here from the removed header card. It shows only once the student has an evaluation
+                 (the empty state carries its own), says "Scan a stall's QR" since the evaluation page opens the
+                 scanner, and once this month's evaluation is used it is replaced by the date the next one opens. --}}
+            @if($usedThisMonth)
+                <p class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-neutral-100 text-neutral-600 border border-neutral-200 text-xs font-bold rounded-md shrink-0 w-full sm:w-auto">
+                    <ion-icon name="calendar-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                    Next evaluation opens {{ $nextOpens }}
+                </p>
+            @else
+                <a href="{{ route('student.evaluation') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs shrink-0 w-full sm:w-auto">
+                    <ion-icon name="qr-code-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                    Scan a stall's QR
+                </a>
+            @endif
         </div>
+        @endif
 
         {{-- Table / List Content --}}
         @if($myStudentEvals->isEmpty())
@@ -69,9 +70,10 @@
                 <div class="w-14 h-14 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-3 text-brand-700">
                     <ion-icon name="receipt-outline" class="text-2xl"></ion-icon>
                 </div>
-                <h3 class="text-sm font-bold text-neutral-900 mb-1">No evaluations found</h3>
+                {{-- CHANGED: with no evaluations at all, the empty state is titled "No evaluations yet" and states the one-stall-per-month rule. --}}
+                <h3 class="text-sm font-bold text-neutral-900 mb-1">{{ request('q') ? 'No evaluations found' : 'No evaluations yet' }}</h3>
                 <p class="text-xs text-neutral-500 max-w-sm mb-5">
-                    {{ request('q') ? 'No submitted evaluations matched your search criteria.' : "You haven't submitted any stall evaluations yet. Your reviews will appear here." }}
+                    {{ request('q') ? 'No submitted evaluations matched your search criteria.' : 'You can evaluate 1 stall each month. Your evaluations will show here.' }}
                 </p>
                 {{-- CHANGED: when a search matched nothing, the button now clears the search instead of saying "Evaluate your first stall" to a student who already has evaluations. --}}
                 @if(request('q'))
@@ -80,9 +82,10 @@
                         Clear search
                     </a>
                 @else
+                    {{-- CHANGED: "Evaluate your first stall" became "Scan a stall's QR"; the evaluation page opens the scanner. --}}
                     <a href="{{ route('student.evaluation') }}" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs">
-                        <ion-icon name="add-outline" class="text-sm"></ion-icon>
-                        Evaluate your first stall
+                        <ion-icon name="qr-code-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                        Scan a stall's QR
                     </a>
                 @endif
             </div>
@@ -113,22 +116,16 @@
                             @endphp
                             <tr class="hover:bg-neutral-50/60 transition-colors group">
                                 {{-- Stall Name --}}
-                                <td class="py-3.5 px-5">
-                                    <div class="flex items-center gap-3">
-                                        <div class="w-8 h-8 rounded-md bg-neutral-50 border border-neutral-200 text-brand-700 flex items-center justify-center shrink-0">
-                                            <ion-icon name="storefront-outline" class="text-base"></ion-icon>
-                                        </div>
-                                        <div class="min-w-0">
-                                            <span class="text-xs font-bold text-neutral-900 block truncate">{{ $eval->stall_name ?? 'Food Stall' }}</span>
-                                        </div>
-                                    </div>
+                                {{-- CHANGED: removed the storefront icon box repeated on every row; the column is already "Food Stall". --}}
+                                <td class="py-3.5 px-5 text-xs font-bold text-neutral-900">
+                                    {{ $eval->stall_name ?? 'Food Stall' }}
                                 </td>
 
                                 {{-- Date --}}
                                 {{-- CHANGED: date shown in Philippine time; the "x ago" line raised from 10px neutral-400 to 11px neutral-500. --}}
                                 <td class="py-3.5 px-4 text-xs text-neutral-600 font-medium tabular-nums whitespace-nowrap">
+                                    {{-- CHANGED: removed the "x ago" line under the date; the date already says when. --}}
                                     {{ $evalAt->format('M d, Y') }}
-                                    <span class="block text-[11px] text-neutral-500">{{ $evalAt->diffForHumans() }}</span>
                                 </td>
 
                                 {{-- Criteria Scores --}}
@@ -189,15 +186,11 @@
                         @endphp
                         <div class="p-4 flex flex-col gap-2.5">
                             <div class="flex items-center justify-between">
-                                <div class="flex items-center gap-2 min-w-0">
-                                    <div class="w-8 h-8 rounded-md bg-neutral-50 border border-neutral-200 text-brand-700 flex items-center justify-center shrink-0">
-                                        <ion-icon name="storefront-outline" class="text-base"></ion-icon>
-                                    </div>
-                                    <div class="min-w-0">
-                                        <h3 class="text-xs font-bold text-neutral-900 truncate">{{ $eval->stall_name ?? 'Food Stall' }}</h3>
-                                        {{-- CHANGED: Philippine time; 10px neutral-400 to 11px neutral-500. --}}
-                                        <span class="text-[11px] text-neutral-500">{{ $evalAt->format('M d, Y • h:i A') }}</span>
-                                    </div>
+                                {{-- CHANGED: removed the storefront icon box repeated on every card. --}}
+                                <div class="min-w-0">
+                                    <h3 class="text-xs font-bold text-neutral-900 truncate">{{ $eval->stall_name ?? 'Food Stall' }}</h3>
+                                    {{-- CHANGED: Philippine time; 10px neutral-400 to 11px neutral-500. --}}
+                                    <span class="text-[11px] text-neutral-500">{{ $evalAt->format('M d, Y • h:i A') }}</span>
                                 </div>
                                 <span class="inline-flex items-center gap-1 bg-brand-50 px-2 py-0.5 rounded-md text-xs font-bold text-brand-900 border border-brand-200 shrink-0">
                                     {{ number_format($avg, 1) }}★

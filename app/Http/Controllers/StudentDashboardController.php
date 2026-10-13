@@ -235,8 +235,14 @@ class StudentDashboardController extends Controller
         }
 
         $myStudentEvals = $query->paginate(12)->withQueryString();
-        $totalEvaluations = $myStudentEvals->total();
+        // CHANGED: removed $totalEvaluations; the history view reads $myStudentEvals->total().
 
-        return view('student.history', compact('myStudentEvals', 'totalEvaluations'));
+        // ADDED: whether the student has any evaluation at all (the search above can hide them all), and
+        // whether this month's evaluation is used, so the page can say when the next one opens.
+        $hasEvaluations = DB::table('stall_evaluations')->where('student_id', $user->id)->exists();
+        $usedThisMonth = $hasEvaluations && StudentEvaluationController::usedThisMonth($user->id);
+        $nextOpens = now('Asia/Manila')->startOfMonth()->addMonth()->format('F j');
+
+        return view('student.history', compact('myStudentEvals', 'hasEvaluations', 'usedThisMonth', 'nextOpens'));
     }
 }

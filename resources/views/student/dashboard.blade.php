@@ -28,7 +28,8 @@
                 </div>
                 {{-- CHANGED: states the one-stall-per-month rule instead of asking students to rate every stall they eat at. --}}
                 <p class="text-xs text-ink-500 mt-0.5">
-                    You can evaluate one stall each month. Your ratings help keep campus dining clean, fair and good.
+                    {{-- CHANGED: "ratings" became "evaluations", the one word the student pages use for a submission (same below). --}}
+                    You can evaluate one stall each month. Your evaluations help keep campus dining clean, fair and good.
                 </p>
             </div>
         </div>
@@ -100,7 +101,7 @@
         {{-- Metric 2: Total Reviews --}}
         <div class="bg-white rounded-xl border border-ink-100/80 p-3 sm:p-4 shadow-xs flex flex-col justify-between">
             <div class="flex items-center justify-between gap-2">
-                <span class="text-[11px] font-bold text-ink-500 uppercase tracking-wider leading-tight">Reviews</span>
+                <span class="text-[11px] font-bold text-ink-500 uppercase tracking-wider leading-tight hyphens-auto">Evaluations</span>
                 <ion-icon name="receipt-outline" class="hidden sm:block text-base text-brand-700 shrink-0" aria-hidden="true"></ion-icon>
             </div>
             <div class="text-xl font-bold text-ink-900 tabular-nums tracking-tight mt-3">
@@ -128,7 +129,7 @@
                 @endif
             </div>
             <div class="hidden sm:block text-[11px] text-ink-500 font-medium mt-0.5">
-                {{ $totalEvalsCount > 0 ? 'Your evaluation baseline' : 'No ratings yet' }}
+                {{ $totalEvalsCount > 0 ? 'Your evaluation baseline' : 'No evaluations yet' }}
             </div>
         </div>
     </div>
@@ -314,7 +315,7 @@
                             <div class="text-right">
                                 <span class="text-[11px] font-semibold text-ink-500 block">Evaluations</span>
                                 <span class="text-sm font-bold text-ink-700 tabular-nums">
-                                    {{ $topCampusStall->eval_count }} {{ Str::plural('review', $topCampusStall->eval_count) }}
+                                    {{ $topCampusStall->eval_count }} {{ Str::plural('evaluation', $topCampusStall->eval_count) }}
                                 </span>
                             </div>
                         </div>
@@ -330,9 +331,9 @@
                     <div>
                         <h2 class="text-sm font-bold text-ink-900 tracking-tight flex items-center gap-1.5">
                             <ion-icon name="time-outline" class="text-ink-500 text-sm" aria-hidden="true"></ion-icon>
-                            Your Recent Ratings
+                            Your Recent Evaluations
                         </h2>
-                        <p class="text-[11px] text-ink-500 mt-0.5">Latest reviews submitted</p>
+                        <p class="text-[11px] text-ink-500 mt-0.5">Latest evaluations submitted</p>
                     </div>
                     @if($totalEvalsCount > 0)
                         {{-- CHANGED: an 11px link is a ~14px tap target; the padding takes it past the 24px minimum without moving the text. --}}
@@ -349,7 +350,7 @@
                             <ion-icon name="time-outline" class="text-lg" aria-hidden="true"></ion-icon>
                         </div>
                         <p class="text-xs font-bold text-ink-800 mb-0.5">No evaluation history yet</p>
-                        <p class="text-[11px] text-ink-500 max-w-[200px] mb-3">Your submitted reviews will appear here.</p>
+                        <p class="text-[11px] text-ink-500 max-w-[200px] mb-3">Your submitted evaluations will appear here.</p>
                         {{-- CHANGED: the "Rate your first stall" link became a QR hint; the evaluation page opens only from a scan. --}}
                         <p class="text-[11px] font-semibold text-brand-700 inline-flex items-center gap-1">
                             <ion-icon name="qr-code-outline" class="text-sm" aria-hidden="true"></ion-icon>

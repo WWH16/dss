@@ -187,12 +187,19 @@ class StudentEvaluationController extends Controller
     {
         $monthStart = now('Asia/Manila')->startOfMonth();
 
-        return DB::table('stall_evaluations')
-            ->where('student_id', $studentId)
-            ->where('created_at', '>=', $monthStart->copy()->utc())
-            ->exists()
+        // CHANGED: the check moved to usedThisMonth() below, which the history page also calls.
+        return self::usedThisMonth($studentId)
             ? "You have already submitted your evaluation for {$monthStart->format('F')}. "
                 . "You can evaluate a stall again on {$monthStart->copy()->addMonth()->format('F j')}."
             : null;
+    }
+
+    // ADDED: true once the student has evaluated a stall this calendar month (Philippine time).
+    public static function usedThisMonth(int $studentId): bool
+    {
+        return DB::table('stall_evaluations')
+            ->where('student_id', $studentId)
+            ->where('created_at', '>=', now('Asia/Manila')->startOfMonth()->utc())
+            ->exists();
     }
 }
