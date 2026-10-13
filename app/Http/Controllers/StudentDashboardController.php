@@ -58,6 +58,13 @@ class StudentDashboardController extends Controller
             ];
         });
 
+        // ADDED: students get one evaluation per calendar month (Philippine time), the same rule as
+        // StudentEvaluationController::monthlyLimitMessage(). This is the evaluation that used it, or null.
+        $monthStart = now('Asia/Manila')->startOfMonth();
+        $thisMonthEval = $myStudentEvals->first(
+            fn ($e) => \Carbon\Carbon::parse($e->created_at)->gte($monthStart->copy()->utc())
+        );
+
         // Summary Stats
         $totalStallsCount = $stalls->count();
         $uniqueEvaluatedCount = $stalls->filter(function ($s) use ($evaluatedStallsMap) {
@@ -105,7 +112,10 @@ class StudentDashboardController extends Controller
             'coveragePct',
             'totalEvalsCount',
             'overallAvgGiven',
-            'topCampusStall'
+            'topCampusStall',
+            // ADDED: this month's evaluation status for the dashboard (see above).
+            'monthStart',
+            'thisMonthEval'
         ));
     }
 

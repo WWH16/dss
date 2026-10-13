@@ -74,3 +74,41 @@ test('the dashboard has exactly one h1', function () {
 
     expect(substr_count($content, '<h1'))->toBe(1);
 });
+
+// ADDED: one evaluation per month. Once this month's is used, the dashboard says so; the Scan QR button stays.
+test('the dashboard shows this month as done after an evaluation this month', function () {
+    $stallId = DB::table('stalls')->insertGetId([
+        'name' => 'Rice Corner', 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    DB::table('stall_evaluations')->insert([
+        'student_id' => $this->student->id, 'stall_id' => $stallId,
+        'cleanliness' => 4, 'service' => 4, 'taste' => 4, 'price' => 4,
+        'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $month = now('Asia/Manila')->startOfMonth();
+
+    $this->actingAs($this->student)->get(route('student.dashboard'))
+        ->assertOk()
+        ->assertSee($month->format('F') . ' evaluation done')
+        ->assertSee('Rice Corner')
+        ->assertSee($month->copy()->addMonth()->format('F j'))
+        ->assertSee('class="js-open-scanner', false)
+        ->assertSee('id="qr-start"', false);
+});
+
+test('an evaluation from last month leaves this month open', function () {
+    $stallId = DB::table('stalls')->insertGetId([
+        'name' => 'Rice Corner', 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    $lastMonth = now('Asia/Manila')->startOfMonth()->subDay()->utc();
+    DB::table('stall_evaluations')->insert([
+        'student_id' => $this->student->id, 'stall_id' => $stallId,
+        'cleanliness' => 4, 'service' => 4, 'taste' => 4, 'price' => 4,
+        'created_at' => $lastMonth, 'updated_at' => $lastMonth,
+    ]);
+
+    $this->actingAs($this->student)->get(route('student.dashboard'))
+        ->assertOk()
+        ->assertSee('Your ' . now('Asia/Manila')->format('F') . ' evaluation is open')
+        ->assertSee('id="qr-start"', false);
+});
