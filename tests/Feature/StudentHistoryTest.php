@@ -42,23 +42,17 @@ test('with no evaluations the history shows one action, the monthly rule, and no
     $content = $this->actingAs($this->student)->get(route('student.history'))
         ->assertOk()
         ->assertSee('No evaluations yet')
-        ->assertSee('You can evaluate 1 stall each month.')
+        // CHANGED: the rule is once per stall each month.
+        ->assertSee('You can evaluate each stall once a month.')
         ->assertDontSee('name="q"', false)
         ->getContent();
 
     expect(substr_count($content, "Scan a stall's QR"))->toBe(1);
 });
 
-test('once this month is used the history says when the next evaluation opens', function () {
+// CHANGED: other stalls stay open after an evaluation this month, so the scan action stays on the history.
+test('an evaluation this month leaves the scan action on the history', function () {
     historyEvaluation($this->student->id, now());
-
-    $this->actingAs($this->student)->get(route('student.history'))
-        ->assertSee('Next evaluation opens ' . now('Asia/Manila')->startOfMonth()->addMonth()->format('F j'))
-        ->assertDontSee("Scan a stall's QR", false);
-});
-
-test('an evaluation from last month leaves the scan action on the history', function () {
-    historyEvaluation($this->student->id, now('Asia/Manila')->startOfMonth()->subDay()->utc());
 
     $this->actingAs($this->student)->get(route('student.history'))
         ->assertSee("Scan a stall's QR", false)

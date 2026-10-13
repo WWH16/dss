@@ -48,18 +48,11 @@
 
             {{-- CHANGED: moved here from the removed header card. It shows only once the student has an evaluation
                  (the empty state carries its own), says "Scan a stall's QR" since the evaluation page opens the
-                 scanner, and once this month's evaluation is used it is replaced by the date the next one opens. --}}
-            @if($usedThisMonth)
-                <p class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-neutral-100 text-neutral-600 border border-neutral-200 text-xs font-bold rounded-md shrink-0 w-full sm:w-auto">
-                    <ion-icon name="calendar-outline" class="text-sm" aria-hidden="true"></ion-icon>
-                    Next evaluation opens {{ $nextOpens }}
-                </p>
-            @else
-                <a href="{{ route('student.evaluation') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs shrink-0 w-full sm:w-auto">
-                    <ion-icon name="qr-code-outline" class="text-sm" aria-hidden="true"></ion-icon>
-                    Scan a stall's QR
-                </a>
-            @endif
+                 scanner. CHANGED: it always shows; the "Next evaluation opens" notice is gone since the limit is per stall. --}}
+            <a href="{{ route('student.evaluation') }}" class="inline-flex items-center justify-center gap-1.5 px-4 py-2.5 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs shrink-0 w-full sm:w-auto">
+                <ion-icon name="qr-code-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                Scan a stall's QR
+            </a>
         </div>
         @endif
 
@@ -70,10 +63,10 @@
                 <div class="w-14 h-14 rounded-xl bg-brand-50 border border-brand-100 flex items-center justify-center mb-3 text-brand-700">
                     <ion-icon name="receipt-outline" class="text-2xl"></ion-icon>
                 </div>
-                {{-- CHANGED: with no evaluations at all, the empty state is titled "No evaluations yet" and states the one-stall-per-month rule. --}}
+                {{-- CHANGED: with no evaluations at all, the empty state is titled "No evaluations yet" and states the once-per-stall-each-month rule. --}}
                 <h3 class="text-sm font-bold text-neutral-900 mb-1">{{ request('q') ? 'No evaluations found' : 'No evaluations yet' }}</h3>
                 <p class="text-xs text-neutral-500 max-w-sm mb-5">
-                    {{ request('q') ? 'No submitted evaluations matched your search criteria.' : 'You can evaluate 1 stall each month. Your evaluations will show here.' }}
+                    {{ request('q') ? 'No submitted evaluations matched your search criteria.' : 'You can evaluate each stall once a month. Your evaluations will show here.' }}
                 </p>
                 {{-- CHANGED: when a search matched nothing, the button now clears the search instead of saying "Evaluate your first stall" to a student who already has evaluations. --}}
                 @if(request('q'))

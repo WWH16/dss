@@ -54,21 +54,23 @@
                 </div>
                 
                 <h2 class="text-2xl sm:text-3xl font-bold text-neutral-900 tracking-tight mb-2">
-                    {{ session('success') ? 'Evaluation Submitted!' : 'Already evaluated this month' }}
+                    {{-- CHANGED: the limit heading says "this stall"; the limit is per stall now. --}}
+                    {{ session('success') ? 'Evaluation Submitted!' : 'Already evaluated this stall this month' }}
                 </h2>
                 
                 {{-- CHANGED: removed "logged anonymously". Each evaluation is stored with the student's account, and administrators see the student's name next to it on the Evaluations page, so the claim was not true. --}}
                 <p class="text-neutral-500 max-w-md mx-auto mb-8 text-xs sm:text-sm leading-relaxed">
                     @if(session('success'))
                         Thank you for your valuable feedback. Your rating has been recorded to help maintain high quality dining standards across Isabela State University.
-                        {{-- ADDED: students get one evaluation per month, so the screen says when the next one opens. --}}
-                        You can evaluate a stall again on {{ now('Asia/Manila')->startOfMonth()->addMonth()->format('F j') }}.
+                        {{-- CHANGED: students get one evaluation per stall per month, so the screen says other stalls stay open. --}}
+                        You can evaluate this stall again on {{ now('Asia/Manila')->startOfMonth()->addMonth()->format('F j') }}. Other stalls are still open this month.
                     @else
-                        Each student can evaluate one stall per month. {{ $limit }}
+                        {{-- CHANGED: the rule is one evaluation per stall per month. --}}
+                        Each student can evaluate each stall once per month. {{ $limit }}
                     @endif
                 </p>
 
-                {{-- CHANGED: removed the "Evaluate Another Stall" button; a second evaluation this month is not allowed. --}}
+                {{-- CHANGED: removed the "Evaluate Another Stall" button; the dashboard's Scan QR button opens the next stall. --}}
                 <a href="{{ route('student.dashboard') }}" class="w-full sm:w-auto px-5 py-2.5 bg-brand-600 hover:bg-brand-700 text-white font-bold rounded-md transition-colors text-xs text-center shadow-2xs">
                     Back to Dashboard
                 </a>

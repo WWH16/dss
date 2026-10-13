@@ -26,10 +26,10 @@
                         {{ $profile->student_number ?? 'Student' }}
                     </span>
                 </div>
-                {{-- CHANGED: states the one-stall-per-month rule instead of asking students to rate every stall they eat at. --}}
+                {{-- CHANGED: states the once-per-stall-each-month rule instead of asking students to rate every stall they eat at. --}}
                 <p class="text-xs text-ink-500 mt-0.5">
                     {{-- CHANGED: "ratings" became "evaluations", the one word the student pages use for a submission (same below). --}}
-                    You can evaluate one stall each month. Your evaluations help keep campus dining clean, fair and good.
+                    You can evaluate each stall once a month. Your evaluations help keep campus dining clean, fair and good.
                 </p>
             </div>
         </div>
@@ -37,42 +37,30 @@
         {{-- CHANGED: the viewfinder was inline here and took the whole strip. The scanner now lives in the
              #qr-scan-modal dialog at the bottom of this page, opened by the floating Scan QR button, so the
              strip is back to the three steps. --}}
-        {{-- CHANGED: the strip now shows this month's evaluation status. While it is open, the heading names the
-             month and the three steps stay. Once it is used, the steps give way to the stall rated and the date
-             the next evaluation opens. --}}
-        {{-- CHANGED: $nextOpens and $star are set once here for the strip, the cards and the scanner dialog. --}}
+        {{-- CHANGED: the strip always shows the three steps. The limit is one evaluation per stall per month, so
+             one evaluation no longer closes the month; the "evaluation done" state and its next-opens date are gone. --}}
+        {{-- CHANGED: the ★ glyph is hidden from screen readers, which read it as "black star"; they hear "out of 5" instead (same on every rating below). --}}
         @php
-            $monthName = $monthStart->format('F');
-            $nextOpens = $monthStart->copy()->addMonth()->format('F j');
             $star = '<span aria-hidden="true">★</span><span class="sr-only"> out of 5</span>';
         @endphp
         <div class="px-5 sm:px-6 py-4 bg-brand-50/60 border-t border-brand-100 flex flex-col md:flex-row md:items-center gap-4">
             <div class="flex items-center gap-3 shrink-0">
                 <div class="w-10 h-10 rounded-md bg-brand-700 text-white flex items-center justify-center shrink-0 shadow-2xs">
-                    <ion-icon name="{{ $thisMonthEval ? 'checkmark-done-outline' : 'qr-code-outline' }}" class="text-xl" aria-hidden="true"></ion-icon>
+                    <ion-icon name="qr-code-outline" class="text-xl" aria-hidden="true"></ion-icon>
                 </div>
                 <h2 class="text-sm font-bold text-brand-900 leading-tight">
-                    {{ $thisMonthEval ? "$monthName evaluation done" : "Your $monthName evaluation is open" }}
+                    How to evaluate a stall
                 </h2>
             </div>
-            @if($thisMonthEval)
-                <p class="md:flex-1 md:pl-5 md:border-l md:border-brand-200 text-xs text-brand-900 leading-relaxed">
-                    You rated <span class="font-bold">{{ $thisMonthEval->stall_name }}</span>
-                    {{-- CHANGED: the ★ glyph is hidden from screen readers, which read it as "black star"; they hear "out of 5" instead (same on every rating below). --}}
-                    <span class="tabular-nums">{{ number_format($evaluatedStallsMap[$thisMonthEval->stall_id]['latest_avg'], 1) }}{!! $star !!}</span>.
-                    Your next evaluation opens on <span class="font-bold">{{ $nextOpens }}</span>.
-                </p>
-            @else
-                <ol class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 md:flex-1 md:pl-5 md:border-l md:border-brand-200">
-                    {{-- CHANGED: step 3 says the submission uses this month's evaluation. --}}
-                    @foreach(["Find the QR code posted at the stall's counter.", 'Open the scanner and point it at the code.', "Answer the survey and submit. That uses your $monthName evaluation."] as $step)
-                        <li class="flex items-start gap-2 text-xs text-brand-900">
-                            <span class="w-5 h-5 rounded-full bg-white border border-brand-200 text-brand-800 text-[11px] font-bold flex items-center justify-center shrink-0 tabular-nums">{{ $loop->iteration }}</span>
-                            <span>{{ $step }}</span>
-                        </li>
-                    @endforeach
-                </ol>
-            @endif
+            <ol class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 sm:gap-4 md:flex-1 md:pl-5 md:border-l md:border-brand-200">
+                {{-- CHANGED: step 3 states the once-per-stall-each-month rule. --}}
+                @foreach(["Find the QR code posted at the stall's counter.", 'Open the scanner and point it at the code.', 'Answer the survey and submit. Each stall can be evaluated once a month.'] as $step)
+                    <li class="flex items-start gap-2 text-xs text-brand-900">
+                        <span class="w-5 h-5 rounded-full bg-white border border-brand-200 text-brand-800 text-[11px] font-bold flex items-center justify-center shrink-0 tabular-nums">{{ $loop->iteration }}</span>
+                        <span>{{ $step }}</span>
+                    </li>
+                @endforeach
+            </ol>
         </div>
     </div>
 
@@ -397,11 +385,9 @@
 
 {{-- ── 3. Floating Scan Trigger ───────────────────────────────────────────── --}}
 {{-- ADDED: the scanner is out of the page flow now. This stays within thumb reach on every scroll position, which is where a student holding a phone at a counter needs it. --}}
-{{-- CHANGED: once this month's evaluation is used, the button turns white with a green border and opens a notice instead of the scanner. --}}
-{{-- CHANGED: in the used state the accessible name says where the tap leads, since the visible label still reads "Scan QR". --}}
+{{-- CHANGED: the button always opens the scanner; the white "used" state is gone since other stalls stay open after an evaluation. --}}
 <button type="button"
-        @if($thisMonthEval) aria-label="Scan QR. Next evaluation opens {{ $nextOpens }}" @endif
-        class="js-open-scanner fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 pl-5 pr-6 min-h-14 rounded-full font-bold text-sm transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-600/35 {{ $thisMonthEval ? 'bg-white hover:bg-brand-50 text-brand-800 border border-brand-200 shadow-lg shadow-ink-900/10' : 'bg-brand-700 hover:bg-brand-800 text-white shadow-lg shadow-brand-900/25' }}">
+        class="js-open-scanner fixed bottom-5 right-5 z-40 inline-flex items-center gap-2 pl-5 pr-6 min-h-14 rounded-full font-bold text-sm transition-colors cursor-pointer focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-brand-600/35 bg-brand-700 hover:bg-brand-800 text-white shadow-lg shadow-brand-900/25">
     <ion-icon name="scan-outline" class="text-2xl" aria-hidden="true"></ion-icon>
     Scan QR
 </button>
@@ -411,14 +397,14 @@
      screen to itself: the viewfinder is the task, and showModal() traps focus and dims everything else. --}}
 <dialog id="qr-scan-modal" class="confirm-modal" aria-labelledby="qr-scan-modal-title">
     <div class="flex items-start justify-between gap-3 mb-1">
-        {{-- CHANGED: in the used state the dialog says when the next evaluation opens and has no camera; a scan would only reach the limit screen. The close button is labelled "Close" in both states. --}}
+        {{-- CHANGED: the dialog always holds the camera; the "evaluation done" notice is gone since other stalls stay open. --}}
         <div>
             {{-- CHANGED: the font-display class replaces the inline font-family style. --}}
             <h2 id="qr-scan-modal-title" class="font-display text-base font-bold text-ink-900 leading-tight">
-                {{ $thisMonthEval ? $monthStart->format('F') . ' evaluation done' : "Scan the stall's QR code" }}
+                Scan the stall's QR code
             </h2>
             <p class="text-xs text-ink-500 mt-1">
-                {{ $thisMonthEval ? "Next evaluation opens $nextOpens." : 'Point your camera at the code posted at the counter.' }}
+                Point your camera at the code posted at the counter.
             </p>
         </div>
         <button type="button" class="js-close-scanner shrink-0 -mt-1 -mr-1 p-2 rounded-md text-ink-500 hover:text-ink-900 hover:bg-ink-50 transition-colors cursor-pointer" aria-label="Close">
@@ -426,11 +412,9 @@
         </button>
     </div>
 
-    @unless($thisMonthEval)
-        <div class="flex flex-col items-center text-center">
-            @include('partials.qr-scanner')
-        </div>
-    @endunless
+    <div class="flex flex-col items-center text-center">
+        @include('partials.qr-scanner')
+    </div>
 </dialog>
 
 {{-- ── 5. Client-Side Stall Search & Filtering Logic ──────────────────────── --}}

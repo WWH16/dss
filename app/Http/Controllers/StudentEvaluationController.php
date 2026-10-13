@@ -77,11 +77,10 @@ class StudentEvaluationController extends Controller
         // the student to scan the QR code at the stall.
         $stall = null;
 
-        // ADDED: once this month's evaluation is used up, the page shows the limit screen instead of the
-        // scanner, and a scanned QR code is ignored, so the student does not fill in a form store() would reject.
-        $limit = $this->monthlyLimitMessage($user->id);
+        // CHANGED: the limit is per stall now, so it is checked after the scanned stall is known (below).
+        $limit = null;
 
-        if (! $limit && $request->has('signature')) {
+        if ($request->has('signature')) {
             if (! $request->hasValidSignature(false)) {
                 return redirect()->route('student.evaluation')->with('error', 'This QR code is not valid. Scan the code posted at the stall.');
             }
@@ -96,7 +95,13 @@ class StudentEvaluationController extends Controller
                 return redirect()->route('student.evaluation')->with('error', "{$stall->name} is currently closed for student evaluations.");
             }
 
-            session(['qr_stall_id' => $stall->id]);
+            // ADDED: a stall this student already evaluated this month shows the limit screen instead of the
+            // form, and is not kept for store(), so the student does not fill in a form store() would reject.
+            $limit = $this->monthlyLimitMessage($user->id, $stall);
+
+            if (! $limit) {
+                session(['qr_stall_id' => $stall->id]);
+            }
         }
 
         // CHANGED: statements moved to self::STATEMENTS; store() reads the same list.
@@ -120,9 +125,9 @@ class StudentEvaluationController extends Controller
             return redirect()->route('student.evaluation')->with('error', 'Scan the QR code at the stall to evaluate it.');
         }
 
-        // ADDED: one evaluation per student per calendar month, for any one stall. The evaluation page shows the limit screen.
-        if ($this->monthlyLimitMessage($user->id)) {
-            return redirect()->route('student.evaluation');
+        // CHANGED: one evaluation per student per stall per calendar month; other stalls stay open.
+        if (self::usedThisMonth($user->id, (int) session('qr_stall_id'))) {
+            return redirect()->route('student.evaluation')->with('error', 'You have already evaluated this stall this month. Scan a different stall.');
         }
 
         $request->merge(['stall_id' => session('qr_stall_id')]);
@@ -175,30 +180,32 @@ class StudentEvaluationController extends Controller
         ]);
 
         // CHANGED: redirects to the plain evaluation page instead of back(). back() returned to the signed
-        // scan link, which now refuses the student because this month's evaluation is used up.
+        // scan link, which now refuses the student because this stall's evaluation for the month is used up.
         return redirect()->route('student.evaluation')->with('success', 'Evaluation submitted successfully!');
     }
 
-    // ADDED: returns the reason the student cannot evaluate this month, or null if they can.
+    // ADDED: returns the reason the student cannot evaluate this stall this month, or null if they can.
     // The month runs in Philippine time; created_at is stored in UTC, so the month start is converted.
     // ponytail: check-then-insert without a lock; two hand-crafted parallel requests could both pass.
     // The submit button is disabled on click. Add a lockForUpdate() on the student's users row if that matters.
-    private function monthlyLimitMessage(int $studentId): ?string
+    // CHANGED: takes the scanned stall; the limit is one evaluation per stall per month.
+    private function monthlyLimitMessage(int $studentId, object $stall): ?string
     {
         $monthStart = now('Asia/Manila')->startOfMonth();
 
-        // CHANGED: the check moved to usedThisMonth() below, which the history page also calls.
-        return self::usedThisMonth($studentId)
-            ? "You have already submitted your evaluation for {$monthStart->format('F')}. "
-                . "You can evaluate a stall again on {$monthStart->copy()->addMonth()->format('F j')}."
+        return self::usedThisMonth($studentId, $stall->id)
+            ? "You have already evaluated {$stall->name} for {$monthStart->format('F')}. "
+                . "You can evaluate it again on {$monthStart->copy()->addMonth()->format('F j')}, or scan a different stall now."
             : null;
     }
 
-    // ADDED: true once the student has evaluated a stall this calendar month (Philippine time).
-    public static function usedThisMonth(int $studentId): bool
+    // ADDED: true once the student has evaluated this stall this calendar month (Philippine time).
+    // CHANGED: takes the stall; other stalls do not count.
+    public static function usedThisMonth(int $studentId, int $stallId): bool
     {
         return DB::table('stall_evaluations')
             ->where('student_id', $studentId)
+            ->where('stall_id', $stallId)
             ->where('created_at', '>=', now('Asia/Manila')->startOfMonth()->utc())
             ->exists();
     }

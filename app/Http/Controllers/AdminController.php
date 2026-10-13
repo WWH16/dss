@@ -384,7 +384,7 @@ class AdminController extends Controller
             'CAS'    => ['BA COMM', 'BS PSYCH', 'BS BIO', 'BACOMM', 'BSPSYCH'],
         ];
 
-        // CHANGED: a student may evaluate once per calendar month in Philippine time (StudentEvaluationController::monthlyLimitMessage), so participation is tracked for the current month. created_at is stored in UTC, so the month start is converted.
+        // CHANGED: a student may evaluate each stall once per calendar month in Philippine time (StudentEvaluationController::monthlyLimitMessage), so participation is tracked for the current month: any evaluation this month counts. created_at is stored in UTC, so the month start is converted.
         $monthStart = now('Asia/Manila')->startOfMonth()->utc();
         $thisMonthSql = 'MAX(CASE WHEN stall_evaluations.created_at >= ? THEN 1 ELSE 0 END)';
 

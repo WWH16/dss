@@ -58,12 +58,8 @@ class StudentDashboardController extends Controller
             ];
         });
 
-        // ADDED: students get one evaluation per calendar month (Philippine time), the same rule as
-        // StudentEvaluationController::monthlyLimitMessage(). This is the evaluation that used it, or null.
-        $monthStart = now('Asia/Manila')->startOfMonth();
-        $thisMonthEval = $myStudentEvals->first(
-            fn ($e) => \Carbon\Carbon::parse($e->created_at)->gte($monthStart->copy()->utc())
-        );
+        // CHANGED: removed $monthStart and $thisMonthEval. The limit is one evaluation per stall per month,
+        // so one evaluation no longer closes the month for the whole dashboard.
 
         // Summary Stats
         $totalStallsCount = $stalls->count();
@@ -111,10 +107,7 @@ class StudentDashboardController extends Controller
             'uniqueEvaluatedCount',
             'totalEvalsCount',
             'overallAvgGiven',
-            'topCampusStall',
-            // ADDED: this month's evaluation status for the dashboard (see above).
-            'monthStart',
-            'thisMonthEval'
+            'topCampusStall'
         ));
     }
 
@@ -237,12 +230,10 @@ class StudentDashboardController extends Controller
         $myStudentEvals = $query->paginate(12)->withQueryString();
         // CHANGED: removed $totalEvaluations; the history view reads $myStudentEvals->total().
 
-        // ADDED: whether the student has any evaluation at all (the search above can hide them all), and
-        // whether this month's evaluation is used, so the page can say when the next one opens.
+        // ADDED: whether the student has any evaluation at all (the search above can hide them all).
+        // CHANGED: removed $usedThisMonth and $nextOpens; with one evaluation per stall per month the scan action always stays.
         $hasEvaluations = DB::table('stall_evaluations')->where('student_id', $user->id)->exists();
-        $usedThisMonth = $hasEvaluations && StudentEvaluationController::usedThisMonth($user->id);
-        $nextOpens = now('Asia/Manila')->startOfMonth()->addMonth()->format('F j');
 
-        return view('student.history', compact('myStudentEvals', 'hasEvaluations', 'usedThisMonth', 'nextOpens'));
+        return view('student.history', compact('myStudentEvals', 'hasEvaluations'));
     }
 }

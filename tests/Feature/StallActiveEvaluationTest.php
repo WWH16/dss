@@ -173,7 +173,8 @@ test('the evaluation page renders the shared scanner partial in full', function 
     expect(substr_count($response->getContent(), 'id="qr-start"'))->toBe(1);
 });
 
-// ADDED: a student may submit one evaluation per calendar month (Philippine time), whichever stall it is for.
+// ADDED: a student may submit one evaluation per calendar month (Philippine time).
+// CHANGED: the limit is per stall; a different stall in the same month is allowed.
 function pastEvaluation(int $studentId, int $stallId, string $createdAtUtc): void
 {
     DB::table('stall_evaluations')->insert([
@@ -185,7 +186,8 @@ function pastEvaluation(int $studentId, int $stallId, string $createdAtUtc): voi
     ]);
 }
 
-test('a second evaluation in the same month is rejected even for a different stall', function () {
+// CHANGED: was "rejected even for a different stall"; a different stall is now accepted.
+test('a different stall can be evaluated in the same month', function () {
     $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
     $otherStallId = DB::table('stalls')->insertGetId([
         'name' => 'Other Canteen', 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
@@ -193,10 +195,21 @@ test('a second evaluation in the same month is rejected even for a different sta
     pastEvaluation($this->student->id, $otherStallId, '2026-10-02 01:00:00');
 
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
-        ->followingRedirects()
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSee('Already evaluated this month')
-        ->assertSee('You have already submitted your evaluation for October. You can evaluate a stall again on November 1.');
+        ->assertSessionHas('success', 'Evaluation submitted successfully!');
+
+    $this->assertDatabaseCount('stall_evaluations', 2);
+});
+
+// ADDED: the same stall twice in one month is rejected.
+test('a second evaluation of the same stall in the same month is rejected', function () {
+    $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
+    pastEvaluation($this->student->id, $this->activeStallId, '2026-10-02 01:00:00');
+
+    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
+        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
+        ->assertRedirect(route('student.evaluation'))
+        ->assertSessionHas('error', 'You have already evaluated this stall this month. Scan a different stall.');
 
     $this->assertDatabaseCount('stall_evaluations', 1);
 });
@@ -210,12 +223,12 @@ test('the month follows Philippine time, not UTC', function () {
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
         ->assertSessionHas('success', 'Evaluation submitted successfully!');
 
-    // The evaluation just saved counts for November, so a later November submission is blocked.
+    // The evaluation just saved counts for November, so a later November submission for the same stall is blocked.
     $this->travelTo(Carbon::parse('2026-11-15 04:00:00', 'UTC'));
-    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
-        ->followingRedirects()
-        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSee('You have already submitted your evaluation for November. You can evaluate a stall again on December 1.');
+    // The success flash from the submission above would otherwise show on the next page.
+    $this->flushSession();
+    $this->actingAs($this->student)->get(scanUrl($this->activeStallId))
+        ->assertSee('You have already evaluated Active Canteen for November. You can evaluate it again on December 1, or scan a different stall now.');
 
     $this->assertDatabaseCount('stall_evaluations', 2);
 });
@@ -224,10 +237,8 @@ test('a December evaluation opens again on January 1', function () {
     $this->travelTo(Carbon::parse('2026-12-10 03:00:00', 'UTC'));
     pastEvaluation($this->student->id, $this->activeStallId, '2026-12-01 03:00:00');
 
-    $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
-        ->followingRedirects()
-        ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
-        ->assertSee('You have already submitted your evaluation for December. You can evaluate a stall again on January 1.');
+    $this->actingAs($this->student)->get(scanUrl($this->activeStallId))
+        ->assertSee('You have already evaluated Active Canteen for December. You can evaluate it again on January 1, or scan a different stall now.');
 });
 
 test("another student's evaluation does not use up this student's month", function () {
@@ -245,7 +256,8 @@ test("another student's evaluation does not use up this student's month", functi
     $this->assertDatabaseCount('stall_evaluations', 2);
 });
 
-test('the success screen says when the next evaluation opens and offers no second stall', function () {
+// CHANGED: the success screen says when this stall opens again and that other stalls stay open.
+test('the success screen says when this stall opens again and offers no second stall button', function () {
     $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
 
     $this->actingAs($this->student)->withSession(['qr_stall_id' => $this->activeStallId])
@@ -253,22 +265,36 @@ test('the success screen says when the next evaluation opens and offers no secon
         ->post(route('student.evaluation.store'), ['responses' => allRatings(4)])
         ->assertOk()
         ->assertSee('Evaluation Submitted!')
-        ->assertSee('You can evaluate a stall again on November 1.')
+        ->assertSee('You can evaluate this stall again on November 1. Other stalls are still open this month.')
         ->assertDontSee('Evaluate Another Stall');
 });
 
-test("scanning a stall after this month's evaluation shows the limit instead of the form", function () {
+test("scanning a stall already evaluated this month shows the limit instead of the form", function () {
     $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
     pastEvaluation($this->student->id, $this->activeStallId, '2026-10-05 02:00:00');
 
     $this->actingAs($this->student)->get(scanUrl($this->activeStallId))
         ->assertOk()
-        ->assertSee('Already evaluated this month')
-        ->assertSee('You have already submitted your evaluation for October. You can evaluate a stall again on November 1.')
+        ->assertSee('Already evaluated this stall this month')
+        ->assertSee('You have already evaluated Active Canteen for October. You can evaluate it again on November 1, or scan a different stall now.')
         ->assertDontSee('id="evaluationForm"', false)
         ->assertDontSee('id="qr-start"', false)
         ->assertDontSee('arrow-back-outline', false)
         ->assertSessionMissing('qr_stall_id');
+});
+
+// ADDED: an evaluation of another stall this month does not block the scan.
+test('scanning a stall opens its form after evaluating a different stall this month', function () {
+    $this->travelTo(Carbon::parse('2026-10-20 03:00:00', 'UTC'));
+    $otherStallId = DB::table('stalls')->insertGetId([
+        'name' => 'Other Canteen', 'is_active' => true, 'created_at' => now(), 'updated_at' => now(),
+    ]);
+    pastEvaluation($this->student->id, $otherStallId, '2026-10-05 02:00:00');
+
+    $this->actingAs($this->student)->get(scanUrl($this->activeStallId))
+        ->assertOk()
+        ->assertSee('id="evaluationForm"', false)
+        ->assertSessionHas('qr_stall_id', $this->activeStallId);
 });
 
 test('a scan-and-submit lands on the success screen, not the limit error', function () {
