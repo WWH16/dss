@@ -1,7 +1,7 @@
 {{-- ADDED: the stall's evaluations list, moved out of staff/staff_dashboard.blade.php so the staff standings page can show the same list. Needs $evaluations (paginated). The search form submits back to whichever page includes it. --}}
     <div class="bg-white rounded-xl border border-neutral-200/70 shadow-sm overflow-hidden">
         {{-- Header with Search & Filter Controls --}}
-        <div class="p-5 sm:p-6 pb-4 border-b border-neutral-100 space-y-3">
+        <div class="p-4 sm:p-6 pb-4 border-b border-neutral-100 space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
                     <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-2">
@@ -12,20 +12,21 @@
                 </div>
 
                 {{-- Search Form --}}
-                <form method="GET" action="{{ url()->current() }}" class="flex items-center gap-2">
+                {{-- CHANGED: below 640px the search takes its own row and the controls are 44px tall with 16px text (iOS zooms the page on focus below 16px). --}}
+                <form method="GET" action="{{ url()->current() }}" class="flex flex-wrap sm:flex-nowrap items-center gap-2">
                     <div class="relative w-full sm:w-56">
                         <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm pointer-events-none"></ion-icon>
                         <input type="text" name="q" value="{{ request('q') }}" placeholder="Search in comments…" aria-label="Search student evaluation comments"
-                            class="w-full pl-8 pr-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700">
+                            class="w-full min-h-11 sm:min-h-0 pl-8 pr-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md text-base sm:text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700">
                     </div>
-                    <select name="sort" onchange="this.form.submit()" aria-label="Sort evaluations" class="px-2.5 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+                    <select name="sort" onchange="this.form.submit()" aria-label="Sort evaluations" class="flex-1 sm:flex-none min-h-11 sm:min-h-0 px-2.5 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md text-base sm:text-xs font-medium focus:outline-none focus:border-brand-700">
                         <option value="latest" {{ request('sort') === 'latest' ? 'selected' : '' }}>Latest First</option>
                         <option value="rating_high" {{ request('sort') === 'rating_high' ? 'selected' : '' }}>Highest Rating</option>
                         <option value="rating_low" {{ request('sort') === 'rating_low' ? 'selected' : '' }}>Lowest Rating</option>
                         <option value="oldest" {{ request('sort') === 'oldest' ? 'selected' : '' }}>Oldest First</option>
                     </select>
                     @if(request('q') || request('sort'))
-                        <a href="{{ url()->current() }}" class="text-xs text-neutral-500 hover:text-neutral-900 font-semibold shrink-0">Clear</a>
+                        <a href="{{ url()->current() }}" class="inline-flex items-center min-h-11 sm:min-h-0 px-2 text-xs text-neutral-500 hover:text-neutral-900 font-semibold shrink-0">Clear</a>
                     @endif
                 </form>
             </div>
@@ -56,6 +57,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
+                        {{-- CHANGED: scores show 2 decimals in plain text and the Average badge has one style. The green/red thresholds had no legend and relied on colour alone. --}}
                         @foreach($evaluations as $eval)
                             {{-- CHANGED: the date and "x ago" text are shown in Philippine time (created_at is stored in UTC), as on the printable report. --}}
                             @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
@@ -64,21 +66,14 @@
                                     {{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                     <span class="block text-[11px] text-neutral-500">{{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->diffForHumans() }}</span>
                                 </td>
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->cleanliness >= 4 ? 'text-emerald-700' : ($eval->cleanliness <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
-                                    {{ $eval->cleanliness }}★
-                                </td>
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->service >= 4 ? 'text-emerald-700' : ($eval->service <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
-                                    {{ $eval->service }}★
-                                </td>
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->taste >= 4 ? 'text-emerald-700' : ($eval->taste <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
-                                    {{ $eval->taste }}★
-                                </td>
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->price >= 4 ? 'text-emerald-700' : ($eval->price <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
-                                    {{ $eval->price }}★
-                                </td>
+                                @foreach(['cleanliness', 'service', 'taste', 'price'] as $col)
+                                    <td class="py-3.5 px-3 text-center text-xs font-bold text-neutral-800 tabular-nums">
+                                        {{ number_format($eval->$col, 2) }}★
+                                    </td>
+                                @endforeach
                                 <td class="py-3.5 px-3 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-bold tabular-nums {{ $avg >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200' : 'bg-neutral-100 text-neutral-800' }}">
-                                        {{ number_format($avg, 1) }}★
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-bold tabular-nums bg-neutral-100 text-neutral-900">
+                                        {{ number_format($avg, 2) }}★
                                     </span>
                                 </td>
                                 <td class="py-3.5 px-5">
@@ -105,27 +100,18 @@
                                 <span class="text-xs font-bold text-neutral-600 tabular-nums">
                                     {{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                 </span>
-                                <span class="inline-flex items-center gap-1 bg-brand-50 px-2 py-0.5 rounded-md text-xs font-bold text-brand-900 border border-brand-200">
-                                    {{ number_format($avg, 1) }}★
+                                <span class="inline-flex items-center gap-1 bg-neutral-100 px-2 py-0.5 rounded-md text-xs font-bold text-neutral-900 tabular-nums">
+                                    {{ number_format($avg, 2) }}★
                                 </span>
                             </div>
-                            <div class="grid grid-cols-4 gap-1.5 text-center text-xs">
-                                <div class="bg-neutral-50 rounded-md p-1.5">
-                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Clean</span>
-                                    <span class="font-bold text-neutral-900">{{ $eval->cleanliness }}★</span>
-                                </div>
-                                <div class="bg-neutral-50 rounded-md p-1.5">
-                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Serv</span>
-                                    <span class="font-bold text-neutral-900">{{ $eval->service }}★</span>
-                                </div>
-                                <div class="bg-neutral-50 rounded-md p-1.5">
-                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Taste</span>
-                                    <span class="font-bold text-neutral-900">{{ $eval->taste }}★</span>
-                                </div>
-                                <div class="bg-neutral-50 rounded-md p-1.5">
-                                    <span class="block text-[11px] font-semibold text-neutral-500 uppercase">Price</span>
-                                    <span class="font-bold text-neutral-900">{{ $eval->price }}★</span>
-                                </div>
+                            {{-- CHANGED: 2x2 with the full criterion names (was Clean / Serv in 4 columns) and 2-decimal scores, matching the desktop table. --}}
+                            <div class="grid grid-cols-2 gap-1.5 text-xs">
+                                @foreach(['Cleanliness' => $eval->cleanliness, 'Service' => $eval->service, 'Taste' => $eval->taste, 'Price' => $eval->price] as $label => $score)
+                                    <div class="bg-neutral-50 rounded-md px-2.5 py-1.5 flex items-center justify-between">
+                                        <span class="text-[11px] font-semibold text-neutral-600">{{ $label }}</span>
+                                        <span class="font-bold text-neutral-900 tabular-nums">{{ number_format($score, 2) }}★</span>
+                                    </div>
+                                @endforeach
                             </div>
                             @if($eval->comment)
                                 <p class="text-xs text-neutral-700 bg-neutral-50 p-2.5 rounded-md border border-neutral-200/60 mt-1 italic">

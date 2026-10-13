@@ -9,7 +9,8 @@
 @endsection
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+{{-- CHANGED: tighter section spacing below 640px (space-y-4, was 6). --}}
+<div class="max-w-6xl mx-auto space-y-4 sm:space-y-6">
 
     {{-- ── 1. Unassigned Stall State ───────────────────────────────────────── --}}
     @if(!$hasStall || !$stall)
@@ -22,7 +23,7 @@
                 Your staff account is pending verification and assignment to a food stall by an Administrator. Evaluation records and campus performance standings are restricted until your stall assignment is active.
             </p>
             <div class="flex items-center justify-center gap-3 flex-wrap">
-                <a href="{{ route('staff.profile') }}" class="btn btn-secondary text-xs px-4 py-2 rounded-md font-bold inline-flex items-center gap-1.5 shadow-2xs border border-neutral-200">
+                <a href="{{ route('staff.profile') }}" class="btn btn-secondary text-xs px-4 py-2 min-h-11 sm:min-h-0 rounded-md font-bold inline-flex items-center gap-1.5 shadow-2xs border border-neutral-200">
                     <ion-icon name="person-outline" class="text-sm"></ion-icon>
                     View Account Profile
                 </a>
@@ -35,7 +36,8 @@
             <div>
                 <div class="flex items-center gap-2 mb-1 flex-wrap">
                     <h1 class="text-2xl font-bold text-neutral-900 tracking-tight">{{ $stall->name }}</h1>
-                    @if($stallRank)
+                    {{-- CHANGED: the rank chip needs at least 2 other rated stalls, the same rule as the benchmark; "#1 on Campus" out of 1 or 2 stalls said little. --}}
+                    @if($stallRank && $campusCriteria)
                         @if($stallRank === 1)
                             <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-brand-50 text-brand-900 border border-brand-200 font-bold text-xs shadow-2xs">
                                 <ion-icon name="trophy" class="text-brand-600 text-xs"></ion-icon>
@@ -63,8 +65,9 @@
                 </p>
             </div>
 
+            {{-- CHANGED: buttons on this page are 44px tall below 640px, for touch. --}}
             <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                <a href="{{ route('staff.standings') }}" class="btn btn-secondary text-xs px-3.5 py-2 rounded-md font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50">
+                <a href="{{ route('staff.standings') }}" class="btn btn-secondary text-xs px-3.5 py-2 min-h-11 sm:min-h-0 rounded-md font-bold inline-flex items-center gap-1.5 border border-neutral-200 shadow-2xs hover:bg-neutral-50">
                     <ion-icon name="podium-outline" class="text-sm text-neutral-600"></ion-icon>
                     Campus Standings
                 </a>
@@ -72,12 +75,13 @@
         </div>
 
         {{-- ── 3. Stall Metric Cards ───────────────────────────────────────── --}}
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        {{-- CHANGED: below 640px Overall Score spans the row and the two counts sit side by side (were three stacked cards); the decorative icon boxes hide there to give the labels room. --}}
+        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {{-- Overall Average --}}
-            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
+            <div class="col-span-2 sm:col-span-1 bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Overall Score</span>
-                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
+                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700">
                         <ion-icon name="star" class="text-base"></ion-icon>
                     </div>
                 </div>
@@ -87,18 +91,21 @@
                     </span>
                     <span class="text-xs text-neutral-500 font-semibold">/ 5.00</span>
                 </div>
-                @if($campusCriteria)
-                    <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
-                        Campus avg: <strong class="text-neutral-700 font-bold">{{ number_format($campusCriteria->overall, 2) }}★</strong>
-                    </div>
-                @endif
+                {{-- CHANGED: compares with the other stalls only, and says so when there are too few of them. --}}
+                <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
+                    @if($campusCriteria)
+                        Avg of other stalls: <strong class="text-neutral-700 font-bold">{{ number_format($campusCriteria->overall, 2) }}★</strong>
+                    @else
+                        Not enough campus data yet
+                    @endif
+                </div>
             </div>
 
             {{-- Total Evaluations --}}
             <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Evaluations</span>
-                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
+                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700">
                         <ion-icon name="receipt-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
@@ -114,7 +121,7 @@
             <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Unique Evaluators</span>
-                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 flex items-center justify-center text-brand-700">
+                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700">
                         <ion-icon name="people-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
@@ -129,7 +136,7 @@
 
         {{-- ── 4. Primary Chart Card: Evaluation Activity Timeline (Full Width) ──── --}}
         @if($totalEvaluations > 0 && $averages)
-            <div class="bg-white rounded-xl border border-neutral-200/80 p-5 sm:p-6 shadow-xs">
+            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-6 shadow-xs">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-neutral-100 gap-3">
                     <div>
                         <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
@@ -142,13 +149,15 @@
                     </div>
 
                     {{-- Month / Year Filter Controls --}}
-                    <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-2 self-start sm:self-auto shrink-0">
+                    {{-- CHANGED: the year select shows only for a month or whole-year view; it never applied to the rolling 30 days. --}}
+                    {{-- CHANGED: below 640px the filters fill the row as 44px selects with 16px text (iOS zooms the page on focus below 16px). --}}
+                    <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-2 w-full sm:w-auto shrink-0">
                         @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
                         @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
-                        <div class="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/90 rounded-md p-1">
+                        <div class="flex items-center gap-1.5 w-full sm:w-auto bg-neutral-50 border border-neutral-200/90 rounded-md p-1">
                             <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
-                                class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
+                                class="flex-1 sm:flex-none min-h-11 sm:min-h-0 bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-base sm:text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
                                 <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
                                 <option value="all" {{ $selectedMonth === 'all' ? 'selected' : '' }}>Whole Year</option>
                                 <optgroup label="Month">
@@ -162,12 +171,14 @@
                                 </optgroup>
                             </select>
 
-                            <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
-                                class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
-                                @foreach($availableYears as $y)
-                                    <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
-                                @endforeach
-                            </select>
+                            @if($selectedMonth !== '30_days')
+                                <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
+                                    class="flex-1 sm:flex-none min-h-11 sm:min-h-0 bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-base sm:text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
+                                    @foreach($availableYears as $y)
+                                        <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
+                                    @endforeach
+                                </select>
+                            @endif
                         </div>
                     </form>
                 </div>
@@ -178,89 +189,81 @@
             </div>
 
             {{-- ── 5. Secondary Analytics Grid: Benchmark Comparison & Rating Breakdown ── --}}
+            {{-- CHANGED: one criteria list feeds the cards. The tags read Highest / Lowest, since they rank this stall's own criteria rather than the gap to campus, and show only when the scores differ. --}}
             @php
-                $cleanVal = (float)$averages->cleanliness;
-                $servVal  = (float)$averages->service;
-                $tstVal   = (float)$averages->taste;
-                $prcVal   = (float)$averages->price;
-
-                $critMap = [
-                    'Cleanliness' => $cleanVal,
-                    'Service'     => $servVal,
-                    'Taste'       => $tstVal,
-                    'Price'       => $prcVal,
+                $criteria = [
+                    ['name' => 'Cleanliness', 'score' => (float)$averages->cleanliness, 'camp' => $campusCriteria?->cleanliness],
+                    ['name' => 'Service',     'score' => (float)$averages->service,     'camp' => $campusCriteria?->service],
+                    ['name' => 'Taste',       'score' => (float)$averages->taste,       'camp' => $campusCriteria?->taste],
+                    ['name' => 'Price',       'score' => (float)$averages->price,       'camp' => $campusCriteria?->price],
                 ];
-                arsort($critMap);
-                $topCritName = array_key_first($critMap);
-                $lowestCritName = array_key_last($critMap);
+                $topScore = max(array_column($criteria, 'score'));
+                $lowScore = min(array_column($criteria, 'score'));
             @endphp
 
-            <div class="grid grid-cols-1 lg:grid-cols-5 gap-5 items-stretch">
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-4 sm:gap-5 items-stretch">
 
                 {{-- LEFT: Criteria Benchmark Comparison (3 Cols) --}}
-                <div class="lg:col-span-3 bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs flex flex-col justify-between space-y-4">
-                    <div>
-                        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-                            <div>
-                                <h2 class="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
-                                    <ion-icon name="bar-chart-outline" class="text-brand-700 text-base"></ion-icon>
-                                    Benchmark Comparison
-                                </h2>
-                                <p class="text-xs text-neutral-500 mt-0.5">Your ratings vs. campus average per criterion</p>
-                            </div>
+                {{-- CHANGED: the grouped bar chart that repeated these four values is gone. Each card now carries a bar of its score out of 5, with a marker at the other stalls' average. --}}
+                {{-- CHANGED: the criterion cards stay 2x2 on phones (were 1 per row), and the tag and the difference wrap under when space runs out. --}}
+                <div class="lg:col-span-3 bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col">
+                    <div class="pb-3 border-b border-neutral-100">
+                        <h2 class="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
+                            <ion-icon name="bar-chart-outline" class="text-brand-700 text-base"></ion-icon>
+                            Benchmark Comparison
+                        </h2>
+                        <p class="text-xs text-neutral-500 mt-0.5">
                             @if($campusCriteria)
-                                <span class="text-[11px] font-semibold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md tabular-nums">
-                                    Campus Avg: {{ number_format($campusCriteria->overall, 2) }}★
-                                </span>
+                                Your average per criterion out of 5. The dark marker is the average of the other {{ $campusCriteria->stalls }} rated stalls.
+                            @else
+                                Your average per criterion out of 5. Not enough campus data yet: comparisons need at least 2 other rated stalls.
                             @endif
-                        </div>
-
-                        {{-- Criteria Summary Chips with Direct Strength / Focus Badging --}}
-                        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 mt-3.5">
-                            @foreach([
-                                ['name' => 'Cleanliness', 'score' => (float)$averages->cleanliness, 'camp' => $campusCriteria ? (float)$campusCriteria->cleanliness : 0],
-                                ['name' => 'Service',     'score' => (float)$averages->service,     'camp' => $campusCriteria ? (float)$campusCriteria->service : 0],
-                                ['name' => 'Taste',       'score' => (float)$averages->taste,       'camp' => $campusCriteria ? (float)$campusCriteria->taste : 0],
-                                ['name' => 'Price',       'score' => (float)$averages->price,       'camp' => $campusCriteria ? (float)$campusCriteria->price : 0],
-                            ] as $item)
-                                @php
-                                    $delta = $item['score'] - $item['camp'];
-                                    $isTop = ($item['name'] === $topCritName);
-                                    $isLow = ($item['name'] === $lowestCritName && $topCritName !== $lowestCritName);
-                                @endphp
-                                <div class="p-2.5 bg-neutral-50/80 border {{ $isTop ? 'border-emerald-200/90 ring-1 ring-emerald-200/60' : ($isLow ? 'border-amber-200/90 ring-1 ring-amber-200/60' : 'border-neutral-200/80') }} rounded-md flex flex-col justify-between hover:border-neutral-300 transition-colors">
-                                    <div class="flex items-center justify-between gap-1 mb-1">
-                                        <span class="text-[11px] font-semibold text-neutral-600 truncate">{{ $item['name'] }}</span>
-                                        @if($isTop)
-                                            <span class="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md shrink-0">Strength</span>
-                                        @elseif($isLow)
-                                            <span class="text-[11px] font-bold text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded-md shrink-0">Focus</span>
-                                        @endif
-                                    </div>
-                                    <div class="flex items-baseline justify-between mt-0.5">
-                                        <span class="text-sm font-bold text-neutral-900 tabular-nums">{{ number_format($item['score'], 2) }}★</span>
-                                        <span class="text-[11px] font-bold tabular-nums {{ $delta >= 0 ? 'text-emerald-700' : 'text-amber-700' }}">
-                                            {{ $delta >= 0 ? '+' : '' }}{{ number_format($delta, 2) }}
-                                        </span>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                        </p>
                     </div>
 
-                    {{-- Grouped Bar Chart --}}
-                    <div class="relative w-full pt-2" style="height: 220px;">
-                        <canvas id="criteriaBenchmarkChart" role="img" aria-label="Bar chart comparing your stall ratings against the campus average for each criterion"></canvas>
+                    <div class="grid grid-cols-2 auto-rows-fr gap-2.5 mt-3.5 flex-1">
+                        @foreach($criteria as $item)
+                            @php
+                                $isTop = $topScore > $lowScore && $item['score'] === $topScore;
+                                $isLow = $topScore > $lowScore && $item['score'] === $lowScore;
+                                $delta = $item['camp'] !== null ? round($item['score'] - $item['camp'], 2) : null;
+                            @endphp
+                            <div class="p-3 bg-neutral-50/80 border {{ $isTop ? 'border-emerald-200/90 ring-1 ring-emerald-200/60' : ($isLow ? 'border-amber-200/90 ring-1 ring-amber-200/60' : 'border-neutral-200/80') }} rounded-md flex flex-col justify-between gap-3">
+                                <div class="flex flex-wrap items-center justify-between gap-1">
+                                    <span class="text-xs font-semibold text-neutral-600">{{ $item['name'] }}</span>
+                                    @if($isTop)
+                                        <span class="text-[11px] font-bold text-emerald-800 bg-emerald-100/80 px-1.5 py-0.5 rounded-md shrink-0">Highest</span>
+                                    @elseif($isLow)
+                                        <span class="text-[11px] font-bold text-amber-800 bg-amber-100/80 px-1.5 py-0.5 rounded-md shrink-0">Lowest</span>
+                                    @endif
+                                </div>
+                                <div class="flex flex-wrap items-baseline justify-between gap-x-2 gap-y-0.5">
+                                    <span class="text-base sm:text-lg font-bold text-neutral-900 tabular-nums">{{ number_format($item['score'], 2) }}★</span>
+                                    @if($delta !== null)
+                                        <span class="text-[11px] font-bold tabular-nums {{ $delta > 0 ? 'text-emerald-700' : ($delta < 0 ? 'text-amber-700' : 'text-neutral-500') }}">
+                                            {{ $delta > 0 ? '+' : ($delta < 0 ? '-' : '') }}{{ number_format(abs($delta), 2) }} vs others
+                                        </span>
+                                    @endif
+                                </div>
+                                <div class="relative h-2 rounded-full bg-neutral-200/70" aria-hidden="true">
+                                    <div class="h-full rounded-full bg-brand-600" style="width: {{ $item['score'] / 5 * 100 }}%"></div>
+                                    @if($item['camp'] !== null)
+                                        <div class="absolute -top-1 -bottom-1 w-0.5 rounded-full bg-neutral-900" style="left: calc({{ $item['camp'] / 5 * 100 }}% - 1px)"></div>
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
 
                 {{-- RIGHT: Rating Distribution (2 Cols) --}}
-                <div class="lg:col-span-2 bg-white rounded-xl border border-neutral-200/80 p-5 shadow-xs flex flex-col justify-between">
+                <div class="lg:col-span-2 bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between">
                     <div>
                         <div class="flex items-center justify-between pb-3 mb-3.5 border-b border-neutral-100">
                             <div>
                                 <h2 class="text-sm font-bold text-neutral-900 tracking-tight">Rating Breakdown</h2>
-                                <p class="text-xs text-neutral-500 mt-0.5">Score distribution from 5★ to 1★</p>
+                                {{-- CHANGED: states the bucketing rule the query uses (ROUND of each review's 4-criteria mean). --}}
+                                <p class="text-xs text-neutral-500 mt-0.5">Each review's average, rounded to the nearest star</p>
                             </div>
                             <span class="text-xs font-bold text-neutral-800 tabular-nums bg-neutral-100 px-2 py-0.5 rounded-md">{{ number_format($averages ? (float)$averages->overall : 0, 2) }}★</span>
                         </div>
@@ -288,7 +291,8 @@
                                     <div class="flex items-center justify-between text-xs">
                                         <span class="font-bold text-neutral-700 text-xs">{{ $starRow['label'] }}</span>
                                         <div class="flex items-center gap-1.5">
-                                            <span class="font-mono text-[11px] text-neutral-500 tabular-nums">{{ $starRow['count'] }} ({{ $pct }}%)</span>
+                                            {{-- CHANGED: body font and neutral-600 instead of light grey monospace. --}}
+                                            <span class="text-[11px] font-semibold text-neutral-600 tabular-nums">{{ $starRow['count'] }} ({{ $pct }}%)</span>
                                         </div>
                                     </div>
                                     <div class="w-full bg-neutral-100 h-2 rounded-full overflow-hidden">
@@ -299,9 +303,9 @@
                         </div>
                     </div>
 
-                    <div class="mt-4 pt-3 border-t border-neutral-100 text-[11px] text-neutral-500 flex items-center justify-between">
-                        <span>Total student reviews:</span>
-                        <strong class="text-neutral-800 tabular-nums font-semibold">{{ $totalEvaluations }}</strong>
+                    {{-- CHANGED: reads "Based on N reviews" so a small sample is plain next to the bars. --}}
+                    <div class="mt-4 pt-3 border-t border-neutral-100 text-[11px] text-neutral-500">
+                        Based on <strong class="text-neutral-800 tabular-nums font-semibold">{{ $totalEvaluations }}</strong> {{ Str::plural('review', $totalEvaluations) }}
                     </div>
                 </div>
 
@@ -351,6 +355,8 @@ document.addEventListener('DOMContentLoaded', function() {
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                // CHANGED: a tap anywhere above a day shows its tooltip; the points alone were too small to hit on touch.
+                interaction: { mode: 'index', intersect: false },
                 plugins: {
                     legend: { display: false },
                     tooltip: {
@@ -373,7 +379,8 @@ document.addEventListener('DOMContentLoaded', function() {
                         ticks: {
                             font: { size: 10, weight: '600' },
                             color: '#6b7280',
-                            maxTicksLimit: 8
+                            // CHANGED: 5 date labels on phones (was 8 at every width), so they do not crowd.
+                            maxTicksLimit: window.matchMedia('(min-width: 640px)').matches ? 8 : 5
                         },
                         border: { display: false }
                     },
@@ -385,105 +392,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             color: '#6b7280',
                             stepSize: 1,
                             precision: 0
-                        },
-                        border: { display: false }
-                    }
-                }
-            }
-        });
-    }
-
-    // ── 2. Criteria Benchmark Comparison Grouped Bar Chart ────────────────────
-    var benchmarkCtx = document.getElementById('criteriaBenchmarkChart');
-    if (benchmarkCtx) {
-        var myScores = [
-            {{ number_format($averages ? (float)$averages->cleanliness : 0, 2) }},
-            {{ number_format($averages ? (float)$averages->service : 0, 2) }},
-            {{ number_format($averages ? (float)$averages->taste : 0, 2) }},
-            {{ number_format($averages ? (float)$averages->price : 0, 2) }}
-        ];
-
-        var campusScores = [
-            {{ number_format($campusCriteria ? (float)$campusCriteria->cleanliness : 0, 2) }},
-            {{ number_format($campusCriteria ? (float)$campusCriteria->service : 0, 2) }},
-            {{ number_format($campusCriteria ? (float)$campusCriteria->taste : 0, 2) }},
-            {{ number_format($campusCriteria ? (float)$campusCriteria->price : 0, 2) }}
-        ];
-
-        new Chart(benchmarkCtx, {
-            type: 'bar',
-            data: {
-                labels: ['Cleanliness', 'Service Quality', 'Food Taste', 'Price Value'],
-                datasets: [
-                    {
-                        label: 'Your Stall',
-                        data: myScores,
-                        backgroundColor: 'rgba(22, 101, 52, 0.88)',
-                        borderColor: 'rgb(20, 83, 45)',
-                        borderWidth: 1,
-                        borderRadius: 5,
-                        maxBarThickness: 36,
-                        categoryPercentage: 0.72,
-                        barPercentage: 0.88
-                    },
-                    {
-                        label: 'Campus Avg',
-                        data: campusScores,
-                        backgroundColor: 'rgba(148, 163, 184, 0.80)',
-                        borderColor: 'rgb(100, 116, 139)',
-                        borderWidth: 1,
-                        borderRadius: 5,
-                        maxBarThickness: 36,
-                        categoryPercentage: 0.72,
-                        barPercentage: 0.88
-                    }
-                ]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                interaction: { mode: 'index', intersect: false },
-                plugins: {
-                    legend: {
-                        position: 'bottom',
-                        labels: {
-                            font: { size: 11, weight: '600' },
-                            color: '#4b5563',
-                            padding: 12,
-                            usePointStyle: true,
-                            pointStyle: 'rectRounded'
-                        }
-                    },
-                    tooltip: {
-                        backgroundColor: '#1f2937',
-                        titleFont: { size: 12, weight: '700' },
-                        bodyFont: { size: 11 },
-                        padding: 10,
-                        cornerRadius: 6,
-                        callbacks: {
-                            label: function(ctx) {
-                                return ' ' + ctx.dataset.label + ': ' + ctx.parsed.y.toFixed(2) + '★ / 5.00';
-                            }
-                        }
-                    }
-                },
-                scales: {
-                    x: {
-                        grid: { display: false },
-                        ticks: {
-                            font: { size: 10, weight: '600' },
-                            color: '#374151'
-                        },
-                        border: { display: false }
-                    },
-                    y: {
-                        min: 0,
-                        max: 5,
-                        grid: { color: '#f3f4f6' },
-                        ticks: {
-                            font: { size: 10, weight: '600' },
-                            color: '#6b7280',
-                            stepSize: 1
                         },
                         border: { display: false }
                     }

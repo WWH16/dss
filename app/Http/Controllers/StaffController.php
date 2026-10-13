@@ -58,8 +58,9 @@ class StaffController extends Controller
         $averages = $metrics;
 
         // 3. Compute this stall's current campus rank without exposing details of other stalls
+        // CHANGED: join instead of leftJoin, so stalls with no evaluations take no rank and are not counted in totalStalls.
         $rankedStalls = DB::table('stalls')
-            ->leftJoin('stall_evaluations', 'stalls.id', '=', 'stall_evaluations.stall_id')
+            ->join('stall_evaluations', 'stalls.id', '=', 'stall_evaluations.stall_id')
             ->select(
                 'stalls.id',
                 DB::raw('AVG(cleanliness) as cleanliness'),
@@ -85,15 +86,18 @@ class StaffController extends Controller
         }
 
         // 4. Compute campus-wide benchmark criteria averages for comparison
-        $campusCriteria = DB::table('stall_evaluations')
-            ->selectRaw('
-                AVG(cleanliness) as cleanliness,
-                AVG(service) as service,
-                AVG(taste) as taste,
-                AVG(price) as price,
-                COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall
-            ')
-            ->first();
+        // CHANGED: the benchmark is the mean of the OTHER rated stalls, taken from $rankedStalls instead of a query
+        // over every evaluation, which included this stall and compared it with itself. With fewer than 2 other
+        // rated stalls it is null and the view says there is not enough campus data yet.
+        $otherStalls = $rankedStalls->where('id', '!=', $stall->id);
+        $campusCriteria = $otherStalls->count() >= 2 ? (object) [
+            'cleanliness' => $otherStalls->avg('cleanliness'),
+            'service' => $otherStalls->avg('service'),
+            'taste' => $otherStalls->avg('taste'),
+            'price' => $otherStalls->avg('price'),
+            'overall' => $otherStalls->avg('overall_score'),
+            'stalls' => $otherStalls->count(),
+        ] : null;
 
         // 5. Rating breakdown distribution (1 to 5 stars) for this stall
         $ratingDistribution = DB::table('stall_evaluations')
