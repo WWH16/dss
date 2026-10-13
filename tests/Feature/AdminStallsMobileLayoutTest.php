@@ -52,8 +52,8 @@ test('a rejected stall name marks the panel so it stays open', function () {
 test('the stall rows and their column labels share one grid template', function () {
     $content = $this->actingAs($this->admin)->get(route('admin.stalls'))->getContent();
 
-    // CHANGED: template narrowed with the icon-only actions column (was minmax(0,1fr)_7rem_12rem_13rem).
-    $template = 'lg:grid-cols-[minmax(0,1fr)_6rem_11rem_5rem]';
+    // CHANGED: template narrowed with the icon-only actions column (was minmax(0,1fr)_7rem_12rem_13rem); 7.5rem fits QR, Edit and Delete.
+    $template = 'lg:grid-cols-[minmax(0,1fr)_6rem_11rem_7.5rem]';
     expect(substr_count($content, $template))->toBe(2);
     expect($content)->toContain('>Stall</span>');
     expect($content)->toContain('>Rating</span>');
@@ -74,12 +74,14 @@ test('the guidelines render inside the add stall panel, before the directory', f
     expect($panelEnd)->toBeLessThan(strpos($content, 'id="stalls-list-container"'));
 });
 
-// ADDED: Delete left the directory rows; the only delete control is in the Edit dialog, behind the confirmation.
-test('stall rows carry no delete button and the edit dialog does', function () {
+// CHANGED: Delete is back in each directory row beside QR and Edit, behind the confirmation; the Edit dialog no longer carries one.
+// A stall with no evaluations passes 0, so the confirmation drops the evaluation-records sentence.
+test('stall rows carry the delete button and the edit dialog does not', function () {
     $content = $this->actingAs($this->admin)->get(route('admin.stalls'))->getContent();
 
     $list = substr($content, strpos($content, 'id="stalls-list-container"'), strpos($content, 'id="edit-modal"') - strpos($content, 'id="stalls-list-container"'));
-    expect($list)->not->toContain('openDeleteModal');
-    expect($content)->toContain('id="edit-modal-delete-btn"');
+    expect($list)->toContain('aria-label="Delete Snack Hub"');
+    expect($list)->toMatch("/openDeleteModal\(\d+, 'Snack Hub', 0\)/");
+    expect($content)->not->toContain('id="edit-modal-delete-btn"');
     expect($content)->toContain('id="delete-stall-form"');
 });

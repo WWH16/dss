@@ -218,8 +218,8 @@
                 {{-- ADDED: column labels for the grid the rows form from lg up. The list is tabular data - name,
                      status, rating, staff - and without a legend the aligned columns read as coincidence. The
                      grid template here must stay identical to the one on .stall-item below. --}}
-                {{-- CHANGED: the actions column shrank from 13rem to 5rem (two icon buttons) and rating from 7rem to 6rem; the stall name gets the space, so long names stop truncating. --}}
-                <div class="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_6rem_11rem_5rem] lg:items-center lg:gap-4 px-5 py-2 border-b border-neutral-100 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
+                {{-- CHANGED: the actions column shrank from 13rem to 7.5rem (three icon buttons: QR, Edit, Delete) and rating from 7rem to 6rem; the stall name gets the space, so long names stop truncating. --}}
+                <div class="hidden lg:grid lg:grid-cols-[minmax(0,1fr)_6rem_11rem_7.5rem] lg:items-center lg:gap-4 px-5 py-2 border-b border-neutral-100 text-[11px] font-bold uppercase tracking-wider text-neutral-500">
                     <span>Stall</span>
                     <span>Rating</span>
                     <span>Staff</span>
@@ -249,7 +249,7 @@
                              they started at a different place in every row. The two wrappers below become
                              lg:contents, which promotes their children to grid items without changing the phone
                              layout, where the row stays a flex line with the meta pair wrapping under the name. --}}
-                        <div class="stall-item flex items-start justify-between py-3.5 px-4 gap-2.5 lg:grid lg:grid-cols-[minmax(0,1fr)_6rem_11rem_5rem] lg:items-center lg:gap-4 lg:px-5 hover:bg-neutral-50/70 transition-colors" data-stall-name="{{ strtolower($stall->name) }}">
+                        <div class="stall-item flex items-start justify-between py-3.5 px-4 gap-2.5 lg:grid lg:grid-cols-[minmax(0,1fr)_6rem_11rem_7.5rem] lg:items-center lg:gap-4 lg:px-5 hover:bg-neutral-50/70 transition-colors" data-stall-name="{{ strtolower($stall->name) }}">
                             <div class="flex items-start gap-2.5 min-w-0 flex-1 flex-wrap lg:contents">
                                 {{-- Cell 1 from lg up: the stall's identity. --}}
                                 {{-- CHANGED: dropped the storefront icon repeated on every row and the "Active" badge every active stall carried; only "Inactive" shows, in the neutral metadata badge. The name and badge share one line that never wraps, so every row is the same height. --}}
@@ -303,7 +303,7 @@
                                     </div>
                             </div>
 
-                            {{-- CHANGED: QR and Edit are 36px icon buttons at every width (labels in aria-label and title), and Delete left the row: 20 red buttons were the loudest thing in the table. Delete now lives in the Edit dialog, still behind the confirmation dialog. --}}
+                            {{-- CHANGED: QR, Edit and Delete are 36px icon buttons at every width (labels in aria-label and title). Delete is neutral at rest and turns red only on hover, so a column of red buttons does not become the loudest thing in the table; it still opens the confirmation dialog, and tells it whether the stall has evaluations. --}}
                             <div class="flex items-center gap-1.5 shrink-0 lg:justify-end">
                                 {{-- ADDED: opens the stall's QR code page (print or download) in a new tab. --}}
                                 <a href="{{ route('admin.stall.qr', $stall->id) }}" target="_blank" rel="noopener"
@@ -319,6 +319,12 @@
                                     aria-label="Edit {{ $stall->name }}" title="Edit"
                                     class="w-9 h-9 inline-flex items-center justify-center text-neutral-700 hover:text-brand-800 bg-white hover:bg-neutral-50 rounded-md border border-neutral-200 hover:border-brand-300 transition-colors cursor-pointer">
                                     <ion-icon name="pencil-outline" class="text-base" aria-hidden="true"></ion-icon>
+                                </button>
+                                <button type="button"
+                                    onclick="openDeleteModal({{ $stall->id }}, {{ Js::from($stall->name) }}, {{ $results->has($stall->id) ? 1 : 0 }})"
+                                    aria-label="Delete {{ $stall->name }}" title="Delete"
+                                    class="w-9 h-9 inline-flex items-center justify-center text-neutral-700 hover:text-red-700 bg-white hover:bg-red-50 rounded-md border border-neutral-200 hover:border-red-300 transition-colors cursor-pointer">
+                                    <ion-icon name="trash-outline" class="text-base" aria-hidden="true"></ion-icon>
                                 </button>
                             </div>
                         </div>
@@ -473,12 +479,8 @@
             </div>
         </div>
 
-        {{-- CHANGED: Delete moved here from every directory row. It sits apart on the left as a quiet text button and still opens the confirmation dialog. --}}
+        {{-- CHANGED: the Delete button left this footer and went back to the directory row. --}}
         <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-            <button type="button" id="edit-modal-delete-btn" class="btn btn-ghost btn-sm text-xs font-semibold text-red-700 hover:bg-red-50 rounded-md flex items-center gap-1.5 cursor-pointer mr-auto">
-                <ion-icon name="trash-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
-                <span>Delete stall</span>
-            </button>
             <button type="button" id="edit-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-edit-modal cursor-pointer">Cancel</button>
             <button type="submit" id="edit-modal-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all">
                 <ion-icon name="save-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
@@ -624,8 +626,10 @@
         <div>
             <h3 id="delete-modal-title" class="text-sm font-bold text-neutral-900 leading-tight mb-1">Delete Stall?</h3>
             <p class="text-neutral-500 text-xs leading-relaxed">
+                {{-- CHANGED: the evaluation-records sentence is its own span, hidden by openDeleteModal() for a stall with no evaluations; "cannot be undone" always shows. --}}
                 Permanently delete <strong id="delete-stall-name" class="text-neutral-900 font-semibold"></strong>?
-                This will remove all associated evaluation records and cannot be undone.
+                <span id="delete-stall-evals-note">This will remove all associated evaluation records.</span>
+                This cannot be undone.
             </p>
         </div>
     </div>
@@ -765,15 +769,9 @@ var editCancelBtn   = document.getElementById('edit-modal-cancel-btn');
 var editCloseBtn    = document.getElementById('edit-modal-close-btn');
 var editLoader      = document.getElementById('edit-modal-loader');
 var currentFilterTab = 'all';
-// ADDED: remembered so the dialog's Delete button knows which stall it is for.
-var currentEditStallId = null;
-var currentEditStallName = '';
 
 function openEditModal(stallId, stallName, staffIdsArray, desc, isActive) {
     if (isSubmittingAction) return;
-
-    currentEditStallId = stallId;
-    currentEditStallName = stallName;
 
     editForm.action = '/admin/stall/' + stallId;
     editNameInput.value = stallName;
@@ -902,13 +900,6 @@ editModal.addEventListener('cancel', function(e) {
     if (isSubmittingAction) {
         e.preventDefault(); // Prevent ESC dismissal while loading
     }
-});
-
-// ADDED: Delete lives in the Edit dialog now; it closes the dialog and opens the existing confirmation.
-document.getElementById('edit-modal-delete-btn').addEventListener('click', function() {
-    if (isSubmittingAction) return;
-    editModal.close();
-    openDeleteModal(currentEditStallId, currentEditStallName);
 });
 
 // ── Stall Staff Roster Modal ─────────────────────────────────────────────
@@ -1161,11 +1152,12 @@ var deleteCancelBtn = document.getElementById('delete-modal-cancel-btn');
 var deleteLoader    = document.getElementById('delete-modal-loader');
 var deleteForm      = document.getElementById('delete-stall-form');
 
-// CHANGED: points the one shared delete form at the stall instead of picking that row's own hidden form.
-function openDeleteModal(stallId, stallName) {
+// CHANGED: points the one shared delete form at the stall, and hides the evaluation-records sentence when hasEvaluations is 0.
+function openDeleteModal(stallId, stallName, hasEvaluations) {
     if (isSubmittingAction) return;
     deleteForm.action = '/admin/stall/' + stallId;
     stallNameEl.textContent = stallName;
+    document.getElementById('delete-stall-evals-note').classList.toggle('hidden', !hasEvaluations);
 
     if (deleteLoader) deleteLoader.classList.add('hidden');
     if (confirmDelBtn) {
