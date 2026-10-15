@@ -23,10 +23,30 @@ class User extends Authenticatable implements MustVerifyEmail
         'email',
         'password',
         'course',
+        // CHANGED: added track, the specialization track within the course.
+        'track',
         'year_level',
         'student_number',
         'stall_id',
         'email_verified_at',
+    ];
+
+    // CHANGED: the programs a student can pick, each with its specialization tracks (code => name). Registration, the profile form and the admin Students page all read this list.
+    public const PROGRAMS = [
+        'BSIT' => [
+            'BA'   => 'Business Analytics',
+            'WMAD' => 'Web and Mobile Application Development',
+            'NS'   => 'Network Security',
+            'BPO'  => 'Business Process Outsourcing',
+        ],
+        'BSCS' => [
+            'BA' => 'Business Analytics',
+            'DM' => 'Data Mining',
+        ],
+        'BSEMC' => [
+            'GD' => 'Game Development',
+            'DA' => 'Digital Animation',
+        ],
     ];
 
     // CHANGED: removed the unused stall() relation; queries join stalls directly.

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\User;
 use App\Rules\Recaptcha;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 
 class AuthController extends Controller
@@ -35,7 +36,9 @@ class AuthController extends Controller
                     ->numbers()
                     ->symbols()
             ],
-            'course'               => 'required_if:role,student|nullable|string|max:255',
+            // CHANGED: course must be one of User::PROGRAMS, and track one of that course's tracks.
+            'course'               => ['required_if:role,student', 'nullable', Rule::in(array_keys(User::PROGRAMS))],
+            'track'                => ['required_if:role,student', 'nullable', Rule::in(array_keys(User::PROGRAMS[$request->course] ?? []))],
             'year_level'           => 'required_if:role,student|nullable|string|max:255',
             'student_number'       => 'required_if:role,student|nullable|string|max:255|unique:users,student_number',
             'g_recaptcha_response' => [new Recaptcha('register')],
@@ -51,7 +54,10 @@ class AuthController extends Controller
             'email.required' => 'Please enter your email address.',
             'email.unique' => 'This email address is already registered.',
             'email.regex' => 'Students must use their official ISU Cauayan email address (e.g. jdelacruz_cyn@isu.edu.ph).',
-            'course.required_if' => 'Please select your academic course.',
+            // CHANGED: says "program" instead of "academic course".
+            'course.required_if' => 'Please select your program.',
+            // CHANGED: message for a missing track; an invalid one uses the default message (lang/en/validation.php names the field).
+            'track.required_if' => 'Please select your specialization track.',
             'year_level.required_if' => 'Please select your year level.',
             'student_number.required_if' => 'Please enter your student number.',
             'student_number.unique' => 'This student number is already registered.',
@@ -64,6 +70,8 @@ class AuthController extends Controller
             'name'           => trim($request->name),
             'email'          => trim($request->email),
             'course'         => $request->role === 'student' ? $request->course : null,
+            // CHANGED: track saved with the course.
+            'track'          => $request->role === 'student' ? $request->track : null,
             'year_level'     => $request->role === 'student' ? $request->year_level : null,
             'student_number' => $request->role === 'student' ? $request->student_number : null,
             'stall_id'       => null,

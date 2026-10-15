@@ -4,54 +4,7 @@
 {{-- CHANGED: added header_title so the top bar reads "Students" (the sidebar label) instead of the layout default "Dashboard". --}}
 @section('header_title', 'Students')
 
-@php
-    // CHANGED: wrapped in function_exists(). A plain function declaration in a view is fatal ("Cannot redeclare") the second time the view renders in the same PHP process. Also removed the per-department 'badge' and 'dot' colours (emerald, amber, blue, purple, rose, teal); every department badge now uses one neutral style, so green stays the only accent and colour keeps meaning score status.
-    if (!function_exists('getStudentDeptInfo')) {
-    function getStudentDeptInfo($course) {
-        $c = strtoupper(trim($course ?? ''));
-        if (in_array($c, ['BSIT', 'BSCS', 'BSIS', 'ACT', 'MIT'])) {
-            return [
-                'code' => 'CCSICT',
-                'name' => 'Computing Studies (CCSICT)',
-            ];
-        }
-        if (in_array($c, ['BSHM', 'BSTM', 'HRM'])) {
-            return [
-                'code' => 'CHM',
-                'name' => 'Hospitality Mgt. (CHM)',
-            ];
-        }
-        if (in_array($c, ['BSBA', 'BSA', 'BSMA', 'BSENTREP', 'BSEntrep'])) {
-            return [
-                'code' => 'CBA',
-                'name' => 'Business & Acctg. (CBA)',
-            ];
-        }
-        if (in_array($c, ['BSED', 'BEED', 'BPED', 'BTLED'])) {
-            return [
-                'code' => 'CED',
-                'name' => 'Teacher Education (CED)',
-            ];
-        }
-        if (in_array($c, ['BSCRIM', 'BS CRIM', 'BSLE'])) {
-            return [
-                'code' => 'CCJE',
-                'name' => 'Criminal Justice (CCJE)',
-            ];
-        }
-        if (in_array($c, ['BA COMM', 'BS PSYCH', 'BS BIO', 'BACOMM', 'BSPSYCH'])) {
-            return [
-                'code' => 'CAS',
-                'name' => 'Arts & Sciences (CAS)',
-            ];
-        }
-        return [
-            'code' => 'GEN',
-            'name' => $c ?: 'General Department',
-        ];
-    }
-    }
-@endphp
+{{-- CHANGED: removed getStudentDeptInfo() and every department (CCSICT, CHM, CBA, CED, CCJE, CAS). The system serves one college, so the Department filter, column and details row are gone. --}}
 
 @section('content')
 {{-- CHANGED: was max-w-7xl mx-auto, which centred the page and left dead space beside the sidebar; same fix as the overview and stalls pages. --}}
@@ -64,18 +17,17 @@
     @php
         $sort = request('sort') ?: 'latest';
         $status = request('status');
-        $narrowed = request('q') || request('department') || request('course') || request('year_level');
+        $narrowed = request('q') || request('course') || request('year_level');
         $hasFilters = $narrowed || $status || $sort !== 'latest';
         $sortUrl = fn ($s) => request()->fullUrlWithQuery(['sort' => $s, 'page' => null]);
         $statusUrl = fn ($s) => request()->fullUrlWithQuery(['status' => $s, 'page' => null]);
         $total = (int) $participation->total;
         $evaluated = (int) $participation->evaluated;
         $month = now('Asia/Manila')->format('F');
-        // CHANGED: the Department column and filter only appear once students come from more than one department; with one, every row repeated the same code.
-        $showDept = collect($departmentStats)->filter()->count() > 1;
-        // CHANGED: department and the Philippine-time registration date are set once per student here and travel to the details dialog on the student object.
+        // CHANGED: the Philippine-time registration date is set once per student here and travels to the details dialog on the student object.
         $students->getCollection()->each(function ($s) {
-            $s->dept = getStudentDeptInfo($s->course);
+            // CHANGED: the track's full name from User::PROGRAMS, falling back to the stored code.
+            $s->track_name = \App\Models\User::PROGRAMS[$s->course][$s->track] ?? $s->track;
             $s->registered_at = \Carbon\Carbon::parse($s->created_at, 'UTC')->timezone('Asia/Manila');
             $s->registered_label = $s->registered_at->format('M d, Y');
         });
@@ -104,19 +56,6 @@
                 </div>
 
                 <div class="grid grid-cols-2 lg:flex gap-2.5">
-                    @if($showDept || request('department'))
-                        <div>
-                            <label for="filter_department" class="sr-only">Department</label>
-                            <select id="filter_department" name="department" onchange="this.form.submit()" class="w-full lg:w-48 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ request('department') ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
-                                <option value="">All departments</option>
-                                @foreach($departments as $dept)
-                                    <option value="{{ $dept['code'] }}" {{ request('department') == $dept['code'] ? 'selected' : '' }}>
-                                        {{ $dept['name'] }} ({{ $departmentStats[$dept['code']] ?? 0 }})
-                                    </option>
-                                @endforeach
-                            </select>
-                        </div>
-                    @endif
                     <div>
                         <label for="filter_course" class="sr-only">Program</label>
                         <select id="filter_course" name="course" onchange="this.form.submit()" class="w-full lg:w-40 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ request('course') ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
@@ -202,15 +141,12 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                {{-- CHANGED: "Student Evaluator" header became "Name"; Department shows only with more than one department. "Evaluations Submitted" split in two: "This month" carries the status badge, "Evaluations" the all-time count as a plain number; Evaluations and Registered sort through the sort parameter. Column widths are set so names no longer take the spare room. --}}
+                {{-- CHANGED: "Student Evaluator" header became "Name"; the Department column is removed. "Evaluations Submitted" split in two: "This month" carries the status badge, "Evaluations" the all-time count as a plain number; Evaluations and Registered sort through the sort parameter. Column widths are set so names no longer take the spare room. --}}
                 <table class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="bg-neutral-50/80 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200/80">
                             <th class="px-5 py-3 w-[25%]">Name</th>
                             <th class="px-4 py-3 w-[14%]">Student ID</th>
-                            @if($showDept)
-                                <th class="px-4 py-3 w-[11%]">Department</th>
-                            @endif
                             <th class="px-4 py-3 w-[18%]">Program & Year</th>
                             <th class="px-4 py-3 w-[15%]">This month</th>
                             <th class="px-4 py-3 w-[11%] text-right" aria-sort="{{ $sort === 'evaluations_asc' ? 'ascending' : ($sort === 'evaluations_desc' ? 'descending' : 'none') }}">
@@ -242,15 +178,12 @@
                                     </div>
                                 </td>
 
-                                {{-- CHANGED: student ID and department are plain 13px text instead of chips; the ID is no longer monospace. --}}
+                                {{-- CHANGED: student ID is plain 13px text instead of a chip and no longer monospace; the department cell is removed. --}}
                                 <td class="px-4 py-3 text-[13px] text-neutral-700 tabular-nums whitespace-nowrap">{{ $student->student_number ?: 'Not set' }}</td>
 
-                                @if($showDept)
-                                    <td class="px-4 py-3 text-[13px] text-neutral-700" title="{{ $student->dept['name'] }}">{{ $student->dept['code'] }}</td>
-                                @endif
-
                                 <td class="px-4 py-3 text-[13px] whitespace-nowrap">
-                                    <span class="font-medium text-neutral-900">{{ $student->course ?: 'Not set' }}</span>
+                                    {{-- CHANGED: the track code follows the course (e.g. BSIT-WMAD); hovering shows its full name. --}}
+                                    <span class="font-medium text-neutral-900" title="{{ $student->track_name }}">{{ $student->course ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}</span>
                                     @if($student->year_level)
                                         <span class="text-neutral-500 mx-1" aria-hidden="true">·</span>
                                         <span class="text-neutral-600">{{ $student->year_level }}</span>
@@ -281,7 +214,7 @@
                 </table>
 
                 <!-- Mobile Card View -->
-                {{-- CHANGED: one row per student: neutral avatar, name with ID and program underneath, status and an eye button on the right. The whole card opens the details dialog. The labelled grey box and the department chip are gone; department shows only with more than one department. --}}
+                {{-- CHANGED: one row per student: neutral avatar, name with ID and program underneath, status and an eye button on the right. The whole card opens the details dialog. The labelled grey box and the department are gone. --}}
                 <div class="md:hidden divide-y divide-neutral-100">
                     @foreach($students as $student)
                         <div class="p-4 flex items-center gap-3 hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openDetailsModal(@json($student))'>
@@ -291,7 +224,7 @@
                             <div class="min-w-0 flex-1">
                                 <h3 class="text-sm font-semibold text-neutral-900 leading-tight truncate">{{ $student->name }}</h3>
                                 <p class="text-xs text-neutral-600 mt-0.5 truncate tabular-nums">
-                                    {{ $student->student_number ?: 'No ID' }} · {{ $showDept ? $student->dept['code'] . ' · ' : '' }}{{ $student->course ?: 'Not set' }}{{ $student->year_level ? ' · ' . $student->year_level : '' }}
+                                    {{ $student->student_number ?: 'No ID' }} · {{ $student->course ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}{{ $student->year_level ? ' · ' . $student->year_level : '' }}
                                 </p>
                             </div>
                             <div class="shrink-0 flex items-center gap-1">
@@ -410,7 +343,8 @@
         </div>
 
         <dl class="mt-2 divide-y divide-neutral-100 text-sm">
-            @foreach(['dept-name' => 'Department', 'course' => 'Program', 'year' => 'Year level', 'created-at' => 'Registered'] as $id => $label)
+            {{-- CHANGED: added the Track row; removed the Department row. --}}
+            @foreach(['course' => 'Program', 'track' => 'Track', 'year' => 'Year level', 'created-at' => 'Registered'] as $id => $label)
                 <div class="flex items-center justify-between gap-4 py-2.5">
                     <dt class="text-neutral-600">{{ $label }}</dt>
                     <dd id="details-{{ $id }}" class="font-medium text-neutral-900 text-right"></dd>
@@ -428,15 +362,16 @@
 <script>
 var detailsModal = document.getElementById('details-modal');
 
-// CHANGED: takes only the student; department and the Philippine-time registration date arrive on it (dept, registered_label), set by the server. toggleFilterDrawer() is gone with the drawer.
+// CHANGED: takes only the student; the Philippine-time registration date arrives on it (registered_label), set by the server. The department line is removed. toggleFilterDrawer() is gone with the drawer.
 function openDetailsModal(student) {
     document.getElementById('details-name').textContent = student.name;
     // CHANGED: the student number moved from a monospace "ID:" badge and a grid cell into the header subtitle.
     document.getElementById('details-student-number').textContent = student.student_number || 'No student number';
     document.getElementById('modal-avatar').textContent = (student.name || 'S').charAt(0).toUpperCase();
 
-    document.getElementById('details-dept-name').textContent = student.dept.name;
     document.getElementById('details-course').textContent = student.course || 'Not Set';
+    // CHANGED: the track's full name (track_name, set by the server).
+    document.getElementById('details-track').textContent = student.track_name || 'Not Set';
     document.getElementById('details-year').textContent = student.year_level || 'Not Set';
     document.getElementById('details-created-at').textContent = student.registered_label;
 

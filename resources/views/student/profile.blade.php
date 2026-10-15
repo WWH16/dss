@@ -94,13 +94,25 @@
                 </div>
 
                 {{-- Course / Degree --}}
+                {{-- CHANGED: labelled "Program" instead of "Course / Program". --}}
                 <div class="group">
                     <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
                         <ion-icon name="book-outline" class="text-neutral-400"></ion-icon>
-                        Course / Program
+                        Program
                     </dt>
                     <dd class="text-neutral-900 font-semibold text-sm sm:text-base">
                         {{ $profile->course ?: 'Not set' }}
+                    </dd>
+                </div>
+
+                {{-- CHANGED: added the specialization track, shown by its full name. --}}
+                <div class="group">
+                    <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
+                        <ion-icon name="git-branch-outline" class="text-neutral-400"></ion-icon>
+                        Specialization Track
+                    </dt>
+                    <dd class="text-neutral-900 font-semibold text-sm sm:text-base">
+                        {{ \App\Models\User::PROGRAMS[$profile->course][$profile->track] ?? ($profile->track ?: 'Not set') }}
                     </dd>
                 </div>
 
@@ -183,12 +195,40 @@
             </div>
 
             {{-- Course / Degree --}}
-            {{-- CHANGED: the placeholder suggests program codes only. The old example "BS Computer Science" does not match any code the admin Students page groups into a department, so a student who typed it was listed under no department. --}}
+            {{-- CHANGED: the free-text course input became a "Program" select of User::PROGRAMS, followed by a track select that lists only the chosen program's tracks. resources/js/app.js keeps the track disabled until a program is selected; while disabled the field fades to half opacity. --}}
+            @php
+                $currentCourse = old('course', $profile->course);
+                $currentTrack = old('track', $profile->track);
+            @endphp
             <div>
-                <label for="modal-course" class="block text-xs font-bold text-neutral-700 mb-1.5">Course / Degree Program</label>
-                <input type="text" id="modal-course" name="course" value="{{ old('course', $profile->course) }}" placeholder="e.g. BSIT, BSCS, BSHM"
+                <label for="modal-course" class="block text-xs font-bold text-neutral-700 mb-1.5">Program</label>
+                <select id="modal-course" name="course" required
                     class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('course') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    <option value="">Select Program</option>
+                    @foreach(array_keys(\App\Models\User::PROGRAMS) as $program)
+                        <option value="{{ $program }}" {{ $currentCourse === $program ? 'selected' : '' }}>{{ $program }}</option>
+                    @endforeach
+                </select>
                 @error('course')
+                    <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
+                @enderror
+            </div>
+
+            <div data-track-field="modal-course" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
+                <label for="modal-track" class="block text-xs font-bold text-neutral-700 mb-1.5">Specialization Track</label>
+                <select id="modal-track" name="track" required
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('track') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    {{-- CHANGED: the placeholder shows but cannot be picked (disabled); a selected track below overrides its "selected". --}}
+                    <option value="" disabled selected>Select Track</option>
+                    @foreach(\App\Models\User::PROGRAMS as $program => $tracks)
+                        <optgroup label="{{ $program }}">
+                            @foreach($tracks as $code => $trackName)
+                                <option value="{{ $code }}" {{ $currentCourse === $program && $currentTrack === $code ? 'selected' : '' }}>{{ $code }} - {{ $trackName }}</option>
+                            @endforeach
+                        </optgroup>
+                    @endforeach
+                </select>
+                @error('track')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -360,7 +400,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Auto-reopen on validation errors
-    @if($errors->has('name') || $errors->has('course') || $errors->has('year_level'))
+    // CHANGED: also reopens on a track error.
+    @if($errors->has('name') || $errors->has('course') || $errors->has('track') || $errors->has('year_level'))
         if (editProfileModal) editProfileModal.showModal();
     @endif
 

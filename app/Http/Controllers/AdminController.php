@@ -374,15 +374,7 @@ class AdminController extends Controller
 
     public function students(Request $request)
     {
-        // CHANGED: codes are upper-case and matched against UPPER(TRIM(course)) below, the same way the Students view assigns department badges. PostgreSQL compares text case-sensitively, so a course saved as "bsit" or "BS Crim" got a badge but was left out when filtering by its department. Added "BS CRIM", which the view already counted as CCJE; dropped the mixed-case duplicates.
-        $deptCourseMap = [
-            'CCSICT' => ['BSIT', 'BSCS', 'BSIS', 'ACT', 'MIT'],
-            'CHM'    => ['BSHM', 'BSTM', 'HRM'],
-            'CBA'    => ['BSBA', 'BSA', 'BSMA', 'BSENTREP'],
-            'CED'    => ['BSED', 'BEED', 'BPED', 'BTLED'],
-            'CCJE'   => ['BSCRIM', 'BS CRIM', 'BSLE'],
-            'CAS'    => ['BA COMM', 'BS PSYCH', 'BS BIO', 'BACOMM', 'BSPSYCH'],
-        ];
+        // CHANGED: removed $deptCourseMap and the Department filter. The system serves one college (CCSICT), whose programs are User::PROGRAMS.
 
         // CHANGED: a student may evaluate each stall once per calendar month in Philippine time (StudentEvaluationController::monthlyLimitMessage), so participation is tracked for the current month: any evaluation this month counts. created_at is stored in UTC, so the month start is converted.
         $monthStart = now('Asia/Manila')->startOfMonth()->utc();
@@ -396,6 +388,8 @@ class AdminController extends Controller
                 'users.name',
                 'users.student_number',
                 'users.course',
+                // CHANGED: added track for the Program column and details dialog.
+                'users.track',
                 'users.year_level',
                 'users.created_at',
                 // CHANGED: dropped MAX(stall_evaluations.created_at) as last_evaluation_at. The Students page showed it as "Last submitted", and matching that date against the Evaluations page identified who wrote an "anonymous" evaluation.
@@ -408,6 +402,7 @@ class AdminController extends Controller
                 'users.name',
                 'users.student_number',
                 'users.course',
+                'users.track',
                 'users.year_level',
                 'users.created_at'
             );
@@ -419,14 +414,6 @@ class AdminController extends Controller
                 $w->where('users.name', 'like', "%{$q}%")
                   ->orWhere('users.student_number', 'like', "%{$q}%");
             });
-        }
-
-        // Department filter
-        $selectedDept = $request->get('department');
-        if ($selectedDept && isset($deptCourseMap[$selectedDept])) {
-            // CHANGED: case- and space-insensitive match (see $deptCourseMap).
-            $codes = $deptCourseMap[$selectedDept];
-            $query->whereRaw('UPPER(TRIM(users.course)) IN (' . implode(',', array_fill(0, count($codes), '?')) . ')', $codes);
         }
 
         // Course filter
@@ -476,39 +463,8 @@ class AdminController extends Controller
 
         $students = $query->paginate($perPage)->withQueryString();
 
-        // Department counts for filter dropdown options (single grouped query
-        // instead of one COUNT query per department)
-        $courseCounts = DB::table('users')
-            ->where('role', 'student')
-            ->whereNotNull('course')
-            ->select('course', DB::raw('COUNT(*) as cnt'))
-            ->groupBy('course')
-            ->pluck('cnt', 'course');
-
-        // CHANGED: counts are grouped by UPPER(TRIM(course)) so the numbers in the department dropdown match what the filter returns.
-        $upperCourseCounts = [];
-        foreach ($courseCounts as $course => $cnt) {
-            $key = strtoupper(trim((string) $course));
-            $upperCourseCounts[$key] = ($upperCourseCounts[$key] ?? 0) + $cnt;
-        }
-
-        $departmentStats = [];
-        foreach ($deptCourseMap as $code => $courses) {
-            $departmentStats[$code] = collect($courses)->sum(fn ($c) => $upperCourseCounts[$c] ?? 0);
-        }
-
-        $departments = [
-            ['code' => 'CCSICT', 'name' => 'Computing Studies (CCSICT)', 'courses' => ['BSIT', 'BSCS', 'BSIS', 'ACT']],
-            ['code' => 'CHM',    'name' => 'Hospitality Management (CHM)', 'courses' => ['BSHM', 'BSTM', 'HRM']],
-            ['code' => 'CBA',    'name' => 'Business & Accountancy (CBA)', 'courses' => ['BSBA', 'BSA', 'BSMA', 'BSENTREP']],
-            ['code' => 'CED',    'name' => 'Teacher Education (CED)', 'courses' => ['BSED', 'BEED', 'BPED', 'BTLED']],
-            ['code' => 'CCJE',   'name' => 'Criminal Justice (CCJE)', 'courses' => ['BSCRIM', 'BSCrim', 'BSLE']],
-            ['code' => 'CAS',    'name' => 'Arts & Sciences (CAS)', 'courses' => ['BA Comm', 'BS Psych', 'BS Bio']],
-        ];
-
-        // Available distinct courses derived from $courseCounts (eliminates redundant DB query)
-        $dbCourses = $courseCounts->keys()->filter(fn ($c) => trim((string)$c) !== '')->values()->toArray();
-        $courseOptions = array_values(array_unique(array_merge(['BSIT', 'BSCS', 'BSHM', 'BSBA', 'BSED', 'BEED', 'BSCRIM'], $dbCourses)));
+        // CHANGED: the Program filter lists every program in User::PROGRAMS, including ones no student has registered under yet. The per-course count query and the department lists are gone with the Department filter.
+        $courseOptions = array_keys(User::PROGRAMS);
 
         $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
 
@@ -516,11 +472,8 @@ class AdminController extends Controller
         return view('admin.students', compact(
             'students',
             'participation',
-            'departmentStats',
-            'departments',
             'courseOptions',
-            'yearOptions',
-            'selectedDept'
+            'yearOptions'
         ));
     }
 

@@ -8,6 +8,8 @@ use App\Services\Ahp;
 use App\Services\Saw;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use App\Models\User;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use App\Mail\PasswordChangedMail; // ADDED
 use Illuminate\Support\Facades\Log; // ADDED
@@ -145,13 +147,16 @@ class StudentDashboardController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'course' => 'nullable|string|max:100',
+            // CHANGED: course is picked from User::PROGRAMS and track from that course's tracks, as at registration.
+            'course' => ['required', Rule::in(array_keys(User::PROGRAMS))],
+            'track' => ['required', Rule::in(array_keys(User::PROGRAMS[$request->course] ?? []))],
             'year_level' => 'nullable|string|max:50',
         ]);
 
         DB::table('users')->where('id', $user->id)->update([
             'name' => trim($request->name),
-            'course' => $request->course ? trim($request->course) : null,
+            'course' => $request->course,
+            'track' => $request->track,
             'year_level' => $request->year_level ? trim($request->year_level) : null,
             'updated_at' => now(),
         ]);
