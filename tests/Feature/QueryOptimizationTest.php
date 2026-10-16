@@ -73,6 +73,10 @@ test('admin dashboard executes optimal query count with zero duplicate or dead q
         return $q['query'] === 'select * from "stalls" order by "name" asc';
     });
     expect($deadStallsQueries)->toBeEmpty();
+
+    // ADDED: counts, ranking, campus health (with evaluation count and first date), trend, recent five.
+    $dashboardQueries = array_filter($queries, fn ($q) => str_contains($q['query'], 'stall_evaluations') || str_contains($q['query'], 'FROM stalls'));
+    expect($dashboardQueries)->toHaveCount(5);
 });
 
 test('admin stalls page executes constant query count regardless of stall count (no N+1)', function () {

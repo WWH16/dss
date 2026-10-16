@@ -17,13 +17,13 @@ class AdminController extends Controller
     public function dashboard(Request $request)
     {
         // Dashboard Counts
-        $studentCount = DB::table('users')
-            ->where('role', 'student')
-            ->count();
-
-        $stallCount = DB::table('stalls')->count();
-
-        $evaluationCount = DB::table('stall_evaluations')->count();
+        // CHANGED: student and stall counts come from one round trip; the evaluation count comes from the campus health query below.
+        $counts = DB::selectOne(
+            'SELECT (SELECT COUNT(*) FROM users WHERE role = ?) AS students, (SELECT COUNT(*) FROM stalls) AS stalls',
+            ['student']
+        );
+        $studentCount = (int) $counts->students;
+        $stallCount = (int) $counts->stalls;
 
         // Average rating per stall (Ranked by overall composite score)
         $results = DB::table('stall_evaluations')
@@ -54,8 +54,12 @@ class AdminController extends Controller
         $topStall = $results->first() ?? null;
 
         // Campus-Wide Aggregate Criteria Health
+        // CHANGED: also carries the evaluation count (was its own query) and the first evaluation's time for the
+        // chart's year list, saving two round trips to the database.
         $campusHealth = DB::table('stall_evaluations')
             ->selectRaw('
+                COUNT(*) as evaluation_count,
+                MIN(created_at) as first_at,
                 AVG(cleanliness) as avg_cleanliness,
                 AVG(service) as avg_service,
                 AVG(taste) as avg_taste,
@@ -63,6 +67,7 @@ class AdminController extends Controller
                 (AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4 as avg_overall
             ')
             ->first();
+        $evaluationCount = (int) $campusHealth->evaluation_count;
 
         // Stalls Needing Attention (< 3.0 in any criterion or overall)
         $attentionStalls = $results->filter(function($stall) {
@@ -78,7 +83,7 @@ class AdminController extends Controller
             'trendCounts' => $trendCounts,
             'activityPeriodLabel' => $activityPeriodLabel,
             'activityTotalCount' => $activityTotalCount,
-        ] = $this->activityTrend($request);
+        ] = $this->activityTrend($request, null, $campusHealth->first_at);
 
         // Evaluations per stall (for Pie Chart - derived from $results in-memory to eliminate redundant query)
         $pieChartData = $results->map(function ($row) {
