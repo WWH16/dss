@@ -4,9 +4,10 @@
         <div class="p-4 sm:p-6 pb-4 border-b border-neutral-100 space-y-3">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
                 <div>
-                    <h2 class="text-base font-bold text-neutral-900 tracking-tight flex items-center gap-2">
+                    {{-- CHANGED: the Anonymous Submissions tag no longer breaks over two lines on narrow phones; it moves under the heading instead. --}}
+                    <h2 class="text-base font-bold text-neutral-900 tracking-tight flex flex-wrap items-center gap-x-2 gap-y-1">
                         <span>Student Evaluations</span>
-                        <span class="text-[11px] font-semibold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md">Anonymous Submissions</span>
+                        <span class="text-[11px] font-semibold text-neutral-500 bg-neutral-100 px-2 py-0.5 rounded-md whitespace-nowrap">Anonymous Submissions</span>
                     </h2>
                     <p class="text-xs text-neutral-500 mt-0.5">Feedback logs submitted by students for your stall</p>
                 </div>
@@ -14,6 +15,10 @@
                 {{-- Search Form --}}
                 {{-- CHANGED: below 640px the search takes its own row and the controls are 44px tall with 16px text (iOS zooms the page on focus below 16px). --}}
                 <form method="GET" action="{{ url()->current() }}" class="flex flex-wrap sm:flex-nowrap items-center gap-2">
+                    {{-- CHANGED: keeps the dashboard chart's period, which a search used to reset to the last 30 days. --}}
+                    @foreach(['activity_month', 'activity_year'] as $keep)
+                        @if(request($keep)) <input type="hidden" name="{{ $keep }}" value="{{ request($keep) }}"> @endif
+                    @endforeach
                     <div class="relative w-full sm:w-56">
                         <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm pointer-events-none"></ion-icon>
                         <input type="text" name="q" value="{{ request('q') }}" placeholder="Search in comments…" aria-label="Search student evaluation comments"

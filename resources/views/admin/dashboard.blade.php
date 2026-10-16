@@ -126,9 +126,10 @@
                 </div>
 
                 {{-- Month / Year Filter Controls --}}
+                {{-- CHANGED: an Apply button submits the filter instead of each select's change, which reloaded the page on every arrow key and did nothing without JavaScript. --}}
                 <form method="GET" action="{{ route('admin.dashboard') }}" class="flex items-center gap-2 self-start sm:self-auto shrink-0">
                     <div class="flex items-center gap-1.5 bg-neutral-50 border border-neutral-200/90 rounded-lg p-1">
-                        <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
+                        <select name="activity_month" aria-label="Filter activity by month"
                             class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
                             <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
                             <option value="all" {{ $selectedMonth === 'all' ? 'selected' : '' }}>Whole Year</option>
@@ -143,12 +144,13 @@
                             </optgroup>
                         </select>
 
-                        <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
+                        <select name="activity_year" aria-label="Filter activity by year"
                             class="bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
                             @foreach($availableYears as $y)
                                 <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
                             @endforeach
                         </select>
+                        <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Apply</button>
                     </div>
                 </form>
             </div>

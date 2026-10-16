@@ -271,7 +271,10 @@
 </div>
 
 {{-- ── Canvas Confetti Library ─────────────────────────────────────────── --}}
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
+{{-- CHANGED: loaded only for a top-3 stall, the only one that fires it, and deferred so it no longer blocks the page while it downloads. --}}
+@if(($myRank ?? 999) <= 3)
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js" defer></script>
+@endif
 
 @section('scripts')
 <script>

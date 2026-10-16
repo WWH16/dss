@@ -75,24 +75,24 @@
         </div>
 
         {{-- ── 3. Stall Metric Cards ───────────────────────────────────────── --}}
-        {{-- CHANGED: below 640px Overall Score spans the row and the two counts sit side by side (were three stacked cards); the decorative icon boxes hide there to give the labels room. --}}
-        <div class="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+        {{-- CHANGED: the decorative icon boxes hide below 640px to give the labels room. With the This Month card: four across from 1024px and two by two below, phones included, so the four numbers fit in one screen. The footer sits at the bottom (mt-auto, was justify-between) so the numbers line up when a label or footer wraps. --}}
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
             {{-- Overall Average --}}
-            <div class="col-span-2 sm:col-span-1 bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
+            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Overall Score</span>
                     <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700">
                         <ion-icon name="star" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="flex items-baseline gap-1.5">
+                <div class="flex flex-wrap items-baseline gap-x-1.5 mb-2.5">
                     <span class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
                         {{ number_format($averages ? (float)$averages->overall : 0, 2) }}★
                     </span>
                     <span class="text-xs text-neutral-500 font-semibold">/ 5.00</span>
                 </div>
                 {{-- CHANGED: compares with the other stalls only, and says so when there are too few of them. --}}
-                <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
+                <div class="mt-auto pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
                     @if($campusCriteria)
                         Avg of other stalls: <strong class="text-neutral-700 font-bold">{{ number_format($campusCriteria->overall, 2) }}★</strong>
                     @else
@@ -101,34 +101,50 @@
                 </div>
             </div>
 
+            {{-- ADDED: students who rated this stall this month. A student rates a stall once a month, so the number restarts each month. --}}
+            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col hover:border-neutral-300 transition-colors">
+                <div class="flex items-center justify-between mb-2">
+                    <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">This Month</span>
+                    <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700">
+                        <ion-icon name="calendar-outline" class="text-base"></ion-icon>
+                    </div>
+                </div>
+                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
+                    {{ $monthStudents }}
+                </div>
+                <div class="mt-auto pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
+                    {{ Str::plural('Student', $monthStudents) }} rated you in {{ now('Asia/Manila')->format('F') }}
+                </div>
+            </div>
+
             {{-- Total Evaluations --}}
-            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
+            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Total Evaluations</span>
                     <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700">
                         <ion-icon name="receipt-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
+                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
                     {{ $totalEvaluations }}
                 </div>
-                <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
+                <div class="mt-auto pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
                     Student reviews logged
                 </div>
             </div>
 
             {{-- Unique Student Evaluators --}}
-            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col justify-between hover:border-neutral-300 transition-colors">
+            <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-5 shadow-xs flex flex-col hover:border-neutral-300 transition-colors">
                 <div class="flex items-center justify-between mb-2">
                     <span class="text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Unique Evaluators</span>
                     <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700">
                         <ion-icon name="people-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
+                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
                     {{ $uniqueStudents }}
                 </div>
-                <div class="mt-2.5 pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
+                <div class="mt-auto pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
                     Individual students
                 </div>
             </div>
@@ -150,13 +166,14 @@
 
                     {{-- Month / Year Filter Controls --}}
                     {{-- CHANGED: the year select shows only for a month or whole-year view; it never applied to the rolling 30 days. --}}
+                    {{-- CHANGED: an Apply button submits the filter instead of each select's change, which reloaded the page on every arrow key and did nothing without JavaScript. Picking a period only shows or hides the year select. On the narrowest phones the button wraps to a full-width row of its own. --}}
                     {{-- CHANGED: below 640px the filters fill the row as 44px selects with 16px text (iOS zooms the page on focus below 16px). --}}
                     <form method="GET" action="{{ route('staff.dashboard') }}" class="flex items-center gap-2 w-full sm:w-auto shrink-0">
                         @if(request('q')) <input type="hidden" name="q" value="{{ request('q') }}"> @endif
                         @if(request('sort')) <input type="hidden" name="sort" value="{{ request('sort') }}"> @endif
 
-                        <div class="flex items-center gap-1.5 w-full sm:w-auto bg-neutral-50 border border-neutral-200/90 rounded-md p-1">
-                            <select name="activity_month" onchange="this.form.submit()" aria-label="Filter activity by month"
+                        <div class="flex flex-wrap items-center gap-1.5 w-full sm:w-auto bg-neutral-50 border border-neutral-200/90 rounded-md p-1">
+                            <select name="activity_month" onchange="this.form.activity_year.hidden = this.value === '30_days'" aria-label="Filter activity by month"
                                 class="flex-1 sm:flex-none min-h-11 sm:min-h-0 bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-base sm:text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
                                 <option value="30_days" {{ $selectedMonth === '30_days' ? 'selected' : '' }}>Last 30 Days</option>
                                 <option value="all" {{ $selectedMonth === 'all' ? 'selected' : '' }}>Whole Year</option>
@@ -171,14 +188,13 @@
                                 </optgroup>
                             </select>
 
-                            @if($selectedMonth !== '30_days')
-                                <select name="activity_year" onchange="this.form.submit()" aria-label="Filter activity by year"
-                                    class="flex-1 sm:flex-none min-h-11 sm:min-h-0 bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-base sm:text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
-                                    @foreach($availableYears as $y)
-                                        <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
-                                    @endforeach
-                                </select>
-                            @endif
+                            <select name="activity_year" aria-label="Filter activity by year" @if($selectedMonth === '30_days') hidden @endif
+                                class="flex-1 sm:flex-none min-h-11 sm:min-h-0 bg-white border border-neutral-200 rounded-md px-2.5 py-1 text-base sm:text-xs font-semibold text-neutral-700 shadow-2xs focus:outline-none focus:border-brand-700">
+                                @foreach($availableYears as $y)
+                                    <option value="{{ $y }}" {{ (int)$selectedYear === (int)$y ? 'selected' : '' }}>{{ $y }}</option>
+                                @endforeach
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer min-h-11 sm:min-h-0 grow sm:grow-0">Apply</button>
                         </div>
                     </form>
                 </div>

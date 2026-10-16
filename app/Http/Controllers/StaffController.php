@@ -40,17 +40,27 @@ class StaffController extends Controller
         }
 
         // 2. Metrics for the assigned stall ONLY (consolidated into 1 single aggregate query)
+        // CHANGED: also counts the students who rated this stall this calendar month (Philippine time). A student rates a stall once a month, so this is also the month's evaluation count. created_at is stored in UTC, so the month start is converted.
+        // CHANGED: also carries the star breakdown (was step 5's own query) and the first evaluation's time for the
+        // chart's year list, saving two round trips to the database.
         $metrics = DB::table('stall_evaluations')
             ->where('stall_id', $stall->id)
             ->selectRaw('
                 COUNT(*) as total_evaluations,
+                MIN(created_at) as first_at,
                 COUNT(DISTINCT student_id) as unique_students,
+                COUNT(DISTINCT CASE WHEN created_at >= ? THEN student_id END) as month_students,
                 AVG(cleanliness) as cleanliness,
                 AVG(service) as service,
                 AVG(taste) as taste,
                 AVG(price) as price,
-                COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall
-            ')
+                COALESCE((AVG(cleanliness) + AVG(service) + AVG(taste) + AVG(price)) / 4, 0) as overall,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 5 THEN 1 ELSE 0 END), 0) as stars_5,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 4 THEN 1 ELSE 0 END), 0) as stars_4,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 3 THEN 1 ELSE 0 END), 0) as stars_3,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 2 THEN 1 ELSE 0 END), 0) as stars_2,
+                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 1 THEN 1 ELSE 0 END), 0) as stars_1
+            ', [now('Asia/Manila')->startOfMonth()->utc()])
             ->first();
 
         $totalEvaluations = $metrics->total_evaluations ?? 0;
@@ -100,16 +110,7 @@ class StaffController extends Controller
         ] : null;
 
         // 5. Rating breakdown distribution (1 to 5 stars) for this stall
-        $ratingDistribution = DB::table('stall_evaluations')
-            ->where('stall_id', $stall->id)
-            ->selectRaw('
-                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 5 THEN 1 ELSE 0 END), 0) as stars_5,
-                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 4 THEN 1 ELSE 0 END), 0) as stars_4,
-                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 3 THEN 1 ELSE 0 END), 0) as stars_3,
-                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 2 THEN 1 ELSE 0 END), 0) as stars_2,
-                COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 1 THEN 1 ELSE 0 END), 0) as stars_1
-            ')
-            ->first();
+        // CHANGED: comes from $metrics; passed to the view as ratingDistribution.
 
         // CHANGED: trend query moved to Controller::activityTrend(), shared with the admin dashboard.
         [
@@ -120,10 +121,10 @@ class StaffController extends Controller
             'trendCounts' => $trendCounts,
             'activityPeriodLabel' => $activityPeriodLabel,
             'activityTotalCount' => $activityTotalCount,
-        ] = $this->activityTrend($request, $stall->id);
+        ] = $this->activityTrend($request, $stall->id, $metrics->first_at);
 
         // CHANGED: the paginated evaluations query moved to stallEvaluations(), shared with standings().
-        $evaluations = $this->stallEvaluations($request, $stall->id);
+        $evaluations = $this->stallEvaluations($request, $stall->id, (int) $totalEvaluations);
 
         return view('staff.staff_dashboard', [
             'hasStall' => true,
@@ -131,9 +132,11 @@ class StaffController extends Controller
             'user' => $user,
             'totalEvaluations' => $totalEvaluations,
             'uniqueStudents' => $uniqueStudents,
+            // ADDED: for the This Month card.
+            'monthStudents' => $metrics->month_students,
             'averages' => $averages,
             'campusCriteria' => $campusCriteria,
-            'ratingDistribution' => $ratingDistribution,
+            'ratingDistribution' => $metrics,
             'trendDates' => $trendDates,
             'trendCounts' => $trendCounts,
             'availableYears' => $availableYears,
@@ -148,7 +151,8 @@ class StaffController extends Controller
     }
 
     // 7. Paginated evaluations list for this stall (STRICT PRIVACY: zero student names or IDs)
-    private function stallEvaluations(Request $request, $stallId)
+    // CHANGED: takes the stall's evaluation count when the caller already has it, so an unsearched list skips its count query.
+    private function stallEvaluations(Request $request, $stallId, ?int $total = null)
     {
         $evaluationsQuery = DB::table('stall_evaluations')
             ->where('stall_id', $stallId)
@@ -178,7 +182,7 @@ class StaffController extends Controller
             $evaluationsQuery->orderBy('created_at', 'desc');
         }
 
-        return $evaluationsQuery->paginate(10)->withQueryString();
+        return $evaluationsQuery->paginate(10, ['*'], 'page', null, $request->filled('q') ? null : $total)->withQueryString();
     }
 
     /**
@@ -224,7 +228,8 @@ class StaffController extends Controller
             'myStall' => $myStall,
             'user' => $user,
             // ADDED: this stall's own evaluations, which replace the all-stalls leaderboard table.
-            'evaluations' => $this->stallEvaluations($request, $myStall->id),
+            // CHANGED: the stall's eval_count from $standings is the list's total, which saves a count query (0 when it has no evaluations, so it is not ranked).
+            'evaluations' => $this->stallEvaluations($request, $myStall->id, (int) ($standings->firstWhere('id', $myStall->id)?->eval_count ?? 0)),
         ]);
     }
 
