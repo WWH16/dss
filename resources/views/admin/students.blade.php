@@ -25,11 +25,15 @@
         $evaluated = (int) $participation->evaluated;
         $month = now('Asia/Manila')->format('F');
         // CHANGED: the Philippine-time registration date is set once per student here and travels to the details dialog on the student object.
-        $students->getCollection()->each(function ($s) {
+        $students->getCollection()->each(function ($s) use ($openStalls, $month) {
             // CHANGED: the track's full name from User::PROGRAMS, falling back to the stored code.
             $s->track_name = \App\Models\User::PROGRAMS[$s->course][$s->track] ?? $s->track;
             $s->registered_at = \Carbon\Carbon::parse($s->created_at, 'UTC')->timezone('Asia/Manila');
             $s->registered_label = $s->registered_at->format('M d, Y');
+            // CHANGED: this month's stalls and the dialog's status line are set here once, so the table and the dialog share one rule.
+            $done = (int) $s->stalls_this_month;
+            $s->month_complete = $done > 0 && $done >= $openStalls;
+            $s->month_line = ($done === 0 ? 'Not yet evaluated' : ($s->month_complete ? "All {$done} " . Str::plural('stall', $done) : "{$done} of {$openStalls} stalls") . ' evaluated') . " in {$month}";
         });
         // CHANGED: this month's progress across the open stalls, shared by the table and the mobile cards. A student rates each stall once a month, so "Evaluated" became "X of N stalls"; only a student who has rated every open stall gets the emerald badge. "Not yet" stays plain neutral-600 text.
         $monthBadge = function ($s) use ($openStalls) {
@@ -37,7 +41,7 @@
             if ($done === 0) {
                 return '<span class="text-xs text-neutral-600 whitespace-nowrap">Not yet</span>';
             }
-            if ($done >= $openStalls) {
+            if ($s->month_complete) {
                 return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60 whitespace-nowrap"><ion-icon name="checkmark-circle" class="text-sm text-emerald-600" aria-hidden="true"></ion-icon>All ' . $done . ' ' . Str::plural('stall', $done) . '</span>';
             }
             return '<span class="text-xs text-neutral-600 whitespace-nowrap tabular-nums"><strong class="font-semibold text-neutral-900">' . $done . '</strong> of ' . $openStalls . ' stalls</span>';
@@ -383,17 +387,13 @@ function openDetailsModal(student) {
     document.getElementById('details-created-at').textContent = student.registered_label;
 
     // CHANGED: the count is a bare number in the panel; the status line gives this month's stalls, as in the This month column. The panel turns emerald only once every open stall is rated, matching the table badge. Only the colour classes are toggled, so the base classes live in the markup alone.
-    var done = Number(student.stalls_this_month);
-    var openStalls = @json($openStalls);
-    var complete = done > 0 && done >= openStalls;
+    var complete = student.month_complete;
     document.getElementById('details-eval-count').textContent = student.evaluations_count;
     var panel = document.getElementById('details-month-panel').classList;
     panel.toggle('bg-emerald-50', complete);
     panel.toggle('bg-neutral-50', !complete);
     var monthLine = document.getElementById('details-this-month');
-    monthLine.textContent = (done === 0 ? 'Not yet evaluated'
-        : complete ? 'All ' + done + (done === 1 ? ' stall' : ' stalls') + ' evaluated'
-        : done + ' of ' + openStalls + ' stalls evaluated') + ' in ' + @json($month);
+    monthLine.textContent = student.month_line;
     monthLine.classList.toggle('text-emerald-800', complete);
     monthLine.classList.toggle('text-neutral-600', !complete);
 

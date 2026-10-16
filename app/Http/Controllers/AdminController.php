@@ -432,7 +432,7 @@ class AdminController extends Controller
 
         // CHANGED: this month's participation counts for the summary line and the All / Evaluated / Not yet filter. Taken after search and the other filters but before the status filter, so each count matches what its option returns.
         $participation = DB::query()->fromSub(clone $query, 'filtered')
-            ->selectRaw('COUNT(*) AS total, SUM(CASE WHEN stalls_this_month > 0 THEN 1 ELSE 0 END) AS evaluated')
+            ->selectRaw('COUNT(*) AS total, COUNT(NULLIF(stalls_this_month, 0)) AS evaluated')
             ->first();
 
         // CHANGED: status filter: students who have evaluated at least one stall this month, or none yet.
