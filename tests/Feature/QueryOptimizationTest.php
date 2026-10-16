@@ -79,6 +79,25 @@ test('admin dashboard executes optimal query count with zero duplicate or dead q
     expect($dashboardQueries)->toHaveCount(5);
 });
 
+// ADDED: the total rides on the page's rows, so the list runs one query plus the stall filter's.
+test('admin evaluations page reads its total from the page query', function () {
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+
+    $response = $this->actingAs($this->admin)->get(route('admin.evaluations', ['per_page' => 10]));
+
+    $response->assertStatus(200);
+    expect($response->viewData('evaluations')->total())->toBe(5);
+    $listQueries = array_filter(DB::getQueryLog(), fn ($q) => str_contains($q['query'], 'stalls'));
+    expect($listQueries)->toHaveCount(2);
+
+    $filtered = $this->actingAs($this->admin)->get(route('admin.evaluations', ['q' => 'Stall #3']));
+    expect($filtered->viewData('evaluations')->total())->toBe(1);
+
+    $pastEnd = $this->actingAs($this->admin)->get(route('admin.evaluations', ['page' => 2]));
+    expect($pastEnd->viewData('evaluations')->total())->toBe(5);
+});
+
 test('admin stalls page executes constant query count regardless of stall count (no N+1)', function () {
     DB::flushQueryLog();
     DB::enableQueryLog();

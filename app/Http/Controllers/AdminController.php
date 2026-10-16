@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use App\Services\Ahp;
 use App\Services\Saw;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use App\Models\User;
@@ -371,7 +372,15 @@ class AdminController extends Controller
             $perPage = 10;
         }
 
-        $evaluations = $query->paginate($perPage)->withQueryString();
+        // CHANGED: the page's rows carry the total (COUNT(*) OVER ()), which replaces paginate()'s separate count
+        // query and saves a round trip to the database. A page past the end has no rows to read it from, so only
+        // that page runs the count.
+        $page = LengthAwarePaginator::resolveCurrentPage();
+        $rows = (clone $query)->selectRaw('COUNT(*) OVER () AS total_rows')->forPage($page, $perPage)->get();
+        $total = $rows->isNotEmpty() ? (int) $rows->first()->total_rows : ($page > 1 ? $query->count() : 0);
+        $evaluations = (new LengthAwarePaginator($rows, $total, $perPage, $page, [
+            'path' => LengthAwarePaginator::resolveCurrentPath(),
+        ]))->withQueryString();
         $stalls = DB::table('stalls')->select('id', 'name')->orderBy('name')->get();
 
         return view('admin.evaluations', compact('evaluations', 'stalls'));
