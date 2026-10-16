@@ -96,7 +96,6 @@
                             <th class="py-3.5 px-3 text-center font-semibold">Price</th>
                             <th class="py-3.5 px-3 text-center font-semibold">Average</th>
                             <th class="py-3.5 px-5 font-semibold">Feedback</th>
-                            <th class="py-3.5 px-4 text-right font-semibold">Action</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
@@ -107,11 +106,12 @@
                                 $evalAt = \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila');
                                 $evalAtLabel = $evalAt->format('M d, Y, h:i A');
                             @endphp
-                            <tr class="hover:bg-neutral-50/60 transition-colors group">
+                            {{-- CHANGED: the whole row opens the details dialog, as on the admin pages; the stall name button is the keyboard target and its click bubbles here. The View button and the Action column are gone. --}}
+                            <tr class="hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openEvalDetailsModal(@json($eval), @json($evalAtLabel))'>
                                 {{-- Stall Name --}}
                                 {{-- CHANGED: removed the storefront icon box repeated on every row; the column is already "Food Stall". --}}
                                 <td class="py-3.5 px-5 text-xs font-bold text-neutral-900">
-                                    {{ $eval->stall_name ?? 'Food Stall' }}
+                                    <button type="button" aria-label="View evaluation for {{ $eval->stall_name ?? 'Food Stall' }}" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $eval->stall_name ?? 'Food Stall' }}</button>
                                 </td>
 
                                 {{-- Date --}}
@@ -153,16 +153,6 @@
                                         <span class="text-neutral-500 text-xs italic">No comment</span>
                                     @endif
                                 </td>
-
-                                {{-- Action --}}
-                                {{-- CHANGED: passes the Philippine-time date string to the modal (the rounded average is no longer passed; the dialog works it out from the four scores); label "Details" became "View", the same word as the mobile list and the admin pages. --}}
-                                <td class="py-3.5 px-4 text-right whitespace-nowrap">
-                                    <button type="button"
-                                        onclick='openEvalDetailsModal(@json($eval), @json($evalAtLabel))'
-                                        class="inline-flex items-center gap-1 text-xs font-bold text-brand-700 hover:text-brand-800 hover:bg-brand-50 px-2.5 py-1 rounded-md transition-colors cursor-pointer">
-                                        View
-                                    </button>
-                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -177,11 +167,12 @@
                             $evalAt = \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila');
                             $evalAtLabel = $evalAt->format('M d, Y, h:i A');
                         @endphp
-                        <div class="p-4 flex flex-col gap-2.5">
+                        {{-- CHANGED: the whole card opens the details dialog; the stall name button replaces the View button as the keyboard target. --}}
+                        <div class="p-4 flex flex-col gap-2.5 hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openEvalDetailsModal(@json($eval), @json($evalAtLabel))'>
                             <div class="flex items-center justify-between">
                                 {{-- CHANGED: removed the storefront icon box repeated on every card. --}}
                                 <div class="min-w-0">
-                                    <h3 class="text-xs font-bold text-neutral-900 truncate">{{ $eval->stall_name ?? 'Food Stall' }}</h3>
+                                    <h3 class="text-xs font-bold text-neutral-900 truncate"><button type="button" aria-label="View evaluation for {{ $eval->stall_name ?? 'Food Stall' }}" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $eval->stall_name ?? 'Food Stall' }}</button></h3>
                                     {{-- CHANGED: Philippine time; 10px neutral-400 to 11px neutral-500. --}}
                                     <span class="text-[11px] text-neutral-500">{{ $evalAt->format('M d, Y • h:i A') }}</span>
                                 </div>
@@ -217,15 +208,6 @@
                                     “{{ $eval->comment }}”
                                 </p>
                             @endif
-
-                            {{-- CHANGED: "View Full Details →" shortened to "View", matching the desktop table; passes the Philippine-time date to the modal and no longer the rounded average. --}}
-                            <div class="flex justify-end pt-1">
-                                <button type="button"
-                                    onclick='openEvalDetailsModal(@json($eval), @json($evalAtLabel))'
-                                    class="text-xs font-bold text-brand-700 hover:underline">
-                                    View
-                                </button>
-                            </div>
                         </div>
                     @endforeach
                 </div>
