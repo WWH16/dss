@@ -152,32 +152,31 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                {{-- CHANGED: "Student Evaluator" header became "Name"; the Department column is removed. "Evaluations Submitted" split in two: "This month" carries the status badge, "Evaluations" the all-time count as a plain number; Evaluations and Registered sort through the sort parameter. Column widths are set so names no longer take the spare room. --}}
+                {{-- CHANGED: "Student Evaluator" header became "Name"; the Department column is removed. "Evaluations Submitted" split in two: "This month" carries the status badge, "Evaluations" the all-time count as a plain number; Evaluations and Registered sort through the sort parameter. Column widths are set so names no longer take the spare room; they add up to 100% so no empty strip is left after Registered. --}}
                 <table class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="bg-neutral-50/80 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200/80">
-                            <th class="px-5 py-3 w-[25%]">Name</th>
-                            <th class="px-4 py-3 w-[14%]">Student ID</th>
-                            <th class="px-4 py-3 w-[18%]">Program & Year</th>
-                            <th class="px-4 py-3 w-[15%]">This month</th>
-                            <th class="px-4 py-3 w-[11%] text-right" aria-sort="{{ $sort === 'evaluations_asc' ? 'ascending' : ($sort === 'evaluations_desc' ? 'descending' : 'none') }}">
+                            <th class="px-5 py-3 w-[29%]">Name</th>
+                            <th class="px-4 py-3 w-[15%]">Student ID</th>
+                            <th class="px-4 py-3 w-[20%]">Program & Year</th>
+                            <th class="px-4 py-3 w-[18%]">This month</th>
+                            <th class="px-4 py-3 w-[10%] text-right" aria-sort="{{ $sort === 'evaluations_asc' ? 'ascending' : ($sort === 'evaluations_desc' ? 'descending' : 'none') }}">
                                 <a href="{{ $sortUrl($sort === 'evaluations_desc' ? 'evaluations_asc' : 'evaluations_desc') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'evaluations') ? 'text-neutral-900' : '' }}">
                                     Evaluations
                                     <ion-icon name="{{ $sort === 'evaluations_asc' ? 'arrow-up-outline' : ($sort === 'evaluations_desc' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
-                            <th class="pl-8 pr-4 py-3" aria-sort="{{ $sort === 'oldest' ? 'ascending' : ($sort === 'latest' ? 'descending' : 'none') }}">
+                            <th class="pl-8 pr-5 py-3 w-[8%]" aria-sort="{{ $sort === 'oldest' ? 'ascending' : ($sort === 'latest' ? 'descending' : 'none') }}">
                                 <a href="{{ $sortUrl($sort === 'latest' ? 'oldest' : 'latest') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ in_array($sort, ['latest', 'oldest']) ? 'text-neutral-900' : '' }}">
                                     Registered
                                     <ion-icon name="{{ $sort === 'oldest' ? 'arrow-up-outline' : ($sort === 'latest' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
-                            <th class="w-12 px-3 py-3"><span class="sr-only">Details</span></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
                         @foreach($students as $student)
-                            {{-- CHANGED: the whole row opens the details dialog; the eye button is the keyboard target and its click bubbles here. --}}
+                            {{-- CHANGED: the whole row opens the details dialog; the name button is the keyboard target and its click bubbles here. --}}
                             <tr class="hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openDetailsModal(@json($student))'>
                                 {{-- CHANGED: initial avatar is a neutral circle instead of a green square, so it no longer reads as a status badge next to the green evaluated badge. --}}
                                 <td class="px-5 py-3">
@@ -185,7 +184,8 @@
                                         <span class="w-8 h-8 rounded-full bg-neutral-100 text-neutral-600 text-xs font-semibold flex items-center justify-center shrink-0" aria-hidden="true">
                                             {{ strtoupper(substr($student->name, 0, 1)) }}
                                         </span>
-                                        <span class="font-medium text-neutral-900 leading-tight">{{ $student->name }}</span>
+                                        {{-- CHANGED: the name is a button in place of the removed eye button, so keyboard and screen reader users can still open the dialog. --}}
+                                        <button type="button" class="font-medium text-neutral-900 leading-tight text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $student->name }}</button>
                                     </div>
                                 </td>
 
@@ -208,16 +208,8 @@
                                 <td class="px-4 py-3 text-right text-[13px] text-neutral-700 tabular-nums">{{ $student->evaluations_count }}</td>
 
                                 {{-- CHANGED: shows the registration date in Philippine time instead of the raw UTC date. --}}
-                                <td class="pl-8 pr-4 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
+                                <td class="pl-8 pr-5 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
                                     <time datetime="{{ $student->registered_at->toIso8601String() }}">{{ $student->registered_label }}</time>
-                                </td>
-
-                                {{-- CHANGED: the bordered "View" button became an eye icon button, as on the evaluations page. --}}
-                                <td class="px-3 py-3 text-right">
-                                    <button type="button" aria-label="View {{ $student->name }}"
-                                        class="w-8 h-8 inline-flex items-center justify-center rounded-md text-neutral-500 hover:text-brand-700 hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-brand-600 cursor-pointer">
-                                        <ion-icon name="eye-outline" class="text-base" aria-hidden="true"></ion-icon>
-                                    </button>
                                 </td>
                             </tr>
                         @endforeach
@@ -225,7 +217,7 @@
                 </table>
 
                 <!-- Mobile Card View -->
-                {{-- CHANGED: one row per student: neutral avatar, name with ID and program underneath, status and an eye button on the right. The whole card opens the details dialog. The labelled grey box and the department are gone. --}}
+                {{-- CHANGED: one row per student: neutral avatar, name with ID and program underneath, status on the right. The whole card opens the details dialog; the eye button is gone and the name button is the keyboard target. The labelled grey box and the department are gone. --}}
                 <div class="md:hidden divide-y divide-neutral-100">
                     @foreach($students as $student)
                         <div class="p-4 flex items-center gap-3 hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openDetailsModal(@json($student))'>
@@ -233,18 +225,12 @@
                                 {{ strtoupper(substr($student->name, 0, 1)) }}
                             </span>
                             <div class="min-w-0 flex-1">
-                                <h3 class="text-sm font-semibold text-neutral-900 leading-tight truncate">{{ $student->name }}</h3>
+                                <h3 class="text-sm font-semibold text-neutral-900 leading-tight truncate"><button type="button" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $student->name }}</button></h3>
                                 <p class="text-xs text-neutral-600 mt-0.5 truncate tabular-nums">
                                     {{ $student->student_number ?: 'No ID' }} · {{ $student->course ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}{{ $student->year_level ? ' · ' . $student->year_level : '' }}
                                 </p>
                             </div>
-                            <div class="shrink-0 flex items-center gap-1">
-                                {!! $monthBadge($student) !!}
-                                <button type="button" aria-label="View {{ $student->name }}"
-                                    class="w-9 h-9 -mr-2 inline-flex items-center justify-center rounded-md text-neutral-500 hover:text-brand-700 cursor-pointer">
-                                    <ion-icon name="eye-outline" class="text-base" aria-hidden="true"></ion-icon>
-                                </button>
-                            </div>
+                            <div class="shrink-0">{!! $monthBadge($student) !!}</div>
                         </div>
                     @endforeach
                 </div>
