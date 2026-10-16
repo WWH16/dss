@@ -66,6 +66,45 @@ dialog.confirm-modal[open] {
     }
 }
 
+/* ADDED: on phones a dialog marked .sheet-on-phone becomes a bottom sheet. modal-sharp's overflow: hidden clipped
+   tall forms below the fold with no way to scroll to Save; the sheet scrolls instead, while .sheet-head and
+   .sheet-actions stay pinned so the title and the buttons stay in view. */
+@media (max-width: 639.98px) {
+    dialog.confirm-modal.sheet-on-phone {
+        width: 100%;
+        max-width: none;
+        max-height: 92dvh;
+        margin: auto 0 0;
+        border-radius: 1rem 1rem 0 0 !important;
+        overflow-y: auto !important;
+        overscroll-behavior: contain;
+    }
+
+    .sheet-on-phone .sheet-head {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+    }
+
+    .sheet-on-phone .sheet-actions {
+        position: sticky;
+        bottom: 0;
+        background-color: var(--color-surface);
+        padding-bottom: max(1rem, env(safe-area-inset-bottom));
+    }
+}
+
+@media (max-width: 639.98px) and (prefers-reduced-motion: no-preference) {
+    dialog.confirm-modal.sheet-on-phone[open] {
+        animation: sheet-enter 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+}
+
+@keyframes sheet-enter {
+    from { transform: translateY(100%); }
+    to { transform: translateY(0); }
+}
+
 @keyframes modal-enter {
     from {
         opacity: 0;

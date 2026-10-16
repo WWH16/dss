@@ -12,20 +12,21 @@
         
         {{-- Profile Header with Avatar & Action CTAs --}}
         {{-- CHANGED: p-5 on phones (was p-6). --}}
-        <div class="p-5 sm:p-8 border-b border-neutral-100 bg-neutral-50/50 flex flex-col sm:flex-row items-center sm:items-start justify-between gap-6 relative">
-            <div class="flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
+        {{-- CHANGED: on phones the avatar sits beside the name, left-aligned like the details list below, instead of a centered stack (avatar 56px there, was 80px; name text-lg, was text-xl; gap-5 to the buttons, was gap-6). --}}
+        <div class="p-5 sm:p-8 border-b border-neutral-100 bg-neutral-50/50 flex flex-col sm:flex-row sm:items-start justify-between gap-5 sm:gap-6 relative">
+            <div class="flex items-center sm:items-start gap-4 sm:gap-5">
                 {{-- Avatar Circle --}}
-                <div class="w-20 h-20 sm:w-22 sm:h-22 rounded-full bg-brand-50 border-2 border-brand-200/80 text-brand-700 font-bold text-3xl shadow-xs flex items-center justify-center ring-4 ring-white shrink-0">
+                <div class="w-14 h-14 sm:w-22 sm:h-22 rounded-full bg-brand-50 border-2 border-brand-200/80 text-brand-700 font-bold text-2xl sm:text-3xl shadow-xs flex items-center justify-center ring-4 ring-white shrink-0">
                     {{ strtoupper(substr($profile->name ?? ($profile->student_number ?? 'S'), 0, 1)) }}
                 </div>
 
                 {{-- Name & Identity Info --}}
-                <div class="pt-1 min-w-0">
-                    <h1 class="text-xl sm:text-2xl font-bold text-neutral-900 tracking-tight leading-tight">
+                <div class="sm:pt-1 min-w-0">
+                    <h1 class="text-lg sm:text-2xl font-bold text-neutral-900 tracking-tight leading-tight text-balance">
                         {{ $profile->name ?? 'Student' }}
                     </h1>
-                    
-                    <div class="flex flex-wrap items-center justify-center sm:justify-start gap-2 mt-2">
+
+                    <div class="flex flex-wrap items-center gap-2 mt-2">
                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-brand-50 text-brand-800 border border-brand-200/70">
                             ID: {{ $profile->student_number ?? 'N/A' }}
                         </span>
@@ -35,8 +36,8 @@
                         </span>
                     </div>
 
-                    {{-- CHANGED: break-all so a long school email wraps instead of pushing the card wider than a phone screen. --}}
-                    <p class="text-xs text-neutral-500 mt-2 flex items-center justify-center sm:justify-start gap-1.5 break-all">
+                    {{-- CHANGED: break-all so a long school email wraps instead of pushing the card wider than a phone screen. Hidden on phones, where the Email row in the list below already shows it. --}}
+                    <p class="text-xs text-neutral-500 mt-2 hidden sm:flex items-center gap-1.5 break-all">
                         <ion-icon name="mail-outline" class="text-neutral-400 text-sm"></ion-icon>
                         {{ $profile->email }}
                     </p>
@@ -44,15 +45,15 @@
             </div>
 
             {{-- Action Buttons --}}
-            {{-- CHANGED: both buttons are 44px tall on phones (min-h-11, was ~32px). --}}
-            <div class="flex flex-row sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
+            {{-- CHANGED: both buttons are 44px tall on phones (min-h-11, was ~32px), with 14px labels there (text-sm, 12px from sm up). Labels stay on one line; Password wraps to its own row if both do not fit. --}}
+            <div class="flex flex-row flex-wrap sm:flex-col gap-2 shrink-0 w-full sm:w-auto">
                 <button type="button" onclick="openEditProfileModal()" 
-                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs">
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-3.5 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-sm sm:text-xs font-bold rounded-md transition-colors shadow-2xs">
                     <ion-icon name="create-outline" class="text-sm"></ion-icon>
                     Edit Profile
                 </button>
                 <button type="button" onclick="openChangePasswordModal()" 
-                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 px-3.5 py-2 min-h-11 sm:min-h-0 bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200/90 text-xs font-bold rounded-md transition-colors shadow-2xs">
+                    class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-3.5 py-2 min-h-11 sm:min-h-0 bg-white hover:bg-neutral-50 text-neutral-700 border border-neutral-200/90 text-sm sm:text-xs font-bold rounded-md transition-colors shadow-2xs">
                     <ion-icon name="lock-closed-outline" class="text-sm text-neutral-500"></ion-icon>
                     Password
                 </button>
@@ -60,9 +61,9 @@
         </div>
 
         {{-- Academic & Profile Details List --}}
-        {{-- CHANGED: p-5 on phones (was p-6); the "ISU DSS Portal" tag shows from sm up so the heading keeps one line. --}}
+        {{-- CHANGED: p-5 on phones (was p-6); the "ISU DSS Portal" tag shows from sm up so the heading keeps one line. On phones the heading has mb-5 (was mb-6) and the rows gap-y-5 (was gap-y-6), so the five rows read as one tighter group. --}}
         <div class="p-5 sm:p-8">
-            <div class="flex items-center justify-between pb-3 mb-6 border-b border-neutral-100">
+            <div class="flex items-center justify-between pb-3 mb-5 sm:mb-6 border-b border-neutral-100">
                 <h2 class="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-2">
                     <ion-icon name="school-outline" class="text-lg text-brand-700"></ion-icon>
                     Academic &amp; Student Information
@@ -70,7 +71,7 @@
                 <span class="hidden sm:inline text-[11px] font-semibold text-neutral-500">ISU DSS Portal</span>
             </div>
 
-            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-y-6 sm:gap-y-8 gap-x-8">
+            <dl class="grid grid-cols-1 sm:grid-cols-2 gap-y-5 sm:gap-y-8 gap-x-8">
                 {{-- Student Number --}}
                 <div class="group">
                     <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
@@ -83,13 +84,14 @@
                 </div>
 
                 {{-- Email --}}
+                {{-- CHANGED: the email wraps at the @ first (<wbr>, after e() escapes it) and only breaks inside a word when one part is still too long (break-words, was break-all, which split ".ph" onto its own line). --}}
                 <div class="group">
                     <dt class="text-xs font-bold uppercase tracking-wider text-neutral-500 mb-1 flex items-center gap-1.5">
                         <ion-icon name="mail-outline" class="text-neutral-400"></ion-icon>
                         Email
                     </dt>
-                    <dd class="text-neutral-900 font-semibold text-sm sm:text-base break-all">
-                        {{ $profile->email }}
+                    <dd class="text-neutral-900 font-semibold text-sm sm:text-base break-words">
+                        {!! str_replace('@', '<wbr>@', e($profile->email)) !!}
                     </dd>
                 </div>
 
@@ -161,10 +163,11 @@
 </div>
 
 {{-- ── 1. Edit Academic Profile Modal ────────────────────────────────────── --}}
-<dialog id="edit-profile-modal" class="confirm-modal modal-sharp max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
+{{-- CHANGED (both modals): on phones they open as bottom sheets (sheet-on-phone in resources/css/components/modal.css). The sheet scrolls, which the old clipped dialog could not, so Save stays reachable on short screens; the header (sheet-head, now opaque on phones) and the button row (sheet-actions) stay pinned. On phones the padding is px-5, Cancel and Save/Update are 44px tall with 14px labels, and Save/Update fills the rest of the row (flex-1) as the thumb target, and the email in the reference box wraps (break-all). --}}
+<dialog id="edit-profile-modal" class="confirm-modal modal-sharp sheet-on-phone max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
     <div class="bg-white">
         {{-- Modal Header --}}
-        <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
+        <div class="sheet-head px-5 sm:px-6 py-4 bg-neutral-50 sm:bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
                     <ion-icon name="create-outline" class="text-base"></ion-icon>
@@ -181,7 +184,7 @@
 
         {{-- Modal Form --}}
         {{-- CHANGED (both modals): fields use 16px text on phones (text-base, was text-xs), since iOS Safari zooms the page into any field under 16px, and py-2.5 makes them 44px tall. The close button is a 44px square, and Cancel and Save/Update are 44px tall on phones. --}}
-        <form action="{{ route('student.profile.update') }}" method="POST" class="p-6 space-y-4">
+        <form action="{{ route('student.profile.update') }}" method="POST" class="px-5 pt-5 sm:p-6 space-y-4">
             @csrf
 
             {{-- Full Name --}}
@@ -255,15 +258,15 @@
             {{-- Readonly Reference Chips --}}
             <div class="p-3 rounded-md bg-neutral-50 border border-neutral-200/70 text-[11px] text-neutral-500 space-y-1">
                 <p><strong>ID Number:</strong> <span class="font-mono">{{ $profile->student_number }}</span> (Locked)</p>
-                <p><strong>Email:</strong> {{ $profile->email }}</p>
+                <p class="break-all"><strong>Email:</strong> {{ $profile->email }}</p>
             </div>
 
             {{-- Footer Buttons --}}
-            <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" class="js-close-profile-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
+            <div class="sheet-actions -mx-5 px-5 sm:mx-0 sm:px-0 pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
+                <button type="button" class="js-close-profile-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-sm sm:text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
                     Cancel
                 </button>
-                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
+                <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-sm sm:text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     <ion-icon name="save-outline" class="text-sm"></ion-icon>
                     Save Changes
                 </button>
@@ -273,10 +276,10 @@
 </dialog>
 
 {{-- ── 2. Change Password Modal ────────────────────────────────────────── --}}
-<dialog id="change-password-modal" class="confirm-modal modal-sharp max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
+<dialog id="change-password-modal" class="confirm-modal modal-sharp sheet-on-phone max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
     <div class="bg-white">
         {{-- Modal Header --}}
-        <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
+        <div class="sheet-head px-5 sm:px-6 py-4 bg-neutral-50 sm:bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
             <div class="flex items-center gap-2.5">
                 <div class="w-8 h-8 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-700 flex items-center justify-center shrink-0">
                     <ion-icon name="lock-closed-outline" class="text-base"></ion-icon>
@@ -293,7 +296,7 @@
 
         {{-- Modal Form --}}
         {{-- CHANGED: id added so the script below can show a spinner on submit. --}}
-        <form id="change-password-form" action="{{ route('student.profile.password') }}" method="POST" class="p-6 space-y-4">
+        <form id="change-password-form" action="{{ route('student.profile.password') }}" method="POST" class="px-5 pt-5 sm:p-6 space-y-4">
             @csrf
 
             {{-- Current Password --}}
@@ -328,11 +331,11 @@
             </div>
 
             {{-- Footer Buttons --}}
-            <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" class="js-close-password-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
+            <div class="sheet-actions -mx-5 px-5 sm:mx-0 sm:px-0 pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
+                <button type="button" class="js-close-password-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-sm sm:text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
                     Cancel
                 </button>
-                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
+                <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-sm sm:text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
                     <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
                     Update Password
                 </button>
