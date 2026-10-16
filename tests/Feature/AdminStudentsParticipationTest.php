@@ -82,6 +82,21 @@ test('students page filters by this month\'s participation', function () {
         ->assertDontSeeText('Ben Never');
 });
 
+// ADDED: the list's total and the open stall count come from the participation query, so the page
+// runs it and the page query only.
+test('students page totals come from the participation query', function () {
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+
+    $all = $this->actingAs($this->admin)->get(route('admin.students'));
+
+    expect($all->viewData('students')->total())->toBe(4)
+        ->and($all->viewData('openStalls'))->toBe(1)
+        ->and(array_filter(DB::getQueryLog(), fn ($q) => str_contains($q['query'], 'stall_evaluations') || str_contains($q['query'], 'stalls')))->toHaveCount(2);
+    expect($this->actingAs($this->admin)->get(route('admin.students', ['status' => 'evaluated']))->viewData('students')->total())->toBe(1);
+    expect($this->actingAs($this->admin)->get(route('admin.students', ['status' => 'pending']))->viewData('students')->total())->toBe(3);
+});
+
 test('students page shows this month\'s stalls out of the open stalls', function () {
     // A second open stall and a closed one; Ana's evaluation of the closed stall does not count.
     $ana = User::where('name', 'Ana This Month')->first();

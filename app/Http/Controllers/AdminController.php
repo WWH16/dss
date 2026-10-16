@@ -445,8 +445,9 @@ class AdminController extends Controller
         }
 
         // CHANGED: this month's participation counts for the summary line and the All / Evaluated / Not yet filter. Taken after search and the other filters but before the status filter, so each count matches what its option returns.
+        // CHANGED: also carries the open stall count (was its own query).
         $participation = DB::query()->fromSub(clone $query, 'filtered')
-            ->selectRaw('COUNT(*) AS total, COUNT(NULLIF(stalls_this_month, 0)) AS evaluated')
+            ->selectRaw('COUNT(*) AS total, COUNT(NULLIF(stalls_this_month, 0)) AS evaluated, (SELECT COUNT(*) FROM stalls WHERE stalls.is_active) AS open_stalls')
             ->first();
 
         // CHANGED: status filter: students who have evaluated at least one stall this month, or none yet.
@@ -477,7 +478,13 @@ class AdminController extends Controller
             $perPage = 10;
         }
 
-        $students = $query->paginate($perPage)->withQueryString();
+        // CHANGED: the list's total is already in $participation, which saves paginate()'s count query.
+        $total = match ($request->get('status')) {
+            'evaluated' => $participation->evaluated,
+            'pending' => $participation->total - $participation->evaluated,
+            default => $participation->total,
+        };
+        $students = $query->paginate($perPage, ['*'], 'page', null, (int) $total)->withQueryString();
 
         // CHANGED: the Program filter lists every program in User::PROGRAMS, including ones no student has registered under yet. The per-course count query and the department lists are gone with the Department filter.
         $courseOptions = array_keys(User::PROGRAMS);
@@ -485,7 +492,7 @@ class AdminController extends Controller
         $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
 
         // ADDED: the stalls a student can evaluate this month, the "of N" in the This month column.
-        $openStalls = DB::table('stalls')->where('is_active', true)->count();
+        $openStalls = (int) $participation->open_stalls;
 
         // CHANGED: passes $participation for the summary line and status filter counts, and $openStalls.
         return view('admin.students', compact(
@@ -668,11 +675,20 @@ class AdminController extends Controller
             $perPage = 10;
         }
 
+        // CHANGED: an unsearched list's total is already in $stats, which saves paginate()'s count query.
+        $total = $request->filled('q') ? null : (int) match ($role) {
+            'admin' => $stats->admin_count,
+            'clinic' => $stats->clinic_count,
+            'staff' => $stats->staff_count,
+            'unassigned' => $stats->unassigned_staff_count,
+            default => $stats->total_count,
+        };
+
         // CHANGED: admins first, then clinic, then staff, newest first within each role. Sorting by date alone filled page 1 with staff.
         $users = $query
             ->orderByRaw("CASE users.role WHEN 'admin' THEN 0 WHEN 'clinic' THEN 1 ELSE 2 END")
             ->orderByDesc('users.created_at')
-            ->paginate($perPage)->withQueryString();
+            ->paginate($perPage, ['*'], 'page', null, $total)->withQueryString();
 
         $stalls = DB::table('stalls')
             ->select('id', 'name', 'is_active')

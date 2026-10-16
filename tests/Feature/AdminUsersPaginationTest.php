@@ -90,6 +90,22 @@ test('admin can filter users by role and search query with pagination', function
     $responseSearch->assertDontSee('Unassigned Staff');
 });
 
+// ADDED: an unsearched list takes its total from the stats query and skips the count query.
+test('users list totals come from the stats query unless searched', function () {
+    $total = fn ($params) => $this->actingAs($this->admin)->get(route('admin.users', $params))->viewData('users')->total();
+
+    DB::flushQueryLog();
+    DB::enableQueryLog();
+    expect($total([]))->toBe(4);
+    expect(array_filter(DB::getQueryLog(), fn ($q) => str_contains($q['query'], 'count(*) as aggregate')))->toBeEmpty();
+
+    expect($total(['role' => 'admin']))->toBe(2)
+        ->and($total(['role' => 'staff']))->toBe(2)
+        ->and($total(['role' => 'unassigned']))->toBe(1)
+        ->and($total(['role' => 'clinic']))->toBe(0)
+        ->and($total(['q' => 'Snack Hub']))->toBe(1);
+});
+
 test('users page renders unified modal-sharp dialogs with shrunken width and no redundant subtitles', function () {
     $response = $this->actingAs($this->admin)->get(route('admin.users'));
 
