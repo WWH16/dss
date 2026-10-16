@@ -376,12 +376,14 @@ class AdminController extends Controller
     {
         // CHANGED: removed $deptCourseMap and the Department filter. The system serves one college (CCSICT), whose programs are User::PROGRAMS.
 
-        // CHANGED: a student may evaluate each stall once per calendar month in Philippine time (StudentEvaluationController::monthlyLimitMessage), so participation is tracked for the current month: any evaluation this month counts. created_at is stored in UTC, so the month start is converted.
+        // CHANGED: a student may evaluate each stall once per calendar month in Philippine time (StudentEvaluationController::monthlyLimitMessage), so this month's participation is the number of different open stalls the student has evaluated since the month began. created_at is stored in UTC, so the month start is converted.
         $monthStart = now('Asia/Manila')->startOfMonth()->utc();
-        $thisMonthSql = 'MAX(CASE WHEN stall_evaluations.created_at >= ? THEN 1 ELSE 0 END)';
+        $thisMonthSql = 'COUNT(DISTINCT CASE WHEN stall_evaluations.created_at >= ? AND stalls.is_active THEN stall_evaluations.stall_id END)';
 
         $query = DB::table('users')
             ->leftJoin('stall_evaluations', 'stall_evaluations.student_id', '=', 'users.id')
+            // CHANGED: joined so closed stalls do not count toward this month's stalls.
+            ->leftJoin('stalls', 'stalls.id', '=', 'stall_evaluations.stall_id')
             ->where('users.role', 'student')
             ->select(
                 'users.id',
@@ -395,8 +397,8 @@ class AdminController extends Controller
                 // CHANGED: dropped MAX(stall_evaluations.created_at) as last_evaluation_at. The Students page showed it as "Last submitted", and matching that date against the Evaluations page identified who wrote an "anonymous" evaluation.
                 DB::raw('COUNT(stall_evaluations.id) as evaluations_count')
             )
-            // CHANGED: 1 if the student has evaluated this month, else 0.
-            ->selectRaw("{$thisMonthSql} as evaluated_this_month", [$monthStart])
+            // CHANGED: open stalls the student has evaluated this month, instead of a 1/0 flag.
+            ->selectRaw("{$thisMonthSql} as stalls_this_month", [$monthStart])
             ->groupBy(
                 'users.id',
                 'users.name',
@@ -430,12 +432,12 @@ class AdminController extends Controller
 
         // CHANGED: this month's participation counts for the summary line and the All / Evaluated / Not yet filter. Taken after search and the other filters but before the status filter, so each count matches what its option returns.
         $participation = DB::query()->fromSub(clone $query, 'filtered')
-            ->selectRaw('COUNT(*) AS total, SUM(evaluated_this_month) AS evaluated')
+            ->selectRaw('COUNT(*) AS total, SUM(CASE WHEN stalls_this_month > 0 THEN 1 ELSE 0 END) AS evaluated')
             ->first();
 
-        // CHANGED: status filter: students who have evaluated this month, or have not yet.
+        // CHANGED: status filter: students who have evaluated at least one stall this month, or none yet.
         if ($request->get('status') === 'evaluated') {
-            $query->havingRaw("{$thisMonthSql} = 1", [$monthStart]);
+            $query->havingRaw("{$thisMonthSql} > 0", [$monthStart]);
         } elseif ($request->get('status') === 'pending') {
             $query->havingRaw("{$thisMonthSql} = 0", [$monthStart]);
         }
@@ -468,10 +470,14 @@ class AdminController extends Controller
 
         $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
 
-        // CHANGED: passes $participation for the summary line and status filter counts.
+        // ADDED: the stalls a student can evaluate this month, the "of N" in the This month column.
+        $openStalls = DB::table('stalls')->where('is_active', true)->count();
+
+        // CHANGED: passes $participation for the summary line and status filter counts, and $openStalls.
         return view('admin.students', compact(
             'students',
             'participation',
+            'openStalls',
             'courseOptions',
             'yearOptions'
         ));

@@ -81,3 +81,30 @@ test('students page filters by this month\'s participation', function () {
         ->assertDontSeeText('Dan Last Month')
         ->assertDontSeeText('Ben Never');
 });
+
+test('students page shows this month\'s stalls out of the open stalls', function () {
+    // A second open stall and a closed one; Ana's evaluation of the closed stall does not count.
+    $ana = User::where('name', 'Ana This Month')->first();
+    $openId = DB::table('stalls')->insertGetId(['name' => 'Rice Bowl', 'is_active' => true, 'created_at' => now(), 'updated_at' => now()]);
+    $closedId = DB::table('stalls')->insertGetId(['name' => 'Old Grill', 'is_active' => false, 'created_at' => now(), 'updated_at' => now()]);
+    DB::table('stall_evaluations')->insert([
+        'student_id' => $ana->id, 'stall_id' => $closedId,
+        'cleanliness' => 4, 'service' => 4, 'taste' => 4, 'price' => 4,
+        'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $this->actingAs($this->admin)->get(route('admin.students'))
+        ->assertOk()
+        ->assertSee('<strong class="font-semibold text-neutral-900">1</strong> of 2 stalls', false);
+
+    DB::table('stall_evaluations')->insert([
+        'student_id' => $ana->id, 'stall_id' => $openId,
+        'cleanliness' => 4, 'service' => 4, 'taste' => 4, 'price' => 4,
+        'created_at' => now(), 'updated_at' => now(),
+    ]);
+
+    $this->actingAs($this->admin)->get(route('admin.students'))
+        ->assertOk()
+        ->assertSeeText('All 2 stalls')
+        ->assertSeeText('1 of 4');
+});
