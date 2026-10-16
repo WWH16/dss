@@ -123,14 +123,13 @@
                                     <ion-icon name="{{ $sort === 'oldest' ? 'arrow-up-outline' : ($sort === 'latest' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
-                            <th class="w-12 px-3 py-3"><span class="sr-only">Details</span></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
                         @foreach($evaluations as $eval)
-                            {{-- CHANGED: the whole row opens the details dialog; the eye button is the keyboard target and its click bubbles here. --}}
+                            {{-- CHANGED: the whole row opens the details dialog; the stall name button is the keyboard target and its click bubbles here. The eye button and its column are gone, so Date ends the row at the card's 20px edge. --}}
                             <tr class="hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openEvalDetailsModal(@json($eval))'>
-                                <td class="px-5 py-3 font-medium text-neutral-900 whitespace-nowrap">{{ $eval->stall_name }}</td>
+                                <td class="px-5 py-3 font-medium text-neutral-900 whitespace-nowrap"><button type="button" aria-label="View evaluation for {{ $eval->stall_name }}" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $eval->stall_name }}</button></td>
 
                                 {{-- CHANGED: plain numbers, two decimals everywhere; colour only marks outliers. Average is the only bold score. --}}
                                 <td class="px-4 py-3 text-right">{!! $score($eval->avg, 'font-bold') !!}</td>
@@ -150,13 +149,6 @@
                                 <td class="px-5 py-3 text-right text-xs text-neutral-500 whitespace-nowrap tabular-nums">
                                     <time datetime="{{ $eval->at->toIso8601String() }}" title="{{ $eval->at_label }}">{{ $eval->at->format('M d, Y') }}</time>
                                 </td>
-
-                                <td class="px-3 py-3 text-right">
-                                    <button type="button" aria-label="View evaluation for {{ $eval->stall_name }}"
-                                        class="w-8 h-8 inline-flex items-center justify-center rounded-md text-neutral-500 hover:text-brand-700 hover:bg-brand-50 focus-visible:outline-2 focus-visible:outline-brand-600 cursor-pointer">
-                                        <ion-icon name="eye-outline" class="text-base" aria-hidden="true"></ion-icon>
-                                    </button>
-                                </td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -165,20 +157,14 @@
                 <!-- Mobile Card View -->
                 <div class="md:hidden divide-y divide-neutral-100">
                     @foreach($evaluations as $eval)
-                        {{-- CHANGED: the stall name leads the card instead of "Anonymous student"; the whole card opens the details dialog. --}}
+                        {{-- CHANGED: the stall name leads the card instead of "Anonymous student"; the whole card opens the details dialog, and the stall name button replaces the eye button as the keyboard target. --}}
                         <div class="p-4 flex flex-col gap-2.5 hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openEvalDetailsModal(@json($eval))'>
                             <div class="flex items-start justify-between gap-3">
                                 <div class="min-w-0">
-                                    <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate">{{ $eval->stall_name }}</h3>
+                                    <h3 class="text-sm font-bold text-neutral-900 leading-tight truncate"><button type="button" aria-label="View evaluation for {{ $eval->stall_name }}" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $eval->stall_name }}</button></h3>
                                     <time datetime="{{ $eval->at->toIso8601String() }}" class="block text-[11px] text-neutral-500 mt-0.5">{{ $eval->at->format('M d, Y • h:i A') }}</time>
                                 </div>
-                                <div class="shrink-0 flex items-center gap-1">
-                                    {!! $score($eval->avg, 'text-sm font-bold') !!}
-                                    <button type="button" aria-label="View evaluation for {{ $eval->stall_name }}"
-                                        class="w-9 h-9 -mr-2 inline-flex items-center justify-center rounded-md text-neutral-500 hover:text-brand-700 cursor-pointer">
-                                        <ion-icon name="eye-outline" class="text-base" aria-hidden="true"></ion-icon>
-                                    </button>
-                                </div>
+                                <div class="shrink-0">{!! $score($eval->avg, 'text-sm font-bold') !!}</div>
                             </div>
 
                             @if($eval->comment)
