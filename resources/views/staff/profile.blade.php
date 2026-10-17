@@ -161,7 +161,7 @@
                 <p class="text-[11px] text-brand-200">Update your staff account information</p>
             </div>
         </div>
-        <button type="button" onclick="this.closest('dialog').close()" class="text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+        <button type="button" onclick="this.closest('dialog').close()" class="text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Close modal">
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
@@ -195,7 +195,7 @@
         {{-- CHANGED: removed the read-only stall/role box; the page behind the modal already shows both. --}}
         {{-- Footer Buttons --}}
         <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
-            <button type="button" onclick="this.closest('dialog').close()" class="btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Cancel</button>
+            <button type="button" onclick="this.closest('dialog').close()" class="btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Cancel</button>
             <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold max-sm:flex-1 max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Save Changes</button>
         </div>
     </form>
@@ -213,7 +213,7 @@
                 <p class="text-[11px] text-brand-200">Update your security credentials</p>
             </div>
         </div>
-        <button type="button" onclick="this.closest('dialog').close()" class="text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+        <button type="button" onclick="this.closest('dialog').close()" class="text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Close modal">
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
@@ -261,7 +261,7 @@
         {{-- Footer Buttons --}}
         {{-- CHANGED: "Update Password" button neutral-900 to brand-600, the same as the student profile and the "Save Changes" button. --}}
         <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
-            <button type="button" onclick="this.closest('dialog').close()" class="btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Cancel</button>
+            <button type="button" onclick="this.closest('dialog').close()" class="btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Cancel</button>
             <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold max-sm:flex-1 max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Update Password</button>
         </div>
     </form>
@@ -270,25 +270,35 @@
 {{-- ── Modal Controller Script ────────────────────────────────────────── --}}
 {{-- CHANGED: the open/close helpers became inline onclick handlers on the buttons, the two backdrop handlers became one loop, and the DOMContentLoaded wrapper and null guards are gone (the script runs after both dialogs, which are always on the page). --}}
 <script>
+// CHANGED: one loop per modal wires the backdrop click, the busy lock and the submit spinner (was a second loop over the forms).
 document.querySelectorAll('#edit-profile-modal, #change-password-modal').forEach(modal => {
+    // ADDED: while its form is being sent (busy), Escape and a backdrop click no longer close the modal.
+    modal.addEventListener('cancel', (e) => { if (modal.dataset.busy) e.preventDefault(); });
     modal.addEventListener('click', (e) => {
+        if (modal.dataset.busy) return;
         const rect = modal.getBoundingClientRect();
         if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
             modal.close();
         }
     });
-});
 
-// ADDED: spinner on Save Changes / Update Password while the form submits. Same spinner markup as the
-// student profile and admin users pages; submit only fires after the required fields pass.
-document.querySelectorAll('#edit-profile-modal form, #change-password-modal form').forEach(form => {
-    form.addEventListener('submit', () => {
-        const btn = form.querySelector('button[type="submit"]');
-        const label = form.closest('#edit-profile-modal') ? 'Saving...' : 'Updating...';
+    // ADDED: spinner on Save Changes / Update Password while the form submits. Same spinner markup as the
+    // student profile and admin users pages; submit only fires after the required fields pass.
+    modal.querySelector('form').addEventListener('submit', () => {
+        const btn = modal.querySelector('button[type="submit"]');
+        const label = modal.id === 'edit-profile-modal' ? 'Saving...' : 'Updating...';
+        // ADDED: lock the modal so it cannot be closed half-way through; X and Cancel are disabled.
+        modal.dataset.busy = 'true';
+        modal.querySelectorAll('button[type="button"]').forEach(b => b.disabled = true);
         btn.disabled = true;
         btn.classList.add('opacity-75', 'cursor-not-allowed');
         btn.innerHTML = '<svg class="animate-spin h-3.5 w-3.5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>' + label + '</span>';
     });
+});
+
+// ADDED: Chrome closes a dialog on a second Esc even when cancel was prevented, so the key itself is blocked while a form is being sent.
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && document.querySelector('dialog[data-busy]')) e.preventDefault();
 });
 
 // Auto-reopen on validation errors
