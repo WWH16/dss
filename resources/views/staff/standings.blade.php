@@ -71,15 +71,6 @@
                 Official composite performance rankings for campus food vendors.
             </p>
         </div>
-
-        @if($myStall)
-            <div class="flex items-center gap-2 self-start sm:self-auto shrink-0">
-                <a href="{{ route('staff.dashboard') }}" class="btn btn-secondary text-xs px-3.5 py-2 rounded-md font-bold inline-flex items-center gap-1.5 shadow-2xs border border-neutral-200">
-                    <ion-icon name="storefront-outline" class="text-sm"></ion-icon>
-                    My Stall Dashboard
-                </a>
-            </div>
-        @endif
     </div>
 
     {{-- ── 2. Staff Standing Delight Recognition Card (Pristine Layout) ── --}}
