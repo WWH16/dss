@@ -56,6 +56,7 @@ document.querySelectorAll('[data-password-rules]').forEach(list => {
         row.classList.toggle('font-bold', ok);
         icon.classList.toggle('text-neutral-400', !ok);
         icon.classList.toggle('text-emerald-500', ok);
+        icon.classList.toggle('animate-icon-pop', ok);
         icon.setAttribute('name', ok ? 'checkmark-circle' : 'ellipse-outline');
     }));
 });

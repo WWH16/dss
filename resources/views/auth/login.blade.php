@@ -22,16 +22,6 @@
     @if(config('services.recaptcha.site_key'))
         <script src="https://www.google.com/recaptcha/api.js?render={{ config('services.recaptcha.site_key') }}"></script>
     @endif
-    <style>
-        @keyframes icon-pop {
-            0% { transform: scale(0.5); opacity: 0.5; }
-            40% { transform: scale(1.3); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .animate-icon-pop {
-            animation: icon-pop 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-        }
-    </style>
 </head>
 <body class="bg-neutral-50/50 min-h-screen flex items-center justify-center px-4 relative antialiased">
 
@@ -382,28 +372,8 @@
                         {{-- PASSWORD CRITERIA CHECKLIST (Structured Layout) --}}
                         {{-- CHANGED: removed the segmented strength bar and its NONE/WEAK/STRONG label; the checklist below
                              already shows each rule, so the bar repeated it. Top margin cut from mt-4 to mt-1.5 to sit under the field. --}}
-                        <div id="password-criteria-box" class="mt-1.5">
-
-                            {{-- Checklist Items (Spaced 2x2 Grid) --}}
-                            <div class="grid grid-cols-2 gap-x-4 gap-y-0 font-medium text-neutral-500">
-                                <div id="req-length" class="flex items-center gap-1 transition-colors duration-300">
-                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
-                                    <span class="text-[9px] whitespace-nowrap">8+ characters</span>
-                                </div>
-                                <div id="req-case" class="flex items-center gap-1 transition-colors duration-300">
-                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
-                                    <span class="text-[9px] whitespace-nowrap">Upper & lowercase</span>
-                                </div>
-                                <div id="req-number" class="flex items-center gap-1 transition-colors duration-300">
-                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
-                                    <span class="text-[9px] whitespace-nowrap">One number</span>
-                                </div>
-                                <div id="req-symbol" class="flex items-center gap-1 transition-colors duration-300">
-                                    <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300"></ion-icon>
-                                    <span class="text-[9px] whitespace-nowrap">One symbol</span>
-                                </div>
-                            </div>
-                        </div>
+                        {{-- CHANGED: the hand-written checklist and its script gave way to the shared partial, driven by resources/js/app.js. --}}
+                        @include('partials.password-rules')
 
                         @if($hasPasswordError)
                             <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $passwordErrorMessage }}</p>
@@ -537,51 +507,6 @@
             switchTab(initialTab);
             toggleLoginFields();
             toggleRegisterFields();
-
-            // Dynamic Password Validation Checklist
-            const passwordInput = document.getElementById('register_password');
-            const reqs = {
-                length: { el: document.getElementById('req-length'), icon: document.querySelector('#req-length .req-icon'), check: (val) => val.length >= 8, state: null },
-                case: { el: document.getElementById('req-case'), icon: document.querySelector('#req-case .req-icon'), check: (val) => /[a-z]/.test(val) && /[A-Z]/.test(val), state: null },
-                number: { el: document.getElementById('req-number'), icon: document.querySelector('#req-number .req-icon'), check: (val) => /[0-9]/.test(val), state: null },
-                symbol: { el: document.getElementById('req-symbol'), icon: document.querySelector('#req-symbol .req-icon'), check: (val) => /[^A-Za-z0-9]/.test(val), state: null }
-            };
-
-            // CHANGED: the strength bar and its label are gone, so their elements and the valid-rule count are no longer tracked.
-            function evaluatePassword() {
-                const val = passwordInput.value;
-                const isEmpty = val.length === 0;
-
-                for (const key in reqs) {
-                    const req = reqs[key];
-                    const isValid = req.check(val);
-
-                    const newState = isEmpty ? 'empty' : (isValid ? 'valid' : 'invalid');
-
-                    // Only update DOM if the visual state needs to change
-                    if (req.state !== newState) {
-                        req.state = newState;
-                        
-                        // CHANGED: toggles single classes instead of overwriting className. Overwriting also wiped the
-                        // "hydrated" class Ionicons puts on <ion-icon>, and without it the icon stays visibility:hidden.
-                        const ok = newState === 'valid';
-                        req.el.classList.toggle('text-neutral-500', !ok);
-                        req.el.classList.toggle('text-emerald-600', ok);
-                        req.el.classList.toggle('font-bold', ok);
-                        req.icon.classList.toggle('text-neutral-400', !ok);
-                        req.icon.classList.toggle('text-emerald-500', ok);
-                        // Pop animation when it becomes valid
-                        req.icon.classList.toggle('animate-icon-pop', ok);
-                        req.icon.setAttribute('name', ok ? 'checkmark-circle' : 'ellipse-outline');
-                    }
-                }
-            }
-
-            if (passwordInput) {
-                passwordInput.addEventListener('input', evaluatePassword);
-                // Run on load in case browser pre-filled password
-                evaluatePassword();
-            }
 
             // Student Email Prefix Input Auto-Sanitization (strip pasted domain suffix)
             const emailPrefixInput = document.getElementById('register_email_prefix');
