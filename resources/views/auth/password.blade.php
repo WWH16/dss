@@ -1,4 +1,4 @@
-@php $isReset = isset($token); $recaptchaKey = $isReset ? null : config('services.recaptcha.site_key'); @endphp
+@php $isReset = isset($token); $expired ??= false; $cooldown ??= 0; $recaptchaKey = $isReset ? null : config('services.recaptcha.site_key'); @endphp
 <!doctype html>
 <html lang="en" class="h-full">
 <head>
@@ -35,11 +35,15 @@
             <div class="flex justify-center mb-4">
                 <img src="{{ asset('assets/images/isu_logo.png') }}" alt="ISU Logo" class="w-14 h-14 object-contain">
             </div>
-            <h1 class="text-lg font-display font-bold text-neutral-900 tracking-tight">{{ $isReset ? 'Set a new password' : 'Forgot your password?' }}</h1>
+            <h1 class="text-lg font-display font-bold text-neutral-900 tracking-tight">{{ $expired ? 'This link no longer works' : ($isReset ? 'Set a new password' : 'Forgot your password?') }}</h1>
             <p class="text-neutral-500 text-xs mt-1 font-medium">
-                {{ $isReset ? 'Choose a new password for your account.' : 'Enter your account email and we will send you a reset link.' }}
+                {{ $expired ? 'It expired, was already used, or a newer link was sent. Only the latest link in your inbox works.' : ($isReset ? 'Choose a new password for your account.' : 'Enter your account email and we will send you a reset link.') }}
             </p>
         </div>
+
+        @if($expired)
+            <a href="{{ route('password.request') }}" class="btn btn-primary w-full py-2.5 font-bold tracking-wide rounded-[4px] border-0 flex items-center justify-center gap-2">Request a new link</a>
+        @else
 
         @if(session('success'))
             <div class="mb-4 p-3.5 bg-emerald-50 border border-emerald-100 text-emerald-800 rounded-[4px] text-xs font-semibold flex items-center gap-2" role="status">
@@ -99,7 +103,6 @@
                 </div>
             @endif
 
-            @php $cooldown ??= 0; @endphp
             <button type="submit" id="password-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none" @disabled($cooldown > 0)>
                 <ion-icon id="password-btn-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                 <span id="password-btn-content">{{ $isReset ? 'Reset Password' : ($cooldown > 0 ? "Resend in {$cooldown}s" : 'Send Reset Link') }}</span>
@@ -112,6 +115,7 @@
                 </p>
             @endif
         </form>
+        @endif
 
         <p class="text-center text-[11px] text-neutral-400 mt-4">
             Remembered it?
@@ -123,7 +127,8 @@
     {{-- Same submit loading state as the login page; the eye toggle is shared from resources/js/app.js. --}}
     <script>
         // The disabled button blocks a second click or Enter, so no extra double-submit guard is needed.
-        document.getElementById('password-form').addEventListener('submit', (e) => {
+        // ?. because an expired link page has no form.
+        document.getElementById('password-form')?.addEventListener('submit', (e) => {
             const form = e.currentTarget;
             document.getElementById('password-btn-content').textContent = @json($isReset ? 'Resetting…' : 'Sending…');
             document.getElementById('password-btn-loader').style.display = '';

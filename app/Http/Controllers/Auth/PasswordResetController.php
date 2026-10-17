@@ -42,7 +42,13 @@ class PasswordResetController extends Controller
 
     public function showReset(Request $request, string $token)
     {
-        return view('auth.password', ['token' => $token, 'email' => $request->query('email')]);
+        // Laravel keeps one link per email, so a used, expired, or replaced link is caught here, before the
+        // user types a new password, and the page offers a new link instead of the form.
+        $email = (string) $request->query('email');
+        $user = $email !== '' ? Password::broker()->getUser(['email' => $email]) : null;
+        $expired = ! $user || ! Password::broker()->tokenExists($user, $token);
+
+        return view('auth.password', ['token' => $token, 'email' => $email, 'expired' => $expired]);
     }
 
     public function reset(Request $request)
@@ -68,6 +74,12 @@ class PasswordResetController extends Controller
                 ])->save();
             }
         );
+
+        // A link that expired or was replaced while the form was open goes back to the link page,
+        // which now shows the "request a new link" message.
+        if ($status === Password::INVALID_TOKEN) {
+            return redirect()->route('password.reset', ['token' => $request->token, 'email' => $request->email]);
+        }
 
         if ($status !== Password::PASSWORD_RESET) {
             return back()->withInput($request->only('email'))->withErrors(['email' => __($status)]);
