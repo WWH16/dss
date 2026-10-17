@@ -251,8 +251,8 @@
                         <ion-icon id="modal-new-password-icon" name="eye-outline" class="text-base"></ion-icon>
                     </button>
                 </div>
-                {{-- CHANGED: hint neutral-500 to neutral-600, the hint colour of the other dialogs. --}}
-                <p class="text-[11px] text-neutral-600 mt-1">Minimum 8 characters with upper &amp; lowercase, a number, and a symbol.</p>
+                {{-- CHANGED: the "Minimum 8 characters..." hint became the shared rule checklist, which ticks each rule as it is met, as on the student profile. --}}
+                @include('partials.password-rules')
                 @error('password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
