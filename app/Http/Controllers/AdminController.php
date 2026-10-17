@@ -145,13 +145,6 @@ class AdminController extends Controller
         'prepared'   => 'Prepared by',
     ];
 
-    public const CRITERION_LABELS = [
-        'food_quality'    => 'Food Quality',
-        'service_quality' => 'Service Quality',
-        'price'           => 'Price',
-        'cleanliness'     => 'Cleanliness',
-    ];
-
     public function report(Request $request)
     {
         $input = $request->validate([
@@ -277,7 +270,7 @@ class AdminController extends Controller
             'selectedIds'     => $selectedIds,
             'sections'        => $sections,
             'sectionOptions'  => self::REPORT_SECTIONS,
-            'criterionLabels' => self::CRITERION_LABELS,
+            'criterionLabels' => NeedsImprovement::LABELS, // CHANGED: Taste and Service, as on the dashboards (was Food Quality and Service Quality).
             'columns'         => Saw::COLUMNS,
             'ahpConsistency'  => $ahpConsistency,
             'rated'           => $rated,

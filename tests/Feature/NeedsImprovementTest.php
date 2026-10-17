@@ -180,3 +180,20 @@ test('the admin banner names every low criterion, lowest first', function () {
         ->assertOk()
         ->assertSeeText('Improvement Stall (Service, Taste)');
 });
+
+test('the admin report uses the Taste and Service names', function () {
+    staffWithEvaluations([[2, 2, 4, 4]]);
+    $admin = User::create([
+        'name' => 'Admin',
+        'email' => 'admin@example.com',
+        'password' => bcrypt('AdminPassword123!'),
+        'role' => 'admin',
+        'email_verified_at' => now(),
+    ]);
+
+    $this->actingAs($admin)->get(route('admin.report'))
+        ->assertOk()
+        ->assertViewHas('criterionLabels', NeedsImprovement::LABELS)
+        ->assertDontSeeText('Food Quality')
+        ->assertDontSeeText('Service Quality');
+});
