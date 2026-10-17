@@ -49,8 +49,9 @@
 
     {{-- CHANGED: search, role tabs and the table share one card, as on the students and evaluations pages. The active-filter chips are gone: the tabs and the search box already show the filter, and the footer shows the count. --}}
     <div class="bg-white rounded-xl border border-neutral-200/80 shadow-2xs overflow-hidden">
-        <div class="p-4 sm:px-5 border-b border-neutral-200/70 flex flex-col lg:flex-row lg:items-center gap-2.5">
-            <form id="user-filter-form" method="GET" action="{{ route('admin.users') }}" class="flex-1 flex flex-col sm:flex-row sm:items-center gap-2.5 min-w-0">
+        {{-- CHANGED: the toolbar wraps instead of squeezing. Below 1280px the search box shares the first row with Clear and New Account, and the role tabs get a full-width row of their own that scrolls sideways to the card edge; from 1280px all of it sits on one row. Before, the tabs sat beside the search box from 640px up and crushed it, and on phones New Account took a row to itself. The form is display: contents so its fields join the toolbar's rows; it submits as before. --}}
+        <div class="p-4 sm:px-5 border-b border-neutral-200/70 flex flex-wrap items-center gap-2.5">
+            <form id="user-filter-form" method="GET" action="{{ route('admin.users') }}" class="contents">
                 @if(request('role') && request('role') !== 'all')
                     <input type="hidden" name="role" value="{{ request('role') }}">
                 @endif
@@ -62,8 +63,9 @@
                 <div class="flex-1 relative min-w-0">
                     <label for="user-search-input" class="sr-only">Search accounts</label> {{-- ADDED --}}
                     <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
+                    {{-- CHANGED: 16px text on phones (was 14px everywhere), so iOS Safari no longer zooms the page when the box takes focus. --}}
                     <input type="text" name="q" id="user-search-input" data-live-search value="{{ request('q') }}" placeholder="Search by name, email, or stall…"
-                        class="w-full pl-9 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
+                        class="w-full pl-9 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
                     @if(request('q'))
                         <a href="{{ route('admin.users', array_filter(['role' => $currentRole !== 'all' ? $currentRole : null, 'per_page' => request('per_page')])) }}"
                             class="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600 cursor-pointer" aria-label="Clear search">
@@ -74,7 +76,8 @@
 
                 {{-- Role Filter Tabs --}}
                 {{-- CHANGED: the filled pills became the segmented tabs of the students page (white on grey for the active tab, count beside the label). "Unassigned" keeps its amber text and alert icon while any staff wait for a stall. --}}
-                <div class="overflow-x-auto shrink-0 -mx-1 px-1">
+                {{-- CHANGED: was overflow-x-auto shrink-0 -mx-1 px-1 beside the search box; now its own row below 1280px (see the toolbar note), bleeding to the card edges so a cut-off tab shows the row scrolls. The tabs are 8px taller on phones. --}}
+                <div class="order-last xl:order-none w-full xl:w-auto xl:shrink-0 overflow-x-auto -mx-4 px-4 sm:-mx-5 sm:px-5 xl:mx-0 xl:px-0 -my-1 py-1">
                     <nav aria-label="Filter by role" class="inline-flex p-0.5 bg-neutral-100 rounded-md text-xs whitespace-nowrap">
                         @foreach($roleTabs as $key => [$label, $count])
                             @php
@@ -82,7 +85,7 @@
                                 $warn = $key === 'unassigned' && $count > 0;
                             @endphp
                             <a href="{{ route('admin.users', array_filter(['role' => $key !== 'all' ? $key : null, 'q' => request('q'), 'per_page' => request('per_page')])) }}" @if($active) aria-current="page" @endif
-                                class="px-3 py-1.5 rounded inline-flex items-center gap-1.5 font-semibold transition-colors {{ $active ? 'bg-white text-neutral-900 shadow-2xs' : ($warn ? 'text-amber-800 hover:text-amber-950' : 'text-neutral-600 hover:text-neutral-900') }}">
+                                class="px-3 py-2 sm:py-1.5 rounded inline-flex items-center gap-1.5 font-semibold transition-colors {{ $active ? 'bg-white text-neutral-900 shadow-2xs' : ($warn ? 'text-amber-800 hover:text-amber-950' : 'text-neutral-600 hover:text-neutral-900') }}">
                                 @if($warn)
                                     <ion-icon name="alert-circle" class="text-sm text-amber-600" aria-hidden="true"></ion-icon>
                                 @endif
@@ -94,18 +97,19 @@
                 </div>
 
                 @if($hasFilters)
-                    <a href="{{ route('admin.users') }}" class="self-start sm:self-auto inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 shrink-0">
+                    {{-- CHANGED: self-start sm:self-auto became self-stretch, so Clear matches the search box's height on the shared row. --}}
+                    <a href="{{ route('admin.users') }}" class="self-stretch inline-flex items-center gap-1 px-3 py-2 rounded-md text-sm font-semibold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-50 shrink-0">
                         <ion-icon name="close-outline" class="text-base"></ion-icon>
                         Clear
                     </a>
                 @endif
             </form>
 
-            {{-- CHANGED: moved here from the removed page header; on phones it sits above the search box, on the right. --}}
-            <button type="button" onclick="openCreateUserModal()"
-                class="order-first lg:order-none self-end lg:self-auto btn btn-primary text-xs font-bold px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all shrink-0">
-                <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
-                <span>New Account</span>
+            {{-- CHANGED: moved here from the removed page header. It now sits at the end of the search row on every width (was alone on its own row on phones), shows only its icon below 640px so the search box keeps its room, and stretches to the search box's height. --}}
+            <button type="button" onclick="openCreateUserModal()" aria-label="New Account"
+                class="self-stretch btn btn-primary text-xs font-bold px-3 sm:px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all shrink-0">
+                <ion-icon name="person-add-outline" class="text-lg sm:text-sm" aria-hidden="true"></ion-icon>
+                <span class="hidden sm:inline">New Account</span>
             </button>
         </div>
 
@@ -137,13 +141,15 @@
             <div id="users-directory-container" class="overflow-x-auto">
                 {{-- Desktop Table View --}}
                 {{-- CHANGED: columns have set widths so Role no longer takes spare room and Created sits next to the Edit button; "Stall Assignment" became "Stall"; the Actions header stays visible. --}}
-                <table id="users-desktop-table" class="w-full text-left border-collapse min-w-[760px] hidden md:table">
+                {{-- CHANGED: shown from 1024px instead of 768px, with min-w-[680px] instead of 760px. Between 769px and 1023px the sidebar leaves 480-735px, so the table always scrolled sideways; the account list covers that range now. --}}
+                <table id="users-desktop-table" class="w-full text-left border-collapse min-w-[680px] hidden lg:table">
                     <thead>
                         <tr class="border-b border-neutral-200/70 bg-neutral-50/75">
                             <th class="px-5 py-3 w-[38%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Account</th>
                             <th class="px-4 py-3 w-[16%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Role</th>
                             <th class="px-4 py-3 w-[26%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stall</th>
-                            <th class="px-4 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Created</th>
+                            {{-- CHANGED: Created shows from 1280px (hidden xl:table-cell), so the four main columns fit 1024px without scrolling. --}}
+                            <th class="hidden xl:table-cell px-4 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Created</th>
                             <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
@@ -218,7 +224,8 @@
 
                                 {{-- Created Date Column --}}
                                 {{-- CHANGED: created_at is stored in UTC; shown in Philippine time, as on the printable report. --}}
-                                <td class="px-4 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
+                                {{-- CHANGED: hidden below 1280px, as its header. --}}
+                                <td class="hidden xl:table-cell px-4 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
                                     {{ \Carbon\Carbon::parse($u->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                 </td>
 
@@ -254,7 +261,8 @@
 
                 {{-- Mobile Card List View --}}
                 {{-- CHANGED: one row per account, as on the students page: neutral avatar, name, the email copy button, then role and stall on one line, with Edit and Delete underneath. The labelled "Assignment:" strip is gone. --}}
-                <div class="md:hidden divide-y divide-neutral-100" id="users-mobile-list">
+                {{-- CHANGED: the list covers everything below 1024px (was below 768px), matching the table. --}}
+                <div class="lg:hidden divide-y divide-neutral-100" id="users-mobile-list">
                 @foreach($users as $u)
                     @php
                         $isCurrentUser = $u->id === Auth::id();
@@ -262,7 +270,9 @@
                         $isClinic = $u->role === 'clinic'; // ADDED
                         $isAssigned = !empty($u->stall_id);
                     @endphp
-                    <div class="p-4 flex items-start gap-3 {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}">
+                    {{-- CHANGED: the whole row opens the Edit dialog (a tap on the email copy button still only copies), replacing the Edit and Delete buttons that crowded each row; Delete now lives in the Edit dialog. --}}
+                    <div onclick="if (!event.target.closest('button')) this.querySelector('[data-row-edit]').click()"
+                        class="p-4 sm:px-5 flex items-start gap-3 cursor-pointer active:bg-neutral-100/70 transition-colors {{ $isCurrentUser ? 'bg-brand-50/20' : '' }}">
                         <span class="w-9 h-9 rounded-full bg-neutral-100 text-neutral-600 text-sm font-semibold flex items-center justify-center shrink-0" aria-hidden="true">
                             {{ strtoupper(substr($u->name, 0, 1)) }}
                         </span>
@@ -304,41 +314,35 @@
                                     </span>
                                 @endif
                             </div>
-
-                            {{-- Actions for Mobile --}}
-                            {{-- CHANGED: Js::from() for the name and email arguments, as in the desktop table. --}}
-                            <div class="flex items-center gap-2 mt-3">
-                                <button type="button"
-                                    onclick="openEditUserModal({{ $u->id }}, {{ Js::from($u->name) }}, {{ Js::from($u->email) }}, '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
-                                    class="btn btn-ghost text-xs font-semibold px-3 py-1.5 rounded-md border border-neutral-200 text-neutral-700">
-                                    Edit
-                                </button>
-                                @if(!$isCurrentUser)
-                                    <button type="button"
-                                        onclick="openDeleteUserModal({{ $u->id }}, {{ Js::from($u->name) }}, '{{ $u->role }}')"
-                                        class="text-xs font-semibold px-3 py-1.5 rounded-md bg-red-50 text-red-600 border border-red-200">
-                                        Delete
-                                    </button>
-                                @endif
-                            </div>
                         </div>
+
+                        {{-- Actions for Mobile --}}
+                        {{-- CHANGED: Js::from() for the name and email arguments, as in the desktop table. --}}
+                        {{-- CHANGED: the Edit and Delete buttons became one 40px chevron button at the row's end. It is the keyboard and screen-reader route to the Edit dialog, and the button the row tap clicks. --}}
+                        <button type="button" data-row-edit aria-label="Edit {{ $u->name }}"
+                            onclick="openEditUserModal({{ $u->id }}, {{ Js::from($u->name) }}, {{ Js::from($u->email) }}, '{{ $u->role }}', {{ $u->stall_id ?? 'null' }}, {{ $isCurrentUser ? 'true' : 'false' }})"
+                            class="self-center -mr-2 w-10 h-10 shrink-0 rounded-md inline-flex items-center justify-center text-neutral-400 hover:text-neutral-700 hover:bg-neutral-100 cursor-pointer">
+                            <ion-icon name="chevron-forward-outline" class="text-lg" aria-hidden="true"></ion-icon>
+                        </button>
                     </div>
                 @endforeach
                 </div>
             </div>
 
             {{-- ── Pagination Footer Bar ───────────────────────────────── --}}
-            <div class="px-5 py-4 bg-neutral-50/70 border-t border-neutral-200/70 flex flex-col sm:flex-row items-center justify-between gap-3">
-                <div class="flex items-center gap-3 text-xs text-neutral-500 font-medium order-2 sm:order-1">
+            {{-- CHANGED: the count and the per-page picker wrap onto two centred lines on phones (were one unbreakable line that ran past the card below about 400px), and the pager buttons are 40px tall below 640px. --}}
+            <div class="px-4 sm:px-5 py-4 bg-neutral-50/70 border-t border-neutral-200/70 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="flex flex-wrap items-center justify-center gap-x-3 gap-y-2 text-xs text-neutral-500 font-medium order-2 sm:order-1">
                     <span>
                         Showing <strong class="text-neutral-900 font-bold tabular-nums">{{ $users->firstItem() ?? 0 }}</strong> to <strong class="text-neutral-900 font-bold tabular-nums">{{ $users->lastItem() ?? 0 }}</strong> of <strong class="text-neutral-900 font-bold tabular-nums">{{ $users->total() }}</strong> accounts
                     </span>
 
                     {{-- Per Page Selector --}}
                     {{-- CHANGED: "PER PAGE" uppercase bold became sentence-case "Per page", as on the students and evaluations pages. --}}
-                    <div class="flex items-center gap-1.5 border-l border-neutral-200 pl-3">
+                    {{-- CHANGED: the divider shows only from 640px, where the two sit on one line; the select is 16px on phones so iOS does not zoom on tap. --}}
+                    <div class="flex items-center gap-1.5 sm:border-l sm:border-neutral-200 sm:pl-3">
                         <label for="per_page_select" class="text-xs text-neutral-500">Per page</label>
-                        <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded-md px-2 py-1 text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
+                        <select id="per_page_select" onchange="window.location.href = this.value" class="bg-white border border-neutral-200 rounded-md px-2 py-1 text-base sm:text-xs font-semibold focus:outline-none focus:border-brand-600 cursor-pointer">
                             @foreach([10, 25, 50] as $size)
                                 <option value="{{ request()->fullUrlWithQuery(['per_page' => $size, 'page' => 1]) }}" {{ $users->perPage() == $size ? 'selected' : '' }}>
                                     {{ $size }}
@@ -352,12 +356,12 @@
                 <div class="flex items-center gap-1 order-1 sm:order-2">
                     {{-- Previous Page Link --}}
                     @if($users->onFirstPage())
-                        <span class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                        <span class="min-h-10 sm:min-h-0 px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
                             <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
                             Previous
                         </span>
                     @else
-                        <a href="{{ $users->previousPageUrl() }}" class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                        <a href="{{ $users->previousPageUrl() }}" class="min-h-10 sm:min-h-0 px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
                             <ion-icon name="chevron-back-outline" class="text-xs"></ion-icon>
                             Previous
                         </a>
@@ -386,12 +390,12 @@
 
                     {{-- Next Page Link --}}
                     @if($users->hasMorePages())
-                        <a href="{{ $users->nextPageUrl() }}" class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
+                        <a href="{{ $users->nextPageUrl() }}" class="min-h-10 sm:min-h-0 px-2.5 py-1.5 rounded-md border border-neutral-200 bg-white hover:bg-neutral-50 text-neutral-700 text-xs font-semibold transition-colors inline-flex items-center gap-1">
                             Next
                             <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
                         </a>
                     @else
-                        <span class="px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
+                        <span class="min-h-10 sm:min-h-0 px-2.5 py-1.5 rounded-md border border-neutral-200 bg-neutral-100 text-neutral-300 text-xs font-semibold cursor-not-allowed inline-flex items-center gap-1">
                             Next
                             <ion-icon name="chevron-forward-outline" class="text-xs"></ion-icon>
                         </span>
@@ -404,13 +408,14 @@
 </div>
 
 {{-- ── 5. CREATE ACCOUNT MODAL ─────────────────────────────────────────── --}}
+{{-- CHANGED (all three dialogs): below 640px each dialog is a bottom sheet (sheet-on-phone, the student profile's pattern), with the green header (sheet-head) and the Cancel/submit row (sheet-actions) pinned while the fields scroll, so Create Account no longer scrolls out of reach on short phones. The forms drop their bottom padding there because sheet-actions brings its own, safe-area aware. Every input and select is 16px on phones (was 14px), so iOS Safari no longer zooms on focus. --}}
 {{-- CHANGED (all three dialogs): rebuilt in the frame of the evaluations and students dialogs. Plain confirm-modal width and shadow with no padding or border (modal-sharp max-w-[400px] dropped), a dark green header band that runs to the edge with a tile, the title and a pale green subtitle, and the content padded below it. The grey footer bar became a hairline-topped row of small buttons inside the body, and inputs are 14px instead of 12px. Each field-error line is written on one line and the submit buttons are plain text; the markup the script reads (data-error-for, the inner span) is unchanged. --}}
-<dialog id="create-user-modal" class="confirm-modal p-0! border-0!" aria-labelledby="create-modal-title">
+<dialog id="create-user-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="create-modal-title">
     <div id="create-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    <div class="bg-brand-900 text-white px-6 py-4 flex items-center justify-between gap-3">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
             <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
                 <ion-icon name="person-add-outline" class="text-lg" aria-hidden="true"></ion-icon>
@@ -422,7 +427,7 @@
         </button>
     </div>
 
-    <form id="create-user-form" method="POST" action="{{ route('admin.users.create') }}" class="px-6 pb-6">
+    <form id="create-user-form" method="POST" action="{{ route('admin.users.create') }}" class="px-6 pb-6 max-sm:pb-0">
         @csrf
 
         <div class="mt-5 space-y-4">
@@ -464,7 +469,7 @@
                     Assigned stall <span class="text-neutral-500 font-normal">(optional)</span>
                 </label>
                 <select id="create_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">-- Unassigned (Assign Later) --</option>
                     @foreach($stalls as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -479,7 +484,7 @@
                     Full name <span class="text-rose-600">*</span>
                 </label>
                 <input type="text" id="create_name" name="name" placeholder="e.g. Maria Santos" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
@@ -489,7 +494,7 @@
                     Email address <span class="text-rose-600">*</span>
                 </label>
                 <input type="email" id="create_email" name="email" placeholder="e.g. maria@isu.edu.ph" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
@@ -502,7 +507,7 @@
                         </label>
                         <div class="relative">
                             <input type="password" id="create_password" name="password" placeholder="••••••••" required
-                                class="w-full pl-3 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                                class="w-full pl-3 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                             <button type="button" onclick="togglePasswordVisibility('create_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
                                 <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                             </button>
@@ -515,7 +520,7 @@
                         </label>
                         <div class="relative">
                             <input type="password" id="create_password_confirmation" name="password_confirmation" placeholder="••••••••" required
-                                class="w-full pl-3 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                                class="w-full pl-3 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                             <button type="button" onclick="togglePasswordVisibility('create_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
                                 <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                             </button>
@@ -528,7 +533,7 @@
         </div>
 
         {{-- Form Footer Actions --}}
-        <div class="flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
             <button type="button" onclick="closeCreateUserModal()" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
             <button type="submit" id="create-user-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Create Account</button>
         </div>
@@ -537,12 +542,12 @@
 
 {{-- ── 6. EDIT ACCOUNT MODAL ───────────────────────────────────────────── --}}
 {{-- CHANGED: the header tile shows the account's initial, as in the students dialog, and the subtitle names the account being edited. --}}
-<dialog id="edit-user-modal" class="confirm-modal p-0! border-0!" aria-labelledby="edit-modal-title">
+<dialog id="edit-user-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="edit-modal-title">
     <div id="edit-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
             <div id="edit-modal-avatar" class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 text-white font-bold text-sm flex items-center justify-center shrink-0" aria-hidden="true"></div>
             <div class="min-w-0">
@@ -555,7 +560,7 @@
         </button>
     </div>
 
-    <form id="edit-user-form" method="POST" action="" class="px-6 pb-6">
+    <form id="edit-user-form" method="POST" action="" class="px-6 pb-6 max-sm:pb-0">
         @csrf
         @method('PUT')
 
@@ -572,7 +577,7 @@
                     Role <span class="text-rose-600">*</span>
                 </label>
                 <select id="edit_role" name="role" onchange="toggleEditRole(this.value)"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors disabled:text-neutral-500 disabled:cursor-not-allowed">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors disabled:text-neutral-500 disabled:cursor-not-allowed">
                     <option value="admin">Administrator</option>
                     <option value="staff">Canteen Staff</option>
                     <option value="clinic">Clinic</option> {{-- ADDED --}}
@@ -590,7 +595,7 @@
                     Assigned canteen stall
                 </label>
                 <select id="edit_stall_id" name="stall_id"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">-- Unassigned (No Stall) --</option>
                     @foreach($stalls as $s)
                         <option value="{{ $s->id }}">{{ $s->name }}</option>
@@ -605,7 +610,7 @@
                     Full name <span class="text-rose-600">*</span>
                 </label>
                 <input type="text" id="edit_name" name="name" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 <p data-error-for="name" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
@@ -615,7 +620,7 @@
                     Email address <span class="text-rose-600">*</span>
                 </label>
                 <input type="email" id="edit_email" name="email" required
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 <p data-error-for="email" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
             </div>
 
@@ -634,7 +639,7 @@
                             <label for="edit_password" class="block text-xs font-semibold text-neutral-900 mb-1.5">New password</label>
                             <div class="relative">
                                 <input type="password" id="edit_password" name="password" placeholder="••••••••"
-                                    class="w-full pl-3 pr-9 py-2 bg-white border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                                    class="w-full pl-3 pr-9 py-2 bg-white border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                                 <button type="button" onclick="togglePasswordVisibility('edit_password', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
                                     <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                                 </button>
@@ -645,7 +650,7 @@
                             <label for="edit_password_confirmation" class="block text-xs font-semibold text-neutral-900 mb-1.5">Confirm</label>
                             <div class="relative">
                                 <input type="password" id="edit_password_confirmation" name="password_confirmation" placeholder="••••••••"
-                                    class="w-full pl-3 pr-9 py-2 bg-white border border-neutral-200 rounded-md text-sm text-neutral-900 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                                    class="w-full pl-3 pr-9 py-2 bg-white border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                                 <button type="button" onclick="togglePasswordVisibility('edit_password_confirmation', this)" class="absolute right-2.5 top-1/2 -translate-y-1/2 text-neutral-500 hover:text-neutral-800 cursor-pointer" aria-label="Toggle password visibility">
                                     <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                                 </button>
@@ -658,7 +663,12 @@
         </div>
 
         {{-- Form Footer Actions --}}
-        <div class="flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            {{-- ADDED: below 1024px the account list has no Delete button, so the Edit dialog offers it, on the left away from Save. Hidden when editing your own account, as in the table. --}}
+            <button type="button" id="edit-delete-btn" onclick="deleteFromEditModal()" class="lg:hidden mr-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-transparent hover:border-rose-200 hover:bg-rose-50 text-xs font-semibold text-rose-700 rounded-md transition-colors cursor-pointer">
+                <ion-icon name="trash-outline" class="text-sm" aria-hidden="true"></ion-icon>
+                Delete
+            </button>
             <button type="button" onclick="closeEditUserModal()" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
             <button type="submit" id="edit-user-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Save Changes</button>
         </div>
@@ -667,8 +677,8 @@
 
 {{-- ── 7. DELETE CONFIRMATION MODAL ───────────────────────────────────── --}}
 {{-- CHANGED: the subtitle names the account and its role; the warning is a rose panel in the place of the evaluations dialog's average panel. The error box moved inside the form: showGeneralError(deleteForm) only searches the form, so a refused delete (such as the last administrator) never showed its message before. --}}
-<dialog id="delete-user-modal" class="confirm-modal p-0! border-0!" aria-labelledby="delete-modal-title">
-    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+<dialog id="delete-user-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="delete-modal-title">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
             <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
                 <ion-icon name="trash-outline" class="text-lg" aria-hidden="true"></ion-icon>
@@ -683,7 +693,7 @@
         </button>
     </div>
 
-    <form id="delete-user-form" method="POST" action="" class="px-6 pb-6">
+    <form id="delete-user-form" method="POST" action="" class="px-6 pb-6 max-sm:pb-0">
         @csrf
         @method('DELETE')
 
@@ -698,7 +708,7 @@
             <span class="leading-tight font-medium"></span>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
             <button type="button" onclick="closeDeleteUserModal()" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
             <button type="submit" id="delete-user-submit-btn" class="btn btn-sm text-xs font-semibold rounded-md bg-rose-600 hover:bg-rose-700 text-white cursor-pointer">Delete Account</button>
         </div>
@@ -985,12 +995,17 @@
     var editForm = document.getElementById('edit-user-form');
     var roleSelect = document.getElementById('edit_role');
     var isEditingSelf = false;
+    var editingUser = null; // ADDED: the account in the Edit dialog, for its Delete button.
 
     function openEditUserModal(id, name, email, role, stallId, isSelf) {
         if (!editModal || !editForm) return;
 
         clearFormErrors(editForm);
         isEditingSelf = isSelf;
+        // ADDED: remember the account and hide Delete on your own account.
+        editingUser = { id: id, name: name, role: role };
+        var deleteBtn = document.getElementById('edit-delete-btn');
+        if (deleteBtn) deleteBtn.classList.toggle('hidden', isSelf);
 
         editForm.action = "/admin/users/" + id;
         document.getElementById('edit_name').value = name;
@@ -1051,6 +1066,14 @@
             if (pwdFields) pwdFields.classList.add('hidden');
             editModal.close();
         }
+    }
+
+    // ADDED: the Edit dialog's Delete button hands over to the delete confirmation.
+    function deleteFromEditModal() {
+        if (!editingUser) return;
+        var user = editingUser;
+        closeEditUserModal();
+        openDeleteUserModal(user.id, user.name, user.role);
     }
 
     function toggleEditRole(role) {

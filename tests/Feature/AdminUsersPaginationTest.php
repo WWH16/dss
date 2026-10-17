@@ -113,7 +113,8 @@ test('users page renders unified modal-sharp dialogs with shrunken width and no 
 
     // CHANGED: the three dialogs use the evaluations and students dialog frame (borderless confirm-modal, dark green header) instead of modal-sharp max-w-[400px].
     $content = $response->getContent();
-    expect(substr_count($content, 'class="confirm-modal p-0! border-0!"'))->toBe(3);
+    // CHANGED: the dialogs also carry sheet-on-phone, which turns them into bottom sheets below 640px.
+    expect(substr_count($content, 'class="confirm-modal sheet-on-phone p-0! border-0!"'))->toBe(3);
     expect(substr_count($content, 'bg-brand-900 text-white px-6 py-4'))->toBe(3);
     $response->assertDontSee('modal-sharp', false);
 
