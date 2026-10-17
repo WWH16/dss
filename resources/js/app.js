@@ -29,6 +29,15 @@ document.querySelectorAll('[data-live-search]').forEach(input => {
     }
 });
 
+// ADDED: the eye button beside a password field shows or hides it (moved from the login page, shared with the reset password page).
+// ??= keeps the admin users page's own togglePasswordVisibility(inputId, btn), which takes the button instead of an icon id.
+window.togglePasswordVisibility ??= (fieldId, iconId) => {
+    const input = document.getElementById(fieldId);
+    const show = input.type === 'password';
+    input.type = show ? 'text' : 'password';
+    document.getElementById(iconId).setAttribute('name', show ? 'eye-off-outline' : 'eye-outline');
+};
+
 // ADDED: a <p data-password-match> under a confirm field says live whether it matches the form's password, and a mismatch blocks submit with the browser's own message, so a typo is caught before the server sends the form back with both password fields wiped. While the confirm text is still the start of the password and the field has focus, nothing shows yet.
 document.querySelectorAll('[data-password-match]').forEach(hint => {
     const form = hint.closest('form');

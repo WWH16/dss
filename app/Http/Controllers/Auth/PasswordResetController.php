@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
@@ -54,9 +53,10 @@ class PasswordResetController extends Controller
         $status = Password::reset(
             $request->only('email', 'password', 'password_confirmation', 'token'),
             function ($user, $password) {
-                // A new remember_token also logs out every "Remember me" device, as on a normal password change.
+                // The model's 'hashed' cast hashes the password. A new remember_token also logs out every
+                // "Remember me" device, as on a normal password change.
                 $user->forceFill([
-                    'password' => Hash::make($password),
+                    'password' => $password,
                     'remember_token' => str()->random(60),
                 ])->save();
             }

@@ -549,17 +549,7 @@
             if (staffField) staffField.style.display = isStaff ? 'block' : 'none';
         }
 
-        function togglePasswordVisibility(fieldId, iconId) {
-            const pwdInput = document.getElementById(fieldId);
-            const pwdIcon = document.getElementById(iconId);
-            if (pwdInput.type === 'password') {
-                pwdInput.type = 'text';
-                pwdIcon.setAttribute('name', 'eye-off-outline');
-            } else {
-                pwdInput.type = 'password';
-                pwdIcon.setAttribute('name', 'eye-outline');
-            }
-        }
+        // CHANGED: togglePasswordVisibility moved to resources/js/app.js, shared with the reset password page.
 
         document.addEventListener('DOMContentLoaded', () => {
             let initialTab = "{{ $isRegisterTab ? 'register' : 'login' }}";

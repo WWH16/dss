@@ -94,7 +94,7 @@
                 </div>
             @endif
 
-            @php $cooldown = $isReset ? 0 : ($cooldown ?? 0); @endphp
+            @php $cooldown ??= 0; @endphp
             <button type="submit" id="password-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2 disabled:opacity-45 disabled:cursor-not-allowed disabled:pointer-events-none" @disabled($cooldown > 0)>
                 <ion-icon id="password-btn-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                 <span id="password-btn-content">{{ $isReset ? 'Reset Password' : ($cooldown > 0 ? "Resend in {$cooldown}s" : 'Send Reset Link') }}</span>
@@ -108,22 +108,11 @@
 
     </div>
 
-    {{-- Same eye toggle and submit loading state as the login page. --}}
+    {{-- Same submit loading state as the login page; the eye toggle is shared from resources/js/app.js. --}}
     <script>
-        function togglePasswordVisibility(fieldId, iconId) {
-            const input = document.getElementById(fieldId);
-            const show = input.type === 'password';
-            input.type = show ? 'text' : 'password';
-            document.getElementById(iconId).setAttribute('name', show ? 'eye-off-outline' : 'eye-outline');
-        }
-
+        // The disabled button blocks a second click or Enter, so no extra double-submit guard is needed.
         document.getElementById('password-form').addEventListener('submit', (e) => {
             const form = e.currentTarget;
-            if (form.dataset.submitting === 'true') {
-                e.preventDefault();
-                return;
-            }
-            form.dataset.submitting = 'true';
             document.getElementById('password-btn-content').textContent = @json($isReset ? 'Resetting…' : 'Sending…');
             document.getElementById('password-btn-loader').style.display = '';
             const btn = document.getElementById('password-submit-btn');
