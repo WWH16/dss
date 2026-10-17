@@ -41,7 +41,7 @@
                 <div class="flex-1 relative">
                     <label for="filter_q" class="sr-only">Search</label>
                     <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
-                    <input id="filter_q" type="search" name="q" value="{{ request('q') }}" placeholder="Search stall or comment…"
+                    <input id="filter_q" type="search" name="q" data-live-search value="{{ request('q') }}" placeholder="Search stall or comment…"
                         class="w-full pl-9 pr-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15">
                 </div>
 

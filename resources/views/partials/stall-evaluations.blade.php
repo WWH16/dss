@@ -21,7 +21,7 @@
                     @endforeach
                     <div class="relative w-full sm:w-56">
                         <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-sm pointer-events-none"></ion-icon>
-                        <input type="text" name="q" value="{{ request('q') }}" placeholder="Search in comments…" aria-label="Search student evaluation comments"
+                        <input type="text" name="q" data-live-search value="{{ request('q') }}" placeholder="Search in comments…" aria-label="Search student evaluation comments"
                             class="w-full min-h-11 sm:min-h-0 pl-8 pr-3 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md text-base sm:text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700">
                     </div>
                     <select name="sort" onchange="this.form.submit()" aria-label="Sort evaluations" class="flex-1 sm:flex-none min-h-11 sm:min-h-0 px-2.5 py-1.5 bg-neutral-50 border border-neutral-300 rounded-md text-base sm:text-xs font-medium focus:outline-none focus:border-brand-700">

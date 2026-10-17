@@ -62,7 +62,7 @@
                 <div class="flex-1 relative min-w-0">
                     <label for="user-search-input" class="sr-only">Search accounts</label> {{-- ADDED --}}
                     <ion-icon name="search-outline" class="absolute left-3 top-1/2 -translate-y-1/2 text-neutral-400 text-base pointer-events-none"></ion-icon>
-                    <input type="text" name="q" id="user-search-input" value="{{ request('q') }}" placeholder="Search by name, email, or stall…"
+                    <input type="text" name="q" id="user-search-input" data-live-search value="{{ request('q') }}" placeholder="Search by name, email, or stall…"
                         class="w-full pl-9 pr-9 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-all">
                     @if(request('q'))
                         <a href="{{ route('admin.users', array_filter(['role' => $currentRole !== 'all' ? $currentRole : null, 'per_page' => request('per_page')])) }}"
@@ -708,22 +708,10 @@
 {{-- ── 8. Client-Side Polish & Filtering Script ───────────────────────── --}}
 <script>
     // ── Search & Filter Form Helpers ─────────────────────────────────────
+    // CHANGED: the debounced auto-submit and caret restore moved to data-live-search in resources/js/app.js, shared with the other staff and admin searches.
     var searchInput = document.getElementById('user-search-input');
-    var filterForm = document.getElementById('user-filter-form');
-    var searchTimeout = null;
 
-    if (searchInput && filterForm) {
-        // CHANGED: after the debounced auto-submit reloads the page, put focus and the caret back at the end of the search box. Before, focus was lost on reload, so anything typed next went nowhere.
-        if (searchInput.value) {
-            searchInput.focus();
-            searchInput.setSelectionRange(searchInput.value.length, searchInput.value.length);
-        }
-        searchInput.addEventListener('input', function() {
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(function() {
-                filterForm.submit();
-            }, 450);
-        });
+    if (searchInput) {
         searchInput.addEventListener('keydown', function(e) {
             if (e.key === 'Escape') {
                 window.location.href = "{{ route('admin.users') }}";

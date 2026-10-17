@@ -15,3 +15,16 @@ document.querySelectorAll('[data-track-field]').forEach(field => {
     course.addEventListener('change', sync);
     sync();
 });
+
+// ADDED: an <input data-live-search> submits its GET form 450ms after typing stops (the users page's logic, now shared), so a search no longer waits for Enter. After the reload, focus and the caret go back to the end of the box so typing can continue.
+document.querySelectorAll('[data-live-search]').forEach(input => {
+    let timer;
+    input.addEventListener('input', () => {
+        clearTimeout(timer);
+        timer = setTimeout(() => input.form.submit(), 450);
+    });
+    if (input.value) {
+        input.focus();
+        input.setSelectionRange(input.value.length, input.value.length);
+    }
+});
