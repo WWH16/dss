@@ -1207,6 +1207,11 @@ if (confirmDelBtn) {
         deleteForm.submit();
     });
 }
+
+// ADDED: Chrome closes a dialog on a second Esc even when cancel was prevented, so the key itself is blocked while a request runs.
+document.addEventListener('keydown', function(e) {
+    if (isSubmittingAction && e.key === 'Escape') e.preventDefault();
+});
 </script>
 @endsection
 @endsection
