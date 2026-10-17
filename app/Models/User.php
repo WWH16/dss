@@ -75,16 +75,14 @@ class User extends Authenticatable implements MustVerifyEmail
         ];
     }
 
-    // ADDED: Laravel's reset email, greeting the user by name instead of "Hello!" and carrying the ISU seal
-    // as an embedded image for the mail header.
+    // ADDED: Laravel's reset email, greeting the user by name instead of "Hello!". The ISU seal in the
+    // mail header is attached for every email in AppServiceProvider.
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new class($token) extends ResetPassword {
             public function toMail($notifiable)
             {
-                return parent::toMail($notifiable)
-                    ->greeting("Hello, {$notifiable->name}!")
-                    ->withSymfonyMessage(fn ($message) => $message->embedFromPath(public_path('assets/images/isu_logo_email.png'), 'isu-logo'));
+                return parent::toMail($notifiable)->greeting("Hello, {$notifiable->name}!");
             }
         });
     }

@@ -1,138 +1,30 @@
-<!DOCTYPE html>
-<html lang="en" xmlns="http://www.w3.org/1999/xhtml" xmlns:v="urn:schemas-microsoft-com:vml" xmlns:o="urn:schemas-microsoft-com:office:office">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="x-apple-disable-message-reformatting">
-    <title>Verify Email Address — ISU DSS Portal</title>
-    <!--[if mso]>
-    <noscript><xml><o:OfficeDocumentSettings><o:PixelsPerInch>96</o:PixelsPerInch></o:OfficeDocumentSettings></xml></noscript>
-    <![endif]-->
-    <!-- Web Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=Sora:wght@700;800&display=swap" rel="stylesheet">
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body, html { margin: 0 !important; padding: 0 !important; width: 100% !important; background-color: #f8faf9; }
-        body {
-            background-color: #f8faf9;
-            -webkit-font-smoothing: antialiased;
-            font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-            mso-line-height-rule: exactly;
-        }
-        .font-display { font-family: 'Sora', 'Plus Jakarta Sans', -apple-system, sans-serif; }
-        @media only screen and (max-width: 600px) {
-            .email-outer { padding: 20px 12px !important; }
-            .email-card { padding: 28px 20px !important; }
-            .otp-code { font-size: 30px !important; letter-spacing: 8px !important; padding: 14px 16px !important; }
-            .cta-btn { padding: 12px 18px !important; font-size: 14px !important; }
-        }
-    </style>
-</head>
-<body style="margin:0;padding:0;background-color:#f8faf9;">
+{{-- CHANGED: rebuilt on Laravel's mail template, the same look as the password reset email
+     (ISU seal header, green theme in resources/views/vendor/mail). The wording is kept; the "ISU Cauayan DSS Portal"
+     brand line and "Automated Email" footer give way to the template's seal and footer, and a sign-off and a
+     copy-this-link line are added as in the reset email. --}}
+<x-mail::message>
+# Verify your email address
 
-<table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="background-color:#f8faf9;">
-    <tr>
-        <td align="center" class="email-outer" style="padding:48px 16px;">
-            <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="max-width:480px;width:100%;">
-                
-                <!-- Card Container -->
-                <tr>
-                    <td class="email-card" style="background-color:#ffffff;border:1px solid #e2e8f0;border-radius:6px;padding:36px 40px;box-shadow:0 1px 3px rgba(0,0,0,0.03);">
-                        
-                        <!-- Header / Brand -->
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:24px;">
-                            <tr>
-                                <td>
-                                    <p class="font-display" style="font-family:'Sora','Plus Jakarta Sans',sans-serif;font-size:15px;font-weight:700;color:#166534;margin:0;letter-spacing:-0.01em;">
-                                        ISU Cauayan DSS Portal
-                                    </p>
-                                </td>
-                            </tr>
-                        </table>
+Hi {{ $studentName }}, click the button below to verify your institutional email address instantly, or copy your 6-digit code:
 
-                        <!-- Heading & Copy -->
-                        <h1 class="font-display" style="font-family:'Sora','Plus Jakarta Sans',sans-serif;font-size:20px;font-weight:700;color:#0f172a;margin:0 0 8px;line-height:1.3;letter-spacing:-0.02em;">
-                            Verify your email address
-                        </h1>
-                        <p style="font-size:14px;color:#475569;margin:0 0 24px;line-height:1.55;font-weight:400;">
-                            Hi {{ $studentName }}, click the button below to verify your institutional email address instantly, or copy your 6-digit code:
-                        </p>
+<x-mail::button :url="$verificationUrl">
+Verify Email Address
+</x-mail::button>
 
-                        <!-- Primary CTA Button (Adaptive) -->
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:24px;">
-                            <tr>
-                                <td align="center">
-                                    <a href="{{ $verificationUrl }}" target="_blank" class="cta-btn font-display" style="display:inline-block;width:100%;background-color:#166534;color:#ffffff;font-family:'Sora','Plus Jakarta Sans',sans-serif;font-size:14.5px;font-weight:700;text-align:center;padding:14px 24px;border-radius:4px;text-decoration:none;box-shadow:0 1px 2px rgba(22,101,52,0.15);">
-                                        Verify Email Address &rarr;
-                                    </a>
-                                </td>
-                            </tr>
-                        </table>
+Or enter code manually:
 
-                        <!-- Divider with OR -->
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:24px;">
-                            <tr>
-                                <td style="border-bottom:1px solid #f1f5f9;text-align:center;line-height:0.1em;margin:10px 0 20px;">
-                                    <span style="background:#fff;padding:0 10px;font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:0.05em;">OR ENTER CODE MANUALLY</span>
-                                </td>
-                            </tr>
-                        </table>
+<x-mail::panel>
+<span style="font-size: 28px; font-weight: bold; letter-spacing: 8px;">{{ $otp }}</span>
+</x-mail::panel>
 
-                        <!-- OTP Code Box (Digits Only) -->
-                        <table width="100%" cellpadding="0" cellspacing="0" border="0" role="presentation" style="margin-bottom:12px;">
-                            <tr>
-                                <td align="center">
-                                    <div class="otp-code font-display" aria-label="Verification code: {{ $otp }}" style="
-                                        display:inline-block;
-                                        background-color:#f0fdf4;
-                                        border:1px solid #bbf7d0;
-                                        border-radius:4px;
-                                        padding:16px 24px;
-                                        text-align:center;
-                                        font-size:32px;
-                                        font-weight:700;
-                                        letter-spacing:10px;
-                                        color:#15803d;
-                                        font-family:'Sora',ui-monospace,SFMono-Regular,Consolas,monospace;
-                                        user-select:all;
-                                        -webkit-user-select:all;
-                                        cursor:pointer;
-                                    ">{{ $otp }}</div>
-                                </td>
-                            </tr>
-                        </table>
+Code valid for 15 minutes. Do not share with anyone.
 
-                        <p style="font-size:11.5px;color:#64748b;margin:12px 0 24px;text-align:center;">
-                            Code valid for 15 minutes. Do not share with anyone.
-                        </p>
+If you didn't create an account, you can safely ignore this email.
 
-                        <!-- Subtle Divider -->
-                        <div style="border-top:1px solid #f1f5f9;margin-bottom:20px;"></div>
+Regards,<br>
+{{ config('app.name') }}
 
-                        <!-- Security Note -->
-                        <p style="font-size:12px;color:#64748b;margin:0;line-height:1.5;">
-                            If you didn't create an account, you can safely ignore this email.
-                        </p>
-
-                    </td>
-                </tr>
-
-                <!-- Micro Footer -->
-                <tr>
-                    <td style="padding:16px 8px 0;text-align:center;">
-                        <p style="font-size:11px;color:#64748b;margin:0;">
-                            ISU Cauayan Canteen Evaluation System &middot; Automated Email
-                        </p>
-                    </td>
-                </tr>
-
-            </table>
-        </td>
-    </tr>
-</table>
-
-</body>
-</html>
+<x-slot:subcopy>
+If you're having trouble clicking the "Verify Email Address" button, copy and paste this URL into your web browser: <span class="break-all">[{{ $verificationUrl }}]({{ $verificationUrl }})</span>
+</x-slot:subcopy>
+</x-mail::message>

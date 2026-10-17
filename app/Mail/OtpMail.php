@@ -35,7 +35,8 @@ class OtpMail extends Mailable
         $verificationUrl = rtrim($baseUrl, '/') . '/verify-otp' . (!empty($this->email) ? '?email=' . urlencode($this->email) . '&code=' . urlencode($this->otp) : '');
 
         return new Content(
-            view: 'emails.otp',
+            // CHANGED: markdown instead of view, so it uses the shared Laravel mail template.
+            markdown: 'emails.otp',
             with: [
                 'otp'             => $this->otp,
                 'studentName'     => $this->studentName,

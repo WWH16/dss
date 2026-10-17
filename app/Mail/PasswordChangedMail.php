@@ -29,7 +29,8 @@ class PasswordChangedMail extends Mailable
     public function content(): Content
     {
         return new Content(
-            view: 'emails.password-changed',
+            // CHANGED: markdown instead of view, so it uses the shared Laravel mail template.
+            markdown: 'emails.password-changed',
             with: [
                 'studentName' => $this->studentName,
                 'changedAtLabel' => $this->changedAt->copy()->timezone('Asia/Manila')->format('M j, Y, g:i A'),
