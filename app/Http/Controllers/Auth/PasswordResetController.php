@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rules\Password as PasswordRule;
@@ -19,18 +20,24 @@ class PasswordResetController extends Controller
 
     public function sendLink(Request $request)
     {
-        $request->validate(['email' => 'required|email']);
+        $request->validate([
+            'email' => 'required|email',
+            'g_recaptcha_response' => [new Recaptcha('forgot_password')],
+        ]);
 
+        // Unknown emails are told so: the register form already reveals which emails are taken, so hiding it
+        // here protected nothing. reCAPTCHA and the route throttle slow down anyone checking emails in bulk.
         $status = Password::sendResetLink($request->only('email'));
 
-        if ($status === Password::RESET_THROTTLED) {
-            return back()->withInput()->withErrors(['email' => __($status)]);
+        if ($status !== Password::RESET_LINK_SENT) {
+            return back()->withInput($request->only('email'))->withErrors(['email' => $status === Password::INVALID_USER
+                ? "We couldn't find an account with that email. Make sure it's the email you registered with."
+                : __($status)]);
         }
 
-        // Same reply whether or not the email is registered, so the form cannot be used to find accounts.
         $request->session()->put('reset_link_sent_at', now()->timestamp);
 
-        return back()->withInput($request->only('email'))->with('success', 'If that email belongs to an account, a reset link is on its way.');
+        return back()->withInput($request->only('email'))->with('success', "A reset link is on its way. Check your Spam folder if you don't see it.");
     }
 
     public function showReset(Request $request, string $token)

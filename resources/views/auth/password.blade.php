@@ -1,4 +1,4 @@
-@php $isReset = isset($token); @endphp
+@php $isReset = isset($token); $recaptchaKey = $isReset ? null : config('services.recaptcha.site_key'); @endphp
 <!doctype html>
 <html lang="en" class="h-full">
 <head>
@@ -15,6 +15,11 @@
 
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
+
+    {{-- Google reCAPTCHA v3, on the send-link form only, as on the login page. --}}
+    @if($recaptchaKey)
+        <script src="https://www.google.com/recaptcha/api.js?render={{ $recaptchaKey }}"></script>
+    @endif
 </head>
 <body class="bg-neutral-50/50 min-h-screen flex items-center justify-center px-4 relative antialiased">
 
@@ -99,6 +104,13 @@
                 <ion-icon id="password-btn-loader" name="hourglass-outline" class="text-lg leading-none btn-hourglass" aria-hidden="true" style="display:none;"></ion-icon>
                 <span id="password-btn-content">{{ $isReset ? 'Reset Password' : ($cooldown > 0 ? "Resend in {$cooldown}s" : 'Send Reset Link') }}</span>
             </button>
+
+            @if($recaptchaKey)
+                <input type="hidden" name="g_recaptcha_response" id="g_recaptcha_response">
+                <p class="text-[10px] text-neutral-400 text-center mt-2 leading-tight">
+                    Protected by reCAPTCHA (<a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Privacy</a> & <a href="https://policies.google.com/terms" target="_blank" rel="noopener noreferrer" class="underline hover:text-neutral-600">Terms</a>)
+                </p>
+            @endif
         </form>
 
         <p class="text-center text-[11px] text-neutral-400 mt-4">
@@ -120,6 +132,16 @@
             btn.classList.add('btn-loading');
             form.classList.add('pointer-events-none');
             form.style.opacity = '0.6';
+
+            // As on the login page: fetch a reCAPTCHA token first, then submit. If reCAPTCHA did not load,
+            // the form still submits and the server-side check decides.
+            const siteKey = @json($recaptchaKey);
+            if (siteKey && typeof grecaptcha !== 'undefined') {
+                e.preventDefault();
+                grecaptcha.ready(() => grecaptcha.execute(siteKey, { action: 'forgot_password' })
+                    .then(token => { document.getElementById('g_recaptcha_response').value = token; form.submit(); })
+                    .catch(() => form.submit()));
+            }
         });
 
         // Same four checks as the register form's checklist; each row turns green once met.
