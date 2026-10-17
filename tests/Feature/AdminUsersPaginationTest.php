@@ -30,21 +30,20 @@ beforeEach(function () {
         'updated_at' => now(),
     ]);
 
-    User::create([
+    // CHANGED: the stall is saved on the staff table.
+    User::createWithProfile([
         'name' => 'Assigned Vendor',
         'email' => 'staff1@example.com',
         'password' => bcrypt('StaffPassword123!'),
         'role' => 'staff',
-        'stall_id' => $stallId,
         'email_verified_at' => now(),
-    ]);
+    ], ['stall_id' => $stallId]);
 
     User::create([
         'name' => 'Unassigned Staff',
         'email' => 'staff2@example.com',
         'password' => bcrypt('StaffPassword123!'),
         'role' => 'staff',
-        'stall_id' => null,
         'email_verified_at' => now(),
     ]);
 });

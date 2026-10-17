@@ -43,7 +43,8 @@
                 $errors->has('stall_id') || 
                 $errors->has('password') || 
                 $errors->has('password_confirmation') || 
-                $errors->has('course') || 
+                // CHANGED: course is now program_id.
+                $errors->has('program_id') ||
                 $errors->has('year_level') || 
                 $errors->has('role')
             )));
@@ -80,8 +81,8 @@
         @endif
 
         @php
-            // CHANGED: added 'track'; its error shows under the track field, not in the general error box.
-            $visibleFields =['role', 'name', 'email', 'email_prefix', 'email_other', 'password', 'password_confirmation', 'course', 'track', 'year_level', 'student_number', 'g_recaptcha_response'];
+            // CHANGED: added the track; its error shows under the track field, not in the general error box. course and track are now program_id and track_id.
+            $visibleFields =['role', 'name', 'email', 'email_prefix', 'email_other', 'password', 'password_confirmation', 'program_id', 'track_id', 'year_level', 'student_number', 'g_recaptcha_response'];
             $generalErrors = collect($errors->keys())->diff($visibleFields);
         @endphp
         @if($generalErrors->isNotEmpty())
@@ -267,35 +268,37 @@
                     {{-- CHANGED: Program and its Specialization Track sit together on every screen; Year and Student Number share the row below. Before, Year sat between Program and Track on phones. --}}
                     <div>
                         {{-- CHANGED: the field is labelled "Program" instead of "Course". --}}
-                        <label for="register_course" class="block text-xs font-semibold text-neutral-700 mb-1.5">Program</label>
+                        {{-- CHANGED: the select posts program_id; options come from the programs table. --}}
+                        @php $programs = \App\Models\Program::with('tracks')->orderBy('id')->get(); @endphp
+                        <label for="register_program" class="block text-xs font-semibold text-neutral-700 mb-1.5">Program</label>
                         <div class="relative">
-                            <select id="register_course" name="course" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('course') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                            <select id="register_program" name="program_id" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('program_id') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
                                 <option value="">Select program</option>
-                                {{-- CHANGED: options come from User::PROGRAMS (BSIT, BSCS, BSEMC); BSHM is no longer offered. --}}
-                                @foreach(array_keys(\App\Models\User::PROGRAMS) as $program)
-                                    <option value="{{ $program }}" {{ old('course') == $program ? 'selected' : '' }}>{{ $program }}</option>
+                                @foreach($programs as $program)
+                                    <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>{{ $program->code }}</option>
                                 @endforeach
                             </select>
                             <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
                                 <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
                             </div>
                         </div>
-                        @error('course')
+                        @error('program_id')
                             <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
                     </div>
 
                     {{-- CHANGED: added the specialization track. Each option names its program in data-program; resources/js/app.js shows only the selected program's options and keeps the field disabled until a program is selected; while disabled the field fades to half opacity. --}}
-                    <div data-track-field="register_course" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
+                    <div data-track-field="register_program" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
                         <label for="register_track" class="block text-xs font-semibold text-neutral-700 mb-1.5">Specialization Track</label>
                         <div class="relative">
-                            <select id="register_track" name="track" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('track') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                            <select id="register_track" name="track_id" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('track_id') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
                                 {{-- CHANGED: the placeholder shows but cannot be picked (disabled); a selected track below overrides its "selected". --}}
                                 <option value="" disabled selected>Select track</option>
                                 {{-- CHANGED: no optgroup per program; the program is already picked, so its heading in the list was redundant. --}}
-                                @foreach(\App\Models\User::PROGRAMS as $program => $tracks)
-                                    @foreach($tracks as $code => $trackName)
-                                        <option value="{{ $code }}" data-program="{{ $program }}" {{ old('course') == $program && old('track') == $code ? 'selected' : '' }}>{{ $code }} - {{ $trackName }}</option>
+                                {{-- CHANGED: values are track and program IDs from the tracks table. --}}
+                                @foreach($programs as $program)
+                                    @foreach($program->tracks as $track)
+                                        <option value="{{ $track->id }}" data-program="{{ $program->id }}" {{ old('track_id') == $track->id ? 'selected' : '' }}>{{ $track->code }} - {{ $track->name }}</option>
                                     @endforeach
                                 @endforeach
                             </select>
@@ -303,7 +306,7 @@
                                 <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
                             </div>
                         </div>
-                        @error('track')
+                        @error('track_id')
                             <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
                     </div>
@@ -465,10 +468,11 @@
             const studentFields = document.getElementById('register_student_fields');
             if (studentFields) studentFields.style.display = isStudent ? 'block' : 'none';
 
-            const course = document.getElementById('register_course');
-            if (course) course.required = isStudent;
+            // CHANGED: the program select is register_program (was register_course).
+            const program = document.getElementById('register_program');
+            if (program) program.required = isStudent;
 
-            // CHANGED: the track is required for students, like the course.
+            // CHANGED: the track is required for students, like the program.
             const track = document.getElementById('register_track');
             if (track) track.required = isStudent;
 

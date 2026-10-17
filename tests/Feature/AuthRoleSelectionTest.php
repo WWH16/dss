@@ -1,5 +1,10 @@
 <?php
 
+use Illuminate\Foundation\Testing\RefreshDatabase;
+
+// CHANGED: the login page reads programs and tracks from the database.
+uses(RefreshDatabase::class);
+
 test('welcome page hero buttons link to appropriate login roles', function () {
     $response = $this->get('/');
 

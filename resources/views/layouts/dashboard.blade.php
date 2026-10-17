@@ -213,7 +213,8 @@
                 @endif
             @elseif($user && $user->role === 'staff')
                 @php
-                    $isStaffAssigned = !empty($user->stall_id);
+                    // CHANGED: the stall assignment is on the staff table.
+                    $isStaffAssigned = !empty($user->staff?->stall_id);
                 @endphp
                 <a href="{{ route('staff.dashboard') }}" class="sidebar-link {{ request()->routeIs('staff.dashboard') ? 'active' : '' }}">
                     <ion-icon name="grid-outline" class="sidebar-link-icon" aria-hidden="true"></ion-icon>
@@ -265,11 +266,12 @@
             </div>
             <div class="flex items-center gap-3">
                 <div class="text-right hidden sm:block">
-                    <div class="text-sm font-bold text-ink-900 leading-none">{{ Auth::user()->name ?? (Auth::user()->student_number ?? 'User') }}</div>
+                    {{-- CHANGED: the student number is read from the students table. --}}
+                    <div class="text-sm font-bold text-ink-900 leading-none">{{ Auth::user()->name ?? (Auth::user()->student?->student_number ?? 'User') }}</div>
                     <div class="text-[11px] text-ink-500 uppercase tracking-wider font-semibold mt-1">{{ Auth::user()->role ?? 'Role' }}</div>
                 </div>
                 <div class="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200">
-                    {{ substr(Auth::user()->name ?? (Auth::user()->student_number ?? 'U'), 0, 1) }}
+                    {{ substr(Auth::user()->name ?? (Auth::user()->student?->student_number ?? 'U'), 0, 1) }}
                 </div>
             </div>
         </header>

@@ -177,7 +177,8 @@ test('admin creates a clinic account', function () {
 
     $nurse = User::where('email', 'nurse@example.com')->first();
     expect($nurse->role)->toBe('clinic');
-    expect($nurse->stall_id)->toBeNull();
+    // CHANGED: a clinic account has no staff row, so no stall.
+    expect($nurse->staff)->toBeNull();
 });
 
 test('admin users page lists and filters clinic accounts', function () {
@@ -202,12 +203,17 @@ test('admin changes a clinic account to staff with a stall, and back to clinic',
     $this->actingAs($admin)->put(route('admin.users.update', $clinic->id), [
         'role' => 'staff', 'name' => $clinic->name, 'email' => $clinic->email, 'stall_id' => $stallId,
     ])->assertSessionHasNoErrors();
-    expect($clinic->fresh()->only('role', 'stall_id'))->toBe(['role' => 'staff', 'stall_id' => $stallId]);
+    // CHANGED: the stall is read from the staff table.
+    expect($clinic->fresh()->role)->toBe('staff')
+        ->and($clinic->fresh()->staff->stall_id)->toBe($stallId);
 
     $this->actingAs($admin)->put(route('admin.users.update', $clinic->id), [
         'role' => 'clinic', 'name' => $clinic->name, 'email' => $clinic->email, 'stall_id' => $stallId,
     ])->assertSessionHasNoErrors();
-    expect($clinic->fresh()->only('role', 'stall_id'))->toBe(['role' => 'clinic', 'stall_id' => null]);
+    // CHANGED: switching back drops the staff row (and its stall) and adds a clinics row.
+    expect($clinic->fresh()->role)->toBe('clinic')
+        ->and($clinic->fresh()->staff)->toBeNull()
+        ->and(DB::table('clinics')->where('user_id', $clinic->id)->exists())->toBeTrue();
 });
 
 test('admin deletes a clinic account', function () {

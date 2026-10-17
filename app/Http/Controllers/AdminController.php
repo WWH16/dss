@@ -10,6 +10,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
+use App\Models\Program;
 use App\Models\User;
 
 // CHANGED: role checks moved out of each method into the role middleware on this controller's routes (routes/web.php).
@@ -292,18 +293,20 @@ class AdminController extends Controller
             ->orderBy('name')
             ->get();
 
+        // CHANGED: the stall assignment is read from the staff table.
         $staffUsers = DB::table('users')
-            ->leftJoin('stalls', 'users.stall_id', '=', 'stalls.id')
+            ->join('staff', 'staff.user_id', '=', 'users.id')
+            ->leftJoin('stalls', 'staff.stall_id', '=', 'stalls.id')
             ->where('users.role', 'staff')
             ->select(
                 'users.id',
                 'users.name',
                 'users.email',
-                'users.stall_id',
+                'staff.stall_id',
                 'stalls.name as current_stall_name'
             )
             // CHANGED: unassigned staff first, then by name, so the stall page's staff pickers list them first.
-            ->orderByRaw('users.stall_id is not null')
+            ->orderByRaw('staff.stall_id is not null')
             ->orderBy('users.name')
             ->get();
 
@@ -388,7 +391,7 @@ class AdminController extends Controller
 
     public function students(Request $request)
     {
-        // CHANGED: removed $deptCourseMap and the Department filter. The system serves one college (CCSICT), whose programs are User::PROGRAMS.
+        // CHANGED: removed $deptCourseMap and the Department filter. The system serves one college (CCSICT), whose programs are the programs table.
 
         // CHANGED: a student may evaluate each stall once per calendar month in Philippine time (StudentEvaluationController::monthlyLimitMessage), so this month's participation is the number of different open stalls the student has evaluated since the month began. created_at is stored in UTC, so the month start is converted.
         $monthStart = now('Asia/Manila')->startOfMonth()->utc();
@@ -398,15 +401,20 @@ class AdminController extends Controller
             ->leftJoin('stall_evaluations', 'stall_evaluations.student_id', '=', 'users.id')
             // CHANGED: joined so closed stalls do not count toward this month's stalls.
             ->leftJoin('stalls', 'stalls.id', '=', 'stall_evaluations.stall_id')
+            // CHANGED: student number, program, track and year level come from the students, programs and tracks tables.
+            ->join('students', 'students.user_id', '=', 'users.id')
+            ->leftJoin('programs', 'programs.id', '=', 'students.program_id')
+            ->leftJoin('tracks', 'tracks.id', '=', 'students.track_id')
             ->where('users.role', 'student')
             ->select(
                 'users.id',
                 'users.name',
-                'users.student_number',
-                'users.course',
-                // CHANGED: added track for the Program column and details dialog.
-                'users.track',
-                'users.year_level',
+                'students.student_number',
+                'programs.code as program',
+                // CHANGED: added track for the Program column and details dialog; track_name is its full name.
+                'tracks.code as track',
+                'tracks.name as track_name',
+                'students.year_level',
                 'users.created_at',
                 // CHANGED: dropped MAX(stall_evaluations.created_at) as last_evaluation_at. The Students page showed it as "Last submitted", and matching that date against the Evaluations page identified who wrote an "anonymous" evaluation.
                 DB::raw('COUNT(stall_evaluations.id) as evaluations_count')
@@ -416,10 +424,11 @@ class AdminController extends Controller
             ->groupBy(
                 'users.id',
                 'users.name',
-                'users.student_number',
-                'users.course',
-                'users.track',
-                'users.year_level',
+                'students.student_number',
+                'programs.code',
+                'tracks.code',
+                'tracks.name',
+                'students.year_level',
                 'users.created_at'
             );
 
@@ -428,20 +437,20 @@ class AdminController extends Controller
             $q = trim($request->q);
             $query->where(function ($w) use ($q) {
                 $w->where('users.name', 'like', "%{$q}%")
-                  ->orWhere('users.student_number', 'like', "%{$q}%");
+                  ->orWhere('students.student_number', 'like', "%{$q}%");
             });
         }
 
-        // Course filter
-        if ($request->filled('course')) {
-            // CHANGED: case- and space-insensitive, so "BSIT" also finds "bsit".
-            $query->whereRaw('UPPER(TRIM(users.course)) = ?', [strtoupper(trim($request->course))]);
+        // CHANGED: program filter (was the course filter), matched against programs.code.
+        if ($request->filled('program')) {
+            $query->where('programs.code', $request->program);
         }
 
         // Year level filter
         if ($request->filled('year_level')) {
             // CHANGED: case-insensitive. Sign-up saves "1st year" but the profile form saved "1st Year", so on PostgreSQL the filter missed every student who had edited their profile.
-            $query->whereRaw('LOWER(users.year_level) = ?', [strtolower($request->year_level)]);
+            // CHANGED: year level is on the students table.
+            $query->whereRaw('LOWER(students.year_level) = ?', [strtolower($request->year_level)]);
         }
 
         // CHANGED: this month's participation counts for the summary line and the All / Evaluated / Not yet filter. Taken after search and the other filters but before the status filter, so each count matches what its option returns.
@@ -489,8 +498,8 @@ class AdminController extends Controller
         };
         $students = $query->paginate($perPage, ['*'], 'page', null, (int) $total)->withQueryString();
 
-        // CHANGED: the Program filter lists every program in User::PROGRAMS, including ones no student has registered under yet. The per-course count query and the department lists are gone with the Department filter.
-        $courseOptions = array_keys(User::PROGRAMS);
+        // CHANGED: the Program filter lists every row of the programs table (was User::PROGRAMS), including ones no student has registered under yet. The per-program count query and the department lists are gone with the Department filter.
+        $programOptions = Program::orderBy('id')->pluck('code');
 
         $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
 
@@ -502,7 +511,7 @@ class AdminController extends Controller
             'students',
             'participation',
             'openStalls',
-            'courseOptions',
+            'programOptions',
             'yearOptions'
         ));
     }
@@ -513,7 +522,8 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'staff_ids' => 'nullable|array',
-            'staff_ids.*' => 'exists:users,id',
+            // CHANGED: must be a staff account (row in staff).
+            'staff_ids.*' => 'exists:staff,user_id',
             'description' => 'nullable|string|max:500',
         ]);
 
@@ -527,9 +537,9 @@ class AdminController extends Controller
 
         // Assign multiple selected staff members
         if ($request->has('staff_ids') && is_array($request->staff_ids)) {
-            DB::table('users')
-                ->whereIn('id', $request->staff_ids)
-                ->where('role', 'staff')
+            // CHANGED: the stall is saved on the staff table.
+            DB::table('staff')
+                ->whereIn('user_id', $request->staff_ids)
                 ->update(['stall_id' => $stallId, 'updated_at' => now()]);
         }
 
@@ -542,7 +552,8 @@ class AdminController extends Controller
         $request->validate([
             'name' => 'required|string|max:255',
             'staff_ids' => 'nullable|array',
-            'staff_ids.*' => 'exists:users,id',
+            // CHANGED: must be a staff account (row in staff).
+            'staff_ids.*' => 'exists:staff,user_id',
             'description' => 'nullable|string|max:500',
             'is_active' => 'nullable|boolean',
         ]);
@@ -556,13 +567,13 @@ class AdminController extends Controller
 
         // Sync staff assignments:
         // 1. Unassign all staff currently attached to this stall
-        DB::table('users')->where('stall_id', $id)->update(['stall_id' => null, 'updated_at' => now()]);
+        // CHANGED: assignments are on the staff table.
+        DB::table('staff')->where('stall_id', $id)->update(['stall_id' => null, 'updated_at' => now()]);
 
         // 2. Assign the newly selected staff members
         if ($request->has('staff_ids') && is_array($request->staff_ids)) {
-            DB::table('users')
-                ->whereIn('id', $request->staff_ids)
-                ->where('role', 'staff')
+            DB::table('staff')
+                ->whereIn('user_id', $request->staff_ids)
                 ->update(['stall_id' => $id, 'updated_at' => now()]);
         }
 
@@ -591,13 +602,15 @@ class AdminController extends Controller
     public function assignStaff(Request $request)
     {
         $request->validate([
-            'staff_id' => 'required|exists:users,id',
+            // CHANGED: must be a staff account (row in staff).
+            'staff_id' => 'required|exists:staff,user_id',
             'stall_id' => 'required|exists:stalls,id',
         ]);
 
         $stall = DB::table('stalls')->where('id', $request->stall_id)->first();
 
-        DB::table('users')->where('id', $request->staff_id)->where('role', 'staff')->update([
+        // CHANGED: the stall is saved on the staff table.
+        DB::table('staff')->where('user_id', $request->staff_id)->update([
             'stall_id' => $request->stall_id,
             'updated_at' => now(),
         ]);
@@ -609,10 +622,12 @@ class AdminController extends Controller
     public function unassignStaff(Request $request)
     {
         $request->validate([
-            'staff_id' => 'required|exists:users,id',
+            // CHANGED: must be a staff account (row in staff).
+            'staff_id' => 'required|exists:staff,user_id',
         ]);
 
-        DB::table('users')->where('id', $request->staff_id)->where('role', 'staff')->update([
+        // CHANGED: the stall is cleared on the staff table.
+        DB::table('staff')->where('user_id', $request->staff_id)->update([
             'stall_id' => null,
             'updated_at' => now(),
         ]);
@@ -627,25 +642,29 @@ class AdminController extends Controller
         // Total system counts for stat cards & filter pill badges
         // CHANGED: include clinic accounts and count them.
         // CHANGED: dropped assigned_staff_count; only the removed stat card showed it.
+        // CHANGED: the stall assignment is read from the staff table.
         $stats = DB::table('users')
-            ->whereIn('role', ['admin', 'staff', 'clinic'])
+            ->leftJoin('staff', 'staff.user_id', '=', 'users.id')
+            ->whereIn('users.role', ['admin', 'staff', 'clinic'])
             ->selectRaw("
                 COUNT(*) as total_count,
-                COUNT(CASE WHEN role = 'admin' THEN 1 END) as admin_count,
-                COUNT(CASE WHEN role = 'clinic' THEN 1 END) as clinic_count,
-                COUNT(CASE WHEN role = 'staff' THEN 1 END) as staff_count,
-                COUNT(CASE WHEN role = 'staff' AND stall_id IS NULL THEN 1 END) as unassigned_staff_count
+                COUNT(CASE WHEN users.role = 'admin' THEN 1 END) as admin_count,
+                COUNT(CASE WHEN users.role = 'clinic' THEN 1 END) as clinic_count,
+                COUNT(CASE WHEN users.role = 'staff' THEN 1 END) as staff_count,
+                COUNT(CASE WHEN users.role = 'staff' AND staff.stall_id IS NULL THEN 1 END) as unassigned_staff_count
             ")
             ->first();
 
+        // CHANGED: the stall assignment is read from the staff table.
         $query = DB::table('users')
-            ->leftJoin('stalls', 'stalls.id', '=', 'users.stall_id')
+            ->leftJoin('staff', 'staff.user_id', '=', 'users.id')
+            ->leftJoin('stalls', 'stalls.id', '=', 'staff.stall_id')
             ->select(
                 'users.id',
                 'users.name',
                 'users.email',
                 'users.role',
-                'users.stall_id',
+                'staff.stall_id',
                 'users.created_at',
                 'stalls.name as stall_name'
             )
@@ -670,7 +689,8 @@ class AdminController extends Controller
         } elseif ($role === 'staff') {
             $query->where('users.role', 'staff');
         } elseif ($role === 'unassigned') {
-            $query->where('users.role', 'staff')->whereNull('users.stall_id');
+            // CHANGED: staff.stall_id (was users.stall_id).
+            $query->where('users.role', 'staff')->whereNull('staff.stall_id');
         }
 
         $perPage = (int) $request->get('per_page', 10);
@@ -716,14 +736,14 @@ class AdminController extends Controller
             ],
         ]);
 
-        User::create([
+        // CHANGED: a staff account's stall is saved on the staff table.
+        User::createWithProfile([
             'role'              => $request->role,
             'name'              => trim($request->name),
             'email'             => trim($request->email),
-            'stall_id'          => $request->role === 'staff' ? $request->stall_id : null,
             'password'          => Hash::make($request->password),
             'email_verified_at' => now(),
-        ]);
+        ], $request->role === 'staff' ? ['stall_id' => $request->stall_id] : []);
 
         // CHANGED: label for clinic accounts.
         $label = ['admin' => 'Administrator', 'staff' => 'Staff', 'clinic' => 'Clinic'][$request->role];
@@ -782,7 +802,6 @@ class AdminController extends Controller
         $target->name = trim($request->name);
         $target->email = trim($request->email);
         $target->role = $request->role;
-        $target->stall_id = $request->role === 'staff' ? $request->stall_id : null;
 
         if ($request->filled('password')) {
             $target->password = Hash::make($request->password);
@@ -790,7 +809,13 @@ class AdminController extends Controller
             $target->setRememberToken(str()->random(60));
         }
 
-        $target->save();
+        // CHANGED: saving a new role moves the account's role row (User::booted); a staff account's stall is saved on the staff table.
+        DB::transaction(function () use ($target, $request) {
+            $target->save();
+            if ($target->role === 'staff') {
+                $target->staff()->update(['stall_id' => $request->stall_id]);
+            }
+        });
 
         if ($request->wantsJson()) {
             session()->flash('success', "Account for {$target->name} updated successfully.");

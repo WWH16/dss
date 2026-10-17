@@ -36,11 +36,13 @@ class AuthController extends Controller
                     ->numbers()
                     ->symbols()
             ],
-            // CHANGED: course must be one of User::PROGRAMS, and track one of that course's tracks.
-            'course'               => ['required_if:role,student', 'nullable', Rule::in(array_keys(User::PROGRAMS))],
-            'track'                => ['required_if:role,student', 'nullable', Rule::in(array_keys(User::PROGRAMS[$request->course] ?? []))],
+            // CHANGED: program_id must be a row of programs, and track_id a track of that program.
+            // CHANGED: integer first (bail), so a tampered value fails validation instead of erroring in the bigint lookup.
+            'program_id'           => ['bail', 'required_if:role,student', 'nullable', 'integer', Rule::exists('programs', 'id')],
+            'track_id'             => ['bail', 'required_if:role,student', 'nullable', 'integer', Rule::exists('tracks', 'id')->where('program_id', $request->program_id)],
             'year_level'           => 'required_if:role,student|nullable|string|max:255',
-            'student_number'       => 'required_if:role,student|nullable|string|max:255|unique:users,student_number',
+            // CHANGED: student numbers now live on the students table.
+            'student_number'       => 'required_if:role,student|nullable|string|max:255|unique:students,student_number',
             'g_recaptcha_response' => [new Recaptcha('register')],
         ];
 
@@ -55,9 +57,10 @@ class AuthController extends Controller
             'email.unique' => 'This email address is already registered.',
             'email.regex' => 'Students must use their official ISU Cauayan email address (e.g. jdelacruz_cyn@isu.edu.ph).',
             // CHANGED: says "program" instead of "academic course".
-            'course.required_if' => 'Please select your program.',
+            // CHANGED: keyed by program_id instead of course.
+            'program_id.required_if' => 'Please select your program.',
             // CHANGED: message for a missing track; an invalid one uses the default message (lang/en/validation.php names the field).
-            'track.required_if' => 'Please select your specialization track.',
+            'track_id.required_if' => 'Please select your specialization track.',
             'year_level.required_if' => 'Please select your year level.',
             'student_number.required_if' => 'Please enter your student number.',
             'student_number.unique' => 'This student number is already registered.',
@@ -69,14 +72,14 @@ class AuthController extends Controller
             'role'           => $request->role,
             'name'           => trim($request->name),
             'email'          => trim($request->email),
-            'course'         => $request->role === 'student' ? $request->course : null,
-            // CHANGED: track saved with the course.
-            'track'          => $request->role === 'student' ? $request->track : null,
-            'year_level'     => $request->role === 'student' ? $request->year_level : null,
-            'student_number' => $request->role === 'student' ? $request->student_number : null,
-            'stall_id'       => null,
+            // CHANGED: removed the course, track, year_level, student_number and stall_id keys; role fields go to the role tables.
             'password'       => Hash::make($request->password),
         ];
+
+        // ADDED: the student's fields, saved on the students table once the OTP is verified (OtpController).
+        if ($request->role === 'student') {
+            $userData['student'] = $request->only('student_number', 'program_id', 'track_id', 'year_level');
+        }
 
         // For students: DO NOT create User yet. Send OTP and save pending payload in EmailVerification table.
         if ($request->role === 'student') {

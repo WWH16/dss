@@ -36,14 +36,14 @@ function staffWithRatedStalls(array $scores): User
             'updated_at' => now(),
         ]);
 
-        $staff ??= User::create([
+        // CHANGED: the stall is saved on the staff table.
+        $staff ??= User::createWithProfile([
             'name' => 'Staff',
             'email' => 'staff@example.com',
             'password' => bcrypt('StaffPassword123!'),
             'role' => 'staff',
-            'stall_id' => $stallId,
             'email_verified_at' => now(),
-        ]);
+        ], ['stall_id' => $stallId]);
     }
 
     return $staff;
@@ -79,7 +79,7 @@ test('the This Month card counts only this month\'s students', function () {
     $lastMonth = now('Asia/Manila')->startOfMonth()->subDay()->utc();
     DB::table('stall_evaluations')->insert([
         'student_id' => $other->id,
-        'stall_id' => $staff->stall_id,
+        'stall_id' => $staff->staff->stall_id,
         'cleanliness' => 3, 'service' => 3, 'taste' => 3, 'price' => 3,
         'created_at' => $lastMonth,
         'updated_at' => $lastMonth,
@@ -96,7 +96,7 @@ test('the activity chart counts days in Philippine time', function () {
     // 7 AM on October 1 in Manila is still September 30 in UTC.
     DB::table('stall_evaluations')->insert([
         'student_id' => User::where('role', 'student')->value('id'),
-        'stall_id' => $staff->stall_id,
+        'stall_id' => $staff->staff->stall_id,
         'cleanliness' => 3, 'service' => 3, 'taste' => 3, 'price' => 3,
         'created_at' => '2025-09-30 23:00:00',
         'updated_at' => '2025-09-30 23:00:00',

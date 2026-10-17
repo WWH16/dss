@@ -1,5 +1,6 @@
 <?php
 
+use App\Models\Program;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
@@ -32,15 +33,17 @@ beforeEach(function () {
     ];
 
     foreach (array_keys($students) as $i => $name) {
-        $student = User::create([
+        // CHANGED: program, year level and student number are saved on the students table.
+        $student = User::createWithProfile([
             'name' => $name,
             'email' => "student{$i}@example.com",
             'password' => bcrypt('StudentPassword123!'),
             'role' => 'student',
-            'course' => 'BSIT',
+            'email_verified_at' => now(),
+        ], [
+            'program_id' => Program::where('code', 'BSIT')->value('id'),
             'year_level' => '4th year',
             'student_number' => "21-000{$i}",
-            'email_verified_at' => now(),
         ]);
 
         if ($at = $students[$name]) {
@@ -122,4 +125,19 @@ test('students page shows this month\'s stalls out of the open stalls', function
         ->assertOk()
         ->assertSeeText('All 2 stalls')
         ->assertSeeText('1 of 4');
+});
+
+test('students page filters by program and shows the track name', function () {
+    $bsit = Program::firstWhere('code', 'BSIT');
+    $bscs = Program::firstWhere('code', 'BSCS');
+    $make = fn ($name, $p, $t, $n) => User::createWithProfile(
+        ['name' => $name, 'email' => "{$n}@x.com", 'password' => 'Password1!', 'role' => 'student'],
+        ['student_number' => $n, 'program_id' => $p->id, 'track_id' => $p->tracks->firstWhere('code', $t)->id],
+    );
+    $make('Eve Cruz', $bsit, 'WMAD', '22-1');
+    $make('Finn Reyes', $bscs, 'DM', '22-2');
+
+    $this->actingAs($this->admin)->get(route('admin.students', ['program' => 'BSIT']))
+        ->assertSee('Eve Cruz')->assertDontSee('Finn Reyes')
+        ->assertSee('BSIT-WMAD')->assertSee('title="Web and Mobile Application Development"', false);
 });

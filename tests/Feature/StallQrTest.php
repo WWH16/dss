@@ -18,14 +18,14 @@ function qrStall(bool $active = true): int
 
 function qrUser(string $role): User
 {
-    return User::create([
+    // CHANGED: the student number is saved on the students table.
+    return User::createWithProfile([
         'name' => ucfirst($role) . ' User',
         'email' => "{$role}@example.com",
-        'student_number' => $role === 'student' ? '21-00001' : null,
         'password' => bcrypt('password'),
         'role' => $role,
         'email_verified_at' => now(),
-    ]);
+    ], $role === 'student' ? ['student_number' => '21-00001'] : []);
 }
 
 // The link the admin QR page encodes for a stall.
@@ -149,7 +149,8 @@ test('stalls page links each stall to its QR page', function () {
 function assignedStaff(?int $stallId): User
 {
     $staff = qrUser('staff');
-    $staff->forceFill(['stall_id' => $stallId])->save();
+    // CHANGED: the stall is saved on the staff table.
+    $staff->staff()->update(['stall_id' => $stallId]);
 
     return $staff;
 }

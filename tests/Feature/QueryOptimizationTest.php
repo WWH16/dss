@@ -15,6 +15,15 @@ beforeEach(function () {
         'email_verified_at' => now(),
     ]);
 
+    // CHANGED: evaluations come from a student; stall_evaluations.student_id now references students.
+    $this->student = User::create([
+        'name' => 'Student User',
+        'email' => 'student@example.com',
+        'password' => bcrypt('StudentPassword123!'),
+        'role' => 'student',
+        'email_verified_at' => now(),
+    ]);
+
     // Create several stalls
     for ($i = 1; $i <= 5; $i++) {
         $stallId = DB::table('stalls')->insertGetId([
@@ -24,14 +33,14 @@ beforeEach(function () {
             'updated_at' => now(),
         ]);
 
-        $staff = User::create([
+        // CHANGED: the stall is saved on the staff table.
+        $staff = User::createWithProfile([
             'name' => "Staff Member {$i}",
             'email' => "staff{$i}@example.com",
             'password' => bcrypt('StaffPassword123!'),
             'role' => 'staff',
-            'stall_id' => $stallId,
             'email_verified_at' => now(),
-        ]);
+        ], ['stall_id' => $stallId]);
 
         if ($i === 1) {
             $this->staff = $staff;
@@ -40,7 +49,7 @@ beforeEach(function () {
 
         // Seed evaluations
         DB::table('stall_evaluations')->insert([
-            'student_id' => $this->admin->id,
+            'student_id' => $this->student->id,
             'stall_id' => $stallId,
             'cleanliness' => 4,
             'service' => 5,
@@ -116,7 +125,7 @@ test('admin stalls page executes constant query count regardless of stall count 
             'updated_at' => now(),
         ]);
         DB::table('stall_evaluations')->insert([
-            'student_id' => $this->admin->id,
+            'student_id' => $this->student->id,
             'stall_id' => $id,
             'cleanliness' => 4,
             'service' => 4,
@@ -138,21 +147,7 @@ test('admin stalls page executes constant query count regardless of stall count 
     expect($queriesAfter)->toBe($queriesBefore);
 });
 
-test('admin students page derives distinct courses without redundant DB query', function () {
-    DB::flushQueryLog();
-    DB::enableQueryLog();
-
-    $response = $this->actingAs($this->admin)->get(route('admin.students'));
-
-    $response->assertStatus(200);
-    $queries = DB::getQueryLog();
-
-    // Verify distinct course query was eliminated
-    $distinctCourseQueries = array_filter($queries, function ($q) {
-        return str_contains($q['query'], 'distinct "course"');
-    });
-    expect($distinctCourseQueries)->toBeEmpty();
-});
+// CHANGED: removed the "distinct courses" test; programs come from the programs table, so no distinct query can exist to check for.
 
 test('staff dashboard consolidates stall evaluation metrics into single query', function () {
     DB::flushQueryLog();

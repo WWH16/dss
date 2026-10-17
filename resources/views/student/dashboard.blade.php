@@ -15,7 +15,8 @@
         <div class="p-5 sm:p-6 flex items-center gap-3.5">
             {{-- CHANGED: hidden on phones, where the header bar above already shows the same initial. --}}
             <div class="hidden sm:flex w-12 h-12 rounded-xl bg-brand-50 border border-brand-200/80 text-brand-700 items-center justify-center font-bold text-lg shrink-0 shadow-2xs">
-                {{ strtoupper(substr($profile->name ?? ($profile->student_number ?? 'S'), 0, 1)) }}
+                {{-- CHANGED: the student number is read from the students table. --}}
+                {{ strtoupper(substr($profile->name ?? ($profile->student?->student_number ?? 'S'), 0, 1)) }}
             </div>
             <div class="min-w-0">
                 <div class="flex flex-wrap items-center gap-2">
@@ -23,7 +24,8 @@
                         Hello, {{ $profile->name ?? 'Student' }}
                     </h1>
                     <span class="inline-flex items-center px-2 py-0.5 rounded-md text-[11px] font-mono font-semibold bg-ink-50 text-ink-600 border border-ink-100">
-                        {{ $profile->student_number ?? 'Student' }}
+                        {{-- CHANGED: read from the students table. --}}
+                        {{ $profile->student?->student_number ?? 'Student' }}
                     </span>
                 </div>
                 {{-- CHANGED: states the once-per-stall-each-month rule instead of asking students to rate every stall they eat at. --}}

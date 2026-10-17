@@ -6,6 +6,7 @@ use App\Mail\OtpMail;
 use App\Models\EmailVerification;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 
@@ -114,7 +115,12 @@ class OtpController extends Controller
                 $userData['email_verified_at'] = now();
 
                 if (!User::where('email', $email)->exists()) {
-                    User::create($userData);
+                    // CHANGED: the student's fields go to the students table. A payload saved before the role tables
+                    // existed has them at the top level; its student number and year level are kept.
+                    User::createWithProfile(
+                        Arr::except($userData, ['student', 'course', 'track', 'year_level', 'student_number', 'stall_id']),
+                        $userData['student'] ?? Arr::only($userData, ['student_number', 'year_level']),
+                    );
                 }
             } else {
                 User::where('email', $email)->update([

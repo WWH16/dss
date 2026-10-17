@@ -8,7 +8,6 @@ use App\Services\Ahp;
 use App\Services\Saw;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
-use App\Models\User;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Password;
 use App\Mail\PasswordChangedMail; // ADDED
@@ -23,7 +22,8 @@ class StudentDashboardController extends Controller
         $user = Auth::user();
 
         // Student profile
-        $profile = $user;
+        // CHANGED: loads the students row, which holds the student number.
+        $profile = $user->load('student');
 
         // Food stalls (selecting active stalls open for evaluation)
         $stalls = DB::table('stalls')
@@ -121,7 +121,8 @@ class StudentDashboardController extends Controller
     {
         $user = Auth::user();
 
-        $profile = $user;
+        // CHANGED: loads the students row with its program and track.
+        $profile = $user->load('student.program', 'student.track');
 
         // Single aggregated SQL query for profile metrics
         $stats = DB::table('stall_evaluations')
@@ -147,19 +148,25 @@ class StudentDashboardController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            // CHANGED: course is picked from User::PROGRAMS and track from that course's tracks, as at registration.
-            'course' => ['required', Rule::in(array_keys(User::PROGRAMS))],
-            'track' => ['required', Rule::in(array_keys(User::PROGRAMS[$request->course] ?? []))],
+            // CHANGED: program_id is a row of programs and track_id a track of that program, as at registration.
+            // CHANGED: integer first (bail), so a tampered value fails validation instead of erroring in the bigint lookup.
+            'program_id' => ['bail', 'required', 'integer', Rule::exists('programs', 'id')],
+            'track_id' => ['bail', 'required', 'integer', Rule::exists('tracks', 'id')->where('program_id', $request->program_id)],
             'year_level' => 'nullable|string|max:50',
         ]);
 
-        DB::table('users')->where('id', $user->id)->update([
-            'name' => trim($request->name),
-            'course' => $request->course,
-            'track' => $request->track,
-            'year_level' => $request->year_level ? trim($request->year_level) : null,
-            'updated_at' => now(),
-        ]);
+        // CHANGED: the name stays on users; program, track and year level are saved on the students table.
+        DB::transaction(function () use ($user, $request) {
+            DB::table('users')->where('id', $user->id)->update([
+                'name' => trim($request->name),
+                'updated_at' => now(),
+            ]);
+            $user->student()->update([
+                'program_id' => $request->program_id,
+                'track_id' => $request->track_id,
+                'year_level' => $request->year_level ? trim($request->year_level) : null,
+            ]);
+        });
 
         return redirect()->back()->with('success', 'Profile information updated successfully!');
     }

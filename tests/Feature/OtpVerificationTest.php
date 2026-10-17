@@ -29,10 +29,8 @@ test('otp verification succeeds when email is submitted in request even if sessi
             'email'          => $email,
             'password'       => bcrypt('password123'),
             'role'           => 'student',
-            'course'         => 'BSIT',
-            'year_level'     => '3rd Year',
-            'student_number' => '2023-0001',
-            'stall_id'       => null,
+            // CHANGED: student fields travel under 'student', as AuthController now saves them.
+            'student'        => ['student_number' => '2023-0001', 'program_id' => null, 'track_id' => null, 'year_level' => '3rd Year'],
         ],
         'expires_at' => now()->addMinutes(15),
     ]);
@@ -50,4 +48,13 @@ test('otp verification succeeds when email is submitted in request even if sessi
         'email' => $email,
         'role'  => 'student',
     ]);
+});
+
+test('a pending signup saved before the role split keeps its student number', function () {
+    EmailVerification::create(['email' => 'juan_cyn@isu.edu.ph', 'otp' => '111111', 'expires_at' => now()->addMinutes(15), 'payload' => [
+        'role' => 'student', 'name' => 'Juan', 'email' => 'juan_cyn@isu.edu.ph', 'password' => bcrypt('x'),
+        'course' => 'BSIT', 'year_level' => '3rd year', 'student_number' => '2023-0001', 'stall_id' => null,
+    ]]);
+    $this->post(route('otp.verify'), ['email' => 'juan_cyn@isu.edu.ph', 'otp' => '111111']);
+    expect(User::firstWhere('email', 'juan_cyn@isu.edu.ph')->student->student_number)->toBe('2023-0001');
 });

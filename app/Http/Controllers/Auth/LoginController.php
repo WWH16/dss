@@ -58,8 +58,9 @@ class LoginController extends Controller
         $password = $request->password;
 
         if ($role === 'student') {
+            // CHANGED: the student number is looked up on the students table.
             $credentials = [
-                'student_number' => $request->student_number,
+                fn ($query) => $query->whereHas('student', fn ($q) => $q->where('student_number', $request->student_number)),
                 'password' => $password
             ];
         } else {

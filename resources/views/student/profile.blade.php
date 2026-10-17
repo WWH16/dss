@@ -17,7 +17,8 @@
             <div class="flex items-center sm:items-start gap-4 sm:gap-5">
                 {{-- Avatar Circle --}}
                 <div class="w-14 h-14 sm:w-22 sm:h-22 rounded-full bg-brand-50 border-2 border-brand-200/80 text-brand-700 font-bold text-2xl sm:text-3xl shadow-xs flex items-center justify-center ring-4 ring-white shrink-0">
-                    {{ strtoupper(substr($profile->name ?? ($profile->student_number ?? 'S'), 0, 1)) }}
+                    {{-- CHANGED: the student number is read from the students table. --}}
+                    {{ strtoupper(substr($profile->name ?? ($profile->student?->student_number ?? 'S'), 0, 1)) }}
                 </div>
 
                 {{-- Name & Identity Info --}}
@@ -28,7 +29,8 @@
 
                     <div class="flex flex-wrap items-center gap-2 mt-2">
                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-mono font-bold bg-brand-50 text-brand-800 border border-brand-200/70">
-                            ID: {{ $profile->student_number ?? 'N/A' }}
+                            {{-- CHANGED: read from the students table. --}}
+                            ID: {{ $profile->student?->student_number ?? 'N/A' }}
                         </span>
                         <span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-neutral-100 text-neutral-600 border border-neutral-200">
                             <ion-icon name="school-outline" class="text-xs text-neutral-500"></ion-icon>
@@ -79,7 +81,8 @@
                         Student ID Number
                     </dt>
                     <dd class="text-neutral-900 font-semibold text-sm sm:text-base tabular-nums font-mono">
-                        {{ $profile->student_number ?? 'Not set' }}
+                        {{-- CHANGED: read from the students table. --}}
+                        {{ $profile->student?->student_number ?? 'Not set' }}
                     </dd>
                 </div>
 
@@ -103,7 +106,8 @@
                         Program
                     </dt>
                     <dd class="text-neutral-900 font-semibold text-sm sm:text-base">
-                        {{ $profile->course ?: 'Not set' }}
+                        {{-- CHANGED: the program code comes from the programs table. --}}
+                        {{ $profile->student?->program?->code ?? 'Not set' }}
                     </dd>
                 </div>
 
@@ -114,7 +118,8 @@
                         Specialization Track
                     </dt>
                     <dd class="text-neutral-900 font-semibold text-sm sm:text-base">
-                        {{ \App\Models\User::PROGRAMS[$profile->course][$profile->track] ?? ($profile->track ?: 'Not set') }}
+                        {{-- CHANGED: the track name comes from the tracks table. --}}
+                        {{ $profile->student?->track?->name ?? 'Not set' }}
                     </dd>
                 </div>
 
@@ -125,7 +130,8 @@
                         Year Level
                     </dt>
                     <dd class="text-neutral-900 font-semibold text-sm sm:text-base">
-                        {{ $profile->year_level ?: 'Not set' }}
+                        {{-- CHANGED: read from the students table. --}}
+                        {{ $profile->student?->year_level ?: 'Not set' }}
                     </dd>
                 </div>
             </dl>
@@ -198,39 +204,41 @@
             </div>
 
             {{-- Course / Degree --}}
-            {{-- CHANGED: the free-text course input became a "Program" select of User::PROGRAMS, followed by a track select that lists only the chosen program's tracks. resources/js/app.js keeps the track disabled until a program is selected; while disabled the field fades to half opacity. --}}
+            {{-- CHANGED: the free-text course input became a "Program" select of the programs table, followed by a track select that lists only the chosen program's tracks. resources/js/app.js keeps the track disabled until a program is selected; while disabled the field fades to half opacity. --}}
+            {{-- CHANGED: the selects post program_id and track_id; options come from the programs and tracks tables. --}}
             @php
-                $currentCourse = old('course', $profile->course);
-                $currentTrack = old('track', $profile->track);
+                $programs = \App\Models\Program::with('tracks')->orderBy('id')->get();
+                $currentProgram = (int) old('program_id', $profile->student?->program_id);
+                $currentTrack = (int) old('track_id', $profile->student?->track_id);
             @endphp
             <div>
-                <label for="modal-course" class="block text-xs font-bold text-neutral-700 mb-1.5">Program</label>
-                <select id="modal-course" name="course" required
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('course') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <label for="modal-program" class="block text-xs font-bold text-neutral-700 mb-1.5">Program</label>
+                <select id="modal-program" name="program_id" required
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('program_id') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="">Select Program</option>
-                    @foreach(array_keys(\App\Models\User::PROGRAMS) as $program)
-                        <option value="{{ $program }}" {{ $currentCourse === $program ? 'selected' : '' }}>{{ $program }}</option>
+                    @foreach($programs as $program)
+                        <option value="{{ $program->id }}" {{ $currentProgram === $program->id ? 'selected' : '' }}>{{ $program->code }}</option>
                     @endforeach
                 </select>
-                @error('course')
+                @error('program_id')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
             </div>
 
-            <div data-track-field="modal-course" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
+            <div data-track-field="modal-program" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
                 <label for="modal-track" class="block text-xs font-bold text-neutral-700 mb-1.5">Specialization Track</label>
-                <select id="modal-track" name="track" required
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('track') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <select id="modal-track" name="track_id" required
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('track_id') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     {{-- CHANGED: the placeholder shows but cannot be picked (disabled); a selected track below overrides its "selected". --}}
                     <option value="" disabled selected>Select Track</option>
                     {{-- CHANGED: no optgroup per program; the program is already picked, so its heading in the list was redundant. --}}
-                    @foreach(\App\Models\User::PROGRAMS as $program => $tracks)
-                        @foreach($tracks as $code => $trackName)
-                            <option value="{{ $code }}" data-program="{{ $program }}" {{ $currentCourse === $program && $currentTrack === $code ? 'selected' : '' }}>{{ $code }} - {{ $trackName }}</option>
+                    @foreach($programs as $program)
+                        @foreach($program->tracks as $track)
+                            <option value="{{ $track->id }}" data-program="{{ $program->id }}" {{ $currentTrack === $track->id ? 'selected' : '' }}>{{ $track->code }} - {{ $track->name }}</option>
                         @endforeach
                     @endforeach
                 </select>
-                @error('track')
+                @error('track_id')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
             </div>
@@ -242,7 +250,8 @@
                     class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('year_level') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     <option value="">Select Year Level</option>
                     {{-- CHANGED: option values are lower-case ("1st year"), the same values the sign-up form saves, and the current value is matched case-insensitively. Before, a student who signed up with "1st year" opened this form with no year selected, and saving it erased their year level. --}}
-                    @php $currentYear = strtolower((string) old('year_level', $profile->year_level)); @endphp
+                    {{-- CHANGED: the year level is read from the students table. --}}
+                    @php $currentYear = strtolower((string) old('year_level', $profile->student?->year_level)); @endphp
                     <option value="1st year" {{ $currentYear === '1st year' ? 'selected' : '' }}>1st Year</option>
                     <option value="2nd year" {{ $currentYear === '2nd year' ? 'selected' : '' }}>2nd Year</option>
                     <option value="3rd year" {{ $currentYear === '3rd year' ? 'selected' : '' }}>3rd Year</option>
@@ -256,7 +265,8 @@
 
             {{-- Readonly Reference Chips --}}
             <div class="p-3 rounded-md bg-neutral-50 border border-neutral-200/70 text-[11px] text-neutral-500 space-y-1">
-                <p><strong>ID Number:</strong> <span class="font-mono">{{ $profile->student_number }}</span> (Locked)</p>
+                {{-- CHANGED: the student number is read from the students table. --}}
+                <p><strong>ID Number:</strong> <span class="font-mono">{{ $profile->student?->student_number }}</span> (Locked)</p>
                 <p class="break-all"><strong>Email:</strong> {{ $profile->email }}</p>
             </div>
 
@@ -431,8 +441,8 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Auto-reopen on validation errors
-    // CHANGED: also reopens on a track error.
-    @if($errors->has('name') || $errors->has('course') || $errors->has('track') || $errors->has('year_level'))
+    // CHANGED: also reopens on a track error. The fields are now program_id and track_id.
+    @if($errors->has('name') || $errors->has('program_id') || $errors->has('track_id') || $errors->has('year_level'))
         if (editProfileModal) editProfileModal.showModal();
     @endif
 

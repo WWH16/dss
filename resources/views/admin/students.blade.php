@@ -17,7 +17,8 @@
     @php
         $sort = request('sort') ?: 'latest';
         $status = request('status');
-        $narrowed = request('q') || request('course') || request('year_level');
+        // CHANGED: the program filter param is program (was course).
+        $narrowed = request('q') || request('program') || request('year_level');
         $hasFilters = $narrowed || $status || $sort !== 'latest';
         $sortUrl = fn ($s) => request()->fullUrlWithQuery(['sort' => $s, 'page' => null]);
         $statusUrl = fn ($s) => request()->fullUrlWithQuery(['status' => $s, 'page' => null]);
@@ -26,8 +27,7 @@
         $month = now('Asia/Manila')->format('F');
         // CHANGED: the Philippine-time registration date is set once per student here and travels to the details dialog on the student object.
         $students->getCollection()->each(function ($s) use ($openStalls, $month) {
-            // CHANGED: the track's full name from User::PROGRAMS, falling back to the stored code.
-            $s->track_name = \App\Models\User::PROGRAMS[$s->course][$s->track] ?? $s->track;
+            // CHANGED: removed the User::PROGRAMS track-name lookup; the query selects track_name from the tracks table.
             $s->registered_at = \Carbon\Carbon::parse($s->created_at, 'UTC')->timezone('Asia/Manila');
             $s->registered_label = $s->registered_at->format('M d, Y');
             // CHANGED: this month's stalls and the dialog's status line are set here once, so the table and the dialog share one rule.
@@ -68,11 +68,12 @@
 
                 <div class="grid grid-cols-2 lg:flex gap-2.5">
                     <div>
-                        <label for="filter_course" class="sr-only">Program</label>
-                        <select id="filter_course" name="course" onchange="this.form.submit()" class="w-full lg:w-40 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ request('course') ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
+                        {{-- CHANGED: the filter is named program (was course) and lists $programOptions. --}}
+                        <label for="filter_program" class="sr-only">Program</label>
+                        <select id="filter_program" name="program" onchange="this.form.submit()" class="w-full lg:w-40 px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-sm focus:outline-none focus:border-brand-600 cursor-pointer {{ request('program') ? 'border-brand-300 bg-brand-50 text-brand-900 font-semibold' : 'text-neutral-700' }}">
                             <option value="">All programs</option>
-                            @foreach($courseOptions as $c)
-                                <option value="{{ $c }}" {{ request('course') == $c ? 'selected' : '' }}>{{ $c }}</option>
+                            @foreach($programOptions as $p)
+                                <option value="{{ $p }}" {{ request('program') == $p ? 'selected' : '' }}>{{ $p }}</option>
                             @endforeach
                         </select>
                     </div>
@@ -200,8 +201,8 @@
                                 <td class="px-4 py-3 text-[13px] text-neutral-700 tabular-nums whitespace-nowrap">{{ $student->student_number ?: 'Not set' }}</td>
 
                                 <td class="px-4 py-3 text-[13px] whitespace-nowrap">
-                                    {{-- CHANGED: the track code follows the course (e.g. BSIT-WMAD); hovering shows its full name. --}}
-                                    <span class="font-medium text-neutral-900" title="{{ $student->track_name }}">{{ $student->course ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}</span>
+                                    {{-- CHANGED: the track code follows the program (e.g. BSIT-WMAD); hovering shows its full name. --}}
+                                    <span class="font-medium text-neutral-900" title="{{ $student->track_name }}">{{ $student->program ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}</span>
                                     @if($student->year_level)
                                         <span class="text-neutral-500 mx-1" aria-hidden="true">·</span>
                                         <span class="text-neutral-600">{{ $student->year_level }}</span>
@@ -235,7 +236,8 @@
                             <div class="min-w-0 flex-1">
                                 <h3 class="text-sm font-semibold text-neutral-900 leading-tight truncate"><button type="button" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $student->name }}</button></h3>
                                 <p class="text-xs text-neutral-600 mt-0.5 truncate tabular-nums">
-                                    {{ $student->student_number ?: 'No ID' }} · {{ $student->course ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}{{ $student->year_level ? ' · ' . $student->year_level : '' }}
+                                    {{-- CHANGED: program (was course). --}}
+                                    {{ $student->student_number ?: 'No ID' }} · {{ $student->program ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}{{ $student->year_level ? ' · ' . $student->year_level : '' }}
                                 </p>
                             </div>
                             <div class="shrink-0">{!! $monthBadge($student) !!}</div>
@@ -349,8 +351,8 @@
         </div>
 
         <dl class="mt-2 divide-y divide-neutral-100 text-sm">
-            {{-- CHANGED: added the Track row; removed the Department row. --}}
-            @foreach(['course' => 'Program', 'track' => 'Track', 'year' => 'Year level', 'created-at' => 'Registered'] as $id => $label)
+            {{-- CHANGED: added the Track row; removed the Department row. The Program row's id is details-program (was details-course). --}}
+            @foreach(['program' => 'Program', 'track' => 'Track', 'year' => 'Year level', 'created-at' => 'Registered'] as $id => $label)
                 <div class="flex items-center justify-between gap-4 py-2.5">
                     <dt class="text-neutral-600">{{ $label }}</dt>
                     <dd id="details-{{ $id }}" class="font-medium text-neutral-900 text-right"></dd>
@@ -375,7 +377,8 @@ function openDetailsModal(student) {
     document.getElementById('details-student-number').textContent = student.student_number || 'No student number';
     document.getElementById('modal-avatar').textContent = (student.name || 'S').charAt(0).toUpperCase();
 
-    document.getElementById('details-course').textContent = student.course || 'Not Set';
+    // CHANGED: program (was course).
+    document.getElementById('details-program').textContent = student.program || 'Not Set';
     // CHANGED: the track's full name (track_name, set by the server).
     document.getElementById('details-track').textContent = student.track_name || 'Not Set';
     document.getElementById('details-year').textContent = student.year_level || 'Not Set';
