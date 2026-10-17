@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
+use App\Mail\PasswordChangedMail;
 use App\Rules\Recaptcha;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Validation\Rules\Password as PasswordRule;
 
@@ -72,6 +74,10 @@ class PasswordResetController extends Controller
                     'password' => $password,
                     'remember_token' => str()->random(60),
                 ])->save();
+
+                // Same "your password was changed" email as a change from the student profile. The password is
+                // already saved, so rescue() logs a failed send instead of failing the reset.
+                rescue(fn () => Mail::to($user->email)->send(new PasswordChangedMail($user->name, now())));
             }
         );
 
