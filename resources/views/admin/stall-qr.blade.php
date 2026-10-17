@@ -16,8 +16,8 @@
 <body class="bg-neutral-50 font-sans antialiased text-neutral-900">
 
 <div class="max-w-xl mx-auto px-4 py-6">
-    {{-- CHANGED: back link is a 44px-tall tap target on phones. --}}
-    <a href="{{ route('admin.stalls') }}" class="no-print inline-flex items-center min-h-11 -my-2 text-xs font-bold text-brand-700 hover:text-brand-800">&larr; Back to Stalls</a>
+    {{-- CHANGED: uses the shared back link (drawn arrow icon instead of the &larr; text glyph), still 44px tall and hidden in print. --}}
+    @include('partials.back-link', ['href' => route('admin.stalls'), 'label' => 'Back to Stalls', 'class' => 'no-print'])
 
     <div class="mt-4">
         @include('partials.stall-qr')

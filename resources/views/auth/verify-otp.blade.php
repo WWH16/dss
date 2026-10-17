@@ -75,16 +75,17 @@
         }
     </style>
 </head>
-<body class="bg-neutral-50/50 min-h-screen flex items-center justify-center px-4 relative antialiased">
+{{-- CHANGED: flex-col, so the back link stacks above the card instead of floating in the page corner. --}}
+<body class="bg-neutral-50/50 min-h-screen flex flex-col items-center justify-center px-4 relative antialiased">
 
     {{-- Back link --}}
-    <div class="absolute top-6 left-6 z-50">
-        <a href="{{ url('/login') }}" class="inline-flex items-center justify-center w-10 h-10 rounded-[4px] border border-neutral-200 bg-white text-neutral-600 hover:text-neutral-900 hover:border-neutral-300 shadow-sm transition-all" aria-label="Go back to login">
-            <ion-icon name="arrow-back-outline" class="text-xl leading-none"></ion-icon>
-        </a>
+    {{-- CHANGED: the icon-only corner arrow is now the shared back link above the card, with visible text and a 44px target. --}}
+    <div class="w-full max-w-md mt-12 mb-3">
+        @include('partials.back-link', ['href' => url('/login'), 'label' => 'Back to Login'])
     </div>
 
-    <div class="w-full max-w-md bg-white rounded-[4px] border border-neutral-200/60 p-6 md:p-8 shadow-sm my-12 relative z-10">
+    {{-- CHANGED: mb-12 instead of my-12; the back link above holds the top margin. --}}
+    <div class="w-full max-w-md bg-white rounded-[4px] border border-neutral-200/60 p-6 md:p-8 shadow-sm mb-12 relative z-10">
 
         {{-- Header --}}
         <div class="text-center mb-6">

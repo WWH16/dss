@@ -31,10 +31,8 @@
     @if(!session('success') && ! $limit)
         {{-- Back Navigation --}}
         <div class="flex items-center justify-between">
-            <a href="{{ route('student.dashboard') }}" class="inline-flex items-center gap-2 text-xs font-bold text-neutral-600 hover:text-brand-700 transition-colors bg-white px-3.5 py-2 rounded-md border border-neutral-200/80 shadow-2xs">
-                <ion-icon name="arrow-back-outline" class="text-sm"></ion-icon>
-                Back to Dashboard
-            </a>
+            {{-- CHANGED: uses the shared back link, which is 44px tall instead of about 32px. --}}
+            @include('partials.back-link', ['href' => route('student.dashboard'), 'label' => 'Back to Dashboard'])
             <span class="text-xs text-neutral-500 font-medium hidden sm:inline-flex items-center gap-1">
                 <ion-icon name="shield-checkmark-outline" class="text-brand-600 text-sm"></ion-icon>
                 Official Campus Survey
