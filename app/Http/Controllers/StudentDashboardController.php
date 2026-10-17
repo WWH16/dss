@@ -182,6 +182,8 @@ class StudentDashboardController extends Controller
 
         DB::table('users')->where('id', $user->id)->update([
             'password' => Hash::make($request->password),
+            // ADDED: a new token voids every "Remember me" cookie issued under the old password.
+            'remember_token' => str()->random(60),
             'updated_at' => now(),
         ]);
 

@@ -19,3 +19,10 @@
 @import './components/back-to-top.css';
 @import './components/modal.css';
 @import './components/toast.css';
+
+/* ADDED: native checkboxes take the brand green; there is no forms plugin, so text-brand-600 alone did nothing. */
+@layer base {
+    input[type="checkbox"] {
+        accent-color: var(--color-brand-600);
+    }
+}

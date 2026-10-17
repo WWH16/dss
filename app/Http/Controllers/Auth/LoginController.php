@@ -69,7 +69,8 @@ class LoginController extends Controller
             ];
         }
 
-        if (Auth::attempt($credentials)) {
+        // CHANGED: pass the "Remember me" checkbox so Laravel issues a long-lived login cookie.
+        if (Auth::attempt($credentials, $request->boolean('remember'))) {
             $user = Auth::user();
 
             if ($user->role !== $role) {

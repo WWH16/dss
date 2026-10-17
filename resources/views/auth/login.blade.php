@@ -167,6 +167,15 @@
                     @endif
                 </div>
 
+                {{-- ADDED: "Remember me" keeps the user signed in past the session lifetime. --}}
+                <div class="flex items-center gap-2">
+                    <input type="checkbox" id="login_remember" name="remember"
+                        class="rounded border-neutral-300 text-brand-600 focus:ring-brand-500 h-4 w-4" @checked(old('remember'))>
+                    <label for="login_remember" class="text-xs font-semibold text-neutral-800 cursor-pointer">
+                        Remember me
+                    </label>
+                </div>
+
                 <input type="hidden" name="g_recaptcha_response" id="login_g_recaptcha_response">
 
                 <button type="submit" id="login-submit-btn" class="btn btn-primary w-full py-2.5 font-bold tracking-wide mt-2 rounded-[4px] border-0 cursor-pointer relative flex items-center justify-center gap-2">

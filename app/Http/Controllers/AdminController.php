@@ -786,6 +786,8 @@ class AdminController extends Controller
 
         if ($request->filled('password')) {
             $target->password = Hash::make($request->password);
+            // ADDED: a new token voids every "Remember me" cookie issued under the old password.
+            $target->setRememberToken(str()->random(60));
         }
 
         $target->save();
