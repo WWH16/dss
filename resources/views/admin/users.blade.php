@@ -107,7 +107,7 @@
 
             {{-- CHANGED: moved here from the removed page header. It now sits at the end of the search row on every width (was alone on its own row on phones), shows only its icon below 640px so the search box keeps its room, and stretches to the search box's height. --}}
             <button type="button" onclick="openCreateUserModal()" aria-label="New Account"
-                class="self-stretch btn btn-primary text-xs font-bold px-3 sm:px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all shrink-0">
+                class="self-stretch btn btn-primary text-xs font-bold px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer transition-all shrink-0">
                 <ion-icon name="person-add-outline" class="text-lg sm:text-sm" aria-hidden="true"></ion-icon>
                 <span class="hidden sm:inline">New Account</span>
             </button>
@@ -1070,10 +1070,8 @@
 
     // ADDED: the Edit dialog's Delete button hands over to the delete confirmation.
     function deleteFromEditModal() {
-        if (!editingUser) return;
-        var user = editingUser;
         closeEditUserModal();
-        openDeleteUserModal(user.id, user.name, user.role);
+        openDeleteUserModal(editingUser.id, editingUser.name, editingUser.role);
     }
 
     function toggleEditRole(role) {
