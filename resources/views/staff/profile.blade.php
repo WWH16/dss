@@ -148,33 +148,34 @@
 </div>
 
 {{-- ── 1. Edit Staff Profile Modal ────────────────────────────────────── --}}
-<dialog id="edit-profile-modal" class="confirm-modal modal-sharp max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    <div class="bg-white">
-        {{-- Modal Header --}}
-        <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
-                    <ion-icon name="create-outline" class="text-base"></ion-icon>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-neutral-900 leading-tight">Edit Staff Profile</h3>
-                    <p class="text-[11px] text-neutral-500">Update your staff account information</p>
-                </div>
+{{-- CHANGED (both modals): rebuilt in the shared dialog frame of the admin pages and the student profile. Plain confirm-modal width with no padding or border (modal-sharp max-w-md and the white wrapper dropped), a dark green header band with a tile, the title and a pale green subtitle, the content padded below, and a hairline-topped row of the shared btn buttons, plain text. Labels are sentence case in semibold neutral-900 (were bold neutral-700 in title case), and fields are 14px from 640px up (were 12px) with the green focus ring. --}}
+{{-- CHANGED (both modals): on phones they open as bottom sheets (sheet-on-phone) with the header (sheet-head) and the button row (sheet-actions) pinned while the fields scroll. Fields are 16px there, since iOS Safari zooms into any field under 16px, and 44px tall; the X is a 44px square, Cancel and Save/Update are 44px tall, and Save/Update fills the rest of the row. --}}
+<dialog id="edit-profile-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="edit-profile-title">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="create-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <button type="button" onclick="this.closest('dialog').close()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
-                <ion-icon name="close-outline" class="text-lg"></ion-icon>
-            </button>
+            <div class="min-w-0">
+                <h3 id="edit-profile-title" class="text-sm font-bold text-white leading-tight">Edit Staff Profile</h3>
+                <p class="text-[11px] text-brand-200">Update your staff account information</p>
+            </div>
         </div>
+        <button type="button" onclick="this.closest('dialog').close()" class="text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
 
-        {{-- Modal Form --}}
-        <form action="{{ route('staff.profile.update') }}" method="POST" class="p-6 space-y-4">
-            @csrf
+    {{-- Modal Form --}}
+    <form action="{{ route('staff.profile.update') }}" method="POST" class="px-6 pb-6 max-sm:pb-0">
+        @csrf
 
+        <div class="mt-5 space-y-4">
             {{-- Full Name --}}
             <div>
-                <label for="modal-name" class="block text-xs font-bold text-neutral-700 mb-1.5">Full Name</label>
+                <label for="modal-name" class="block text-xs font-semibold text-neutral-900 mb-1.5">Full name</label>
                 <input type="text" id="modal-name" name="name" value="{{ old('name', $profile->name) }}" required
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('name') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('name') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 @error('name')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -182,58 +183,52 @@
 
             {{-- Email --}}
             <div>
-                <label for="modal-email" class="block text-xs font-bold text-neutral-700 mb-1.5">Email Address</label>
+                <label for="modal-email" class="block text-xs font-semibold text-neutral-900 mb-1.5">Email address</label>
                 <input type="email" id="modal-email" name="email" value="{{ old('email', $profile->email) }}" required
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('email') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('email') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 @error('email')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
             </div>
+        </div>
 
-            {{-- CHANGED: removed the read-only stall/role box; the page behind the modal already shows both. --}}
-            {{-- Footer Buttons --}}
-            <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" onclick="this.closest('dialog').close()" class="px-3.5 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
-                    Cancel
-                </button>
-                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                    <ion-icon name="save-outline" class="text-sm"></ion-icon>
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
+        {{-- CHANGED: removed the read-only stall/role box; the page behind the modal already shows both. --}}
+        {{-- Footer Buttons --}}
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" onclick="this.closest('dialog').close()" class="btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold max-sm:flex-1 max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Save Changes</button>
+        </div>
+    </form>
 </dialog>
 
 {{-- ── 2. Change Password Modal ────────────────────────────────────────── --}}
-<dialog id="change-password-modal" class="confirm-modal modal-sharp max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    <div class="bg-white">
-        {{-- Modal Header --}}
-        <div class="px-6 py-4 bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-700 flex items-center justify-center shrink-0">
-                    <ion-icon name="lock-closed-outline" class="text-base"></ion-icon>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-neutral-900 leading-tight">Change Password</h3>
-                    <p class="text-[11px] text-neutral-500">Update your security credentials</p>
-                </div>
+<dialog id="change-password-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="change-password-title">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="lock-closed-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <button type="button" onclick="this.closest('dialog').close()" class="text-neutral-400 hover:text-neutral-700 p-1.5 rounded-md transition-colors cursor-pointer" aria-label="Close modal">
-                <ion-icon name="close-outline" class="text-lg"></ion-icon>
-            </button>
+            <div class="min-w-0">
+                <h3 id="change-password-title" class="text-sm font-bold text-white leading-tight">Change Password</h3>
+                <p class="text-[11px] text-brand-200">Update your security credentials</p>
+            </div>
         </div>
+        <button type="button" onclick="this.closest('dialog').close()" class="text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
 
-        {{-- Modal Form --}}
-        <form action="{{ route('staff.profile.password') }}" method="POST" class="p-6 space-y-4">
-            @csrf
+    {{-- Modal Form --}}
+    <form action="{{ route('staff.profile.password') }}" method="POST" class="px-6 pb-6 max-sm:pb-0">
+        @csrf
 
+        <div class="mt-5 space-y-4">
             {{-- Current Password --}}
             <div>
-                <label for="modal-current-password" class="block text-xs font-bold text-neutral-700 mb-1.5">Current Password</label>
+                <label for="modal-current-password" class="block text-xs font-semibold text-neutral-900 mb-1.5">Current password</label>
                 <input type="password" id="modal-current-password" name="current_password" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 @error('current_password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -241,11 +236,12 @@
 
             {{-- New Password --}}
             <div>
-                <label for="modal-new-password" class="block text-xs font-bold text-neutral-700 mb-1.5">New Password</label>
+                <label for="modal-new-password" class="block text-xs font-semibold text-neutral-900 mb-1.5">New password</label>
                 <input type="password" id="modal-new-password" name="password" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                <p class="text-[11px] text-neutral-500 mt-1">Minimum 8 characters with upper &amp; lowercase, a number, and a symbol.</p>
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                {{-- CHANGED: hint neutral-500 to neutral-600, the hint colour of the other dialogs. --}}
+                <p class="text-[11px] text-neutral-600 mt-1">Minimum 8 characters with upper &amp; lowercase, a number, and a symbol.</p>
                 @error('password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -253,27 +249,22 @@
 
             {{-- Confirm Password --}}
             <div>
-                <label for="modal-password-confirmation" class="block text-xs font-bold text-neutral-700 mb-1.5">Confirm New Password</label>
+                <label for="modal-password-confirmation" class="block text-xs font-semibold text-neutral-900 mb-1.5">Confirm new password</label>
                 <input type="password" id="modal-password-confirmation" name="password_confirmation" required
                     placeholder="••••••••"
-                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 {{-- ADDED: live match hint, see data-password-match in resources/js/app.js. --}}
                 <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
             </div>
+        </div>
 
-            {{-- Footer Buttons --}}
-            <div class="pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" onclick="this.closest('dialog').close()" class="px-3.5 py-2 text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
-                    Cancel
-                </button>
-                {{-- CHANGED: "Update Password" button neutral-900 to brand-600, the same as the student profile and the "Save Changes" button. --}}
-                <button type="submit" class="inline-flex items-center gap-1.5 px-4 py-2 bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                    <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
-                    Update Password
-                </button>
-            </div>
-        </form>
-    </div>
+        {{-- Footer Buttons --}}
+        {{-- CHANGED: "Update Password" button neutral-900 to brand-600, the same as the student profile and the "Save Changes" button. --}}
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" onclick="this.closest('dialog').close()" class="btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold max-sm:flex-1 max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Update Password</button>
+        </div>
+    </form>
 </dialog>
 
 {{-- ── Modal Controller Script ────────────────────────────────────────── --}}
