@@ -289,7 +289,8 @@
                     <p class="text-[11px] text-neutral-500">Update your security credentials</p>
                 </div>
             </div>
-            <button type="button" class="js-close-password-modal text-neutral-400 hover:text-neutral-700 w-11 h-11 -mr-2 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+            {{-- CHANGED: disabled:* classes added; the script locks this button while the password is being updated. --}}
+            <button type="button" class="js-close-password-modal text-neutral-400 hover:text-neutral-700 w-11 h-11 -mr-2 flex items-center justify-center rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Close modal">
                 <ion-icon name="close-outline" class="text-lg"></ion-icon>
             </button>
         </div>
@@ -302,9 +303,15 @@
             {{-- Current Password --}}
             <div>
                 <label for="modal-current-password" class="block text-xs font-bold text-neutral-700 mb-1.5">Current Password</label>
-                <input type="password" id="modal-current-password" name="current_password" required
-                    placeholder="••••••••"
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                {{-- CHANGED (all three password fields): wrapped with an eye button to show or hide the text (togglePasswordVisibility in resources/js/app.js); right padding px-3 became pr-11 to clear it. --}}
+                <div class="relative">
+                    <input type="password" id="modal-current-password" name="current_password" required
+                        placeholder="••••••••"
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-current-password', 'modal-current-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer" aria-label="Toggle current password visibility">
+                        <ion-icon id="modal-current-password-icon" name="eye-outline" class="text-base"></ion-icon>
+                    </button>
+                </div>
                 @error('current_password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -313,10 +320,16 @@
             {{-- New Password --}}
             <div>
                 <label for="modal-new-password" class="block text-xs font-bold text-neutral-700 mb-1.5">New Password</label>
-                <input type="password" id="modal-new-password" name="password" required
-                    placeholder="••••••••"
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                <p class="text-[11px] text-neutral-500 mt-1">Minimum 8 characters with letters, numbers, and symbols.</p>
+                <div class="relative">
+                    <input type="password" id="modal-new-password" name="password" required
+                        placeholder="••••••••"
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-new-password', 'modal-new-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer" aria-label="Toggle new password visibility">
+                        <ion-icon id="modal-new-password-icon" name="eye-outline" class="text-base"></ion-icon>
+                    </button>
+                </div>
+                {{-- CHANGED: the "Minimum 8 characters..." hint became the shared rule checklist, which ticks each rule as it is met. --}}
+                @include('partials.password-rules')
                 @error('password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -325,16 +338,22 @@
             {{-- Confirm Password --}}
             <div>
                 <label for="modal-password-confirmation" class="block text-xs font-bold text-neutral-700 mb-1.5">Confirm New Password</label>
-                <input type="password" id="modal-password-confirmation" name="password_confirmation" required
-                    placeholder="••••••••"
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                <div class="relative">
+                    <input type="password" id="modal-password-confirmation" name="password_confirmation" required
+                        placeholder="••••••••"
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-password-confirmation', 'modal-password-confirmation-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer" aria-label="Toggle password confirmation visibility">
+                        <ion-icon id="modal-password-confirmation-icon" name="eye-outline" class="text-base"></ion-icon>
+                    </button>
+                </div>
                 {{-- ADDED: live match hint, see data-password-match in resources/js/app.js. --}}
                 <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
             </div>
 
             {{-- Footer Buttons --}}
             <div class="sheet-actions -mx-5 px-5 sm:mx-0 sm:px-0 pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" class="js-close-password-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-sm sm:text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
+                {{-- CHANGED: disabled:* classes added; the script locks Cancel while the password is being updated. --}}
+                <button type="button" class="js-close-password-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-sm sm:text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent">
                     Cancel
                 </button>
                 <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-sm sm:text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
@@ -384,7 +403,12 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     if (changePasswordModal) {
+        // ADDED: while the password is being updated (busy), Escape and a backdrop click no longer close the modal.
+        changePasswordModal.addEventListener('cancel', (e) => {
+            if (changePasswordModal.dataset.busy) e.preventDefault();
+        });
         changePasswordModal.addEventListener('click', (e) => {
+            if (changePasswordModal.dataset.busy) return;
             const rect = changePasswordModal.getBoundingClientRect();
             if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
                 changePasswordModal.close();
@@ -397,6 +421,9 @@ document.addEventListener('DOMContentLoaded', () => {
     const changePasswordForm = document.getElementById('change-password-form');
     if (changePasswordForm) {
         changePasswordForm.addEventListener('submit', () => {
+            // ADDED: lock the modal so it cannot be closed half-way through the update.
+            changePasswordModal.dataset.busy = 'true';
+            document.querySelectorAll('.js-close-password-modal').forEach(b => b.disabled = true);
             const btn = changePasswordForm.querySelector('button[type="submit"]');
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
