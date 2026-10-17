@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\PasswordResetController; // ADDED
 use App\Http\Controllers\OtpController;
 use App\Http\Controllers\StudentDashboardController;
 use App\Http\Controllers\StudentEvaluationController;
@@ -42,6 +43,12 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::get('/verify-otp', [OtpController::class, 'show'])->name('otp.show');
 Route::post('/verify-otp', [OtpController::class, 'verify'])->name('otp.verify');
 Route::post('/verify-otp/resend', [OtpController::class, 'resend'])->name('otp.resend');
+
+// ADDED: forgot password, using Laravel's built-in reset links. Laravel's reset email links to the password.reset route.
+Route::get('/forgot-password', [PasswordResetController::class, 'showForgot'])->name('password.request');
+Route::post('/forgot-password', [PasswordResetController::class, 'sendLink'])->middleware('throttle:6,1')->name('password.email');
+Route::get('/reset-password/{token}', [PasswordResetController::class, 'showReset'])->name('password.reset');
+Route::post('/reset-password', [PasswordResetController::class, 'reset'])->middleware('throttle:6,1')->name('password.update');
 
 /*
 |--------------------------------------------------------------------------

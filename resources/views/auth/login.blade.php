@@ -168,12 +168,16 @@
                 </div>
 
                 {{-- ADDED: "Remember me" keeps the user signed in past the session lifetime. --}}
-                <div class="flex items-center gap-2">
-                    <input type="checkbox" id="login_remember" name="remember"
-                        class="rounded border-neutral-300 text-brand-600 focus:ring-brand-500 h-4 w-4" @checked(old('remember'))>
-                    <label for="login_remember" class="text-xs font-semibold text-neutral-800 cursor-pointer">
-                        Remember me
-                    </label>
+                {{-- ADDED: "Forgot password?" link on the same row, to the built-in reset flow. --}}
+                <div class="flex items-center justify-between gap-2">
+                    <div class="flex items-center gap-2">
+                        <input type="checkbox" id="login_remember" name="remember"
+                            class="rounded border-neutral-300 text-brand-600 focus:ring-brand-500 h-4 w-4" @checked(old('remember'))>
+                        <label for="login_remember" class="text-xs font-semibold text-neutral-800 cursor-pointer">
+                            Remember me
+                        </label>
+                    </div>
+                    <a href="{{ route('password.request') }}" class="text-xs font-semibold text-brand-700 hover:underline">Forgot password?</a>
                 </div>
 
                 <input type="hidden" name="g_recaptcha_response" id="login_g_recaptcha_response">
