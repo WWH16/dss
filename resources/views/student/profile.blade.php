@@ -169,35 +169,35 @@
 </div>
 
 {{-- ── 1. Edit Academic Profile Modal ────────────────────────────────────── --}}
-{{-- CHANGED (both modals): on phones they open as bottom sheets (sheet-on-phone in resources/css/components/modal.css). The sheet scrolls, which the old clipped dialog could not, so Save stays reachable on short screens; the header (sheet-head, now opaque on phones) and the button row (sheet-actions) stay pinned. On phones the padding is px-5, Cancel and Save/Update are 44px tall with 14px labels, and Save/Update fills the rest of the row (flex-1) as the thumb target, and the email in the reference box wraps (break-all). --}}
-<dialog id="edit-profile-modal" class="confirm-modal modal-sharp sheet-on-phone max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    <div class="bg-white">
-        {{-- Modal Header --}}
-        <div class="sheet-head px-5 sm:px-6 py-4 bg-neutral-50 sm:bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-md bg-brand-50 border border-brand-100 text-brand-700 flex items-center justify-center shrink-0">
-                    <ion-icon name="create-outline" class="text-base"></ion-icon>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-neutral-900 leading-tight">Edit Academic Profile</h3>
-                    <p class="text-[11px] text-neutral-500">Update your student name and academic details</p>
-                </div>
+{{-- CHANGED (both modals): on phones they open as bottom sheets (sheet-on-phone in resources/css/components/modal.css). The sheet scrolls, which the old clipped dialog could not, so Save stays reachable on short screens; the header (sheet-head) and the button row (sheet-actions) stay pinned. On phones Cancel and Save/Update are 44px tall with 14px labels, and Save/Update fills the rest of the row (flex-1) as the thumb target, and the email in the reference box wraps (break-all). --}}
+{{-- CHANGED (both modals): rebuilt in the shared dialog frame of the admin pages and the history dialog. Plain confirm-modal width with no padding or border (modal-sharp max-w-md and the white wrapper dropped), a dark green header band with a tile, the title and a pale green subtitle, the content padded below, and a hairline-topped row of the shared btn buttons, plain text. Labels are sentence case in semibold neutral-900 (were bold neutral-700 in title case), fields are 14px from 640px up (were 12px) with the green focus ring, and the reference box is the tinted panel. The X stays a 44px square, white on the band. --}}
+<dialog id="edit-profile-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="edit-profile-title">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="create-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <button type="button" class="js-close-profile-modal text-neutral-400 hover:text-neutral-700 w-11 h-11 -mr-2 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
-                <ion-icon name="close-outline" class="text-lg"></ion-icon>
-            </button>
+            <div class="min-w-0">
+                <h3 id="edit-profile-title" class="text-sm font-bold text-white leading-tight">Edit Academic Profile</h3>
+                <p class="text-[11px] text-brand-200">Update your student name and academic details</p>
+            </div>
         </div>
+        <button type="button" class="js-close-profile-modal text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
 
-        {{-- Modal Form --}}
-        {{-- CHANGED (both modals): fields use 16px text on phones (text-base, was text-xs), since iOS Safari zooms the page into any field under 16px, and py-2.5 makes them 44px tall. The close button is a 44px square, and Cancel and Save/Update are 44px tall on phones. --}}
-        <form action="{{ route('student.profile.update') }}" method="POST" class="px-5 pt-5 sm:p-6 space-y-4">
-            @csrf
+    {{-- Modal Form --}}
+    {{-- CHANGED (both modals): fields use 16px text on phones (text-base, was text-xs), since iOS Safari zooms the page into any field under 16px, and py-2.5 makes them 44px tall. The close button is a 44px square, and Cancel and Save/Update are 44px tall on phones. --}}
+    <form action="{{ route('student.profile.update') }}" method="POST" class="px-6 pb-6 max-sm:pb-0">
+        @csrf
 
+        <div class="mt-5 space-y-4">
             {{-- Full Name --}}
             <div>
-                <label for="modal-name" class="block text-xs font-bold text-neutral-700 mb-1.5">Full Name</label>
+                <label for="modal-name" class="block text-xs font-semibold text-neutral-900 mb-1.5">Full name</label>
                 <input type="text" id="modal-name" name="name" value="{{ old('name', $profile->name) }}" required
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('name') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('name') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                 @error('name')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -212,9 +212,9 @@
                 $currentTrack = (int) old('track_id', $profile->student?->track_id);
             @endphp
             <div>
-                <label for="modal-program" class="block text-xs font-bold text-neutral-700 mb-1.5">Program</label>
+                <label for="modal-program" class="block text-xs font-semibold text-neutral-900 mb-1.5">Program</label>
                 <select id="modal-program" name="program_id" required
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('program_id') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('program_id') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">Select Program</option>
                     @foreach($programs as $program)
                         <option value="{{ $program->id }}" {{ $currentProgram === $program->id ? 'selected' : '' }}>{{ $program->code }}</option>
@@ -226,9 +226,9 @@
             </div>
 
             <div data-track-field="modal-program" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
-                <label for="modal-track" class="block text-xs font-bold text-neutral-700 mb-1.5">Specialization Track</label>
+                <label for="modal-track" class="block text-xs font-semibold text-neutral-900 mb-1.5">Specialization track</label>
                 <select id="modal-track" name="track_id" required
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('track_id') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('track_id') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     {{-- CHANGED: the placeholder shows but cannot be picked (disabled); a selected track below overrides its "selected". --}}
                     <option value="" disabled selected>Select Track</option>
                     {{-- CHANGED: no optgroup per program; the program is already picked, so its heading in the list was redundant. --}}
@@ -245,9 +245,9 @@
 
             {{-- Year Level --}}
             <div>
-                <label for="modal-year-level" class="block text-xs font-bold text-neutral-700 mb-1.5">Year Level</label>
+                <label for="modal-year-level" class="block text-xs font-semibold text-neutral-900 mb-1.5">Year level</label>
                 <select id="modal-year-level" name="year_level"
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('year_level') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('year_level') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">Select Year Level</option>
                     {{-- CHANGED: option values are lower-case ("1st year"), the same values the sign-up form saves, and the current value is matched case-insensitively. Before, a student who signed up with "1st year" opened this form with no year selected, and saving it erased their year level. --}}
                     {{-- CHANGED: the year level is read from the students table. --}}
@@ -264,60 +264,54 @@
             </div>
 
             {{-- Readonly Reference Chips --}}
-            <div class="p-3 rounded-md bg-neutral-50 border border-neutral-200/70 text-[11px] text-neutral-500 space-y-1">
+            <div class="px-3.5 py-3 rounded-lg bg-surface-alt text-[11px] text-neutral-600 space-y-1">
                 {{-- CHANGED: the student number is read from the students table. --}}
-                <p><strong>ID Number:</strong> <span class="font-mono">{{ $profile->student?->student_number }}</span> (Locked)</p>
-                <p class="break-all"><strong>Email:</strong> {{ $profile->email }}</p>
+                <p><strong class="text-neutral-900">ID Number:</strong> <span class="font-mono">{{ $profile->student?->student_number }}</span> (Locked)</p>
+                <p class="break-all"><strong class="text-neutral-900">Email:</strong> {{ $profile->email }}</p>
             </div>
+        </div>
 
-            {{-- Footer Buttons --}}
-            <div class="sheet-actions -mx-5 px-5 sm:mx-0 sm:px-0 pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                <button type="button" class="js-close-profile-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-sm sm:text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer">
-                    Cancel
-                </button>
-                <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-sm sm:text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                    <ion-icon name="save-outline" class="text-sm"></ion-icon>
-                    Save Changes
-                </button>
-            </div>
-        </form>
-    </div>
+        {{-- Footer Buttons --}}
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" class="js-close-profile-modal btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold max-sm:flex-1 max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Save Changes</button>
+        </div>
+    </form>
 </dialog>
 
 {{-- ── 2. Change Password Modal ────────────────────────────────────────── --}}
-<dialog id="change-password-modal" class="confirm-modal modal-sharp sheet-on-phone max-w-md w-full rounded-xl p-0 overflow-hidden shadow-2xl border-0 outline-none bg-white backdrop:bg-neutral-950/60">
-    <div class="bg-white">
-        {{-- Modal Header --}}
-        <div class="sheet-head px-5 sm:px-6 py-4 bg-neutral-50 sm:bg-neutral-50/70 border-b border-neutral-100 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-                <div class="w-8 h-8 rounded-md bg-neutral-100 border border-neutral-200 text-neutral-700 flex items-center justify-center shrink-0">
-                    <ion-icon name="lock-closed-outline" class="text-base"></ion-icon>
-                </div>
-                <div>
-                    <h3 class="text-sm font-bold text-neutral-900 leading-tight">Change Password</h3>
-                    <p class="text-[11px] text-neutral-500">Update your security credentials</p>
-                </div>
+<dialog id="change-password-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="change-password-title">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="lock-closed-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            {{-- CHANGED: disabled:* classes added; the script locks this button while the password is being updated. --}}
-            <button type="button" class="js-close-password-modal text-neutral-400 hover:text-neutral-700 w-11 h-11 -mr-2 flex items-center justify-center rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Close modal">
-                <ion-icon name="close-outline" class="text-lg"></ion-icon>
-            </button>
+            <div class="min-w-0">
+                <h3 id="change-password-title" class="text-sm font-bold text-white leading-tight">Change Password</h3>
+                <p class="text-[11px] text-brand-200">Update your security credentials</p>
+            </div>
         </div>
+        {{-- CHANGED: disabled:* classes added; the script locks this button while the password is being updated. --}}
+        <button type="button" class="js-close-password-modal text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
 
-        {{-- Modal Form --}}
-        {{-- CHANGED: id added so the script below can show a spinner on submit. --}}
-        <form id="change-password-form" action="{{ route('student.profile.password') }}" method="POST" class="px-5 pt-5 sm:p-6 space-y-4">
-            @csrf
+    {{-- Modal Form --}}
+    {{-- CHANGED: id added so the script below can show a spinner on submit. --}}
+    <form id="change-password-form" action="{{ route('student.profile.password') }}" method="POST" class="px-6 pb-6 max-sm:pb-0">
+        @csrf
 
+        <div class="mt-5 space-y-4">
             {{-- Current Password --}}
             <div>
-                <label for="modal-current-password" class="block text-xs font-bold text-neutral-700 mb-1.5">Current Password</label>
+                <label for="modal-current-password" class="block text-xs font-semibold text-neutral-900 mb-1.5">Current password</label>
                 {{-- CHANGED (all three password fields): wrapped with an eye button to show or hide the text (togglePasswordVisibility in resources/js/app.js); right padding px-3 became pr-11 to clear it. --}}
                 <div class="relative">
                     <input type="password" id="modal-current-password" name="current_password" required
                         placeholder="••••••••"
-                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                    <button type="button" onclick="togglePasswordVisibility('modal-current-password', 'modal-current-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer" aria-label="Toggle current password visibility">
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-current-password', 'modal-current-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer" aria-label="Toggle current password visibility">
                         <ion-icon id="modal-current-password-icon" name="eye-outline" class="text-base"></ion-icon>
                     </button>
                 </div>
@@ -328,12 +322,12 @@
 
             {{-- New Password --}}
             <div>
-                <label for="modal-new-password" class="block text-xs font-bold text-neutral-700 mb-1.5">New Password</label>
+                <label for="modal-new-password" class="block text-xs font-semibold text-neutral-900 mb-1.5">New password</label>
                 <div class="relative">
                     <input type="password" id="modal-new-password" name="password" required
                         placeholder="••••••••"
-                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                    <button type="button" onclick="togglePasswordVisibility('modal-new-password', 'modal-new-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer" aria-label="Toggle new password visibility">
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-new-password', 'modal-new-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer" aria-label="Toggle new password visibility">
                         <ion-icon id="modal-new-password-icon" name="eye-outline" class="text-base"></ion-icon>
                     </button>
                 </div>
@@ -346,32 +340,27 @@
 
             {{-- Confirm Password --}}
             <div>
-                <label for="modal-password-confirmation" class="block text-xs font-bold text-neutral-700 mb-1.5">Confirm New Password</label>
+                <label for="modal-password-confirmation" class="block text-xs font-semibold text-neutral-900 mb-1.5">Confirm new password</label>
                 <div class="relative">
                     <input type="password" id="modal-password-confirmation" name="password_confirmation" required
                         placeholder="••••••••"
-                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
-                    <button type="button" onclick="togglePasswordVisibility('modal-password-confirmation', 'modal-password-confirmation-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-400 hover:text-neutral-600 transition-colors cursor-pointer" aria-label="Toggle password confirmation visibility">
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-password-confirmation', 'modal-password-confirmation-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer" aria-label="Toggle password confirmation visibility">
                         <ion-icon id="modal-password-confirmation-icon" name="eye-outline" class="text-base"></ion-icon>
                     </button>
                 </div>
                 {{-- ADDED: live match hint, see data-password-match in resources/js/app.js. --}}
                 <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
             </div>
+        </div>
 
-            {{-- Footer Buttons --}}
-            <div class="sheet-actions -mx-5 px-5 sm:mx-0 sm:px-0 pt-3 border-t border-neutral-100 flex items-center justify-end gap-2">
-                {{-- CHANGED: disabled:* classes added; the script locks Cancel while the password is being updated. --}}
-                <button type="button" class="js-close-password-modal px-3.5 py-2 min-h-11 sm:min-h-0 text-sm sm:text-xs font-bold text-neutral-600 hover:text-neutral-900 hover:bg-neutral-100 rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent">
-                    Cancel
-                </button>
-                <button type="submit" class="flex-1 sm:flex-none inline-flex items-center justify-center gap-1.5 whitespace-nowrap px-4 py-2 min-h-11 sm:min-h-0 bg-brand-600 hover:bg-brand-700 text-white text-sm sm:text-xs font-bold rounded-md transition-colors shadow-2xs cursor-pointer">
-                    <ion-icon name="shield-checkmark-outline" class="text-sm"></ion-icon>
-                    Update Password
-                </button>
-            </div>
-        </form>
-    </div>
+        {{-- Footer Buttons --}}
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            {{-- CHANGED: disabled:* classes added; the script locks Cancel while the password is being updated. --}}
+            <button type="button" class="js-close-password-modal btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Cancel</button>
+            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold max-sm:flex-1 max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Update Password</button>
+        </div>
+    </form>
 </dialog>
 
 {{-- ── Modal Controller Script ────────────────────────────────────────── --}}
