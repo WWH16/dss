@@ -38,6 +38,28 @@ window.togglePasswordVisibility ??= (fieldId, iconId) => {
     document.getElementById(iconId).setAttribute('name', show ? 'eye-off-outline' : 'eye-outline');
 };
 
+// ADDED: a [data-password-rules] checklist (resources/views/partials/password-rules.blade.php) turns each row green
+// with a check once the form's password meets that rule; the same four checks as the register form and the server rule.
+const passwordRules = {
+    length: v => v.length >= 8,
+    case: v => /[a-z]/.test(v) && /[A-Z]/.test(v),
+    number: v => /[0-9]/.test(v),
+    symbol: v => /[^A-Za-z0-9]/.test(v),
+};
+document.querySelectorAll('[data-password-rules]').forEach(list => {
+    const password = list.closest('form').querySelector('[name="password"]');
+    password.addEventListener('input', () => list.querySelectorAll('[data-rule]').forEach(row => {
+        const ok = passwordRules[row.dataset.rule](password.value);
+        const icon = row.querySelector('ion-icon');
+        row.classList.toggle('text-neutral-500', !ok);
+        row.classList.toggle('text-emerald-600', ok);
+        row.classList.toggle('font-bold', ok);
+        icon.classList.toggle('text-neutral-400', !ok);
+        icon.classList.toggle('text-emerald-500', ok);
+        icon.setAttribute('name', ok ? 'checkmark-circle' : 'ellipse-outline');
+    }));
+});
+
 // ADDED: a <p data-password-match> under a confirm field says live whether it matches the form's password, and a mismatch blocks submit with the browser's own message, so a typo is caught before the server sends the form back with both password fields wiped. While the confirm text is still the start of the password and the field has focus, nothing shows yet.
 document.querySelectorAll('[data-password-match]').forEach(hint => {
     const form = hint.closest('form');

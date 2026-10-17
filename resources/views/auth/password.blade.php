@@ -79,15 +79,7 @@
                             <ion-icon id="password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                         </button>
                     </div>
-                    {{-- The register form's checklist, without its strength bar. --}}
-                    <div class="grid grid-cols-2 gap-x-4 gap-y-0 mt-1.5 font-medium">
-                        @foreach (['length' => '8+ characters', 'case' => 'Upper & lowercase', 'number' => 'One number', 'symbol' => 'One symbol'] as $rule => $label)
-                            <div data-rule="{{ $rule }}" class="flex items-center gap-1 text-neutral-500 transition-colors duration-300">
-                                <ion-icon name="ellipse-outline" class="text-[12px] leading-none text-neutral-400 transition-colors duration-300"></ion-icon>
-                                <span class="text-[9px] whitespace-nowrap">{{ $label }}</span>
-                            </div>
-                        @endforeach
-                    </div>
+                    @include('partials.password-rules')
                 </div>
 
                 <div>
@@ -147,26 +139,6 @@
                     .then(token => { document.getElementById('g_recaptcha_response').value = token; form.submit(); })
                     .catch(() => form.submit()));
             }
-        });
-
-        // Same four checks as the register form's checklist; each row turns green once met.
-        const rules = {
-            length: v => v.length >= 8,
-            case: v => /[a-z]/.test(v) && /[A-Z]/.test(v),
-            number: v => /[0-9]/.test(v),
-            symbol: v => /[^A-Za-z0-9]/.test(v),
-        };
-        document.getElementById('password')?.addEventListener('input', (e) => {
-            document.querySelectorAll('[data-rule]').forEach(row => {
-                const ok = rules[row.dataset.rule](e.target.value);
-                const icon = row.querySelector('ion-icon');
-                row.classList.toggle('text-neutral-500', !ok);
-                row.classList.toggle('text-emerald-600', ok);
-                row.classList.toggle('font-bold', ok);
-                icon.classList.toggle('text-neutral-400', !ok);
-                icon.classList.toggle('text-emerald-500', ok);
-                icon.setAttribute('name', ok ? 'checkmark-circle' : 'ellipse-outline');
-            });
         });
 
         // After a link is sent, the button stays locked and counts down until another may be sent.
