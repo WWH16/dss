@@ -424,9 +424,8 @@
                                 <ion-icon id="register_password_confirm_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                             </button>
                         </div>
-                        @if($hasConfirmError)
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $confirmErrorMessage }}</p>
-                        @endif
+                        {{-- CHANGED: the server error line is now also the live match hint (data-password-match, resources/js/app.js), so it is always rendered and starts hidden when there is no error. --}}
+                        <p data-password-match aria-live="polite" class="text-red-600 data-[match=yes]:text-emerald-700 text-xs mt-1.5 font-semibold flex items-center gap-1" @unless($hasConfirmError) hidden @endunless>@if($hasConfirmError)<ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $confirmErrorMessage }}@endif</p>
                     </div>
                 </div>
 

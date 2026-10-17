@@ -328,6 +328,8 @@
                 <input type="password" id="modal-password-confirmation" name="password_confirmation" required
                     placeholder="••••••••"
                     class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
+                {{-- ADDED: live match hint, see data-password-match in resources/js/app.js. --}}
+                <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
             </div>
 
             {{-- Footer Buttons --}}

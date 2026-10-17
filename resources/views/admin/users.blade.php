@@ -525,6 +525,8 @@
                                 <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                             </button>
                         </div>
+                        {{-- ADDED: live match hint, see data-password-match in resources/js/app.js. --}}
+                        <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
                         <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                     </div>
                 </div>
@@ -655,6 +657,8 @@
                                     <ion-icon name="eye-outline" class="text-base leading-none"></ion-icon>
                                 </button>
                             </div>
+                            {{-- ADDED: live match hint, see data-password-match in resources/js/app.js. --}}
+                            <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
                             <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                         </div>
                     </div>
@@ -1043,6 +1047,7 @@
         if (pwdConfirm) {
             pwdConfirm.value = '';
             pwdConfirm.type = 'password';
+            pwdConfirm.dispatchEvent(new Event('input', { bubbles: true })); // ADDED: hides the match hint left from the last edit
         }
         editForm.querySelectorAll('button[onclick*="togglePasswordVisibility"] ion-icon').forEach(function(icon) {
             icon.setAttribute('name', 'eye-outline');

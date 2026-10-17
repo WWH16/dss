@@ -28,3 +28,21 @@ document.querySelectorAll('[data-live-search]').forEach(input => {
         input.setSelectionRange(input.value.length, input.value.length);
     }
 });
+
+// ADDED: a <p data-password-match> under a confirm field says live whether it matches the form's password, and a mismatch blocks submit with the browser's own message, so a typo is caught before the server sends the form back with both password fields wiped. While the confirm text is still the start of the password and the field has focus, nothing shows yet.
+document.querySelectorAll('[data-password-match]').forEach(hint => {
+    const form = hint.closest('form');
+    const password = form.querySelector('[name="password"]');
+    const confirm = form.querySelector('[name="password_confirmation"]');
+    const sync = () => {
+        const a = password.value, b = confirm.value, ok = a === b;
+        confirm.setCustomValidity(b && !ok ? 'Passwords do not match.' : '');
+        confirm.toggleAttribute('aria-invalid', !!b && !ok);
+        hint.hidden = !b || (!ok && document.activeElement === confirm && a.startsWith(b));
+        hint.dataset.match = ok ? 'yes' : 'no';
+        hint.innerHTML = `<ion-icon name="${ok ? 'checkmark-circle' : 'alert-circle'}" class="text-sm leading-none shrink-0" aria-hidden="true"></ion-icon><span>${ok ? 'Passwords match' : 'Passwords do not match'}</span>`;
+    };
+    form.addEventListener('input', sync);
+    confirm.addEventListener('blur', sync);
+    form.addEventListener('reset', () => setTimeout(sync));
+});
