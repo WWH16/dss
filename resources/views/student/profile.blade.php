@@ -182,14 +182,16 @@
                 <p class="text-[11px] text-brand-200">Update your student name and academic details</p>
             </div>
         </div>
-        <button type="button" class="js-close-profile-modal text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer" aria-label="Close modal">
+        {{-- CHANGED: disabled:* classes added; the script locks this button while the profile is being saved. --}}
+        <button type="button" class="js-close-profile-modal text-white/70 enabled:hover:text-white w-11 h-11 -mr-2 -my-1 flex items-center justify-center rounded-md transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed" aria-label="Close modal">
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
 
     {{-- Modal Form --}}
     {{-- CHANGED (both modals): fields use 16px text on phones (text-base, was text-xs), since iOS Safari zooms the page into any field under 16px, and py-2.5 makes them 44px tall. The close button is a 44px square, and Cancel and Save/Update are 44px tall on phones. --}}
-    <form action="{{ route('student.profile.update') }}" method="POST" class="px-6 pb-6 max-sm:pb-0">
+    {{-- CHANGED: id added so the script below can show a spinner on submit. --}}
+    <form id="edit-profile-form" action="{{ route('student.profile.update') }}" method="POST" class="px-6 pb-6 max-sm:pb-0">
         @csrf
 
         <div class="mt-5 space-y-4">
@@ -273,7 +275,8 @@
 
         {{-- Footer Buttons --}}
         <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
-            <button type="button" class="js-close-profile-modal btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Cancel</button>
+            {{-- CHANGED: disabled:* classes added; the script locks Cancel while the profile is being saved. --}}
+            <button type="button" class="js-close-profile-modal btn btn-ghost btn-sm text-xs max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed">Cancel</button>
             <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold max-sm:flex-1 max-sm:min-h-11 max-sm:text-sm rounded-md cursor-pointer">Save Changes</button>
         </div>
     </form>
@@ -377,57 +380,37 @@ document.addEventListener('DOMContentLoaded', () => {
         if (changePasswordModal) changePasswordModal.showModal();
     };
 
-    // Close buttons
-    document.querySelectorAll('.js-close-profile-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (editProfileModal) editProfileModal.close();
-        });
-    });
-
-    document.querySelectorAll('.js-close-password-modal').forEach(btn => {
-        btn.addEventListener('click', () => {
-            if (changePasswordModal) changePasswordModal.close();
-        });
-    });
-
-    // Backdrop clicks
-    if (editProfileModal) {
-        editProfileModal.addEventListener('click', (e) => {
-            const rect = editProfileModal.getBoundingClientRect();
-            if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
-                editProfileModal.close();
-            }
-        });
-    }
-
-    if (changePasswordModal) {
-        // ADDED: while the password is being updated (busy), Escape and a backdrop click no longer close the modal.
-        changePasswordModal.addEventListener('cancel', (e) => {
-            if (changePasswordModal.dataset.busy) e.preventDefault();
-        });
-        changePasswordModal.addEventListener('click', (e) => {
-            if (changePasswordModal.dataset.busy) return;
-            const rect = changePasswordModal.getBoundingClientRect();
-            if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) {
-                changePasswordModal.close();
-            }
-        });
-    }
-
-    // ADDED: spinner on Update Password while the change and the notification email are sent.
+    // CHANGED: one loop wires both modals (was a copy per modal): close buttons, backdrop click, and the lock while its form is sent.
+    // The lock and the spinner now run for Edit Profile too (was the password form only), with "Saving...".
     // Same spinner markup as the admin users page; submit only fires after the required fields pass.
-    const changePasswordForm = document.getElementById('change-password-form');
-    if (changePasswordForm) {
-        changePasswordForm.addEventListener('submit', () => {
+    [
+        [editProfileModal, document.getElementById('edit-profile-form'), '.js-close-profile-modal', 'Saving...'],
+        [changePasswordModal, document.getElementById('change-password-form'), '.js-close-password-modal', 'Updating...'],
+    ].forEach(([modal, form, closeSelector, label]) => {
+        if (!modal) return;
+        document.querySelectorAll(closeSelector).forEach(b => b.addEventListener('click', () => modal.close()));
+        // ADDED: while the form is being sent (busy), Escape and a backdrop click no longer close the modal.
+        modal.addEventListener('cancel', (e) => { if (modal.dataset.busy) e.preventDefault(); });
+        modal.addEventListener('click', (e) => {
+            if (modal.dataset.busy) return;
+            const rect = modal.getBoundingClientRect();
+            if (e.clientX < rect.left || e.clientX > rect.right || e.clientY < rect.top || e.clientY > rect.bottom) modal.close();
+        });
+        form?.addEventListener('submit', () => {
             // ADDED: lock the modal so it cannot be closed half-way through the update.
-            changePasswordModal.dataset.busy = 'true';
-            document.querySelectorAll('.js-close-password-modal').forEach(b => b.disabled = true);
-            const btn = changePasswordForm.querySelector('button[type="submit"]');
+            modal.dataset.busy = 'true';
+            document.querySelectorAll(closeSelector).forEach(b => b.disabled = true);
+            const btn = form.querySelector('button[type="submit"]');
             btn.disabled = true;
             btn.classList.add('opacity-75', 'cursor-not-allowed');
-            btn.innerHTML = '<svg class="animate-spin h-3.5 w-3.5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>Updating...</span>';
+            btn.innerHTML = '<svg class="animate-spin h-3.5 w-3.5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" aria-hidden="true"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg><span>' + label + '</span>';
         });
-    }
+    });
+
+    // ADDED: Chrome closes a dialog on a second Esc even when cancel was prevented, so the key itself is blocked while a form is being sent.
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && document.querySelector('dialog[data-busy]')) e.preventDefault();
+    });
 
     // Auto-reopen on validation errors
     // CHANGED: also reopens on a track error. The fields are now program_id and track_id.
