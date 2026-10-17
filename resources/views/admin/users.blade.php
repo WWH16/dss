@@ -736,6 +736,19 @@
     // ── Reusable Modal Helpers & Error Management ─────────────────────────
     var spinnerSvg = '<svg class="animate-spin h-3.5 w-3.5 text-white shrink-0" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg>';
 
+    // ADDED: true while a create, edit or delete request runs; none of the three dialogs can be closed until it ends (the stalls page's lock).
+    var isSubmittingAction = false;
+
+    // ADDED: sets the lock and disables the dialogs' X and Cancel buttons (and Edit's Delete) to match, greyed like the submit button.
+    function lockDialogs(on) {
+        isSubmittingAction = on;
+        document.querySelectorAll('dialog button[onclick^="close"], #edit-delete-btn').forEach(function(b) {
+            b.disabled = on;
+            b.classList.toggle('opacity-75', on);
+            b.classList.toggle('cursor-not-allowed', on);
+        });
+    }
+
     function clearFormErrors(form) {
         if (!form) return;
         form.querySelectorAll('.field-error').forEach(function(el) {
@@ -929,6 +942,7 @@
     if (createForm) {
         createForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            lockDialogs(true);
             clearFormErrors(createForm);
 
             var loader = document.getElementById('create-modal-loader');
@@ -965,6 +979,7 @@
                     return;
                 }
 
+                lockDialogs(false); // ADDED: unlock on failure; success reloads the page
                 if (loader) loader.classList.add('hidden');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -983,6 +998,7 @@
                 }
             })
             .catch(function(err) {
+                lockDialogs(false); // ADDED: unlock on network error
                 if (loader) loader.classList.add('hidden');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -1091,6 +1107,7 @@
     if (editForm) {
         editForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            lockDialogs(true);
             clearFormErrors(editForm);
 
             var wasDisabled = roleSelect && roleSelect.disabled;
@@ -1136,6 +1153,7 @@
                     return;
                 }
 
+                lockDialogs(false); // ADDED: unlock on failure; success reloads the page
                 if (loader) loader.classList.add('hidden');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -1154,6 +1172,7 @@
                 }
             })
             .catch(function(err) {
+                lockDialogs(false); // ADDED: unlock on network error
                 if (loader) loader.classList.add('hidden');
                 if (submitBtn) {
                     submitBtn.disabled = false;
@@ -1292,6 +1311,7 @@
     if (deleteForm) {
         deleteForm.addEventListener('submit', function(e) {
             e.preventDefault();
+            lockDialogs(true);
             clearFormErrors(deleteForm);
 
             var submitBtn = document.getElementById('delete-user-submit-btn');
@@ -1326,6 +1346,7 @@
                     return;
                 }
 
+                lockDialogs(false); // ADDED: unlock on failure; success reloads the page
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
@@ -1336,6 +1357,7 @@
                 showGeneralError(deleteForm, msg);
             })
             .catch(function(err) {
+                lockDialogs(false); // ADDED: unlock on network error
                 if (submitBtn) {
                     submitBtn.disabled = false;
                     submitBtn.classList.remove('opacity-75', 'cursor-not-allowed');
@@ -1383,6 +1405,7 @@
     [createModal, editModal, deleteModal].forEach(function(modal) {
         if (!modal) return;
         modal.addEventListener('click', function(e) {
+            if (isSubmittingAction) return; // ADDED: backdrop click does not close while a request runs
             var rect = modal.getBoundingClientRect();
             var isInDialog = (rect.top <= e.clientY && e.clientY <= rect.top + rect.height &&
                 rect.left <= e.clientX && e.clientX <= rect.left + rect.width);
@@ -1390,6 +1413,15 @@
                 modal.close();
             }
         });
+        // ADDED: Esc (and the phone back gesture) does not close while a request runs.
+        modal.addEventListener('cancel', function(e) {
+            if (isSubmittingAction) e.preventDefault();
+        });
+    });
+
+    // ADDED: Chrome closes a dialog on a second Esc even when cancel was prevented, so the key itself is blocked while a request runs.
+    document.addEventListener('keydown', function(e) {
+        if (isSubmittingAction && e.key === 'Escape') e.preventDefault();
     });
 </script>
 @endsection
