@@ -13,10 +13,15 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use App\Models\Program;
 use App\Models\User;
+use App\Mail\RoleChangedMail; // ADDED
+use Illuminate\Support\Facades\Mail; // ADDED
 
 // CHANGED: role checks moved out of each method into the role middleware on this controller's routes (routes/web.php).
 class AdminController extends Controller
 {
+    // ADDED: display names for the internal roles, shared by createUser and the role change email.
+    private const ROLE_LABELS = ['admin' => 'Administrator', 'staff' => 'Staff', 'clinic' => 'Clinic'];
+
     public function dashboard(Request $request)
     {
         // Dashboard Counts
@@ -741,7 +746,7 @@ class AdminController extends Controller
         ], $request->role === 'staff' ? ['stall_id' => $request->stall_id] : []);
 
         // CHANGED: label for clinic accounts.
-        $label = ['admin' => 'Administrator', 'staff' => 'Staff', 'clinic' => 'Clinic'][$request->role];
+        $label = self::ROLE_LABELS[$request->role]; // CHANGED: reads the shared role labels.
         if ($request->wantsJson()) {
             session()->flash('success', "{$label} account created successfully!");
             return response()->json([
@@ -796,6 +801,7 @@ class AdminController extends Controller
 
         $target->name = trim($request->name);
         $target->email = trim($request->email);
+        $oldRole = $target->role; // ADDED: kept to tell the account its role changed.
         $target->role = $request->role;
 
         if ($request->filled('password')) {
@@ -811,6 +817,13 @@ class AdminController extends Controller
                 $target->staff()->update(['stall_id' => $request->stall_id]);
             }
         });
+
+        // ADDED: email the account when its role changed. The change is already saved, so a mail failure is ignored.
+        if ($oldRole !== $target->role) {
+            rescue(fn () => Mail::to($target->email)->send(
+                new RoleChangedMail($target->name, self::ROLE_LABELS[$oldRole], self::ROLE_LABELS[$target->role], now())
+            ));
+        }
 
         if ($request->wantsJson()) {
             session()->flash('success', "Account for {$target->name} updated successfully.");
