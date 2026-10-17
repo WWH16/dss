@@ -380,28 +380,9 @@
                         </div>
 
                         {{-- PASSWORD CRITERIA CHECKLIST (Structured Layout) --}}
-                        <div id="password-criteria-box" class="mt-4">
-                            
-                            {{-- Segmented Progress Bar (Full Width) --}}
-                            <div class="flex gap-1 w-full mb-0.5">
-                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-1" class="h-full w-0 transition-all duration-300 ease-out"></div>
-                                </div>
-                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-2" class="h-full w-0 transition-all duration-300 ease-out"></div>
-                                </div>
-                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-3" class="h-full w-0 transition-all duration-300 ease-out"></div>
-                                </div>
-                                <div class="flex-1 h-[4px] bg-neutral-200 rounded-full overflow-hidden">
-                                    <div id="pwd-bar-4" class="h-full w-0 transition-all duration-300 ease-out"></div>
-                                </div>
-                            </div>
-                            
-                            {{-- Strength Text (Lower Right, No Label) --}}
-                            <div class="mb-0.5 text-right">
-                                <span id="pwd-strength-text" class="text-[10px] font-bold text-neutral-400 uppercase tracking-widest transition-colors duration-300">NONE</span>
-                            </div>
+                        {{-- CHANGED: removed the segmented strength bar and its NONE/WEAK/STRONG label; the checklist below
+                             already shows each rule, so the bar repeated it. Top margin cut from mt-4 to mt-1.5 to sit under the field. --}}
+                        <div id="password-criteria-box" class="mt-1.5">
 
                             {{-- Checklist Items (Spaced 2x2 Grid) --}}
                             <div class="grid grid-cols-2 gap-x-4 gap-y-0 font-medium text-neutral-500">
@@ -566,22 +547,15 @@
                 symbol: { el: document.getElementById('req-symbol'), icon: document.querySelector('#req-symbol .req-icon'), check: (val) => /[^A-Za-z0-9]/.test(val), state: null }
             };
 
-            const bar1 = document.getElementById('pwd-bar-1');
-            const bar2 = document.getElementById('pwd-bar-2');
-            const bar3 = document.getElementById('pwd-bar-3');
-            const bar4 = document.getElementById('pwd-bar-4');
-            const strengthText = document.getElementById('pwd-strength-text');
-
+            // CHANGED: the strength bar and its label are gone, so their elements and the valid-rule count are no longer tracked.
             function evaluatePassword() {
                 const val = passwordInput.value;
                 const isEmpty = val.length === 0;
-                let validCount = 0;
 
                 for (const key in reqs) {
                     const req = reqs[key];
                     const isValid = req.check(val);
-                    if (isValid) validCount++;
-                    
+
                     const newState = isEmpty ? 'empty' : (isValid ? 'valid' : 'invalid');
 
                     // Only update DOM if the visual state needs to change
@@ -605,45 +579,6 @@
                             req.icon.className = "text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
                             req.icon.setAttribute('name', 'ellipse-outline');
                         }
-                    }
-                }
-
-                // Update segmented strength meter with width animations and synchronized colors
-                let barColor = 'bg-red-500'; // Default
-                if (validCount === 1) barColor = 'bg-red-500';
-                else if (validCount === 2) barColor = 'bg-orange-500';
-                else if (validCount === 3) barColor = 'bg-amber-500';
-                else if (validCount >= 4) barColor = 'bg-emerald-500';
-
-                if (isEmpty) {
-                    bar1.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
-                    bar2.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
-                    bar3.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
-                    bar4.className = "h-full w-0 transition-all duration-300 ease-out bg-neutral-200";
-                    strengthText.textContent = "NONE";
-                    strengthText.className = "text-[10px] font-bold text-neutral-400 uppercase tracking-widest transition-colors duration-300";
-                } else {
-                    // Update widths based on how many are valid, all using the synchronized barColor
-                    bar1.className = `h-full transition-all duration-300 ease-out ${validCount >= 1 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
-                    bar2.className = `h-full transition-all duration-300 ease-out ${validCount >= 2 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
-                    bar3.className = `h-full transition-all duration-300 ease-out ${validCount >= 3 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
-                    bar4.className = `h-full transition-all duration-300 ease-out ${validCount >= 4 ? 'w-full ' + barColor : 'w-0 ' + barColor}`;
-                    
-                    if (validCount === 1) {
-                        strengthText.textContent = "WEAK";
-                        strengthText.className = "text-[10px] font-bold text-red-600 uppercase tracking-widest transition-colors duration-300";
-                    } else if (validCount === 2) {
-                        strengthText.textContent = "FAIR";
-                        strengthText.className = "text-[10px] font-bold text-orange-600 uppercase tracking-widest transition-colors duration-300";
-                    } else if (validCount === 3) {
-                        strengthText.textContent = "GOOD";
-                        strengthText.className = "text-[10px] font-bold text-amber-600 uppercase tracking-widest transition-colors duration-300";
-                    } else if (validCount === 4) {
-                        strengthText.textContent = "STRONG";
-                        strengthText.className = "text-[10px] font-bold text-emerald-600 uppercase tracking-widest transition-colors duration-300";
-                    } else {
-                        strengthText.textContent = "WEAK";
-                        strengthText.className = "text-[10px] font-bold text-red-600 uppercase tracking-widest transition-colors duration-300";
                     }
                 }
             }
