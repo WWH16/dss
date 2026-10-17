@@ -227,8 +227,9 @@
 
 {{-- ── 3. Evaluation Detail Dialog Modal ───────────────────────────────── --}}
 {{-- CHANGED: rebuilt to match the admin evaluation dialog. Dark green header band running to the edge (no padding or pale border on the dialog itself) with the stall and submission date; the average sits on top in a panel tinted by its band and names the band in words; each criterion is a row with a five-step meter and a two-decimal score; star glyphs, uppercase section labels, the boxed criteria grid and the italic quoted comment are gone; the black "Close" button became the small "Done" button. --}}
-<dialog id="eval-details-modal" class="confirm-modal relative p-0! border-0!" aria-labelledby="modal-stall-name">
-    <div class="bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+{{-- CHANGED: below 640px the dialog is a bottom sheet (sheet-on-phone, as on the admin pages) with the header (sheet-head) and the Done row (sheet-actions) pinned while the scores scroll. The "relative" class is removed: a modal dialog with position relative is laid out against the top of the page, so on a scrolled history list it opened out of view. --}}
+<dialog id="eval-details-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="modal-stall-name">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
             <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
                 <ion-icon name="storefront-outline" class="text-lg" aria-hidden="true"></ion-icon>
@@ -243,7 +244,7 @@
         </button>
     </div>
 
-    <div class="px-6 pb-6">
+    <div class="px-6 pb-6 max-sm:pb-0">
         <div id="modal-eval-avg-panel" class="mt-5 rounded-lg px-4 py-3.5 flex items-center justify-between gap-4">
             <div>
                 <p class="text-xs font-semibold text-neutral-900">Average of four criteria</p>
@@ -270,7 +271,7 @@
         </div>
 
         {{-- CHANGED: removed "Rate this stall again" (evaluations open only from the stall's QR code). --}}
-        <div class="flex justify-end pt-4 mt-4 border-t border-neutral-100">
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex justify-end pt-4 mt-4 border-t border-neutral-100">
             <button type="button" class="btn btn-primary btn-sm text-xs font-semibold rounded-md js-close-eval-modal cursor-pointer">Done</button>
         </div>
     </div>
