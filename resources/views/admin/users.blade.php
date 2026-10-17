@@ -422,7 +422,7 @@
             </div>
             <h3 id="create-modal-title" class="text-sm font-bold text-white leading-tight">Create Account</h3>
         </div>
-        <button type="button" onclick="closeCreateUserModal()" class="text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
+        <button type="button" onclick="closeCreateUserModal()" class="text-white/70 enabled:hover:text-white p-1 cursor-pointer" aria-label="Close"> {{-- CHANGED: hover only while enabled (was hover:text-white) --}}
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
@@ -557,7 +557,7 @@
                 <p id="edit-modal-subtitle" class="text-[11px] text-brand-200 truncate"></p>
             </div>
         </div>
-        <button type="button" onclick="closeEditUserModal()" class="text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
+        <button type="button" onclick="closeEditUserModal()" class="text-white/70 enabled:hover:text-white p-1 cursor-pointer" aria-label="Close"> {{-- CHANGED: hover only while enabled (was hover:text-white) --}}
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>
@@ -669,7 +669,7 @@
         {{-- Form Footer Actions --}}
         <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
             {{-- ADDED: below 1024px the account list has no Delete button, so the Edit dialog offers it, on the left away from Save. Hidden when editing your own account, as in the table. --}}
-            <button type="button" id="edit-delete-btn" onclick="deleteFromEditModal()" class="lg:hidden mr-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-transparent hover:border-rose-200 hover:bg-rose-50 text-xs font-semibold text-rose-700 rounded-md transition-colors cursor-pointer">
+            <button type="button" id="edit-delete-btn" onclick="deleteFromEditModal()" class="lg:hidden mr-auto inline-flex items-center gap-1.5 px-3.5 py-1.5 border border-transparent enabled:hover:border-rose-200 enabled:hover:bg-rose-50 text-xs font-semibold text-rose-700 rounded-md transition-colors cursor-pointer"> {{-- CHANGED: hover only while enabled (was hover:border-rose-200 hover:bg-rose-50) --}}
                 <ion-icon name="trash-outline" class="text-sm" aria-hidden="true"></ion-icon>
                 Delete
             </button>
@@ -692,7 +692,7 @@
                 <p id="delete-modal-name" class="text-[11px] text-brand-200 truncate"></p>
             </div>
         </div>
-        <button type="button" onclick="closeDeleteUserModal()" class="text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
+        <button type="button" onclick="closeDeleteUserModal()" class="text-white/70 enabled:hover:text-white p-1 cursor-pointer" aria-label="Close"> {{-- CHANGED: hover only while enabled (was hover:text-white) --}}
             <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
     </div>

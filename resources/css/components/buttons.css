@@ -113,7 +113,8 @@
     border-color: transparent;
 }
 
-.btn-ghost:hover {
+/* CHANGED: no hover on a disabled ghost button (was .btn-ghost:hover) */
+.btn-ghost:hover:not(:disabled) {
     background-color: oklch(0.95 0.02 155);
     color: var(--color-brand-800);
     border-color: oklch(0.88 0.05 155 / 0.4);
