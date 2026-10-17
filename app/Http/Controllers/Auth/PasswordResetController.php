@@ -45,7 +45,7 @@ class PasswordResetController extends Controller
         // Laravel keeps one link per email, so a used, expired, or replaced link is caught here, before the
         // user types a new password, and the page offers a new link instead of the form.
         $email = (string) $request->query('email');
-        $user = $email !== '' ? Password::broker()->getUser(['email' => $email]) : null;
+        $user = Password::broker()->getUser(['email' => $email]);
         $expired = ! $user || ! Password::broker()->tokenExists($user, $token);
 
         return view('auth.password', ['token' => $token, 'email' => $email, 'expired' => $expired]);
