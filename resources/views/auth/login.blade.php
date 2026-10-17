@@ -261,45 +261,25 @@
 
                 {{-- STUDENT FIELDS --}}
                 <div id="register_student_fields" style="{{ $currentRegisterRole === 'student' ? '' : 'display: none;' }}" class="space-y-4">
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        <div>
-                            {{-- CHANGED: the field is labelled "Program" instead of "Course". --}}
-                            <label for="register_course" class="block text-xs font-semibold text-neutral-700 mb-1.5">Program</label>
-                            <div class="relative">
-                                <select id="register_course" name="course" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('course') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
-                                    <option value="">Select program</option>
-                                    {{-- CHANGED: options come from User::PROGRAMS (BSIT, BSCS, BSEMC); BSHM is no longer offered. --}}
-                                    @foreach(array_keys(\App\Models\User::PROGRAMS) as $program)
-                                        <option value="{{ $program }}" {{ old('course') == $program ? 'selected' : '' }}>{{ $program }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
-                                    <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
-                                </div>
+                    {{-- CHANGED: Program and its Specialization Track sit together on every screen; Year and Student Number share the row below. Before, Year sat between Program and Track on phones. --}}
+                    <div>
+                        {{-- CHANGED: the field is labelled "Program" instead of "Course". --}}
+                        <label for="register_course" class="block text-xs font-semibold text-neutral-700 mb-1.5">Program</label>
+                        <div class="relative">
+                            <select id="register_course" name="course" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('course') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                                <option value="">Select program</option>
+                                {{-- CHANGED: options come from User::PROGRAMS (BSIT, BSCS, BSEMC); BSHM is no longer offered. --}}
+                                @foreach(array_keys(\App\Models\User::PROGRAMS) as $program)
+                                    <option value="{{ $program }}" {{ old('course') == $program ? 'selected' : '' }}>{{ $program }}</option>
+                                @endforeach
+                            </select>
+                            <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
+                                <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
                             </div>
-                            @error('course')
-                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
-                            @enderror
                         </div>
-
-                        <div>
-                            <label for="register_year" class="block text-xs font-semibold text-neutral-700 mb-1.5">Year</label>
-                            <div class="relative">
-                                <select id="register_year" name="year_level" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('year_level') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
-                                    <option value="">Select year</option>
-                                    <option value="1st year" {{ old('year_level') == '1st year' ? 'selected' : '' }}>1st year</option>
-                                    <option value="2nd year" {{ old('year_level') == '2nd year' ? 'selected' : '' }}>2nd year</option>
-                                    <option value="3rd year" {{ old('year_level') == '3rd year' ? 'selected' : '' }}>3rd year</option>
-                                    <option value="4th year" {{ old('year_level') == '4th year' ? 'selected' : '' }}>4th year</option>
-                                </select>
-                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
-                                    <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
-                                </div>
-                            </div>
-                            @error('year_level')
-                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
-                            @enderror
-                        </div>
+                        @error('course')
+                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                        @enderror
                     </div>
 
                     {{-- CHANGED: added the specialization track. One optgroup per program; resources/js/app.js shows only the selected program's group and keeps the field disabled until a program is selected; while disabled the field fades to half opacity. --}}
@@ -326,12 +306,33 @@
                         @enderror
                     </div>
 
-                    <div>
-                        <label for="register_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                        <input type="text" id="register_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @error('student_number') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
-                        @error('student_number')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
-                        @enderror
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        <div>
+                            <label for="register_year" class="block text-xs font-semibold text-neutral-700 mb-1.5">Year</label>
+                            <div class="relative">
+                                <select id="register_year" name="year_level" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('year_level') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                                    <option value="">Select year</option>
+                                    <option value="1st year" {{ old('year_level') == '1st year' ? 'selected' : '' }}>1st year</option>
+                                    <option value="2nd year" {{ old('year_level') == '2nd year' ? 'selected' : '' }}>2nd year</option>
+                                    <option value="3rd year" {{ old('year_level') == '3rd year' ? 'selected' : '' }}>3rd year</option>
+                                    <option value="4th year" {{ old('year_level') == '4th year' ? 'selected' : '' }}>4th year</option>
+                                </select>
+                                <div class="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400">
+                                    <ion-icon name="chevron-down-outline" class="text-base leading-none"></ion-icon>
+                                </div>
+                            </div>
+                            @error('year_level')
+                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                            @enderror
+                        </div>
+
+                        <div>
+                            <label for="register_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
+                            <input type="text" id="register_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @error('student_number') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                            @error('student_number')
+                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                            @enderror
+                        </div>
                     </div>
                 </div>
 
