@@ -398,24 +398,25 @@
 {{-- ── 4. Scanner Dialog ──────────────────────────────────────────────────── --}}
 {{-- ADDED: a native <dialog>, the same confirm-modal treatment the logout prompt uses. Scanning wants the
      screen to itself: the viewfinder is the task, and showModal() traps focus and dims everything else. --}}
-<dialog id="qr-scan-modal" class="confirm-modal" aria-labelledby="qr-scan-modal-title">
-    <div class="flex items-start justify-between gap-3 mb-1">
-        {{-- CHANGED: the dialog always holds the camera; the "evaluation done" notice is gone since other stalls stay open. --}}
-        <div>
-            {{-- CHANGED: the font-display class replaces the inline font-family style. --}}
-            <h2 id="qr-scan-modal-title" class="font-display text-base font-bold text-ink-900 leading-tight">
-                Scan the stall's QR code
-            </h2>
-            <p class="text-xs text-ink-500 mt-1">
-                Point your camera at the code posted at the counter.
-            </p>
+{{-- CHANGED: rebuilt in the shared dialog frame of the admin pages and the history dialog: no padding or border on the dialog, a dark green header band (sheet-head) with a QR tile, the title at 14px bold (was font-display 16px) and the hint as its pale green subtitle, and the scanner padded below. Below 640px it is a bottom sheet, its bottom padding clearing the home indicator. --}}
+<dialog id="qr-scan-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="qr-scan-modal-title">
+    {{-- CHANGED: the dialog always holds the camera; the "evaluation done" notice is gone since other stalls stay open. --}}
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="qr-code-outline" class="text-lg" aria-hidden="true"></ion-icon>
+            </div>
+            <div class="min-w-0">
+                <h2 id="qr-scan-modal-title" class="text-sm font-bold text-white leading-tight">Scan the stall's QR code</h2>
+                <p class="text-[11px] text-brand-200">Point your camera at the code posted at the counter.</p>
+            </div>
         </div>
-        <button type="button" class="js-close-scanner shrink-0 -mt-1 -mr-1 p-2 rounded-md text-ink-500 hover:text-ink-900 hover:bg-ink-50 transition-colors cursor-pointer" aria-label="Close">
+        <button type="button" class="js-close-scanner text-white/70 hover:text-white p-1 cursor-pointer" aria-label="Close">
             <ion-icon name="close-outline" class="text-xl" aria-hidden="true"></ion-icon>
         </button>
     </div>
 
-    <div class="flex flex-col items-center text-center">
+    <div class="px-6 pb-6 max-sm:pb-[max(1.5rem,env(safe-area-inset-bottom))] flex flex-col items-center text-center">
         @include('partials.qr-scanner')
     </div>
 </dialog>
