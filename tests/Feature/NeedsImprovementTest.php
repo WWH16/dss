@@ -149,3 +149,34 @@ test('all-time evaluations decide the flags when this month has none', function 
         ->assertSeeText('from 1 evaluation (all-time; none yet this month)')
         ->assertSeeText(NeedsImprovement::ADVICE['food_quality']);
 });
+
+test('the admin banner flags a stall whose only low criterion is food quality', function () {
+    staffWithEvaluations([[2, 4, 4, 4]]);
+    $admin = User::create([
+        'name' => 'Admin',
+        'email' => 'admin@example.com',
+        'password' => bcrypt('AdminPassword123!'),
+        'role' => 'admin',
+        'email_verified_at' => now(),
+    ]);
+
+    $this->actingAs($admin)->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertViewHas('attentionStalls', fn ($stalls) => $stalls->pluck('name')->all() === ['Improvement Stall'])
+        ->assertSeeText('Improvement Stall (Taste)');
+});
+
+test('the admin banner names every low criterion, lowest first', function () {
+    staffWithEvaluations([[2.8, 2.2, 4, 3.5]]);
+    $admin = User::create([
+        'name' => 'Admin',
+        'email' => 'admin@example.com',
+        'password' => bcrypt('AdminPassword123!'),
+        'role' => 'admin',
+        'email_verified_at' => now(),
+    ]);
+
+    $this->actingAs($admin)->get(route('admin.dashboard'))
+        ->assertOk()
+        ->assertSeeText('Improvement Stall (Service, Taste)');
+});

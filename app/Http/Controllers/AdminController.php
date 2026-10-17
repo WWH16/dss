@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Ahp;
 use App\Services\Saw;
+use App\Services\NeedsImprovement; // ADDED
 use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
@@ -71,10 +72,11 @@ class AdminController extends Controller
             ->first();
         $evaluationCount = (int) $campusHealth->evaluation_count;
 
-        // Stalls Needing Attention (< 3.0 in any criterion or overall)
-        $attentionStalls = $results->filter(function($stall) {
-            return (float)$stall->overall_score < 3.0 || (float)$stall->cleanliness < 3.0 || (float)$stall->service < 3.0;
-        })->values();
+        // Stalls Needing Attention (< 3.0 in any criterion)
+        // CHANGED: the staff dashboard's Needs Improvement rule over all 4 criteria (was cleanliness and service only, plus
+        // overall, which is the mean of the 4 and so redundant). Each stall carries its low criteria for the banner.
+        $attentionStalls = $results->each(fn ($stall) => $stall->flags = NeedsImprovement::flags($stall, $weights))
+            ->filter(fn ($stall) => $stall->flags !== [])->values();
 
         // CHANGED: trend query moved to Controller::activityTrend(), shared with the staff dashboard.
         [

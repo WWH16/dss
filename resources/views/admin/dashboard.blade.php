@@ -63,7 +63,8 @@
                     <h4 class="text-xs font-bold text-amber-950">Attention Required on {{ $attentionStalls->count() }} {{ Str::plural('Stall', $attentionStalls->count()) }}</h4>
                     <p class="text-[11px] text-amber-800 mt-0.5">
                         The following stall(s) have scored below the satisfactory 3.0★ threshold:
-                        <strong>{{ $attentionStalls->pluck('name')->join(', ') }}</strong>.
+                        {{-- CHANGED: each stall is followed by its low criteria, lowest first. --}}
+                        <strong>{{ $attentionStalls->map(fn ($s) => $s->name . ' (' . collect(array_keys($s->flags))->map(fn ($c) => \App\Services\NeedsImprovement::LABELS[$c])->join(', ') . ')')->join(', ') }}</strong>.
                     </p>
                 </div>
             </div>
