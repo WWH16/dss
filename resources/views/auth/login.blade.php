@@ -562,23 +562,17 @@
                     if (req.state !== newState) {
                         req.state = newState;
                         
-                        // Remove animation class before re-applying to allow re-triggering if needed
-                        req.icon.classList.remove('animate-icon-pop');
-                        
-                        if (newState === 'empty') {
-                            req.el.className = "flex items-center gap-1 text-neutral-500 transition-colors duration-300";
-                            req.icon.className = "text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
-                            req.icon.setAttribute('name', 'ellipse-outline');
-                        } else if (newState === 'valid') {
-                            req.el.className = "flex items-center gap-1 text-emerald-600 font-bold transition-colors duration-300";
-                            // Add pop animation when it becomes valid
-                            req.icon.className = "text-[12px] leading-none text-emerald-500 req-icon transition-colors duration-300 animate-icon-pop";
-                            req.icon.setAttribute('name', 'checkmark-circle');
-                        } else {
-                            req.el.className = "flex items-center gap-1 text-neutral-500 transition-colors duration-300";
-                            req.icon.className = "text-[12px] leading-none text-neutral-400 req-icon transition-colors duration-300";
-                            req.icon.setAttribute('name', 'ellipse-outline');
-                        }
+                        // CHANGED: toggles single classes instead of overwriting className. Overwriting also wiped the
+                        // "hydrated" class Ionicons puts on <ion-icon>, and without it the icon stays visibility:hidden.
+                        const ok = newState === 'valid';
+                        req.el.classList.toggle('text-neutral-500', !ok);
+                        req.el.classList.toggle('text-emerald-600', ok);
+                        req.el.classList.toggle('font-bold', ok);
+                        req.icon.classList.toggle('text-neutral-400', !ok);
+                        req.icon.classList.toggle('text-emerald-500', ok);
+                        // Pop animation when it becomes valid
+                        req.icon.classList.toggle('animate-icon-pop', ok);
+                        req.icon.setAttribute('name', ok ? 'checkmark-circle' : 'ellipse-outline');
                     }
                 }
             }

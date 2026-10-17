@@ -13,8 +13,9 @@ Verify Email Address
 
 Or enter code manually:
 
+{{-- CHANGED: user-select: all makes one click or tap select the whole code, where the mail client honours it --}}
 <x-mail::panel>
-<span style="font-size: 28px; font-weight: bold; letter-spacing: 8px;">{{ $otp }}</span>
+<span style="font-size: 28px; font-weight: bold; letter-spacing: 8px; -webkit-user-select: all; user-select: all;">{{ $otp }}</span>
 </x-mail::panel>
 
 Code valid for 15 minutes. Do not share with anyone.

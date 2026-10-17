@@ -277,9 +277,8 @@ img {
 
 /* Panels */
 
+/* CHANGED: green left border removed */
 .panel {
-    /* CHANGED: brand-600 */
-    border-left: #007434 solid 4px;
     margin: 21px 0;
 }
 
