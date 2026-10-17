@@ -354,45 +354,47 @@
 </div>
 
 {{-- ── 4. Edit Stall Modal (Scalable Searchable Multi-Staff Picker) ──────── --}}
-<dialog id="edit-modal" class="confirm-modal max-w-lg relative" aria-labelledby="edit-modal-title">
+{{-- CHANGED (all five dialogs): rebuilt in the Users page's dialog frame so every admin dialog looks the same. No padding or border on the dialog, a dark green header band (sheet-head) with a tile, the title and a pale green subtitle, the content padded below it, and a hairline-topped row of small plain-text buttons (sheet-actions). Labels are sentence case at 12px (were uppercase 11px), fields take the Users inputs (grey fill, white on focus, green ring), and the Delete and Remove dialogs gained the X button the others have. Below 640px each dialog is a bottom sheet with the header and the button row pinned while the content scrolls. The "relative" class is removed: a modal dialog with position relative is laid out against the top of the page, so on a scrolled phone it opened out of view; the fixed dialog still anchors the loader bar. Inputs and selects are 16px on phones (were 12px), so iOS Safari no longer zooms on focus. The Edit dialog keeps its wider max-w-lg for the staff picker. --}}
+<dialog id="edit-modal" class="confirm-modal max-w-lg sheet-on-phone p-0! border-0!" aria-labelledby="edit-modal-title">
     {{-- Indeterminate Modal Progress Bar --}}
     <div id="edit-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    <form id="edit-form" method="POST" class="space-y-4">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="create-outline" class="text-lg" aria-hidden="true"></ion-icon>
+            </div>
+            <div class="min-w-0">
+                <h3 id="edit-modal-title" class="text-sm font-bold text-white leading-tight">Edit Food Stall</h3>
+                <p class="text-[11px] text-brand-200 truncate">Update vendor details &amp; assigned staff members</p>
+            </div>
+        </div>
+        <button type="button" id="edit-modal-close-btn" class="text-white/70 enabled:hover:text-white js-close-edit-modal p-1 cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
+
+    <form id="edit-form" method="POST" class="px-6 pb-6 max-sm:pb-0">
         @csrf
         @method('PUT')
-        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
-                    <ion-icon name="create-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
-                </div>
-                <div>
-                    <h3 id="edit-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Edit Food Stall</h3>
-                    <p class="text-[11px] text-neutral-500">Update vendor details &amp; assigned staff members</p>
-                </div>
-            </div>
-            <button type="button" id="edit-modal-close-btn" class="text-neutral-400 hover:text-neutral-600 js-close-edit-modal p-1 cursor-pointer" aria-label="Close modal">
-                <ion-icon name="close-outline" class="text-xl"></ion-icon>
-            </button>
-        </div>
 
-        <div class="space-y-3.5 text-left">
+        <div class="mt-5 space-y-4 text-left">
             <div>
-                <label for="edit-stall-name-input" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
-                    Stall Name <span class="text-red-500">*</span>
+                <label for="edit-stall-name-input" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Stall name <span class="text-rose-600">*</span>
                 </label>
                 <input type="text" id="edit-stall-name-input" name="name"
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700"
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors"
                     required>
             </div>
 
             {{-- Searchable Staff Picker in Modal --}}
             <div>
                 <div class="flex items-center justify-between mb-1.5">
-                    <label class="block text-[11px] font-semibold text-neutral-700 uppercase tracking-wider">
-                        Assigned Staff Members
+                    <label class="block text-xs font-semibold text-neutral-900">
+                        Assigned staff members
                     </label>
                     {{-- CHANGED: 10px to 11px (page minimum). --}}
                     <span id="edit-staff-count" class="text-[11px] font-bold text-brand-700">0 selected</span>
@@ -408,7 +410,7 @@
                         <div class="relative">
                             <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></ion-icon>
                             <input type="text" id="edit-staff-search" placeholder="Filter staff by name or email…"
-                                class="w-full pl-7 pr-3 py-1.5 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+                                class="w-full pl-7 pr-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                         </div>
 
                         {{-- Filter Tabs --}}
@@ -422,7 +424,7 @@
                     </div>
 
                     {{-- Scrollable Staff Checkbox List --}}
-                    <div id="edit-staff-list" class="max-h-48 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-300 rounded-md space-y-1 divide-y divide-neutral-200/40 custom-scrollbar">
+                    <div id="edit-staff-list" class="max-h-48 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-200 rounded-md space-y-1 divide-y divide-neutral-200/40 custom-scrollbar">
                         @foreach($staffUsers as $staff)
                             <label class="edit-staff-item flex items-center justify-between p-2 rounded hover:bg-white border border-transparent hover:border-neutral-200 transition-colors cursor-pointer text-xs"
                                 id="edit-staff-label-{{ $staff->id }}"
@@ -462,11 +464,11 @@
             </div>
 
             <div>
-                <label for="edit-stall-desc-input" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
+                <label for="edit-stall-desc-input" class="block text-xs font-semibold text-neutral-900 mb-1.5">
                     Description
                 </label>
                 <textarea id="edit-stall-desc-input" name="description" rows="2"
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700"></textarea>
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors"></textarea>
             </div>
 
             <div class="flex items-center gap-2 pt-1">
@@ -480,99 +482,95 @@
         </div>
 
         {{-- CHANGED: the Delete button left this footer and went back to the directory row. --}}
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
             <button type="button" id="edit-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-edit-modal cursor-pointer">Cancel</button>
-            <button type="submit" id="edit-modal-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all">
-                <ion-icon name="save-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
-                <span>Save Changes</span>
-            </button>
+            <button type="submit" id="edit-modal-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Save Changes</button>
         </div>
     </form>
 </dialog>
 
 {{-- ── 5. Dedicated Stall Staff Roster Modal (Scrollable at Scale) ───────── --}}
-<dialog id="roster-modal" class="confirm-modal max-w-md relative" aria-labelledby="roster-modal-title">
+<dialog id="roster-modal" class="confirm-modal max-w-md sheet-on-phone p-0! border-0!" aria-labelledby="roster-modal-title">
     {{-- Indeterminate Modal Progress Bar --}}
     <div id="roster-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    <div class="space-y-4">
-        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
-                    <ion-icon name="people-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
-                </div>
-                <div>
-                    <h3 id="roster-modal-title" class="text-sm font-bold text-neutral-900 leading-tight">Staff Roster</h3>
-                    <p id="roster-modal-subtitle" class="text-[11px] text-neutral-500">Assigned members for this vendor</p>
-                </div>
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="people-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <button type="button" id="roster-modal-close-btn" class="text-neutral-400 hover:text-neutral-600 js-close-roster-modal p-1 cursor-pointer" aria-label="Close roster">
-                <ion-icon name="close-outline" class="text-xl"></ion-icon>
-            </button>
+            <div class="min-w-0">
+                <h3 id="roster-modal-title" class="text-sm font-bold text-white leading-tight">Staff Roster</h3>
+                <p id="roster-modal-subtitle" class="text-[11px] text-brand-200 truncate">Assigned members for this vendor</p>
+            </div>
+        </div>
+        <button type="button" id="roster-modal-close-btn" class="text-white/70 enabled:hover:text-white js-close-roster-modal p-1 cursor-pointer" aria-label="Close roster">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
+
+    <div class="px-6 pb-6 max-sm:pb-0">
+        <div class="mt-5 space-y-4">
+            {{-- Filter within Roster --}}
+            <div class="relative">
+                <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></ion-icon>
+                <input type="text" id="roster-search-input" placeholder="Search members in roster…"
+                    class="w-full pl-7 pr-3 py-1.5 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+            </div>
+
+            {{-- Scrollable List of Assigned Staff --}}
+            <div id="roster-staff-list" class="max-h-60 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-200 rounded-md space-y-1.5 custom-scrollbar">
+                <!-- Rendered dynamically by JavaScript -->
+            </div>
+
+            {{-- Hidden Form for Unassign Action --}}
+            <form id="unassign-staff-form" action="{{ route('admin.staff.unassign') }}" method="POST" class="hidden">
+                @csrf
+                <input type="hidden" name="staff_id" id="unassign-staff-id">
+            </form>
         </div>
 
-        {{-- Filter within Roster --}}
-        <div class="relative">
-            <ion-icon name="search-outline" class="absolute left-2.5 top-1/2 -translate-y-1/2 text-neutral-400 text-xs pointer-events-none"></ion-icon>
-            <input type="text" id="roster-search-input" placeholder="Search members in roster…"
-                class="w-full pl-7 pr-3 py-1.5 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
-        </div>
-
-        {{-- Scrollable List of Assigned Staff --}}
-        <div id="roster-staff-list" class="max-h-60 overflow-y-auto p-1.5 bg-neutral-50 border border-neutral-300 rounded-md space-y-1.5 custom-scrollbar">
-            <!-- Rendered dynamically by JavaScript -->
-        </div>
-
-        {{-- Hidden Form for Unassign Action --}}
-        <form id="unassign-staff-form" action="{{ route('admin.staff.unassign') }}" method="POST" class="hidden">
-            @csrf
-            <input type="hidden" name="staff_id" id="unassign-staff-id">
-        </form>
-
-        <div class="flex items-center justify-between pt-3 border-t border-neutral-100">
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-between gap-2 pt-4 mt-5 border-t border-neutral-100">
             <button type="button" id="roster-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-roster-modal cursor-pointer">Close</button>
-            <button type="button" id="roster-edit-stall-btn"
-                class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1 shadow-2xs cursor-pointer">
-                <ion-icon name="pencil-outline" class="text-sm"></ion-icon>
-                <span>Edit All Assignments</span>
-            </button>
+            <button type="button" id="roster-edit-stall-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Edit All Assignments</button>
         </div>
     </div>
 </dialog>
 
 {{-- ── 6. Quick Assign Staff Modal ───────────────────────────────────────── --}}
-<dialog id="quick-assign-modal" class="confirm-modal relative" aria-labelledby="quick-assign-title">
+<dialog id="quick-assign-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="quick-assign-title">
     {{-- Indeterminate Modal Progress Bar --}}
     <div id="quick-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    <form id="quick-assign-form" action="{{ route('admin.staff.assign') }}" method="POST" class="space-y-4">
-        @csrf
-        <div class="flex items-center justify-between pb-3 border-b border-neutral-100">
-            <div class="flex items-center gap-3">
-                <div class="w-9 h-9 rounded-md bg-brand-50 border border-brand-200/80 flex items-center justify-center text-brand-800">
-                    <ion-icon name="person-add-outline" class="text-lg text-brand-800" aria-hidden="true"></ion-icon>
-                </div>
-                <div>
-                    <h3 id="quick-assign-title" class="text-sm font-bold text-neutral-900 leading-tight">Quick Assign Staff</h3>
-                    <p class="text-[11px] text-neutral-500">Link unassigned staff directly to a food stall</p>
-                </div>
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="person-add-outline" class="text-lg" aria-hidden="true"></ion-icon>
             </div>
-            <button type="button" id="quick-modal-close-btn" class="text-neutral-400 hover:text-neutral-600 js-close-quick-modal p-1 cursor-pointer" aria-label="Close modal">
-                <ion-icon name="close-outline" class="text-xl"></ion-icon>
-            </button>
+            <div class="min-w-0">
+                <h3 id="quick-assign-title" class="text-sm font-bold text-white leading-tight">Quick Assign Staff</h3>
+                <p class="text-[11px] text-brand-200 truncate">Link unassigned staff directly to a food stall</p>
+            </div>
         </div>
+        <button type="button" id="quick-modal-close-btn" class="text-white/70 enabled:hover:text-white js-close-quick-modal p-1 cursor-pointer" aria-label="Close modal">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
 
-        <div class="space-y-3 text-left">
+    <form id="quick-assign-form" action="{{ route('admin.staff.assign') }}" method="POST" class="px-6 pb-6 max-sm:pb-0">
+        @csrf
+
+        <div class="mt-5 space-y-4 text-left">
             <div>
-                <label for="quick-staff-id" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
-                    Staff Member <span class="text-red-500">*</span>
+                <label for="quick-staff-id" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Staff member <span class="text-rose-600">*</span>
                 </label>
                 <select id="quick-staff-id" name="staff_id" required
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">-- Select Staff Account --</option>
                     @foreach($unassignedStaff as $unStaff)
                         <option value="{{ $unStaff->id }}">{{ $unStaff->name }} ({{ $unStaff->email }})</option>
@@ -584,11 +582,11 @@
             </div>
 
             <div>
-                <label for="quick-stall-id" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
-                    Target Food Stall <span class="text-red-500">*</span>
+                <label for="quick-stall-id" class="block text-xs font-semibold text-neutral-900 mb-1.5">
+                    Target food stall <span class="text-rose-600">*</span>
                 </label>
                 <select id="quick-stall-id" name="stall_id" required
-                    class="w-full px-3 py-2 bg-white border border-neutral-300 rounded-md text-xs font-medium focus:outline-none focus:border-brand-700">
+                    class="w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
                     <option value="">-- Select Food Stall --</option>
                     @foreach($stalls as $st)
                         <option value="{{ $st->id }}">{{ $st->name }}</option>
@@ -597,12 +595,9 @@
             </div>
         </div>
 
-        <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
             <button type="button" id="quick-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-quick-modal cursor-pointer">Cancel</button>
-            <button type="submit" id="quick-modal-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md flex items-center gap-1.5 shadow-2xs cursor-pointer transition-all">
-                <ion-icon name="checkmark-outline" class="text-sm leading-none"></ion-icon>
-                <span>Assign Staff</span>
-            </button>
+            <button type="submit" id="quick-modal-submit-btn" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer">Assign Staff</button>
         </div>
     </form>
 </dialog>
@@ -613,56 +608,69 @@
     @csrf
     @method('DELETE')
 </form>
-<dialog id="delete-confirm-modal" class="confirm-modal relative" aria-labelledby="delete-modal-title">
+{{-- CHANGED: the stall's name is the header subtitle, and the warning is the Users delete dialog's rose panel. "Yes, Delete" became "Delete Stall", as the Users dialog says "Delete Account". --}}
+<dialog id="delete-confirm-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="delete-modal-title">
     {{-- Indeterminate Modal Progress Bar --}}
     <div id="delete-modal-loader" class="modal-loading-bar hidden">
         <div class="modal-loading-bar-inner"></div>
     </div>
 
-    <div class="flex items-start gap-3.5 mb-4">
-        <div class="flex-shrink-0 w-9 h-9 rounded-md bg-red-50 border border-red-200/80 flex items-center justify-center text-red-700">
-            <ion-icon name="trash-outline" class="text-lg text-red-700" aria-hidden="true"></ion-icon>
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="trash-outline" class="text-lg" aria-hidden="true"></ion-icon>
+            </div>
+            <div class="min-w-0">
+                <h3 id="delete-modal-title" class="text-sm font-bold text-white leading-tight">Delete Stall</h3>
+                <p id="delete-stall-name" class="text-[11px] text-brand-200 truncate"></p>
+            </div>
         </div>
-        <div>
-            <h3 id="delete-modal-title" class="text-sm font-bold text-neutral-900 leading-tight mb-1">Delete Stall?</h3>
-            <p class="text-neutral-500 text-xs leading-relaxed">
-                {{-- CHANGED: the evaluation-records sentence is its own span, hidden by openDeleteModal() for a stall with no evaluations; "cannot be undone" always shows. --}}
-                Permanently delete <strong id="delete-stall-name" class="text-neutral-900 font-semibold"></strong>?
+        <button type="button" id="delete-modal-close-btn" class="text-white/70 enabled:hover:text-white js-close-delete-modal p-1 cursor-pointer" aria-label="Close">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
+        </button>
+    </div>
+
+    <div class="px-6 pb-6 max-sm:pb-0">
+        <div class="mt-5 rounded-lg px-4 py-3.5 bg-rose-50">
+            <p class="text-xs font-semibold text-rose-900">This cannot be undone.</p>
+            {{-- CHANGED: the evaluation-records sentence is its own span, hidden by openDeleteModal() for a stall with no evaluations; "cannot be undone" always shows. --}}
+            <p class="text-xs text-rose-800 mt-0.5 leading-relaxed">
+                The stall is permanently deleted.
                 <span id="delete-stall-evals-note">This will remove all associated evaluation records.</span>
-                This cannot be undone.
             </p>
         </div>
-    </div>
-    <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-        <button type="button" id="delete-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-delete-modal cursor-pointer">Cancel</button>
-        <button type="button" id="confirm-delete-btn"
-            class="btn btn-sm text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 rounded-md flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
-            <ion-icon name="trash-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
-            <span>Yes, Delete</span>
-        </button>
+
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" id="delete-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md js-close-delete-modal cursor-pointer">Cancel</button>
+            <button type="button" id="confirm-delete-btn" class="btn btn-sm text-xs font-semibold rounded-md bg-rose-600 hover:bg-rose-700 text-white cursor-pointer">Delete Stall</button>
+        </div>
     </div>
 </dialog>
 
 {{-- CHANGED: added a styled confirmation dialog for removing a staff member from a stall; it replaces the browser's native confirm() popup, which did not match the other modals on this page. --}}
-<dialog id="unassign-confirm-modal" class="confirm-modal relative" aria-labelledby="unassign-modal-title">
-    <div class="flex items-start gap-3.5 mb-4">
-        <div class="flex-shrink-0 w-9 h-9 rounded-md bg-red-50 border border-red-200/80 flex items-center justify-center text-red-700">
-            <ion-icon name="person-remove-outline" class="text-lg text-red-700" aria-hidden="true"></ion-icon>
+{{-- CHANGED: "Yes, Remove" became "Remove Staff", and the dialog gained an X button. --}}
+<dialog id="unassign-confirm-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="unassign-modal-title">
+    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-start justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
+                <ion-icon name="person-remove-outline" class="text-lg" aria-hidden="true"></ion-icon>
+            </div>
+            <h3 id="unassign-modal-title" class="text-sm font-bold text-white leading-tight">Remove Staff Member</h3>
         </div>
-        <div>
-            <h3 id="unassign-modal-title" class="text-sm font-bold text-neutral-900 leading-tight mb-1">Remove Staff Member?</h3>
-            <p class="text-neutral-500 text-xs leading-relaxed">
-                Remove <strong id="unassign-staff-name" class="text-neutral-900 font-semibold"></strong> from <strong id="unassign-stall-name" class="text-neutral-900 font-semibold"></strong>? The staff account will become unassigned.
-            </p>
-        </div>
-    </div>
-    <div class="flex items-center justify-end gap-2 pt-3 border-t border-neutral-100">
-        <button type="button" id="unassign-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
-        <button type="button" id="confirm-unassign-btn"
-            class="btn btn-sm text-xs font-semibold text-white bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 rounded-md flex items-center gap-1.5 shadow-2xs transition-all cursor-pointer">
-            <ion-icon name="person-remove-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon>
-            <span>Yes, Remove</span>
+        <button type="button" id="unassign-modal-close-btn" class="text-white/70 enabled:hover:text-white p-1 cursor-pointer" aria-label="Close">
+            <ion-icon name="close-outline" class="text-xl"></ion-icon>
         </button>
+    </div>
+
+    <div class="px-6 pb-6 max-sm:pb-0">
+        <p class="mt-5 text-xs text-neutral-700 leading-relaxed">
+            Remove <strong id="unassign-staff-name" class="text-neutral-900 font-semibold"></strong> from <strong id="unassign-stall-name" class="text-neutral-900 font-semibold"></strong>? The staff account will become unassigned.
+        </p>
+
+        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
+            <button type="button" id="unassign-modal-cancel-btn" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer">Cancel</button>
+            <button type="button" id="confirm-unassign-btn" class="btn btn-sm text-xs font-semibold rounded-md bg-rose-600 hover:bg-rose-700 text-white cursor-pointer">Remove Staff</button>
+        </div>
     </div>
 </dialog>
 
@@ -783,7 +791,7 @@ function openEditModal(stallId, stallName, staffIdsArray, desc, isActive) {
     if (editSubmitBtn) {
         editSubmitBtn.disabled = false;
         editSubmitBtn.classList.remove('btn-loading');
-        editSubmitBtn.innerHTML = '<ion-icon name="save-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon> <span>Save Changes</span>';
+        editSubmitBtn.innerHTML = 'Save Changes'; // CHANGED: plain text, as in the markup (was icon plus span)
     }
     if (editCancelBtn) editCancelBtn.disabled = false;
     if (editCloseBtn) editCloseBtn.disabled = false;
@@ -1011,6 +1019,7 @@ function triggerUnassignStaff(staffId, staffName) {
 
 if (unassignModal) {
     unassignCancelBtn.addEventListener('click', function() { unassignModal.close(); });
+    document.getElementById('unassign-modal-close-btn').addEventListener('click', function() { unassignModal.close(); }); // ADDED: the dialog's new X button
     unassignModal.addEventListener('click', function(e) {
         var r = unassignModal.getBoundingClientRect();
         if (e.clientY < r.top || e.clientY > r.bottom || e.clientX < r.left || e.clientX > r.right) {
@@ -1096,7 +1105,7 @@ function openQuickAssignModal() {
     if (quickSubmitBtn) {
         quickSubmitBtn.disabled = false;
         quickSubmitBtn.classList.remove('btn-loading');
-        quickSubmitBtn.innerHTML = '<ion-icon name="checkmark-outline" class="text-sm leading-none"></ion-icon> <span>Assign Staff</span>';
+        quickSubmitBtn.innerHTML = 'Assign Staff'; // CHANGED: plain text, as in the markup (was icon plus span)
     }
     if (quickCancelBtn) quickCancelBtn.disabled = false;
     if (quickCloseBtn) quickCloseBtn.disabled = false;
@@ -1149,6 +1158,7 @@ var deleteModal     = document.getElementById('delete-confirm-modal');
 var stallNameEl     = document.getElementById('delete-stall-name');
 var confirmDelBtn   = document.getElementById('confirm-delete-btn');
 var deleteCancelBtn = document.getElementById('delete-modal-cancel-btn');
+var deleteCloseBtn  = document.getElementById('delete-modal-close-btn'); // ADDED
 var deleteLoader    = document.getElementById('delete-modal-loader');
 var deleteForm      = document.getElementById('delete-stall-form');
 
@@ -1163,9 +1173,10 @@ function openDeleteModal(stallId, stallName, hasEvaluations) {
     if (confirmDelBtn) {
         confirmDelBtn.disabled = false;
         confirmDelBtn.classList.remove('btn-loading');
-        confirmDelBtn.innerHTML = '<ion-icon name="trash-outline" class="text-sm leading-none" aria-hidden="true"></ion-icon> <span>Yes, Delete</span>';
+        confirmDelBtn.innerHTML = 'Delete Stall'; // CHANGED: plain text, as in the markup (was icon plus "Yes, Delete")
     }
     if (deleteCancelBtn) deleteCancelBtn.disabled = false;
+    if (deleteCloseBtn) deleteCloseBtn.disabled = false; // ADDED: the dialog's new X button
 
     deleteModal.showModal();
 }
@@ -1203,6 +1214,7 @@ if (confirmDelBtn) {
         confirmDelBtn.classList.add('btn-loading');
         confirmDelBtn.innerHTML = makeSpinnerSvg('h-3.5 w-3.5 text-white') + ' <span>Deleting Stall…</span>';
         if (deleteCancelBtn) deleteCancelBtn.disabled = true;
+        if (deleteCloseBtn) deleteCloseBtn.disabled = true; // ADDED: the dialog's new X button
 
         deleteForm.submit();
     });
