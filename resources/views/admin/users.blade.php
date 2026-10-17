@@ -530,7 +530,8 @@
                         <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                     </div>
                 </div>
-                <p class="text-[11px] text-neutral-600 mt-1.5">Min. 8 characters with letters, numbers & symbols.</p>
+                {{-- CHANGED: the "Min. 8 characters..." hint became the shared rule checklist, which ticks each rule as it is met, as on the staff profile. --}}
+                @include('partials.password-rules')
             </div>
         </div>
 
@@ -662,6 +663,8 @@
                             <p data-error-for="password_confirmation" class="field-error hidden text-rose-600 text-[11px] font-semibold mt-1 flex items-center gap-1"><ion-icon name="alert-circle-outline" class="text-xs shrink-0"></ion-icon><span></span></p>
                         </div>
                     </div>
+                    {{-- ADDED: the shared rule checklist, as in the create dialog. --}}
+                    @include('partials.password-rules')
                 </div>
             </div>
         </div>

@@ -49,8 +49,9 @@ const passwordRules = {
     symbol: v => /[^A-Za-z0-9]/.test(v),
 };
 document.querySelectorAll('[data-password-rules]').forEach(list => {
-    const password = list.closest('form').querySelector('[name="password"]');
-    password.addEventListener('input', () => list.querySelectorAll('[data-rule]').forEach(row => {
+    const form = list.closest('form');
+    const password = form.querySelector('[name="password"]');
+    const sync = () => list.querySelectorAll('[data-rule]').forEach(row => {
         const ok = passwordRules[row.dataset.rule](password.value);
         const icon = row.querySelector('ion-icon');
         row.classList.toggle('text-neutral-500', !ok);
@@ -60,7 +61,10 @@ document.querySelectorAll('[data-password-rules]').forEach(list => {
         icon.classList.toggle('text-emerald-500', ok);
         icon.classList.toggle('animate-icon-pop', ok);
         icon.setAttribute('name', ok ? 'checkmark-circle' : 'ellipse-outline');
-    }));
+    });
+    // CHANGED: listens on the form, and on its reset, so the rows clear when a dialog empties the fields (admin users page).
+    form.addEventListener('input', sync);
+    form.addEventListener('reset', () => setTimeout(sync));
 });
 
 // ADDED: a <p data-password-match> under a confirm field says live whether it matches the form's password, and a mismatch blocks submit with the browser's own message, so a typo is caught before the server sends the form back with both password fields wiped. While the confirm text is still the start of the password and the field has focus, nothing shows yet.
