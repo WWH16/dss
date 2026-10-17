@@ -226,9 +226,15 @@
             {{-- Current Password --}}
             <div>
                 <label for="modal-current-password" class="block text-xs font-semibold text-neutral-900 mb-1.5">Current password</label>
-                <input type="password" id="modal-current-password" name="current_password" required
-                    placeholder="••••••••"
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                {{-- ADDED (all three password fields): an eye button shows or hides the text (togglePasswordVisibility in resources/js/app.js), as on the student profile; right padding px-3 became pr-11 to clear it. --}}
+                <div class="relative">
+                    <input type="password" id="modal-current-password" name="current_password" required
+                        placeholder="••••••••"
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('current_password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-current-password', 'modal-current-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer" aria-label="Toggle current password visibility">
+                        <ion-icon id="modal-current-password-icon" name="eye-outline" class="text-base"></ion-icon>
+                    </button>
+                </div>
                 @error('current_password')
                     <p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>
                 @enderror
@@ -237,9 +243,14 @@
             {{-- New Password --}}
             <div>
                 <label for="modal-new-password" class="block text-xs font-semibold text-neutral-900 mb-1.5">New password</label>
-                <input type="password" id="modal-new-password" name="password" required
-                    placeholder="••••••••"
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                <div class="relative">
+                    <input type="password" id="modal-new-password" name="password" required
+                        placeholder="••••••••"
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border @error('password') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-new-password', 'modal-new-password-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer" aria-label="Toggle new password visibility">
+                        <ion-icon id="modal-new-password-icon" name="eye-outline" class="text-base"></ion-icon>
+                    </button>
+                </div>
                 {{-- CHANGED: hint neutral-500 to neutral-600, the hint colour of the other dialogs. --}}
                 <p class="text-[11px] text-neutral-600 mt-1">Minimum 8 characters with upper &amp; lowercase, a number, and a symbol.</p>
                 @error('password')
@@ -250,9 +261,14 @@
             {{-- Confirm Password --}}
             <div>
                 <label for="modal-password-confirmation" class="block text-xs font-semibold text-neutral-900 mb-1.5">Confirm new password</label>
-                <input type="password" id="modal-password-confirmation" name="password_confirmation" required
-                    placeholder="••••••••"
-                    class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                <div class="relative">
+                    <input type="password" id="modal-password-confirmation" name="password_confirmation" required
+                        placeholder="••••••••"
+                        class="w-full pl-3 pr-11 py-2.5 sm:py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors">
+                    <button type="button" onclick="togglePasswordVisibility('modal-password-confirmation', 'modal-password-confirmation-icon')" class="absolute inset-y-0 right-0 w-11 flex items-center justify-center text-neutral-500 hover:text-neutral-800 transition-colors cursor-pointer" aria-label="Toggle password confirmation visibility">
+                        <ion-icon id="modal-password-confirmation-icon" name="eye-outline" class="text-base"></ion-icon>
+                    </button>
+                </div>
                 {{-- ADDED: live match hint, see data-password-match in resources/js/app.js. --}}
                 <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
             </div>
