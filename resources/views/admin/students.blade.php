@@ -91,6 +91,7 @@
                             <option value="latest" {{ $sort === 'latest' ? 'selected' : '' }}>Newest accounts</option>
                             <option value="oldest" {{ $sort === 'oldest' ? 'selected' : '' }}>Oldest accounts</option>
                             <option value="name_asc" {{ $sort === 'name_asc' ? 'selected' : '' }}>Name A to Z</option>
+                            <option value="name_desc" {{ $sort === 'name_desc' ? 'selected' : '' }}>Name Z to A</option>
                             <option value="evaluations_desc" {{ $sort === 'evaluations_desc' ? 'selected' : '' }}>Most evaluations</option>
                             <option value="evaluations_asc" {{ $sort === 'evaluations_asc' ? 'selected' : '' }}>Fewest evaluations</option>
                         </select>
@@ -156,20 +157,26 @@
                 <table class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="bg-neutral-50/80 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200/80">
-                            <th class="px-5 py-3 w-[29%]">Name</th>
+                            {{-- CHANGED: Name sorts from the header like Evaluations and Registered. Idle sort icons are dimmed so only the active column's arrow stands out; they brighten on hover. --}}
+                            <th class="px-5 py-3 w-[29%]" aria-sort="{{ $sort === 'name_asc' ? 'ascending' : ($sort === 'name_desc' ? 'descending' : 'none') }}">
+                                <a href="{{ $sortUrl($sort === 'name_asc' ? 'name_desc' : 'name_asc') }}" class="group inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'name') ? 'text-neutral-900' : '' }}">
+                                    Name
+                                    <ion-icon name="{{ $sort === 'name_asc' ? 'arrow-up-outline' : ($sort === 'name_desc' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs {{ str_starts_with($sort, 'name') ? '' : 'opacity-50 group-hover:opacity-100' }}" aria-hidden="true"></ion-icon>
+                                </a>
+                            </th>
                             <th class="px-4 py-3 w-[15%]">Student ID</th>
                             <th class="px-4 py-3 w-[20%]">Program & Year</th>
                             <th class="px-4 py-3 w-[18%]">This month</th>
                             <th class="px-4 py-3 w-[10%] text-right" aria-sort="{{ $sort === 'evaluations_asc' ? 'ascending' : ($sort === 'evaluations_desc' ? 'descending' : 'none') }}">
-                                <a href="{{ $sortUrl($sort === 'evaluations_desc' ? 'evaluations_asc' : 'evaluations_desc') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'evaluations') ? 'text-neutral-900' : '' }}">
+                                <a href="{{ $sortUrl($sort === 'evaluations_desc' ? 'evaluations_asc' : 'evaluations_desc') }}" class="group inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'evaluations') ? 'text-neutral-900' : '' }}">
                                     Evaluations
-                                    <ion-icon name="{{ $sort === 'evaluations_asc' ? 'arrow-up-outline' : ($sort === 'evaluations_desc' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
+                                    <ion-icon name="{{ $sort === 'evaluations_asc' ? 'arrow-up-outline' : ($sort === 'evaluations_desc' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs {{ str_starts_with($sort, 'evaluations') ? '' : 'opacity-50 group-hover:opacity-100' }}" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
                             <th class="pl-8 pr-5 py-3 w-[8%]" aria-sort="{{ $sort === 'oldest' ? 'ascending' : ($sort === 'latest' ? 'descending' : 'none') }}">
-                                <a href="{{ $sortUrl($sort === 'latest' ? 'oldest' : 'latest') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ in_array($sort, ['latest', 'oldest']) ? 'text-neutral-900' : '' }}">
+                                <a href="{{ $sortUrl($sort === 'latest' ? 'oldest' : 'latest') }}" class="group inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ in_array($sort, ['latest', 'oldest']) ? 'text-neutral-900' : '' }}">
                                     Registered
-                                    <ion-icon name="{{ $sort === 'oldest' ? 'arrow-up-outline' : ($sort === 'latest' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
+                                    <ion-icon name="{{ $sort === 'oldest' ? 'arrow-up-outline' : ($sort === 'latest' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs {{ in_array($sort, ['latest', 'oldest']) ? '' : 'opacity-50 group-hover:opacity-100' }}" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
                         </tr>
@@ -220,7 +227,8 @@
                 {{-- CHANGED: one row per student: neutral avatar, name with ID and program underneath, status on the right. The whole card opens the details dialog; the eye button is gone and the name button is the keyboard target. The labelled grey box and the department are gone. --}}
                 <div class="md:hidden divide-y divide-neutral-100">
                     @foreach($students as $student)
-                        <div class="p-4 flex items-center gap-3 hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openDetailsModal(@json($student))'>
+                        {{-- CHANGED: a trailing chevron marks the row as tappable, as on the users page; active:bg gives touch feedback, since hover never fires on a phone. The chevron is decorative; the name button stays the keyboard target. --}}
+                        <div class="p-4 pr-3 flex items-center gap-3 hover:bg-neutral-50 active:bg-neutral-100 transition-colors cursor-pointer" onclick='openDetailsModal(@json($student))'>
                             <span class="w-8 h-8 rounded-full bg-neutral-100 text-neutral-600 text-xs font-semibold flex items-center justify-center shrink-0" aria-hidden="true">
                                 {{ strtoupper(substr($student->name, 0, 1)) }}
                             </span>
@@ -231,6 +239,7 @@
                                 </p>
                             </div>
                             <div class="shrink-0">{!! $monthBadge($student) !!}</div>
+                            <ion-icon name="chevron-forward-outline" class="text-lg text-neutral-400 shrink-0" aria-hidden="true"></ion-icon>
                         </div>
                     @endforeach
                 </div>

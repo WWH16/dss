@@ -461,6 +461,9 @@ class AdminController extends Controller
         $sortBy = $request->get('sort', 'latest');
         if ($sortBy === 'name_asc') {
             $query->orderBy('users.name', 'asc');
+        } elseif ($sortBy === 'name_desc') {
+            // CHANGED: Z to A, used by the sortable Name header.
+            $query->orderBy('users.name', 'desc');
         } elseif ($sortBy === 'evaluations_desc') {
             // CHANGED: ties ordered by name, so students with equal counts keep a stable order across pages.
             $query->orderByDesc('evaluations_count')->orderBy('users.name');
