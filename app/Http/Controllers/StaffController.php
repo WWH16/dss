@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Services\Ahp;
 use App\Services\Saw;
+use App\Services\NeedsImprovement; // ADDED
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
@@ -51,6 +52,10 @@ class StaffController extends Controller
                 MIN(created_at) as first_at,
                 COUNT(DISTINCT student_id) as unique_students,
                 COUNT(DISTINCT CASE WHEN created_at >= ? THEN student_id END) as month_students,
+                AVG(CASE WHEN created_at >= ? THEN cleanliness END) as month_cleanliness,
+                AVG(CASE WHEN created_at >= ? THEN service END) as month_service,
+                AVG(CASE WHEN created_at >= ? THEN taste END) as month_taste,
+                AVG(CASE WHEN created_at >= ? THEN price END) as month_price,
                 AVG(cleanliness) as cleanliness,
                 AVG(service) as service,
                 AVG(taste) as taste,
@@ -61,7 +66,7 @@ class StaffController extends Controller
                 COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 3 THEN 1 ELSE 0 END), 0) as stars_3,
                 COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 2 THEN 1 ELSE 0 END), 0) as stars_2,
                 COALESCE(SUM(CASE WHEN ROUND((cleanliness + service + taste + price)/4) = 1 THEN 1 ELSE 0 END), 0) as stars_1
-            ', [now('Asia/Manila')->startOfMonth()->utc()])
+            ', array_fill(0, 5, now('Asia/Manila')->startOfMonth()->utc())) // CHANGED: 5 bindings, for the month means added above.
             ->first();
 
         $totalEvaluations = $metrics->total_evaluations ?? 0;
@@ -86,6 +91,20 @@ class StaffController extends Controller
         $weights = (new Ahp)->weights();
         $rankedStalls = (new Saw)->rank($rankedStalls, $weights);
         $rankedStalls = (new Ahp)->attachScores($rankedStalls, $weights);
+
+        // ADDED: the client's Needs Improvement rule, on this month's means, or all-time ones when the month has no
+        // evaluations yet. A student rates a stall once a month, so month_students is the month's evaluation count.
+        $inMonth = $metrics->month_students > 0;
+        $basis = (object) collect(Saw::COLUMNS)
+            ->mapWithKeys(fn ($column) => [$column => $metrics->{($inMonth ? 'month_' : '') . $column}])
+            ->all();
+        $basisCount = (int) ($inMonth ? $metrics->month_students : $totalEvaluations);
+        $improvement = [
+            'flags' => NeedsImprovement::flags($basis, $weights),
+            'inMonth' => $inMonth,
+            'count' => $basisCount,
+            'provisional' => $basisCount < NeedsImprovement::MIN_EVALUATIONS,
+        ];
 
         $stallRank = null;
         $totalStalls = $rankedStalls->count();
@@ -137,6 +156,8 @@ class StaffController extends Controller
             'monthStudents' => $metrics->month_students,
             'averages' => $averages,
             'campusCriteria' => $campusCriteria,
+            // ADDED: for the Needs Improvement panel.
+            'improvement' => $improvement,
             'ratingDistribution' => $metrics,
             'trendDates' => $trendDates,
             'trendCounts' => $trendCounts,

@@ -152,6 +152,46 @@
 
         {{-- ── 4. Primary Chart Card: Evaluation Activity Timeline (Full Width) ──── --}}
         @if($totalEvaluations > 0 && $averages)
+            {{-- ADDED: the client's Needs Improvement recommendations, one per criterion whose mean is below 3.00. --}}
+            @php $flags = $improvement['flags']; @endphp
+            <div class="bg-white rounded-xl border {{ $flags ? 'border-amber-200/90' : 'border-emerald-200/90' }} p-4 sm:p-5 shadow-xs">
+                <div class="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-neutral-100">
+                    <div>
+                        <h2 class="text-sm font-bold text-neutral-900 tracking-tight flex items-center gap-1.5">
+                            <ion-icon name="{{ $flags ? 'construct-outline' : 'checkmark-circle-outline' }}" class="{{ $flags ? 'text-amber-700' : 'text-emerald-700' }} text-base" aria-hidden="true"></ion-icon>
+                            {{ $flags ? 'Needs Improvement' : 'Meets Standard' }}
+                        </h2>
+                        <p class="text-xs text-neutral-500 mt-0.5">
+                            Criteria averaging below 3.00★, from {{ $improvement['inMonth'] ? now('Asia/Manila')->format('F') . "'s " : '' }}{{ $improvement['count'] }} {{ Str::plural('evaluation', $improvement['count']) }}{{ $improvement['inMonth'] ? '' : ' (all-time; none yet this month)' }}.
+                        </p>
+                    </div>
+                    @if($improvement['provisional'])
+                        <span class="text-[11px] font-bold text-neutral-700 bg-neutral-100 border border-neutral-200 px-1.5 py-0.5 rounded-md shrink-0">
+                            Provisional, based on {{ $improvement['count'] }} {{ Str::plural('evaluation', $improvement['count']) }}
+                        </span>
+                    @endif
+                </div>
+
+                @if($flags)
+                    @if(count($flags) === count(\App\Services\Saw::COLUMNS))
+                        <p class="mt-3 text-xs font-semibold text-amber-900">Needs improvement in all areas.</p>
+                    @endif
+                    <ul class="mt-3 grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        @foreach($flags as $criterion => $score)
+                            <li class="p-3 bg-amber-50/60 border border-amber-200/80 rounded-md">
+                                <div class="flex items-baseline justify-between gap-2">
+                                    <span class="text-xs font-bold text-amber-950">{{ \App\Services\NeedsImprovement::LABELS[$criterion] }}</span>
+                                    <span class="text-sm font-bold text-amber-900 tabular-nums">{{ number_format($score, 2) }}★</span>
+                                </div>
+                                <p class="text-xs text-neutral-700 mt-1.5 leading-relaxed">{{ \App\Services\NeedsImprovement::ADVICE[$criterion] }}</p>
+                            </li>
+                        @endforeach
+                    </ul>
+                @else
+                    <p class="mt-3 text-xs font-semibold text-emerald-800">All criteria meet the 3.00 standard.</p>
+                @endif
+            </div>
+
             <div class="bg-white rounded-xl border border-neutral-200/80 p-4 sm:p-6 shadow-xs">
                 <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 mb-4 border-b border-neutral-100 gap-3">
                     <div>
