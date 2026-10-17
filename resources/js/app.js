@@ -1,16 +1,18 @@
 // CHANGED: removed the axios bootstrap import; every request uses fetch().
 import './toast';
 
-// ADDED: a wrapper with data-track-field="<program select id>" holds the track select. It stays disabled until a program is picked, lists only that program's optgroup, and clears a track from another program.
+// ADDED: a wrapper with data-track-field="<program select id>" holds the track select. It stays disabled until a program is picked, lists only that program's options, and clears a track from another program.
+// CHANGED: options carry data-program instead of sitting in an optgroup, so the open list no longer repeats the program as a heading.
+// Other programs' options are taken out of the select, not hidden: iOS Safari ignores hidden on <option>.
 document.querySelectorAll('[data-track-field]').forEach(field => {
     const course = document.getElementById(field.dataset.trackField);
     const track = field.querySelector('select');
+    const [placeholder, ...options] = track.options;
     const sync = () => {
+        const value = track.selectedOptions[0]?.dataset.program === course.value ? track.value : '';
         track.disabled = course.value === '';
-        track.querySelectorAll('optgroup').forEach(group => {
-            group.hidden = group.disabled = group.label !== course.value;
-        });
-        if (track.selectedOptions[0]?.parentElement.disabled) track.value = '';
+        track.replaceChildren(placeholder, ...options.filter(option => option.dataset.program === course.value));
+        track.value = value;
     };
     course.addEventListener('change', sync);
     sync();

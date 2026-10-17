@@ -223,12 +223,11 @@
                     class="w-full px-3 py-2.5 sm:py-2 bg-neutral-50 border @error('track') border-rose-500 @else border-neutral-200 @enderror rounded-md text-base sm:text-xs font-medium text-neutral-900 focus:outline-none focus:border-brand-700 focus:bg-white transition-colors">
                     {{-- CHANGED: the placeholder shows but cannot be picked (disabled); a selected track below overrides its "selected". --}}
                     <option value="" disabled selected>Select Track</option>
+                    {{-- CHANGED: no optgroup per program; the program is already picked, so its heading in the list was redundant. --}}
                     @foreach(\App\Models\User::PROGRAMS as $program => $tracks)
-                        <optgroup label="{{ $program }}">
-                            @foreach($tracks as $code => $trackName)
-                                <option value="{{ $code }}" {{ $currentCourse === $program && $currentTrack === $code ? 'selected' : '' }}>{{ $code }} - {{ $trackName }}</option>
-                            @endforeach
-                        </optgroup>
+                        @foreach($tracks as $code => $trackName)
+                            <option value="{{ $code }}" data-program="{{ $program }}" {{ $currentCourse === $program && $currentTrack === $code ? 'selected' : '' }}>{{ $code }} - {{ $trackName }}</option>
+                        @endforeach
                     @endforeach
                 </select>
                 @error('track')
