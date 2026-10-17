@@ -1,5 +1,6 @@
 <?php
 
+use App\Mail\PasswordChangedMail;
 use App\Mail\RoleChangedMail;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -59,6 +60,34 @@ test('no email when the role stays the same', function () {
     $this->actingAs($admin)->put(route('admin.users.update', $target->id), [
         'role' => 'clinic', 'name' => 'Maria S. Santos', 'email' => 'nurse@example.com',
         'password' => 'NewPass1!', 'password_confirmation' => 'NewPass1!',
+    ])->assertSessionHasNoErrors();
+
+    // CHANGED: the new password now sends PasswordChangedMail, so only the role email is checked.
+    Mail::assertNotSent(RoleChangedMail::class);
+});
+
+test('an admin resetting the password emails the account without the password', function () {
+    Mail::fake();
+    $admin = roleMailUser('admin', 'admin@example.com', 'Admin');
+    $target = roleMailUser('clinic', 'nurse@example.com', 'Maria Santos');
+
+    $this->actingAs($admin)->put(route('admin.users.update', $target->id), [
+        'role' => 'clinic', 'name' => 'Maria Santos', 'email' => 'nurse@example.com',
+        'password' => 'NewPass1!', 'password_confirmation' => 'NewPass1!',
+    ])->assertSessionHasNoErrors();
+
+    Mail::assertSent(PasswordChangedMail::class, fn (PasswordChangedMail $mail) => $mail->hasTo('nurse@example.com')
+        && ! str_contains($mail->render(), 'NewPass1!'));
+    Mail::assertSentCount(1);
+});
+
+test('no password email when the admin leaves the password blank', function () {
+    Mail::fake();
+    $admin = roleMailUser('admin', 'admin@example.com', 'Admin');
+    $target = roleMailUser('clinic', 'nurse@example.com', 'Maria Santos');
+
+    $this->actingAs($admin)->put(route('admin.users.update', $target->id), [
+        'role' => 'clinic', 'name' => 'Maria S. Santos', 'email' => 'nurse@example.com', 'password' => '',
     ])->assertSessionHasNoErrors();
 
     Mail::assertNothingSent();

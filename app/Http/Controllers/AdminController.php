@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
 use App\Models\Program;
 use App\Models\User;
+use App\Mail\PasswordChangedMail; // ADDED
 use App\Mail\RoleChangedMail; // ADDED
 use Illuminate\Support\Facades\Mail; // ADDED
 
@@ -823,6 +824,11 @@ class AdminController extends Controller
             rescue(fn () => Mail::to($target->email)->send(
                 new RoleChangedMail($target->name, self::ROLE_LABELS[$oldRole], self::ROLE_LABELS[$target->role], now())
             ));
+        }
+
+        // ADDED: same "your password was changed" email as the profile and reset flows, sent after the save.
+        if ($request->filled('password')) {
+            rescue(fn () => Mail::to($target->email)->send(new PasswordChangedMail($target->name, now())));
         }
 
         if ($request->wantsJson()) {
