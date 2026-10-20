@@ -23,6 +23,8 @@
     <style>
         /* Dashboard Layout Styles */
         body { background-color: var(--color-surface-alt); }
+        /* ADDED: one dark-green line colour for the sidebar and top bar dividers, so the two lines cannot drift apart. */
+        :root { --dashboard-line: oklch(0.30 0.10 155); }
         .dashboard-layout {
             display: grid;
             grid-template-columns: 15rem minmax(0, 1fr);
@@ -30,7 +32,7 @@
         }
         .dashboard-sidebar {
             background-color: oklch(0.22 0.09 155);
-            border-right: 1px solid oklch(0.30 0.10 155);
+            border-right: 1px solid var(--dashboard-line);
             display: flex;
             flex-direction: column;
             position: sticky;
@@ -39,20 +41,50 @@
             height: 100dvh;
             z-index: 40;
         }
+        /* CHANGED: the top bar carries the canteen photo, and its bottom line uses the sidebar's divider colour. On a page with a banner the bar and banner are one header: it is pinned by its bottom 4rem (negative sticky top), and as the page scrolls a script slides the photo and bar down by the same amount, so the header shrinks into the 4rem bar instead of sliding under it, with the bar's line ending level with the line under "DSS Portal". --collapse is the banner height; the script measures it, and without the script it falls back to the minimum. */
+        .dashboard-column.has-banner { --banner-min: 11rem; }
+        @media (min-width: 640px) {
+            .dashboard-column.has-banner { --banner-min: 9rem; }
+        }
         .dashboard-header {
-            background-color: var(--color-surface);
-            border-bottom: 1px solid oklch(0.84 0.10 155 / 0.35);
-            height: 3.5rem;
+            background-color: var(--color-brand-950);
+            border-bottom: 1px solid var(--dashboard-line);
+            position: sticky;
+            top: calc(-1 * var(--collapse, var(--banner-min, 0rem)));
+            z-index: 30;
+            isolation: isolate;
+            overflow: hidden;
+        }
+        .header-photo {
+            position: absolute;
+            inset: 0;
+            z-index: -1;
+        }
+        /* ADDED: with a banner, the photo is zoomed out to show the whole food court front, roof peak to entrance, instead of a cropped strip of the sign. It is sized from the header height and stretched to 95% of the header width (a deliberate distortion), centred, with a thin fade at each side edge. */
+        .has-banner .header-photo img {
+            inset: auto 2.5% 0 2.5%;
+            height: 172%;
+            width: 95%;
+            object-fit: fill;
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+            mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+        }
+        .header-bar {
+            position: relative;
+            z-index: 1;
+            height: 4rem;
             display: flex;
             align-items: center;
             justify-content: space-between;
+            gap: var(--space-4);
             padding: 0 var(--space-6);
-            position: sticky;
-            top: 0;
-            z-index: 30;
+        }
+        .header-banner { min-height: var(--banner-min); }
+        @media (max-width: 768px) {
+            .header-bar { padding: 0 var(--space-4); }
         }
         .sidebar-brand {
-            border-bottom-color: oklch(0.30 0.10 155);
+            border-bottom-color: var(--dashboard-line);
         }
         .sidebar-brand-text {
             color: oklch(0.90 0.06 155);
@@ -90,7 +122,7 @@
             transform: scale(1.08);
         }
         .sidebar-footer {
-            border-top-color: oklch(0.30 0.10 155);
+            border-top-color: var(--dashboard-line);
         }
         .sidebar-logout {
             color: oklch(0.72 0.08 28) !important;
@@ -104,7 +136,7 @@
             background: none;
             border: none;
             cursor: pointer;
-            color: var(--color-ink-700);
+            color: var(--color-white);
             padding: var(--space-2);
         }
         
@@ -148,7 +180,8 @@
 <body class="font-sans antialiased text-ink-900">
 
 {{-- ADDED: keyboard users tabbed through every sidebar link before reaching the page content (WCAG 2.4.1). --}}
-<a href="#main" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2.5 focus:rounded-md focus:bg-brand-700 focus:text-white focus:text-xs focus:font-bold focus:shadow-md">
+{{-- CHANGED: on a page with a banner the skip link lands on the banner, which holds the page heading and actions. --}}
+<a href="#{{ View::hasSection('banner') ? 'page-banner' : 'main' }}" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-4 focus:py-2.5 focus:rounded-md focus:bg-brand-700 focus:text-white focus:text-xs focus:font-bold focus:shadow-md">
     Skip to main content
 </a>
 
@@ -251,29 +284,44 @@
     </aside>
 
     {{-- ── Main Content Area ───────────────────────────────────────────── --}}
-    <div class="flex flex-col min-h-screen">
+    <div class="dashboard-column flex flex-col min-h-screen @hasSection('banner') has-banner @endif">
         <!-- Header -->
-        <header class="dashboard-header">
-            <div class="flex items-center gap-4">
-                {{-- CHANGED: the button now reports whether the sidebar is open and what it controls; before, a screen reader heard only "Toggle Menu" with no state. --}}
-                <button class="mobile-toggle" id="mobile-toggle" aria-label="Toggle Menu" aria-expanded="false" aria-controls="sidebar">
-                    <ion-icon name="menu-outline" class="text-2xl text-ink-900"></ion-icon>
-                </button>
-                {{-- CHANGED: was an <h2>, which put a level-2 heading ahead of each page's <h1> and broke heading navigation. The header title is a label, not a section heading. --}}
-                <p class="font-display font-semibold text-lg text-ink-900">
-                    @yield('header_title', 'Dashboard')
-                </p>
+        <header class="dashboard-header" id="dashboard-header">
+            {{-- ADDED: the landing page's canteen photo, cropped to the roof and food court sign, under a green wash that is darker on the left behind the title and still dark enough on the right for the white name. Decorative. --}}
+            <div class="header-photo" aria-hidden="true">
+                <img src="{{ asset('assets/images/canteen.jpg') }}" alt="" class="absolute inset-0 h-full w-full object-cover object-[50%_75%]" width="2000" height="1125" decoding="async">
+                <div class="absolute inset-0 bg-linear-to-r from-brand-950/90 via-brand-900/65 to-brand-950/75"></div>
             </div>
-            <div class="flex items-center gap-3">
-                <div class="text-right hidden sm:block">
-                    {{-- CHANGED: the student number is read from the students table. --}}
-                    <div class="text-sm font-bold text-ink-900 leading-none">{{ Auth::user()->name ?? (Auth::user()->student?->student_number ?? 'User') }}</div>
-                    <div class="text-[11px] text-ink-500 uppercase tracking-wider font-semibold mt-1">{{ Auth::user()->role ?? 'Role' }}</div>
+
+            <div class="header-bar">
+                <div class="flex min-w-0 items-center gap-4">
+                    {{-- CHANGED: the button now reports whether the sidebar is open and what it controls; before, a screen reader heard only "Toggle Menu" with no state. --}}
+                    <button class="mobile-toggle rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white" id="mobile-toggle" aria-label="Toggle Menu" aria-expanded="false" aria-controls="sidebar">
+                        <ion-icon name="menu-outline" class="text-2xl"></ion-icon>
+                    </button>
+                    {{-- CHANGED: was an <h2>, which put a level-2 heading ahead of each page's <h1> and broke heading navigation. The header title is a label, not a section heading. --}}
+                    <p class="min-w-0 truncate font-display font-semibold text-lg text-white">
+                        @yield('header_title', 'Dashboard')
+                    </p>
                 </div>
-                <div class="w-9 h-9 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200">
-                    {{ substr(Auth::user()->name ?? (Auth::user()->student?->student_number ?? 'U'), 0, 1) }}
+                <div class="flex shrink-0 items-center gap-3">
+                    <div class="text-right hidden sm:block">
+                        {{-- CHANGED: the student number is read from the students table. --}}
+                        <div class="max-w-48 truncate text-sm font-bold text-white leading-tight">{{ Auth::user()->name ?? (Auth::user()->student?->student_number ?? 'User') }}</div>
+                        <div class="text-[11px] text-brand-200 uppercase tracking-wider font-semibold mt-0.5">{{ Auth::user()->role ?? 'Role' }}</div>
+                    </div>
+                    <div class="w-9 h-9 shrink-0 rounded-full bg-brand-100 flex items-center justify-center text-brand-700 font-bold border border-brand-200">
+                        {{ substr(Auth::user()->name ?? (Auth::user()->student?->student_number ?? 'U'), 0, 1) }}
+                    </div>
                 </div>
             </div>
+
+            {{-- ADDED: the page's own banner content (e.g. the Overview actions) under the bar, on the same photo. It fades out as the header shrinks. The id and tabindex make it the skip link's target, so its heading and actions are not skipped. --}}
+            @hasSection('banner')
+                <div class="header-banner flex flex-col justify-end gap-4 px-4 pt-2 pb-6 sm:flex-row sm:items-end sm:justify-between md:px-6 outline-none" id="page-banner" tabindex="-1">
+                    @yield('banner')
+                </div>
+            @endif
         </header>
 
         <!-- Main Content -->
@@ -305,6 +353,32 @@
 </dialog>
 
 <script>
+    // ADDED: shrink the header into the top bar on scroll. The header is pinned by its bottom edge; moving the photo and bar down by the scrolled amount keeps them in place while the banner content fades out.
+    (function () {
+        var banner = document.getElementById('page-banner');
+        if (!banner) return;
+        var header = document.getElementById('dashboard-header');
+        var photo = header.querySelector('.header-photo');
+        var bar = header.querySelector('.header-bar');
+        var collapse = banner.offsetHeight;
+
+        function update() {
+            var shift = Math.min(Math.max(window.scrollY, 0), collapse);
+            var fade = Math.max(0, 1 - shift / (collapse * 0.4));
+            photo.style.transform = bar.style.transform = 'translateY(' + shift + 'px)';
+            banner.style.opacity = fade;
+            banner.style.visibility = fade === 0 ? 'hidden' : '';
+        }
+
+        new ResizeObserver(function () {
+            collapse = banner.offsetHeight;
+            header.style.setProperty('--collapse', collapse + 'px');
+            update();
+        }).observe(banner);
+        window.addEventListener('scroll', update, { passive: true });
+        update();
+    })();
+
     // Sidebar Mobile Toggle
     (function () {
         var toggle = document.getElementById('mobile-toggle');

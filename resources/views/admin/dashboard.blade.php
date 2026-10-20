@@ -18,39 +18,35 @@
 </style>
 @endsection
 
+{{-- ── 1. Page Header with Quick Actions ────────────────────────────── --}}
+{{-- CHANGED: the actions moved out of the content into the photo banner under the top bar (the layout's banner section). --}}
+@section('banner')
+    {{-- CHANGED: the visible "Overview" heading repeated the top bar title, and the description line was removed. The h1 stays for screen readers and heading navigation. --}}
+    <h1 class="sr-only">Overview</h1>
+
+    {{-- Action Button Group --}}
+    <div class="flex flex-wrap items-center gap-2 shrink-0 sm:ml-auto no-print">
+        {{-- CHANGED: was a button calling window.print() on the dashboard; now opens the dedicated report page with print options. --}}
+        {{-- CHANGED: dropped the Tailwind size, border and shadow utilities, which the unlayered .btn rule overrode; .btn-secondary now supplies the white fill and border. Icon tinted brand green. --}}
+        {{-- CHANGED: Print Report and Manage Stalls are admin-only; both hidden for clinic users. --}}
+        @if(Auth::user()->role === 'admin')
+        <a href="{{ route('admin.report') }}" class="btn btn-secondary font-bold">
+            <ion-icon name="print-outline" class="text-base text-brand-700"></ion-icon>
+            Print Report
+        </a>
+        {{-- CHANGED: dropped the same dead size utilities so both header buttons share one size from .btn. --}}
+        {{-- CHANGED: btn-primary became btn-secondary; the solid green button drew the eye before the activity numbers. --}}
+        <a href="{{ route('admin.stalls') }}" class="btn btn-secondary font-bold">
+            <ion-icon name="add-circle-outline" class="text-base text-brand-700"></ion-icon>
+            Manage Stalls
+        </a>
+        @endif
+    </div>
+@endsection
+
 @section('content')
 {{-- CHANGED: was max-w-7xl mx-auto, which centred a 1280px column and left dead space beside the sidebar on wide screens. Content now starts at the main padding and grows to 1600px. --}}
 <div class="max-w-[1600px] space-y-6">
-
-    {{-- ── 1. Page Header with Quick Actions ────────────────────────────── --}}
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-neutral-200/80">
-        <div>
-            {{-- CHANGED: the visible "Overview" heading repeated the top bar title. The h1 stays for screen readers and heading navigation; the visible copy is the description below. --}}
-            <h1 class="sr-only">Overview</h1>
-            <p class="text-sm text-neutral-600 max-w-2xl">
-                Campus dining analytics, evaluation metrics, and decision support rankings.
-            </p>
-        </div>
-
-        {{-- Action Button Group --}}
-        <div class="flex items-center gap-2 self-start sm:self-auto shrink-0 no-print">
-            {{-- CHANGED: was a button calling window.print() on the dashboard; now opens the dedicated report page with print options. --}}
-            {{-- CHANGED: dropped the Tailwind size, border and shadow utilities, which the unlayered .btn rule overrode; .btn-secondary now supplies the white fill and border. Icon tinted brand green. --}}
-            {{-- CHANGED: Print Report and Manage Stalls are admin-only; both hidden for clinic users. --}}
-            @if(Auth::user()->role === 'admin')
-            <a href="{{ route('admin.report') }}" class="btn btn-secondary font-bold">
-                <ion-icon name="print-outline" class="text-base text-brand-700"></ion-icon>
-                Print Report
-            </a>
-            {{-- CHANGED: dropped the same dead size utilities so both header buttons share one size from .btn. --}}
-            {{-- CHANGED: btn-primary became btn-secondary; the solid green button drew the eye before the activity numbers. --}}
-            <a href="{{ route('admin.stalls') }}" class="btn btn-secondary font-bold">
-                <ion-icon name="add-circle-outline" class="text-base text-brand-700"></ion-icon>
-                Manage Stalls
-            </a>
-            @endif
-        </div>
-    </div>
 
     {{-- ── 2. Diagnostic Warning (Only if any stall is below 3.0★) ─────── --}}
     @if(isset($attentionStalls) && $attentionStalls->isNotEmpty())

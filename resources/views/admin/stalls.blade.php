@@ -58,7 +58,7 @@
 
         {{-- Left Column: Creation Form (4 cols) --}}
         {{-- CHANGED: sticky from lg up so the form stays in reach while the directory scrolls; it scrolls on its own if taller than the window, with the thin custom-scrollbar instead of the browser default. --}}
-        <div class="lg:col-span-4 space-y-5 lg:sticky lg:top-[4.5rem] lg:max-h-[calc(100dvh-5.5rem)] lg:overflow-y-auto custom-scrollbar">
+        <div class="lg:col-span-4 space-y-5 lg:sticky lg:top-[5rem] lg:max-h-[calc(100dvh-6rem)] lg:overflow-y-auto custom-scrollbar">
 
             {{-- Add Stall Card --}}
             {{-- CHANGED: card radius rounded-lg to rounded-xl, matching the overview's card rule (cards xl, controls md). --}}

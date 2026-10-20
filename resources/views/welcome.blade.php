@@ -49,7 +49,7 @@
     <div class="hero-visual" aria-hidden="true">
         <div class="hero-image-wrap">
             <img
-                src="{{ asset('assets/images/canteen.png') }}"
+                src="{{ asset('assets/images/canteen.jpg') }}"
                 alt=""
                 class="hero-image"
                 width="1200"
