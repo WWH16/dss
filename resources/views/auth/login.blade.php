@@ -28,7 +28,8 @@
 
 
     {{-- CHANGED: the icon-only corner arrow labelled "Go back" is now the shared back link above the card. It names where it goes (home), is 44px tall, and no longer overlaps the tall register card on phones. --}}
-    <div class="w-full max-w-md mt-12 mb-3">
+    {{-- CHANGED: on lg+ screens the back link sits in the top-left corner beside the card, like the evaluation page, instead of stacking above it. --}}
+    <div class="w-full max-w-md mt-12 mb-3 lg:absolute lg:top-8 lg:left-8 lg:w-auto lg:m-0">
         @include('partials.back-link', ['href' => url('/'), 'label' => 'Back to Home'])
     </div>
 
@@ -54,7 +55,7 @@
 
     <!-- Unified Form Card -->
     {{-- CHANGED: mb-12 instead of my-12; the back link above holds the top margin. --}}
-    <div class="w-full max-w-md bg-white rounded-[4px] border border-neutral-200/60 p-6 md:p-8 shadow-sm mb-12 relative z-10">
+    <div class="w-full max-w-md bg-white rounded-[4px] border border-neutral-200/60 p-6 md:p-8 shadow-sm mb-12 lg:mt-12 relative z-10">
 
         <!-- Logo & Header -->
         <div class="text-center mb-6">
