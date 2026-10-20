@@ -8,7 +8,7 @@
 <link rel="dns-prefetch" href="https://cdn.jsdelivr.net">
 <style>
     @media print {
-        .site-sidebar, .site-nav, .mobile-toggle, .no-print, header { display: none !important; }
+        .site-sidebar, .site-nav, .no-print { display: none !important; }
         main { padding: 0 !important; margin: 0 !important; max-width: 100% !important; }
         .print-break-inside-avoid { break-inside: avoid; }
         body { background: #fff !important; color: #000 !important; font-size: 12pt; }

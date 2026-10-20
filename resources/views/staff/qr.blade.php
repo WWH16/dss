@@ -7,7 +7,7 @@
 <style>
     @page { margin: 16mm; }
     @media print {
-        .dashboard-sidebar, .dashboard-header, .sidebar-overlay, .no-print { display: none !important; }
+        .dashboard-sidebar, .sidebar-overlay, .no-print { display: none !important; }
         .dashboard-layout { display: block !important; }
         main { padding: 0 !important; }
         body { background: #fff !important; }

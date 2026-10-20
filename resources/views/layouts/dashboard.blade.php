@@ -41,16 +41,16 @@
             height: 100dvh;
             z-index: 40;
         }
-        /* CHANGED: the top bar carries the canteen photo, and its bottom line uses the sidebar's divider colour. On a page with a banner the bar and banner are one header: it is pinned by its bottom 4rem (negative sticky top), and as the page scrolls a script slides the photo and bar down by the same amount, so the header shrinks into the 4rem bar instead of sliding under it, with the bar's line ending level with the line under "DSS Portal". --collapse is the banner height; the script measures it, and without the script it falls back to the minimum. */
-        .dashboard-column.has-banner { --banner-min: 11rem; }
+        /* CHANGED: the top bar carries the canteen photo, and its bottom line uses the sidebar's divider colour. The bar and the banner below it are one header on every page: it is pinned by its bottom 4rem (negative sticky top), and as the page scrolls a script slides the photo and bar down by the same amount, so the header shrinks into the 4rem bar instead of sliding under it, with the bar's line ending level with the line under "DSS Portal". --collapse is the banner height; the script measures it, and without the script it falls back to the minimum. */
+        .dashboard-column { --banner-min: 11rem; }
         @media (min-width: 640px) {
-            .dashboard-column.has-banner { --banner-min: 9rem; }
+            .dashboard-column { --banner-min: 9rem; }
         }
         .dashboard-header {
             background-color: var(--color-brand-950);
             border-bottom: 1px solid var(--dashboard-line);
             position: sticky;
-            top: calc(-1 * var(--collapse, var(--banner-min, 0rem)));
+            top: calc(-1 * var(--collapse, var(--banner-min)));
             z-index: 30;
             isolation: isolate;
             overflow: hidden;
@@ -60,8 +60,8 @@
             inset: 0;
             z-index: -1;
         }
-        /* ADDED: with a banner, the photo is zoomed out to show the whole food court front, roof peak to entrance, instead of a cropped strip of the sign. It is sized from the header height and stretched to 95% of the header width (a deliberate distortion), centred, with a thin fade at each side edge. */
-        .has-banner .header-photo img {
+        /* ADDED: the photo is zoomed out to show the whole food court front, roof peak to entrance, instead of a cropped strip of the sign. It is sized from the header height and stretched to 95% of the header width (a deliberate distortion), centred, with a thin fade at each side edge. */
+        .header-photo img {
             inset: auto 2.5% 0 2.5%;
             height: 172%;
             width: 95%;
@@ -80,6 +80,10 @@
             padding: 0 var(--space-6);
         }
         .header-banner { min-height: var(--banner-min); }
+        /* ADDED: the photo header is screen-only; printouts start with the page content. */
+        @media print {
+            .dashboard-header { display: none; }
+        }
         @media (max-width: 768px) {
             .header-bar { padding: 0 var(--space-4); }
         }
@@ -284,12 +288,12 @@
     </aside>
 
     {{-- ── Main Content Area ───────────────────────────────────────────── --}}
-    <div class="dashboard-column flex flex-col min-h-screen @hasSection('banner') has-banner @endif">
+    <div class="dashboard-column flex flex-col min-h-screen">
         <!-- Header -->
         <header class="dashboard-header" id="dashboard-header">
-            {{-- ADDED: the landing page's canteen photo, cropped to the roof and food court sign, under a green wash that is darker on the left behind the title and still dark enough on the right for the white name. Decorative. --}}
+            {{-- ADDED: the landing page's canteen photo, under a green wash that is darker on the left behind the title and still dark enough on the right for the white name. Decorative. --}}
             <div class="header-photo" aria-hidden="true">
-                <img src="{{ asset('assets/images/canteen.jpg') }}" alt="" class="absolute inset-0 h-full w-full object-cover object-[50%_75%]" width="2000" height="1125" decoding="async">
+                <img src="{{ asset('assets/images/canteen.jpg') }}" alt="" class="absolute" width="2000" height="1125" decoding="async">
                 <div class="absolute inset-0 bg-linear-to-r from-brand-950/90 via-brand-900/65 to-brand-950/75"></div>
             </div>
 
@@ -316,12 +320,10 @@
                 </div>
             </div>
 
-            {{-- ADDED: the page's own banner content (e.g. the Overview actions) under the bar, on the same photo. It fades out as the header shrinks. The id and tabindex make it the skip link's target, so its heading and actions are not skipped. --}}
-            @hasSection('banner')
-                <div class="header-banner flex flex-col justify-end gap-4 px-4 pt-2 pb-6 sm:flex-row sm:items-end sm:justify-between md:px-6 outline-none" id="page-banner" tabindex="-1">
-                    @yield('banner')
-                </div>
-            @endif
+            {{-- ADDED: the banner under the bar, on every page; a page can fill it with its own content (e.g. the Overview actions), which fades out as the header shrinks. The id and tabindex make it the skip link's target on such pages, so their heading and actions are not skipped. --}}
+            <div class="header-banner flex flex-col justify-end gap-4 px-4 pt-2 pb-6 sm:flex-row sm:items-end sm:justify-between md:px-6 outline-none" id="page-banner" tabindex="-1">
+                @yield('banner')
+            </div>
         </header>
 
         <!-- Main Content -->
@@ -356,7 +358,6 @@
     // ADDED: shrink the header into the top bar on scroll. The header is pinned by its bottom edge; moving the photo and bar down by the scrolled amount keeps them in place while the banner content fades out.
     (function () {
         var banner = document.getElementById('page-banner');
-        if (!banner) return;
         var header = document.getElementById('dashboard-header');
         var photo = header.querySelector('.header-photo');
         var bar = header.querySelector('.header-bar');
