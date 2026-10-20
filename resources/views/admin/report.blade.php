@@ -386,7 +386,7 @@
                                             @foreach ($columns as $criterion => $column)
                                                 <th class="num">{{ Str::before($criterionLabels[$criterion], ' ') }}</th>
                                             @endforeach
-                                            <th class="num">Mean</th>
+                                            <th class="num">Overall mean</th>
                                             <th class="num">SAW</th>
                                             <th class="num">AHP</th>
                                         </tr>
@@ -428,15 +428,16 @@
                     <section class="doc-section">
                         <h2>Stalls needing attention</h2>
                         @if ($attention->isNotEmpty())
-                            <p class="muted small">A stall is listed when its overall mean or any criterion mean is below 3.00.</p>
+                            {{-- CHANGED: the intro names the rating scale, and the headers say which mean each column shows. --}}
+                            <p class="muted small">A stall is listed when its overall mean or any criterion mean is below 3.00 out of 5.</p>
                             <div class="tbl-scroll">
                                 <table class="doc">
                                     <thead>
                                         <tr>
                                             <th>Stall</th>
                                             <th class="num">Mean</th>
-                                            <th>Below 3.00</th>
-                                            <th>Weakest criterion</th>
+                                            <th>Criteria below 3.00</th>
+                                            <th>Lowest-rated criterion</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -452,7 +453,7 @@
                                 </table>
                             </div>
                         @else
-                            <p class="attention-empty">No stall has an overall or criterion mean below 3.00.</p>
+                            <p class="attention-empty">No stall has an overall or criterion mean below 3.00 out of 5.</p>
                         @endif
                     </section>
                 @endif
