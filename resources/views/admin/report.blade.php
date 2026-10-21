@@ -12,7 +12,7 @@
     <link rel="icon" type="image/png" href="{{ asset('favicon.png') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Sora:wght@600;700&display=swap" rel="stylesheet">
     <style>
         :root {
             --ink: oklch(0.21 0.02 155);
@@ -130,7 +130,11 @@
             max-width: 100%;
             min-height: 297mm;
             margin: 0 auto;
-            padding: 16mm 15mm 14mm;
+            /* CHANGED: no padding; the page frame below leaves room for the client's letterhead. */
+            padding: 0;
+            position: relative;
+            container-type: inline-size;
+            --mm: calc(100cqw / 210);
             background: var(--paper);
             box-shadow: 0 1px 2px oklch(0.2 0.03 155 / 0.08), 0 14px 36px -8px oklch(0.2 0.03 155 / 0.18);
             font-size: 10pt;
@@ -140,16 +144,31 @@
             print-color-adjust: exact;
         }
 
-        .letterhead { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 14px; }
-        .letterhead img { width: 60px; height: 60px; object-fit: contain; }
-        {{-- CHANGED: removed the .lh-small rule; its only user, the "Republic of the Philippines" line, was removed from the letterhead. --}}
-        .lh-name { margin: 1px 0 0; font-family: 'Sora', sans-serif; font-size: 14pt; font-weight: 700; letter-spacing: 0.01em; text-transform: uppercase; color: var(--brand-deep); line-height: 1.15; }
-        .lh-campus { margin: 1px 0 0; font-size: 9.5pt; font-weight: 600; }
-        .lh-right { text-align: right; font-size: 8.5pt; color: var(--ink-2); line-height: 1.35; }
-        .double-rule { border: 0; border-top: 2.5px solid var(--rule-strong); margin: 12px 0 0; }
-        .double-rule + .double-rule { border-top-width: 0.75px; margin-top: 2px; }
+        /* ADDED: the client's letterhead (ISU Cauayan Campus Health Services template). The header and footer art are crops of the
+           template's full-page image; the two text lines that sit on top of it in the template are real text. Sizes use --mm, one
+           millimetre of the A4 sheet, so the letterhead scales with the preview and is exact on paper. */
+        .lh-head, .lh-foot { position: absolute; left: 0; width: 100%; z-index: 0; }
+        .lh-head { top: 0; }
+        .lh-foot { bottom: 0; }
+        .lh-head img, .lh-foot img { display: block; width: 100%; height: auto; }
+        .lh-place {
+            position: absolute; top: calc(33.6 * var(--mm)); left: 50.95%; transform: translateX(-50%); margin: 0;
+            font-family: 'Inter', sans-serif; font-weight: 700; font-size: calc(3.53 * var(--mm)); line-height: 1.2; color: #006838; white-space: nowrap;
+        }
+        .lh-office {
+            position: absolute; top: calc(53 * var(--mm)); left: calc(72 * var(--mm)); width: calc(136 * var(--mm));
+            font-style: normal; color: #000; line-height: 1.15;
+        }
+        .lh-office strong { display: block; font-family: 'Inter', sans-serif; font-weight: 700; font-size: calc(3.53 * var(--mm)); }
+        .lh-office span { display: block; font-family: Cambria, Georgia, serif; font-weight: 700; font-size: calc(2.47 * var(--mm)); }
+        .lh-office a { color: #1f4e79; }
+        /* The page frame is a one-cell table: its empty head and foot rows repeat on every printed page and keep the content clear of the letterhead; the foot row clears most of the building drawing. Chrome stops repeating a table footer taller than about a quarter of the page (74mm), so it stays under that. */
+        .page-frame { position: relative; z-index: 1; width: 100%; border-collapse: collapse; }
+        .page-frame > thead > tr > td { height: calc(52 * var(--mm)); padding: 0; }
+        .page-frame > tfoot > tr > td { height: calc(72 * var(--mm)); padding: 0; }
+        .page-frame > tbody > tr > td { padding: 0 max(18px, calc(25.4 * var(--mm))); vertical-align: top; }
 
-        .doc-title { font-family: 'Sora', sans-serif; font-size: 19pt; font-weight: 700; letter-spacing: -0.02em; margin: 20px 0 2px; line-height: 1.15; text-wrap: balance; }
+        .doc-title { font-family: 'Sora', sans-serif; font-size: 19pt; font-weight: 700; letter-spacing: -0.02em; margin: 0 0 2px; line-height: 1.15; text-wrap: balance; }
         .doc-sub { margin: 0; color: var(--ink-2); font-size: 9.5pt; }
         .meta { display: grid; grid-template-columns: repeat(4, 1fr); margin: 14px 0 0; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
         .meta div { padding: 8px 10px 8px 0; }
@@ -201,6 +220,7 @@
         .sig-date { margin: 8px 0 0; font-size: 8.5pt; color: var(--ink-2); }
         .sig-date b { color: var(--ink); font-weight: 600; }
 
+        .doc-close { break-inside: avoid; }
         .doc-end { margin-top: 30px; padding-top: 8px; border-top: 1px solid var(--rule); display: flex; justify-content: space-between; gap: 12px; font-size: 7.5pt; color: var(--ink-3); }
         .empty-doc { padding: 40px 0; text-align: center; color: var(--ink-2); }
 
@@ -211,27 +231,28 @@
             .sheet-wrap { padding: 0 16px; }
         }
         @media screen and (max-width: 760px) {
-            .sheet { width: 100%; min-height: 0; padding: 22px 18px; }
+            .sheet { width: 100%; min-height: 0; }
             .meta { grid-template-columns: 1fr 1fr; }
             .meta div:nth-child(3) { border-left: 0; padding-left: 0; }
             .meta div:nth-child(n+3) { border-top: 1px solid var(--rule); }
-            .letterhead { grid-template-columns: auto 1fr; }
-            .lh-right { display: none; }
             .chart { grid-template-columns: minmax(0, 7rem) 1fr 3rem; }
         }
 
+        /* CHANGED: no page margins, so the letterhead reaches the paper edge like the template. The page-number and title
+           margin boxes needed those margins and are gone. */
         @page {
             size: A4 portrait;
-            margin: 14mm 14mm 16mm;
-            @bottom-left { content: "ISU Cauayan · Canteen Stall Evaluation Report"; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 7.5pt; color: #737373; }
-            @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 7.5pt; color: #737373; }
+            margin: 0;
         }
         @media print {
             body { background: #fff; }
             .panel { display: none !important; }
             .desk { display: block; padding: 0; }
             .sheet-wrap { padding: 0; }
-            .sheet { width: auto; min-height: 0; padding: 0; margin: 0; box-shadow: none; }
+            .sheet { width: 210mm; min-height: 0; padding: 0; margin: 0; box-shadow: none; }
+            /* Fixed elements repeat on every printed page. */
+            .lh-head, .lh-foot { position: fixed; width: 210mm; }
+            .page-frame > tbody > tr { break-inside: auto; }
             .tbl-scroll { overflow: visible; }
             thead { display: table-header-group; }
             tr, .chart > * { break-inside: avoid; }
@@ -336,16 +357,25 @@
 
     <div class="sheet-wrap">
         <article class="sheet">
-            <header class="letterhead">
-                <img src="{{ asset('assets/images/isu_logo.png') }}" alt="Isabela State University seal">
-                <div>
-                    {{-- CHANGED: removed the "Republic of the Philippines" line above the university name. --}}
-                    <p class="lh-name">Isabela State University</p>
-                    <p class="lh-campus">Cauayan City Campus</p>
-                </div>
-                <div class="lh-right">Canteen Client Evaluation<br>Decision Support System</div>
-            </header>
-            <hr class="double-rule"><hr class="double-rule">
+            {{-- CHANGED: the ISU seal, name and double rule became the client's letterhead template, with its header and footer on every page. --}}
+            <div class="lh-head" aria-hidden="true">
+                <img src="{{ asset('assets/images/report-letterhead-head.png') }}" alt="">
+                <p class="lh-place">Cauayan, Isabela</p>
+            </div>
+            <div class="lh-foot">
+                <img src="{{ asset('assets/images/report-letterhead-foot.png') }}" alt="">
+                <address class="lh-office">
+                    <strong>CAMPUS HEALTH SERVICES</strong>
+                    <strong>Isabela State University – Cauayan Campus</strong>
+                    <span>Administration Building, San Femin, Cauayan City, Isabela 3305 Philippines</span>
+                    <span>Email: <a href="mailto:isuinfirmarycauayancampus@gmail.com">isuinfirmarycauayancampus@gmail.com</a> | <a href="https://isucauayan.edu.ph/">https://isucauayan.edu.ph/</a></span>
+                </address>
+            </div>
+
+            <table class="page-frame" role="presentation">
+                <thead><tr><td></td></tr></thead>
+                <tfoot><tr><td></td></tr></tfoot>
+                <tbody><tr><td>
 
             <h2 class="doc-title">Canteen Stall Evaluation Report</h2>
             <p class="doc-sub">Stall ranking by Simple Additive Weighting (SAW), with criterion weights from the Analytic Hierarchy Process (AHP)</p>
@@ -474,6 +504,8 @@
 
             @endif
 
+            {{-- ADDED: the signature and the generated-by line print together, so the last line never lands alone on a new page. --}}
+            <div class="doc-close">
             @if ($has('prepared'))
                 <div class="prepared">
                     <p class="sig-role">Prepared by:</p>
@@ -489,6 +521,10 @@
                 <span>Generated by the ISU Cauayan Canteen Client Evaluation DSS on {{ $generatedAt->format('F j, Y \a\t g:i A') }} (PHT).</span>
                 <span>For internal use.</span>
             </footer>
+            </div>
+
+                </td></tr></tbody>
+            </table>
         </article>
     </div>
 </div>
