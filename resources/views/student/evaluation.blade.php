@@ -346,12 +346,9 @@
     {{-- ── Real-Time Progress & Sync Script ───────────────────────────────── --}}
     <script>
         document.addEventListener('DOMContentLoaded', () => {
-            const totalStatements = {{ count($displayStatements ?? []) }};
-            const statementIds = [
-                @foreach($displayStatements as $s)
-                    {{ $s['id'] }},
-                @endforeach
-            ];
+            {{-- CHANGED: the ids come from one @json call instead of a Blade loop inside the array literal, which the editor could not parse. --}}
+            const statementIds = @json(array_column($displayStatements, 'id'));
+            const totalStatements = statementIds.length;
 
             const progressBar = document.getElementById('surveyProgressBar');
             const progressText = document.getElementById('progressText');
@@ -493,7 +490,8 @@
                     if (submitIcon) submitIcon.style.display = 'none';
                     if (submitLoader) submitLoader.style.display = 'inline-flex';
 
-                    const siteKey = "{{ config('services.recaptcha.site_key') }}";
+                    {{-- CHANGED: @json instead of "{{ ... }}" inside a JS string; the single quotes inside the double-quoted string broke the editor's JS parser (") expected"). --}}
+                    const siteKey = @json(config('services.recaptcha.site_key'));
                     if (siteKey && typeof grecaptcha !== 'undefined') {
                         e.preventDefault();
                         grecaptcha.ready(function() {
