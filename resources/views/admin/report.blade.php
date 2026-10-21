@@ -223,8 +223,8 @@
         @page {
             size: A4 portrait;
             margin: 14mm 14mm 16mm;
-            @bottom-left { content: "ISU Cauayan · Canteen Stall Evaluation Report"; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 7.5pt; color: #6b7280; }
-            @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 7.5pt; color: #6b7280; }
+            @bottom-left { content: "ISU Cauayan · Canteen Stall Evaluation Report"; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 7.5pt; color: #737373; }
+            @bottom-right { content: "Page " counter(page) " of " counter(pages); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 7.5pt; color: #737373; }
         }
         @media print {
             body { background: #fff; }

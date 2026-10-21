@@ -89,15 +89,15 @@
                     @csrf
                     <div>
                         <label for="add-stall-name" class="block text-[11px] font-semibold text-neutral-700 mb-1 uppercase tracking-wider">
-                            Stall Name <span class="text-red-500">*</span>
+                            Stall Name <span class="text-rose-500">*</span>
                         </label>
                         {{-- CHANGED: em-dash in the placeholder replaced with a hyphen. --}}
                         <input type="text" id="add-stall-name" name="name"
                             value="{{ old('name') }}"
-                            class="w-full px-3 py-2 bg-white border @error('name') border-red-300 bg-red-50/20 @else border-neutral-300 @enderror rounded-md text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700 transition-colors"
+                            class="w-full px-3 py-2 bg-white border @error('name') border-rose-300 bg-rose-50/20 @else border-neutral-300 @enderror rounded-md text-xs font-medium focus:outline-none focus:border-brand-700 focus:ring-1 focus:ring-brand-700 transition-colors"
                             placeholder="e.g. Stall #1 - Food Hub" required>
                         @error('name')
-                            <p class="text-xs text-red-600 font-medium flex items-center gap-1 mt-1">
+                            <p class="text-xs text-rose-600 font-medium flex items-center gap-1 mt-1">
                                 <ion-icon name="alert-circle" class="text-xs leading-none" aria-hidden="true"></ion-icon>
                                 {{ $message }}
                             </p>
@@ -323,7 +323,7 @@
                                 <button type="button"
                                     onclick="openDeleteModal({{ $stall->id }}, {{ Js::from($stall->name) }}, {{ $results->has($stall->id) ? 1 : 0 }})"
                                     aria-label="Delete {{ $stall->name }}" title="Delete"
-                                    class="w-9 h-9 inline-flex items-center justify-center text-neutral-700 hover:text-red-700 bg-white hover:bg-red-50 rounded-md border border-neutral-200 hover:border-red-300 transition-colors cursor-pointer">
+                                    class="w-9 h-9 inline-flex items-center justify-center text-neutral-700 hover:text-rose-700 bg-white hover:bg-rose-50 rounded-md border border-neutral-200 hover:border-rose-300 transition-colors cursor-pointer">
                                     <ion-icon name="trash-outline" class="text-base" aria-hidden="true"></ion-icon>
                                 </button>
                             </div>
@@ -982,7 +982,7 @@ function renderRosterItems(list) {
                 </div>
             </div>
             <button type="button" id="unassign-btn-${member.id}"
-                class="roster-remove-btn text-neutral-500 hover:text-red-700 bg-neutral-50 hover:bg-red-50 border border-neutral-200 hover:border-red-200 px-2.5 py-2.5 sm:py-1 min-h-11 sm:min-h-0 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
+                class="roster-remove-btn text-neutral-500 hover:text-rose-700 bg-neutral-50 hover:bg-rose-50 border border-neutral-200 hover:border-rose-200 px-2.5 py-2.5 sm:py-1 min-h-11 sm:min-h-0 rounded-md text-[11px] font-semibold flex items-center gap-1 transition-colors cursor-pointer"
                 title="Remove staff from this stall">
                 <ion-icon name="close-circle-outline" class="text-xs"></ion-icon>
                 <span>Remove</span>
@@ -1046,7 +1046,7 @@ function performUnassignStaff(staffId) {
     var clickedBtn = document.getElementById('unassign-btn-' + staffId);
     if (clickedBtn) {
         clickedBtn.disabled = true;
-        clickedBtn.innerHTML = makeSpinnerSvg('h-3 w-3 text-red-600') + ' <span>Removing…</span>';
+        clickedBtn.innerHTML = makeSpinnerSvg('h-3 w-3 text-rose-600') + ' <span>Removing…</span>';
     }
 
     document.querySelectorAll('.roster-remove-btn').forEach(function(b) {

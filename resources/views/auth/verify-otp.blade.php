@@ -41,8 +41,8 @@
             background: color-mix(in srgb, var(--color-brand-600, #16a34a) 6%, white);
         }
         .otp-input.error {
-            border-color: #ef4444;
-            box-shadow: 0 0 0 3px rgb(239 68 68 / 0.12);
+            border-color: #f43f5e;
+            box-shadow: 0 0 0 3px rgb(244 63 94 / 0.12);
         }
 
         @keyframes shake {
@@ -111,15 +111,15 @@
         @endif
 
         @if(session('error'))
-            <div class="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600 shrink-0"></ion-icon>
+            <div class="mb-4 p-3.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
+                <ion-icon name="alert-circle" class="text-lg leading-none text-rose-600 shrink-0"></ion-icon>
                 {{ session('error') }}
             </div>
         @endif
 
         @if($errors->any())
-            <div class="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600 shrink-0"></ion-icon>
+            <div class="mb-4 p-3.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
+                <ion-icon name="alert-circle" class="text-lg leading-none text-rose-600 shrink-0"></ion-icon>
                 {{ $errors->first() }}
             </div>
         @endif
@@ -308,7 +308,7 @@
         function updateExpiryDisplay() {
             if (totalSeconds <= 0) {
                 countdownEl.textContent = 'Expired';
-                countdownEl.classList.add('text-red-500');
+                countdownEl.classList.add('text-rose-500');
                 verifyBtn.disabled = true;
                 return false;
             }
@@ -316,7 +316,7 @@
             const s = String(totalSeconds % 60).padStart(2, '0');
             countdownEl.textContent = `${m}:${s}`;
 
-            if (totalSeconds <= 60) countdownEl.classList.add('countdown-active', 'text-red-500');
+            if (totalSeconds <= 60) countdownEl.classList.add('countdown-active', 'text-rose-500');
             return true;
         }
 

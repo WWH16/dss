@@ -54,8 +54,8 @@
         @endif
 
         @if($errors->any())
-            <div class="mb-4 p-3.5 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2" role="alert">
-                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600 shrink-0"></ion-icon>
+            <div class="mb-4 p-3.5 bg-rose-50 border border-rose-100 text-rose-800 rounded-[4px] text-xs font-semibold flex items-center gap-2" role="alert">
+                <ion-icon name="alert-circle" class="text-lg leading-none text-rose-600 shrink-0"></ion-icon>
                 {{ $errors->first() }}
             </div>
         @endif
@@ -68,14 +68,14 @@
 
             <div>
                 <label for="email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
-                <input type="email" id="email" name="email" value="{{ old('email', $email ?? '') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @error('email') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none" autocomplete="email" required @unless($isReset) autofocus @endunless>
+                <input type="email" id="email" name="email" value="{{ old('email', $email ?? '') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @error('email') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none" autocomplete="email" required @unless($isReset) autofocus @endunless>
             </div>
 
             @if($isReset)
                 <div>
                     <label for="password" class="block text-xs font-semibold text-neutral-700 mb-1.5">New Password</label>
                     <div class="relative">
-                        <input type="password" id="password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none" autocomplete="new-password" required autofocus>
+                        <input type="password" id="password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @error('password') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400 focus:outline-none" autocomplete="new-password" required autofocus>
                         <button type="button" onclick="togglePasswordVisibility('password', 'password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
                             <ion-icon id="password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                         </button>
@@ -92,7 +92,7 @@
                         </button>
                     </div>
                     {{-- Live match hint, wired by data-password-match in resources/js/app.js. --}}
-                    <p data-password-match aria-live="polite" hidden class="text-red-600 data-[match=yes]:text-emerald-700 text-xs mt-1.5 font-semibold flex items-center gap-1"></p>
+                    <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-xs mt-1.5 font-semibold flex items-center gap-1"></p>
                 </div>
             @endif
 

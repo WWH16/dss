@@ -10,7 +10,7 @@
 
 @section('content')
 {{-- CHANGED: tighter section spacing below 640px (space-y-4, was 6). --}}
-<div class="max-w-6xl mx-auto space-y-4 sm:space-y-6">
+<div class="space-y-4 sm:space-y-6">
 
     {{-- ── 1. Unassigned Stall State ───────────────────────────────────────── --}}
     @if(!$hasStall || !$stall)
@@ -85,7 +85,7 @@
                         <ion-icon name="star" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-baseline gap-x-1.5 mb-2.5">
+                <div class="flex flex-wrap items-baseline justify-center gap-x-1.5 mb-2.5">
                     <span class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
                         {{ number_format($averages ? (float)$averages->overall : 0, 2) }}★
                     </span>
@@ -109,7 +109,7 @@
                         <ion-icon name="calendar-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
+                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight text-center">
                     {{ $monthStudents }}
                 </div>
                 <div class="mt-auto pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
@@ -125,7 +125,7 @@
                         <ion-icon name="receipt-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
+                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight text-center">
                     {{ $totalEvaluations }}
                 </div>
                 <div class="mt-auto pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
@@ -141,7 +141,7 @@
                         <ion-icon name="people-outline" class="text-base"></ion-icon>
                     </div>
                 </div>
-                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight">
+                <div class="mb-2.5 text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight text-center">
                     {{ $uniqueStudents }}
                 </div>
                 <div class="mt-auto pt-2 border-t border-neutral-100 text-[11px] text-neutral-500 font-medium">
@@ -337,7 +337,7 @@
                                 ['label' => '5 Stars', 'stars' => '5★', 'count' => $s5, 'color' => 'bg-emerald-500'],
                                 ['label' => '4 Stars', 'stars' => '4★', 'count' => $s4, 'color' => 'bg-emerald-400'],
                                 ['label' => '3 Stars', 'stars' => '3★', 'count' => $s3, 'color' => 'bg-amber-400'],
-                                ['label' => '2 Stars', 'stars' => '2★', 'count' => $s2, 'color' => 'bg-orange-400'],
+                                ['label' => '2 Stars', 'stars' => '2★', 'count' => $s2, 'color' => 'bg-rose-300'],
                                 ['label' => '1 Star',  'stars' => '1★', 'count' => $s1, 'color' => 'bg-rose-400'],
                             ] as $starRow)
                                 @php
@@ -416,7 +416,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 plugins: {
                     legend: { display: false },
                     tooltip: {
-                        backgroundColor: '#1f2937',
+                        backgroundColor: '#262626',
                         titleFont: { size: 12, weight: '700' },
                         bodyFont: { size: 11 },
                         padding: 10,
@@ -434,7 +434,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         grid: { display: false },
                         ticks: {
                             font: { size: 10, weight: '600' },
-                            color: '#6b7280',
+                            color: '#737373',
                             // CHANGED: 5 date labels on phones (was 8 at every width), so they do not crowd.
                             maxTicksLimit: window.matchMedia('(min-width: 640px)').matches ? 8 : 5
                         },
@@ -442,10 +442,10 @@ document.addEventListener('DOMContentLoaded', function() {
                     },
                     y: {
                         beginAtZero: true,
-                        grid: { color: '#f3f4f6' },
+                        grid: { color: '#f5f5f5' },
                         ticks: {
                             font: { size: 10, weight: '600' },
-                            color: '#6b7280',
+                            color: '#737373',
                             stepSize: 1,
                             precision: 0
                         },

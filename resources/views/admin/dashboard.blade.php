@@ -13,7 +13,7 @@
         .print-break-inside-avoid { break-inside: avoid; }
         body { background: #fff !important; color: #000 !important; font-size: 12pt; }
         .shadow-sm, .shadow-md, .shadow-2xs { box-shadow: none !important; }
-        .border { border-color: #cbd5e1 !important; }
+        .border { border-color: #d4d4d4 !important; }
     }
 </style>
 @endsection
@@ -50,8 +50,8 @@
 
     {{-- ── 2. Diagnostic Warning (Only if any stall is below 3.0★) ─────── --}}
     @if(isset($attentionStalls) && $attentionStalls->isNotEmpty())
-        {{-- CHANGED: amber block became a white card with a rose left edge and icon. Below 3.0 is red in the Health Index legend, and the amber fill clashed with the brand green. --}}
-        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-rose-500 rounded-xl text-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        {{-- CHANGED: amber block became a white card with a rose icon. Below 3.0 is red in the Health Index legend, and the amber fill clashed with the brand green. --}}
+        <div class="p-4 bg-white border border-neutral-200/70 rounded-xl text-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                     <ion-icon name="warning-outline" class="text-lg"></ion-icon>
@@ -65,8 +65,8 @@
                     </p>
                 </div>
             </div>
-            {{-- CHANGED: added btn-sm for a smaller size; button is an outlined brand green so it does not compete with the rose edge, border marked important because .btn resets it to transparent. --}}
-            <a href="{{ route('admin.evaluations') }}" class="btn btn-sm font-bold bg-white hover:bg-brand-50 text-brand-700 border-brand-200! hover:border-brand-300! self-start sm:self-auto shrink-0">
+            {{-- CHANGED: added btn-sm for a smaller size; button uses the shared btn-primary style. --}}
+            <a href="{{ route('admin.evaluations') }}" class="btn btn-sm btn-primary font-bold self-start sm:self-auto shrink-0">
                 Review Evaluations
             </a>
         </div>
@@ -394,7 +394,7 @@
                         @php $healthValue = (float) $campusHealth->$healthKey; @endphp
                         <div class="p-4 bg-neutral-50 rounded-lg flex flex-col justify-between gap-2">
                             <span class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider block">{{ $healthLabel }}</span>
-                            <div class="flex items-baseline justify-between">
+                            <div class="flex items-baseline justify-center gap-1.5">
                                 <span class="text-2xl font-bold tabular-nums {{ $healthValue >= 4 ? 'text-emerald-700' : ($healthValue >= 3 ? 'text-amber-700' : 'text-rose-600') }}">
                                     {{ number_format($healthValue, 2) }}
                                 </span>
@@ -520,7 +520,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         grid: { display: false },
                         ticks: {
                             font: { size: 10 },
-                            color: '#94a3b8',
+                            color: '#a3a3a3',
                             maxRotation: 0,
                             callback: function(v, i) {
                                 return (isMobile ? i % 5 : i % 3) === 0 ? trendDates[i] : '';
@@ -531,8 +531,8 @@ document.addEventListener('DOMContentLoaded', function() {
                     y: {
                         min: 0,
                         beginAtZero: true,
-                        grid: { color: '#f1f5f9' },
-                        ticks: { stepSize: 1, precision: 0, font: { size: 10 }, color: '#94a3b8' },
+                        grid: { color: '#f5f5f5' },
+                        ticks: { stepSize: 1, precision: 0, font: { size: 10 }, color: '#a3a3a3' },
                         border: { display: false }
                     }
                 }
@@ -600,7 +600,7 @@ document.addEventListener('DOMContentLoaded', function() {
                         position: 'bottom',
                         labels: {
                             font: { size: 11, weight: '600' },
-                            color: '#52525b',
+                            color: '#525252',
                             padding: 12,
                             usePointStyle: true,
                             pointStyle: 'circle'

@@ -75,8 +75,8 @@
         @endif
 
         @if($errors->has('g_recaptcha_response'))
-            <div class="mb-4 p-4 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600 shrink-0"></ion-icon>
+            <div class="mb-4 p-4 bg-rose-50 border border-rose-100 text-rose-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
+                <ion-icon name="alert-circle" class="text-lg leading-none text-rose-600 shrink-0"></ion-icon>
                 <span>{{ $errors->first('g_recaptcha_response') }}</span>
             </div>
         @endif
@@ -87,8 +87,8 @@
             $generalErrors = collect($errors->keys())->diff($visibleFields);
         @endphp
         @if($generalErrors->isNotEmpty())
-            <div class="mb-4 p-4 bg-red-50 border border-red-100 text-red-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
-                <ion-icon name="alert-circle" class="text-lg leading-none text-red-600 shrink-0"></ion-icon>
+            <div class="mb-4 p-4 bg-rose-50 border border-rose-100 text-rose-800 rounded-[4px] text-xs font-semibold flex items-center gap-2">
+                <ion-icon name="alert-circle" class="text-lg leading-none text-rose-600 shrink-0"></ion-icon>
                 <div class="space-y-0.5">
                     @foreach($generalErrors as $errKey)
                         <p>{{ $errors->first($errKey) }}</p>
@@ -112,7 +112,7 @@
                 <div>
                     <label for="login_role" class="block text-xs font-semibold text-neutral-700 mb-1.5">Role</label>
                     <div class="relative">
-                        <select id="login_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('role') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleLoginFields()">
+                        <select id="login_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('role') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleLoginFields()">
                             <option value="student" {{ $currentLoginRole === 'student' ? 'selected' : '' }}>Student</option>
                             <option value="staff" {{ $currentLoginRole === 'staff' ? 'selected' : '' }}>Staff</option>
                             <option value="admin" {{ $currentLoginRole === 'admin' ? 'selected' : '' }}>Admin</option>
@@ -124,38 +124,38 @@
                         </div>
                     </div>
                     @error('role')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
                 <div id="login_student_number_field" style="{{ $currentLoginRole === 'student' ? '' : 'display: none;' }}">
                     <label for="login_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                    <input type="text" id="login_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @if($error || $errors->has('student_number')) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentLoginRole === 'student' ? 'required' : '' }}>
+                    <input type="text" id="login_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @if($error || $errors->has('student_number')) border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentLoginRole === 'student' ? 'required' : '' }}>
                     @error('student_number')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
                 <div id="login_email_field" style="{{ $currentLoginRole === 'student' ? 'display: none;' : '' }}">
                     <label for="login_email" class="block text-xs font-semibold text-neutral-700 mb-1.5">Email</label>
-                    <input type="email" id="login_email" name="email" value="{{ old('email') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @if($error || $errors->has('email')) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username email" {{ $currentLoginRole !== 'student' ? 'required' : '' }}>
+                    <input type="email" id="login_email" name="email" value="{{ old('email') }}" placeholder="e.g. user@example.com" class="w-full px-4 py-2.5 bg-white border @if($error || $errors->has('email')) border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username email" {{ $currentLoginRole !== 'student' ? 'required' : '' }}>
                     @error('email')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
                     <label for="login_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password</label>
                     <div class="relative">
-                        <input type="password" id="login_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @if($error || $errors->has('password')) border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="current-password" required>
+                        <input type="password" id="login_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border @if($error || $errors->has('password')) border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @endif rounded-[4px] text-sm font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="current-password" required>
                         <button type="button" onclick="togglePasswordVisibility('login_password', 'login_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
                             <ion-icon id="login_password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                         </button>
                     </div>
                     @if($error)
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $error }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $error }}</p>
                     @elseif($errors->has('password'))
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $errors->first('password') }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $errors->first('password') }}</p>
                     @endif
                 </div>
 
@@ -196,7 +196,7 @@
                 <div>
                     <label for="register_role" class="block text-xs font-semibold text-neutral-700 mb-1.5">Role</label>
                     <div class="relative">
-                        <select id="register_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('role') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleRegisterFields()">
+                        <select id="register_role" name="role" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('role') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" onchange="toggleRegisterFields()">
                             <option value="student" {{ $currentRegisterRole == 'student' ? 'selected' : '' }}>Student</option>
                             <option value="staff" {{ $currentRegisterRole == 'staff' ? 'selected' : '' }}>Staff</option>
                         </select>
@@ -205,15 +205,15 @@
                         </div>
                     </div>
                     @error('role')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
                 <div>
                     <label for="register_name" class="block text-xs font-semibold text-neutral-700 mb-1.5">Full Name</label>
-                    <input type="text" id="register_name" name="name" value="{{ old('name') }}" placeholder="e.g. Juan Dela Cruz" class="w-full px-4 py-2.5 bg-white border @error('name') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="name" required>
+                    <input type="text" id="register_name" name="name" value="{{ old('name') }}" placeholder="e.g. Juan Dela Cruz" class="w-full px-4 py-2.5 bg-white border @error('name') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="name" required>
                     @error('name')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
                 </div>
 
@@ -222,7 +222,7 @@
 
                     {{-- Student: split input (prefix + @isu.edu.ph locked) --}}
                     {{-- Student: split input with locked _cyn@isu.edu.ph suffix --}}
-                    <div id="register_email_student" style="{{ $currentRegisterRole === 'student' ? 'display: flex;' : 'display: none;' }}" class="rounded-[4px] overflow-hidden border @error('email') border-red-500 focus-within:border-red-500 focus-within:ring-2 focus-within:ring-red-500/15 @else border-neutral-300 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/15 @enderror transition-all">
+                    <div id="register_email_student" style="{{ $currentRegisterRole === 'student' ? 'display: flex;' : 'display: none;' }}" class="rounded-[4px] overflow-hidden border @error('email') border-rose-500 focus-within:border-rose-500 focus-within:ring-2 focus-within:ring-rose-500/15 @else border-neutral-300 focus-within:border-brand-600 focus-within:ring-2 focus-within:ring-brand-600/15 @enderror transition-all">
                         <input
                             type="text"
                             id="register_email_prefix"
@@ -249,14 +249,14 @@
                             name="email_other"
                             value="{{ old('email_other') }}"
                             placeholder="e.g. user@example.com"
-                            class="w-full px-4 py-2.5 bg-white border @error('email') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400"
+                            class="w-full px-4 py-2.5 bg-white border @error('email') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400"
                             autocomplete="email"
                             {{ $currentRegisterRole === 'staff' ? 'required' : '' }}
                         >
                     </div>
 
                     @error('email')
-                        <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                        <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                     @enderror
 
                     <p id="register_email_hint" style="{{ $currentRegisterRole === 'student' ? '' : 'display: none;' }}" class="text-[11px] text-neutral-400 mt-1.5 font-medium">
@@ -273,7 +273,7 @@
                         @php $programs = \App\Models\Program::with('tracks')->orderBy('id')->get(); @endphp
                         <label for="register_program" class="block text-xs font-semibold text-neutral-700 mb-1.5">Program</label>
                         <div class="relative">
-                            <select id="register_program" name="program_id" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('program_id') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                            <select id="register_program" name="program_id" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('program_id') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
                                 <option value="">Select program</option>
                                 @foreach($programs as $program)
                                     <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>{{ $program->code }}</option>
@@ -284,7 +284,7 @@
                             </div>
                         </div>
                         @error('program_id')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                            <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
                     </div>
 
@@ -292,7 +292,7 @@
                     <div data-track-field="register_program" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
                         <label for="register_track" class="block text-xs font-semibold text-neutral-700 mb-1.5">Specialization Track</label>
                         <div class="relative">
-                            <select id="register_track" name="track_id" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('track_id') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                            <select id="register_track" name="track_id" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('track_id') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
                                 {{-- CHANGED: the placeholder shows but cannot be picked (disabled); a selected track below overrides its "selected". --}}
                                 <option value="" disabled selected>Select track</option>
                                 {{-- CHANGED: no optgroup per program; the program is already picked, so its heading in the list was redundant. --}}
@@ -308,7 +308,7 @@
                             </div>
                         </div>
                         @error('track_id')
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                            <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                         @enderror
                     </div>
 
@@ -316,7 +316,7 @@
                         <div>
                             <label for="register_year" class="block text-xs font-semibold text-neutral-700 mb-1.5">Year</label>
                             <div class="relative">
-                                <select id="register_year" name="year_level" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('year_level') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                                <select id="register_year" name="year_level" class="w-full pl-4 pr-10 py-2.5 bg-white border @error('year_level') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 appearance-none cursor-pointer transition-all" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
                                     <option value="">Select year</option>
                                     <option value="1st year" {{ old('year_level') == '1st year' ? 'selected' : '' }}>1st year</option>
                                     <option value="2nd year" {{ old('year_level') == '2nd year' ? 'selected' : '' }}>2nd year</option>
@@ -328,15 +328,15 @@
                                 </div>
                             </div>
                             @error('year_level')
-                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                                <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                             @enderror
                         </div>
 
                         <div>
                             <label for="register_student_number" class="block text-xs font-semibold text-neutral-700 mb-1.5">Student Number</label>
-                            <input type="text" id="register_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @error('student_number') border-red-500 focus:border-red-500 focus:ring-red-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
+                            <input type="text" id="register_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" class="w-full px-4 py-2.5 bg-white border @error('student_number') border-rose-500 focus:border-rose-500 focus:ring-rose-500/15 @else border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 @enderror rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="username" {{ $currentRegisterRole === 'student' ? 'required' : '' }}>
                             @error('student_number')
-                                <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
+                                <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $message }}</p>
                             @enderror
                         </div>
                     </div>
@@ -364,9 +364,9 @@
                 @endphp
                 <div class="space-y-4">
                     <div class="relative">
-                        <label for="register_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password <span class="text-red-500">*</span></label>
+                        <label for="register_password" class="block text-xs font-semibold text-neutral-700 mb-1.5">Password <span class="text-rose-500">*</span></label>
                         <div class="relative">
-                            <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border {{ $hasPasswordError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15' }} rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
+                            <input type="password" id="register_password" name="password" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border {{ $hasPasswordError ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/15' : 'border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15' }} rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password', 'register_password_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password visibility">
                                 <ion-icon id="register_password_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                             </button>
@@ -379,20 +379,20 @@
                         @include('partials.password-rules')
 
                         @if($hasPasswordError)
-                            <p class="text-red-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $passwordErrorMessage }}</p>
+                            <p class="text-rose-600 text-xs mt-1.5 font-semibold flex items-center gap-1"><ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $passwordErrorMessage }}</p>
                         @endif
                     </div>
 
                     <div>
-                        <label for="register_password_confirmation" class="block text-xs font-semibold text-neutral-700 mb-1.5">Confirm Password <span class="text-red-500">*</span></label>
+                        <label for="register_password_confirmation" class="block text-xs font-semibold text-neutral-700 mb-1.5">Confirm Password <span class="text-rose-500">*</span></label>
                         <div class="relative">
-                            <input type="password" id="register_password_confirmation" name="password_confirmation" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border {{ $hasConfirmError ? 'border-red-500 focus:border-red-500 focus:ring-red-500/15' : 'border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15' }} rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
+                            <input type="password" id="register_password_confirmation" name="password_confirmation" placeholder="••••••••" class="w-full pl-4 pr-11 py-2.5 bg-white border {{ $hasConfirmError ? 'border-rose-500 focus:border-rose-500 focus:ring-rose-500/15' : 'border-neutral-300 focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15' }} rounded-[4px] text-sm focus:outline-none font-medium text-neutral-800 placeholder:text-neutral-400" autocomplete="new-password" required>
                             <button type="button" onclick="togglePasswordVisibility('register_password_confirmation', 'register_password_confirm_icon')" class="absolute inset-y-0 right-0 flex items-center pr-3.5 text-neutral-400 hover:text-neutral-600 transition-colors" aria-label="Toggle password confirmation visibility">
                                 <ion-icon id="register_password_confirm_icon" name="eye-outline" class="text-lg leading-none"></ion-icon>
                             </button>
                         </div>
                         {{-- CHANGED: the server error line is now also the live match hint (data-password-match, resources/js/app.js), so it is always rendered and starts hidden when there is no error. --}}
-                        <p data-password-match aria-live="polite" class="text-red-600 data-[match=yes]:text-emerald-700 text-xs mt-1.5 font-semibold flex items-center gap-1" @unless($hasConfirmError) hidden @endunless>@if($hasConfirmError)<ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $confirmErrorMessage }}@endif</p>
+                        <p data-password-match aria-live="polite" class="text-rose-600 data-[match=yes]:text-emerald-700 text-xs mt-1.5 font-semibold flex items-center gap-1" @unless($hasConfirmError) hidden @endunless>@if($hasConfirmError)<ion-icon name="alert-circle" class="text-sm leading-none"></ion-icon> {{ $confirmErrorMessage }}@endif</p>
                     </div>
                 </div>
 

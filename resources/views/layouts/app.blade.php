@@ -184,7 +184,7 @@
     </div>
     <div class="flex items-center justify-end gap-2 pt-2 border-t border-neutral-100">
         <button type="button" class="btn btn-ghost btn-sm js-close-modal">Cancel</button>
-        <button type="button" class="btn btn-primary btn-sm bg-red-600 hover:bg-red-700 border-red-600 hover:border-red-700 js-confirm-logout" style="background-color: oklch(0.58 0.23 28); border-color: oklch(0.58 0.23 28);">Logout</button>
+        <button type="button" class="btn btn-primary btn-sm bg-rose-600 hover:bg-rose-700 border-rose-600 hover:border-rose-700 js-confirm-logout" style="background-color: oklch(0.58 0.23 28); border-color: oklch(0.58 0.23 28);">Logout</button>
     </div>
 </dialog>
 

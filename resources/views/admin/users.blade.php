@@ -11,9 +11,9 @@
     {{-- ── Flash Messages (Success handled via layout toast) ────────────── --}}
     @if(session('error'))
         {{-- CHANGED: red fill became a white card with a red left edge and icon, matching the dashboard's attention banner. --}}
-        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-red-500 text-neutral-800 rounded-xl text-xs font-semibold flex items-center justify-between gap-3 shadow-2xs">
+        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-rose-500 text-neutral-800 rounded-xl text-xs font-semibold flex items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-2">
-                <ion-icon name="alert-circle" class="text-lg text-red-600 shrink-0"></ion-icon>
+                <ion-icon name="alert-circle" class="text-lg text-rose-600 shrink-0"></ion-icon>
                 <span>{{ session('error') }}</span>
             </div>
             <button type="button" onclick="this.parentElement.remove()" class="text-neutral-500 hover:text-neutral-800 transition-colors p-1" aria-label="Dismiss">
@@ -23,9 +23,9 @@
     @endif
 
     @if($errors->any())
-        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-red-500 text-neutral-800 rounded-xl text-xs font-semibold space-y-1 shadow-2xs">
+        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-rose-500 text-neutral-800 rounded-xl text-xs font-semibold space-y-1 shadow-2xs">
             <div class="flex items-center gap-2 font-bold mb-1">
-                <ion-icon name="alert-circle" class="text-lg text-red-600 shrink-0"></ion-icon>
+                <ion-icon name="alert-circle" class="text-lg text-rose-600 shrink-0"></ion-icon>
                 <span>Please correct the errors below:</span>
             </div>
             <ul class="list-disc list-inside space-y-0.5 text-[11px] text-neutral-600 ml-5 font-normal">
@@ -244,7 +244,7 @@
                                         @if(!$isCurrentUser)
                                             <button type="button"
                                                 onclick="openDeleteUserModal({{ $u->id }}, {{ Js::from($u->name) }}, '{{ $u->role }}')"
-                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold text-red-600 hover:text-red-700 bg-red-50/50 hover:bg-red-50 border border-red-200/70 transition-all cursor-pointer">
+                                                class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-md text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50/50 hover:bg-rose-50 border border-rose-200/70 transition-all cursor-pointer">
                                                 <ion-icon name="trash-outline" class="text-sm"></ion-icon>
                                                 <span>Delete</span>
                                             </button>

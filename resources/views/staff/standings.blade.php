@@ -5,7 +5,7 @@
 {{-- CHANGED (whole file): gold/silver/bronze colours follow the admin overview. #1 uses brand green (every amber-* became brand-*); #2 and #3 use neutral grey (every slate-*, the bronze amber variants and the orange podium bar became neutral-*). The near-invisible podium digits (slate-300, amber-300, orange-200) became neutral-600 / brand-700. Every 9px and 10px text became 11px, font-black and font-extrabold became font-bold, rounded-lg and plain rounded became rounded-md, py-0.2 (not a Tailwind v4 step) became py-0.5, grey eval counts and labels went from neutral-400 to neutral-500, the mobile "Service" label became "Serv" to fit four columns at 11px, and the em-dash placeholders for missing scores became "N/A". --}}
 
 @section('content')
-<div class="max-w-6xl mx-auto space-y-6">
+<div class="space-y-6">
 
     @php
         $totalStalls = $standings->count();

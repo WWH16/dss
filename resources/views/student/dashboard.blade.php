@@ -79,7 +79,7 @@
                 <span class="text-[11px] font-bold text-ink-500 uppercase tracking-wider leading-tight">Stalls Rated</span>
                 <ion-icon name="storefront-outline" class="hidden sm:block text-base text-brand-700 shrink-0" aria-hidden="true"></ion-icon>
             </div>
-            <div class="flex flex-wrap items-baseline gap-x-1 mt-3">
+            <div class="flex flex-wrap items-baseline justify-center gap-x-1 mt-3">
                 <span class="text-xl font-bold text-ink-900 tabular-nums tracking-tight">{{ $uniqueEvaluatedCount }}</span>
                 <span class="text-[11px] text-ink-500 font-semibold tabular-nums">/ {{ $totalStallsCount }}</span>
             </div>
@@ -94,7 +94,7 @@
                 <span class="text-[11px] font-bold text-ink-500 uppercase tracking-wider leading-tight hyphens-auto">Evaluations</span>
                 <ion-icon name="receipt-outline" class="hidden sm:block text-base text-brand-700 shrink-0" aria-hidden="true"></ion-icon>
             </div>
-            <div class="text-xl font-bold text-ink-900 tabular-nums tracking-tight mt-3">
+            <div class="text-xl font-bold text-ink-900 tabular-nums tracking-tight mt-3 text-center">
                 {{ $totalEvalsCount }}
             </div>
             <div class="hidden sm:block text-[11px] text-ink-500 font-medium mt-0.5">
@@ -109,7 +109,7 @@
                 {{-- CHANGED: icon box recoloured from amber to brand green (one accent). --}}
                 <ion-icon name="star" class="hidden sm:block text-base text-brand-700 shrink-0" aria-hidden="true"></ion-icon>
             </div>
-            <div class="flex flex-wrap items-baseline gap-x-1 mt-3">
+            <div class="flex flex-wrap items-baseline justify-center gap-x-1 mt-3">
                 {{-- CHANGED: the no-ratings placeholder is "N/A" instead of an em-dash. --}}
                 <span class="text-xl font-bold text-ink-900 tabular-nums tracking-tight">
                     {!! $totalEvalsCount > 0 ? number_format($overallAvgGiven, 2) . $star : 'N/A' !!}
