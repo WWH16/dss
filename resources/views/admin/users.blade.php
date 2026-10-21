@@ -147,10 +147,10 @@
                     <thead>
                         <tr class="border-b border-neutral-200/70 bg-neutral-50/75">
                             <th class="px-5 py-3 w-[38%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Account</th>
-                            <th class="px-4 py-3 w-[16%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Role</th>
-                            <th class="px-4 py-3 w-[26%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stall</th>
+                            <th class="px-5 py-3 w-[16%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Role</th>
+                            <th class="px-5 py-3 w-[26%] text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Stall</th>
                             {{-- CHANGED: Created shows from 1280px (hidden xl:table-cell), so the four main columns fit 1024px without scrolling. --}}
-                            <th class="hidden xl:table-cell px-4 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Created</th>
+                            <th class="hidden xl:table-cell px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider">Created</th>
                             <th class="px-5 py-3 text-[11px] font-bold text-neutral-500 uppercase tracking-wider text-right">Actions</th>
                         </tr>
                     </thead>
@@ -191,7 +191,7 @@
 
                                 {{-- Role Column --}}
                                 {{-- CHANGED: only Administrator keeps a badge; Clinic and Canteen Staff are plain text, so the badge marks the accounts with full access. --}}
-                                <td class="px-4 py-3">
+                                <td class="px-5 py-3">
                                     @if($isAdmin)
                                         <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-brand-50 text-brand-800 border border-brand-200/80 whitespace-nowrap">
                                             <ion-icon name="shield-checkmark" class="text-xs text-brand-600" aria-hidden="true"></ion-icon>
@@ -203,7 +203,7 @@
                                 </td>
 
                                 {{-- Stall Assignment Column --}}
-                                <td class="px-4 py-3">
+                                <td class="px-5 py-3">
                                     {{-- CHANGED: clinic accounts are system-wide like admins. --}}
                                     @if($isAdmin || $isClinic)
                                         <span class="text-neutral-500 text-[13px] flex items-center gap-1.5">
@@ -226,7 +226,7 @@
                                 {{-- Created Date Column --}}
                                 {{-- CHANGED: created_at is stored in UTC; shown in Philippine time, as on the printable report. --}}
                                 {{-- CHANGED: hidden below 1280px, as its header. --}}
-                                <td class="hidden xl:table-cell px-4 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
+                                <td class="hidden xl:table-cell px-5 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
                                     {{ \Carbon\Carbon::parse($u->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                 </td>
 

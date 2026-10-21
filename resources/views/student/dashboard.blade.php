@@ -70,58 +70,18 @@
     {{-- CHANGED: the three metrics are equal-weight cards in a 3-column grid again. Coverage no longer leads
          with a progress bar and a "not rated yet" count; with one evaluation a month, rating every stall is not
          the goal, so it is now a plain count beside the other two. --}}
-    {{-- CHANGED: on phones the three cards sit in one row (was one per row) with smaller padding; the icons and the captions under the numbers show from sm up. --}}
+    {{-- CHANGED: one card per row on phones and three across from 640px, with the admin card's spacing; the shared card is too wide for three in a phone row. --}}
     {{-- CHANGED: the hover border is gone from these cards and the stall cards; nothing on them is clickable. --}}
-    <div class="grid grid-cols-3 gap-2 sm:gap-4">
-        {{-- Metric 1: Stalls Rated --}}
-        <div class="bg-white rounded-xl border border-ink-100/80 p-3 sm:p-4 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between gap-2">
-                <span class="text-[11px] font-bold text-ink-500 uppercase tracking-wider leading-tight">Stalls Rated</span>
-                <ion-icon name="storefront-outline" class="hidden sm:block text-base text-brand-700 shrink-0" aria-hidden="true"></ion-icon>
-            </div>
-            <div class="flex flex-wrap items-baseline justify-center gap-x-1 mt-3">
-                <span class="text-xl font-bold text-ink-900 tabular-nums tracking-tight">{{ $uniqueEvaluatedCount }}</span>
-                <span class="text-[11px] text-ink-500 font-semibold tabular-nums">/ {{ $totalStallsCount }}</span>
-            </div>
-            <div class="hidden sm:block text-[11px] text-ink-500 font-medium mt-0.5">
-                Different open stalls you have rated
-            </div>
-        </div>
-
-        {{-- Metric 2: Total Reviews --}}
-        <div class="bg-white rounded-xl border border-ink-100/80 p-3 sm:p-4 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between gap-2">
-                <span class="text-[11px] font-bold text-ink-500 uppercase tracking-wider leading-tight hyphens-auto">Evaluations</span>
-                <ion-icon name="receipt-outline" class="hidden sm:block text-base text-brand-700 shrink-0" aria-hidden="true"></ion-icon>
-            </div>
-            <div class="text-xl font-bold text-ink-900 tabular-nums tracking-tight mt-3 text-center">
-                {{ $totalEvalsCount }}
-            </div>
-            <div class="hidden sm:block text-[11px] text-ink-500 font-medium mt-0.5">
-                {{ $totalEvalsCount === 1 ? '1 evaluation logged' : $totalEvalsCount . ' evaluations logged' }}
-            </div>
-        </div>
-
-        {{-- Metric 3: Avg Rating Given --}}
-        <div class="bg-white rounded-xl border border-ink-100/80 p-3 sm:p-4 shadow-xs flex flex-col justify-between">
-            <div class="flex items-center justify-between gap-2">
-                <span class="text-[11px] font-bold text-ink-500 uppercase tracking-wider leading-tight">Avg Given</span>
-                {{-- CHANGED: icon box recoloured from amber to brand green (one accent). --}}
-                <ion-icon name="star" class="hidden sm:block text-base text-brand-700 shrink-0" aria-hidden="true"></ion-icon>
-            </div>
-            <div class="flex flex-wrap items-baseline justify-center gap-x-1 mt-3">
-                {{-- CHANGED: the no-ratings placeholder is "N/A" instead of an em-dash. --}}
-                <span class="text-xl font-bold text-ink-900 tabular-nums tracking-tight">
-                    {!! $totalEvalsCount > 0 ? number_format($overallAvgGiven, 2) . $star : 'N/A' !!}
-                </span>
-                @if($totalEvalsCount > 0)
-                    <span class="hidden sm:inline text-[11px] text-ink-500 font-semibold" aria-hidden="true">/ 5.00</span>
-                @endif
-            </div>
-            <div class="hidden sm:block text-[11px] text-ink-500 font-medium mt-0.5">
-                {{ $totalEvalsCount > 0 ? 'Your evaluation baseline' : 'No evaluations yet' }}
-            </div>
-        </div>
+    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-5">
+        {{-- CHANGED: the three cards use <x-stat-card>, the admin Overview card. --}}
+        <x-stat-card label="Stalls Rated" :value="$uniqueEvaluatedCount" :suffix="'/ ' . $totalStallsCount" icon="storefront-outline">Different open stalls you have rated</x-stat-card>
+        <x-stat-card label="Evaluations" :value="$totalEvalsCount" icon="receipt-outline">
+            {{ $totalEvalsCount === 1 ? '1 evaluation logged' : $totalEvalsCount . ' evaluations logged' }}
+        </x-stat-card>
+        {{-- CHANGED: the no-ratings placeholder is "N/A" instead of an em-dash. --}}
+        <x-stat-card label="Avg Given" :value="$totalEvalsCount > 0 ? new \Illuminate\Support\HtmlString(number_format($overallAvgGiven, 2) . $star) : 'N/A'" :suffix="$totalEvalsCount > 0 ? '/ 5.00' : null" icon="star">
+            {{ $totalEvalsCount > 0 ? 'Your evaluation baseline' : 'No evaluations yet' }}
+        </x-stat-card>
     </div>
 
     {{-- ── 2. Main Analytics & Actions (2-Column Asymmetric Grid) ──────────── --}}

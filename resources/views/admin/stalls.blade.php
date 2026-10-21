@@ -26,8 +26,8 @@
 
     {{-- ── 2. Pending Staff Assignment Banner (Quick Onboarding) ───────────── --}}
     @if($unassignedStaff->isNotEmpty())
-        {{-- CHANGED: amber fill became a white card with an amber left edge and icon, matching the dashboard's attention banner. --}}
-        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-amber-500 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        {{-- CHANGED: amber fill became a white card with an amber icon, matching the Overview's attention banner. --}}
+        <div class="p-4 bg-white border border-neutral-200/70 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-start sm:items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
                     <ion-icon name="people" class="text-lg text-amber-700"></ion-icon>
@@ -44,9 +44,9 @@
             </div>
             {{-- CHANGED: full width and 44px tall on phones, where it was a 30px button hugging the left edge under
                  two lines of warning text; the compact self-sizing button returns from sm up. --}}
-            {{-- CHANGED: filled green became the amber outlined button, the same treatment as the "Assign staff" buttons in the rows, so every assignment action reads alike and filled green stays for Create Stall. --}}
+            {{-- CHANGED: the shared btn-primary green, like the Overview banner's Review Evaluations button. --}}
             <button type="button" onclick="openQuickAssignModal()"
-                class="btn btn-sm text-xs font-bold px-3 min-h-11 sm:min-h-0 sm:py-1.5 rounded-md w-full sm:w-auto self-stretch sm:self-auto shrink-0 bg-white hover:bg-amber-100 text-amber-900 border-amber-300! flex items-center justify-center sm:justify-start gap-1.5 cursor-pointer">
+                class="btn btn-sm text-xs font-bold px-3 min-h-11 sm:min-h-0 sm:py-1.5 rounded-md w-full sm:w-auto self-stretch sm:self-auto shrink-0 btn-primary flex items-center justify-center sm:justify-start gap-1.5 cursor-pointer">
                 <ion-icon name="person-add-outline" class="text-sm"></ion-icon>
                 <span>Assign Staff</span>
             </button>

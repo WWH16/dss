@@ -52,13 +52,13 @@
                 <table class="w-full text-left border-collapse min-w-[650px] hidden md:table">
                     <thead>
                         <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/80 border-b border-neutral-200/70">
-                            <th class="py-3.5 px-5 font-semibold">Date</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Cleanliness</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Service</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Taste</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Price</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Average</th>
-                            <th class="py-3.5 px-5 font-semibold">Student Feedback</th>
+                            <th class="py-3 px-5 font-semibold">Date</th>
+                            <th class="py-3 px-5 text-center font-semibold">Cleanliness</th>
+                            <th class="py-3 px-5 text-center font-semibold">Service</th>
+                            <th class="py-3 px-5 text-center font-semibold">Taste</th>
+                            <th class="py-3 px-5 text-center font-semibold">Price</th>
+                            <th class="py-3 px-5 text-center font-semibold">Average</th>
+                            <th class="py-3 px-5 font-semibold">Student Feedback</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
@@ -67,21 +67,21 @@
                             {{-- CHANGED: the date and "x ago" text are shown in Philippine time (created_at is stored in UTC), as on the printable report. --}}
                             @php $avg = ($eval->cleanliness + $eval->service + $eval->taste + $eval->price) / 4; @endphp
                             <tr class="hover:bg-neutral-50/60 transition-colors">
-                                <td class="py-3.5 px-5 font-medium text-neutral-600 text-xs tabular-nums whitespace-nowrap">
+                                <td class="py-3 px-5 font-medium text-neutral-600 text-xs tabular-nums whitespace-nowrap">
                                     {{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->format('M d, Y') }}
                                     <span class="block text-[11px] text-neutral-500">{{ \Carbon\Carbon::parse($eval->created_at, 'UTC')->timezone('Asia/Manila')->diffForHumans() }}</span>
                                 </td>
                                 @foreach(['cleanliness', 'service', 'taste', 'price'] as $col)
-                                    <td class="py-3.5 px-3 text-center text-xs font-bold text-neutral-800 tabular-nums">
+                                    <td class="py-3 px-5 text-center text-xs font-bold text-neutral-800 tabular-nums">
                                         {{ number_format($eval->$col, 2) }}★
                                     </td>
                                 @endforeach
-                                <td class="py-3.5 px-3 text-center">
+                                <td class="py-3 px-5 text-center">
                                     <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-bold tabular-nums bg-neutral-100 text-neutral-900">
                                         {{ number_format($avg, 2) }}★
                                     </span>
                                 </td>
-                                <td class="py-3.5 px-5">
+                                <td class="py-3 px-5">
                                     @if($eval->comment)
                                         <p class="text-xs text-neutral-700 line-clamp-2 max-w-xs font-normal" title="{{ $eval->comment }}">
                                             “{{ $eval->comment }}”

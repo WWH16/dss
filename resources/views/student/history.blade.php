@@ -88,14 +88,14 @@
                 <table class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/80 border-b border-neutral-200/70">
-                            <th class="py-3.5 px-5 font-semibold">Food Stall</th>
-                            <th class="py-3.5 px-4 font-semibold">Date Submitted</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Cleanliness</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Service</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Taste</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Price</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Average</th>
-                            <th class="py-3.5 px-5 font-semibold">Feedback</th>
+                            <th class="py-3 px-5 font-semibold">Food Stall</th>
+                            <th class="py-3 px-5 font-semibold">Date Submitted</th>
+                            <th class="py-3 px-5 text-center font-semibold">Cleanliness</th>
+                            <th class="py-3 px-5 text-center font-semibold">Service</th>
+                            <th class="py-3 px-5 text-center font-semibold">Taste</th>
+                            <th class="py-3 px-5 text-center font-semibold">Price</th>
+                            <th class="py-3 px-5 text-center font-semibold">Average</th>
+                            <th class="py-3 px-5 font-semibold">Feedback</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
@@ -110,40 +110,40 @@
                             <tr class="hover:bg-neutral-50 transition-colors cursor-pointer" onclick='openEvalDetailsModal(@json($eval), @json($evalAtLabel))'>
                                 {{-- Stall Name --}}
                                 {{-- CHANGED: removed the storefront icon box repeated on every row; the column is already "Food Stall". --}}
-                                <td class="py-3.5 px-5 text-xs font-bold text-neutral-900">
+                                <td class="py-3 px-5 text-xs font-bold text-neutral-900">
                                     <button type="button" aria-label="View evaluation for {{ $eval->stall_name ?? 'Food Stall' }}" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $eval->stall_name ?? 'Food Stall' }}</button>
                                 </td>
 
                                 {{-- Date --}}
                                 {{-- CHANGED: date shown in Philippine time; the "x ago" line raised from 10px neutral-400 to 11px neutral-500. --}}
-                                <td class="py-3.5 px-4 text-xs text-neutral-600 font-medium tabular-nums whitespace-nowrap">
+                                <td class="py-3 px-5 text-xs text-neutral-600 font-medium tabular-nums whitespace-nowrap">
                                     {{-- CHANGED: removed the "x ago" line under the date; the date already says when. --}}
                                     {{ $evalAt->format('M d, Y') }}
                                 </td>
 
                                 {{-- Criteria Scores --}}
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->cleanliness >= 4 ? 'text-emerald-700' : ($eval->cleanliness <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
+                                <td class="py-3 px-5 text-center text-xs font-bold {{ $eval->cleanliness >= 4 ? 'text-emerald-700' : ($eval->cleanliness <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
                                     {{ $eval->cleanliness }}★
                                 </td>
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->service >= 4 ? 'text-emerald-700' : ($eval->service <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
+                                <td class="py-3 px-5 text-center text-xs font-bold {{ $eval->service >= 4 ? 'text-emerald-700' : ($eval->service <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
                                     {{ $eval->service }}★
                                 </td>
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->taste >= 4 ? 'text-emerald-700' : ($eval->taste <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
+                                <td class="py-3 px-5 text-center text-xs font-bold {{ $eval->taste >= 4 ? 'text-emerald-700' : ($eval->taste <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
                                     {{ $eval->taste }}★
                                 </td>
-                                <td class="py-3.5 px-3 text-center text-xs font-bold {{ $eval->price >= 4 ? 'text-emerald-700' : ($eval->price <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
+                                <td class="py-3 px-5 text-center text-xs font-bold {{ $eval->price >= 4 ? 'text-emerald-700' : ($eval->price <= 2 ? 'text-rose-600' : 'text-neutral-800') }} tabular-nums">
                                     {{ $eval->price }}★
                                 </td>
 
                                 {{-- Average --}}
-                                <td class="py-3.5 px-3 text-center">
+                                <td class="py-3 px-5 text-center">
                                     <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded-md text-xs font-bold tabular-nums {{ $avg >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200' : 'bg-neutral-100 text-neutral-800 border border-neutral-200' }}">
                                         {{ number_format($avg, 1) }}★
                                     </span>
                                 </td>
 
                                 {{-- Feedback Comment --}}
-                                <td class="py-3.5 px-5">
+                                <td class="py-3 px-5">
                                     {{-- CHANGED: typographic quotes around the comment; "No comment" neutral-400 to neutral-500. --}}
                                     @if($eval->comment)
                                         <p class="text-xs text-neutral-700 line-clamp-1 max-w-xs font-normal" title="{{ $eval->comment }}">

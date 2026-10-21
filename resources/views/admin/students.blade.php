@@ -154,27 +154,27 @@
             </div>
         @else
             <div class="overflow-x-auto">
-                {{-- CHANGED: "Student Evaluator" header became "Name"; the Department column is removed. "Evaluations Submitted" split in two: "This month" carries the status badge, "Evaluations" the all-time count as a plain number; Evaluations and Registered sort through the sort parameter. Column widths are set so names no longer take the spare room; they add up to 100% so no empty strip is left after Registered. --}}
+                {{-- CHANGED: "Student Evaluator" header became "Name"; the Department column is removed. "Evaluations Submitted" split in two: "This month" carries the status badge, "Evaluations" the all-time count as a plain number; Evaluations and Registered sort through the sort parameter. Column widths are set so names no longer take the spare room; they add up to 100% so no empty strip is left after Registered. Every cell has the same 20px side padding, and Evaluations is centred (was right-aligned with extra left padding on Registered), so the gaps between columns are even. --}}
                 <table class="w-full text-left border-collapse min-w-[760px] hidden md:table">
                     <thead>
                         <tr class="bg-neutral-50/80 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200/80">
                             {{-- CHANGED: Name sorts from the header like Evaluations and Registered. Idle sort icons are dimmed so only the active column's arrow stands out; they brighten on hover. --}}
-                            <th class="px-5 py-3 w-[29%]" aria-sort="{{ $sort === 'name_asc' ? 'ascending' : ($sort === 'name_desc' ? 'descending' : 'none') }}">
+                            <th class="px-5 py-3 w-[28%]" aria-sort="{{ $sort === 'name_asc' ? 'ascending' : ($sort === 'name_desc' ? 'descending' : 'none') }}">
                                 <a href="{{ $sortUrl($sort === 'name_asc' ? 'name_desc' : 'name_asc') }}" class="group inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'name') ? 'text-neutral-900' : '' }}">
                                     Name
                                     <ion-icon name="{{ $sort === 'name_asc' ? 'arrow-up-outline' : ($sort === 'name_desc' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs {{ str_starts_with($sort, 'name') ? '' : 'opacity-50 group-hover:opacity-100' }}" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
-                            <th class="px-4 py-3 w-[15%]">Student ID</th>
-                            <th class="px-4 py-3 w-[20%]">Program & Year</th>
-                            <th class="px-4 py-3 w-[18%]">This month</th>
-                            <th class="px-4 py-3 w-[10%] text-right" aria-sort="{{ $sort === 'evaluations_asc' ? 'ascending' : ($sort === 'evaluations_desc' ? 'descending' : 'none') }}">
+                            <th class="px-5 py-3 w-[14%]">Student ID</th>
+                            <th class="px-5 py-3 w-[20%]">Program & Year</th>
+                            <th class="px-5 py-3 w-[16%]">This month</th>
+                            <th class="px-5 py-3 w-[10%] text-center" aria-sort="{{ $sort === 'evaluations_asc' ? 'ascending' : ($sort === 'evaluations_desc' ? 'descending' : 'none') }}">
                                 <a href="{{ $sortUrl($sort === 'evaluations_desc' ? 'evaluations_asc' : 'evaluations_desc') }}" class="group inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'evaluations') ? 'text-neutral-900' : '' }}">
                                     Evaluations
                                     <ion-icon name="{{ $sort === 'evaluations_asc' ? 'arrow-up-outline' : ($sort === 'evaluations_desc' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs {{ str_starts_with($sort, 'evaluations') ? '' : 'opacity-50 group-hover:opacity-100' }}" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
-                            <th class="pl-8 pr-5 py-3 w-[8%]" aria-sort="{{ $sort === 'oldest' ? 'ascending' : ($sort === 'latest' ? 'descending' : 'none') }}">
+                            <th class="px-5 py-3 w-[12%]" aria-sort="{{ $sort === 'oldest' ? 'ascending' : ($sort === 'latest' ? 'descending' : 'none') }}">
                                 <a href="{{ $sortUrl($sort === 'latest' ? 'oldest' : 'latest') }}" class="group inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ in_array($sort, ['latest', 'oldest']) ? 'text-neutral-900' : '' }}">
                                     Registered
                                     <ion-icon name="{{ $sort === 'oldest' ? 'arrow-up-outline' : ($sort === 'latest' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs {{ in_array($sort, ['latest', 'oldest']) ? '' : 'opacity-50 group-hover:opacity-100' }}" aria-hidden="true"></ion-icon>
@@ -198,9 +198,9 @@
                                 </td>
 
                                 {{-- CHANGED: student ID is plain 13px text instead of a chip and no longer monospace; the department cell is removed. --}}
-                                <td class="px-4 py-3 text-[13px] text-neutral-700 tabular-nums whitespace-nowrap">{{ $student->student_number ?: 'Not set' }}</td>
+                                <td class="px-5 py-3 text-[13px] text-neutral-700 tabular-nums whitespace-nowrap">{{ $student->student_number ?: 'Not set' }}</td>
 
-                                <td class="px-4 py-3 text-[13px] whitespace-nowrap">
+                                <td class="px-5 py-3 text-[13px] whitespace-nowrap">
                                     {{-- CHANGED: the track code follows the program (e.g. BSIT-WMAD); hovering shows its full name. --}}
                                     <span class="font-medium text-neutral-900" title="{{ $student->track_name }}">{{ $student->program ?: 'Not set' }}{{ $student->track ? '-' . $student->track : '' }}</span>
                                     @if($student->year_level)
@@ -210,13 +210,13 @@
                                 </td>
 
                                 {{-- CHANGED: this month's stalls ($monthBadge). --}}
-                                <td class="px-4 py-3">{!! $monthBadge($student) !!}</td>
+                                <td class="px-5 py-3">{!! $monthBadge($student) !!}</td>
 
                                 {{-- CHANGED: all-time count as a plain number; at most one per stall each month, so it counts every stall rating the student has made. --}}
-                                <td class="px-4 py-3 text-right text-[13px] text-neutral-700 tabular-nums">{{ $student->evaluations_count }}</td>
+                                <td class="px-5 py-3 text-center text-[13px] text-neutral-700 tabular-nums">{{ $student->evaluations_count }}</td>
 
                                 {{-- CHANGED: shows the registration date in Philippine time instead of the raw UTC date. --}}
-                                <td class="pl-8 pr-5 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
+                                <td class="px-5 py-3 text-[13px] text-neutral-600 whitespace-nowrap tabular-nums">
                                     <time datetime="{{ $student->registered_at->toIso8601String() }}">{{ $student->registered_label }}</time>
                                 </td>
                             </tr>

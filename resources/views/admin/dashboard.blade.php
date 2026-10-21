@@ -77,38 +77,12 @@
     {{-- CHANGED: "Canteen Stalls" became "Stalls Evaluated" (stalls with at least one evaluation, out of all stalls), and "Campus Average" moved here from the Health Index header badge. Both read from data the controller already loads. The total counts every stall, active or not, so the caption makes no "active" claim. --}}
     <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         {{-- CHANGED: Students and Stalls cards link only for admins; clinic users cannot open those pages. --}}
-        @php $campusAvg = $campusHealth->avg_overall; @endphp
-        @foreach([
-            ['label' => 'Evaluations',      'value' => $evaluationCount, 'suffix' => null, 'icon' => 'create-outline',     'desc' => 'Submissions logged',    'route' => route('admin.evaluations')],
-            ['label' => 'Total Students',   'value' => $studentCount,    'suffix' => null, 'icon' => 'people-outline',     'desc' => 'Registered evaluators', 'route' => Auth::user()->role === 'admin' ? route('admin.students') : null],
-            ['label' => 'Stalls Evaluated', 'value' => $results->count(), 'suffix' => '/ ' . $stallCount, 'icon' => 'storefront-outline', 'desc' => 'With at least one evaluation', 'route' => Auth::user()->role === 'admin' ? route('admin.stalls') : null],
-            ['label' => 'Campus Average',   'value' => $campusAvg !== null ? number_format($campusAvg, 2) : 'N/A', 'suffix' => $campusAvg !== null ? '/ 5.00' : null, 'icon' => 'star-outline', 'desc' => 'Mean of all 4 criteria', 'route' => null],
-        ] as $stat)
-            <a @if($stat['route']) href="{{ $stat['route'] }}" @endif class="group bg-white rounded-xl border border-neutral-200/70 p-5 shadow-sm {{ $stat['route'] ? 'hover:border-brand-300 hover:shadow-md' : '' }} transition-all flex flex-col justify-between">
-                <div>
-                    <div class="flex items-center justify-between mb-3">
-                        <span class="text-xs font-semibold text-neutral-500 uppercase tracking-wider group-hover:text-brand-800 transition-colors">{{ $stat['label'] }}</span>
-                        {{-- CHANGED: icon hidden below 640px so the two-column stat labels fit on one line. --}}
-                        <div class="w-9 h-9 rounded-lg bg-brand-50 border border-brand-100/70 hidden sm:flex items-center justify-center text-brand-700 {{ $stat['route'] ? 'group-hover:bg-brand-600 group-hover:text-white' : '' }} transition-all">
-                            <ion-icon name="{{ $stat['icon'] }}" class="text-lg"></ion-icon>
-                        </div>
-                    </div>
-                    {{-- CHANGED: value centered (experiment). --}}
-                    <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none text-center">
-                        {{ $stat['value'] }}@if($stat['suffix'])<span class="text-sm sm:text-base font-semibold text-neutral-500 ml-1">{{ $stat['suffix'] }}</span>@endif
-                    </div>
-                </div>
-                <div class="flex items-center justify-between mt-3 pt-2 border-t border-neutral-100/70 text-xs">
-                    <span class="text-neutral-500 font-medium">{{ $stat['desc'] }}</span>
-                    {{-- CHANGED: dropped the "Manage" hover label, which repeated the header's "Manage Stalls" action; the chevron alone signals the card is a link. --}}
-                    @if($stat['route'])
-                    <span class="text-brand-700 opacity-0 group-hover:opacity-100 transition-opacity flex items-center" aria-hidden="true">
-                        <ion-icon name="chevron-forward-outline" class="text-sm"></ion-icon>
-                    </span>
-                    @endif
-                </div>
-            </a>
-        @endforeach
+        @php $campusAvg = $campusHealth->avg_overall; $isAdmin = Auth::user()->role === 'admin'; @endphp
+        {{-- CHANGED: the cards use <x-stat-card>, shared with the staff and student dashboards. --}}
+        <x-stat-card label="Evaluations" :value="$evaluationCount" icon="create-outline" :route="route('admin.evaluations')">Submissions logged</x-stat-card>
+        <x-stat-card label="Total Students" :value="$studentCount" icon="people-outline" :route="$isAdmin ? route('admin.students') : null">Registered evaluators</x-stat-card>
+        <x-stat-card label="Stalls Evaluated" :value="$results->count()" :suffix="'/ ' . $stallCount" icon="storefront-outline" :route="$isAdmin ? route('admin.stalls') : null">With at least one evaluation</x-stat-card>
+        <x-stat-card label="Campus Average" :value="$campusAvg !== null ? number_format($campusAvg, 2) : 'N/A'" :suffix="$campusAvg !== null ? '/ 5.00' : null" icon="star-outline">Mean of all 4 criteria</x-stat-card>
     </div>
 
     @if($results->isNotEmpty())
@@ -228,15 +202,15 @@
                 <table class="w-full text-left border-collapse min-w-[800px] hidden md:table">
                     <thead>
                         <tr class="text-[11px] text-neutral-500 font-bold uppercase tracking-wider bg-neutral-50/80 border-b border-neutral-200/70">
-                            <th class="py-3.5 px-5 font-semibold text-center w-16">Rank</th>
-                            <th class="py-3.5 px-5 font-semibold">Food Stall</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Cleanliness</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Service</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Taste</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">Price</th>
-                            <th class="py-3.5 px-5 text-center font-semibold">Overall Composite</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">SAW</th>
-                            <th class="py-3.5 px-3 text-center font-semibold">AHP</th>
+                            <th class="py-3 px-5 font-semibold text-center w-16">Rank</th>
+                            <th class="py-3 px-5 font-semibold">Food Stall</th>
+                            <th class="py-3 px-5 text-center font-semibold">Cleanliness</th>
+                            <th class="py-3 px-5 text-center font-semibold">Service</th>
+                            <th class="py-3 px-5 text-center font-semibold">Taste</th>
+                            <th class="py-3 px-5 text-center font-semibold">Price</th>
+                            <th class="py-3 px-5 text-center font-semibold">Overall Composite</th>
+                            <th class="py-3 px-5 text-center font-semibold">SAW</th>
+                            <th class="py-3 px-5 text-center font-semibold">AHP</th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-neutral-100 text-sm">
@@ -248,7 +222,7 @@
                             <tr class="hover:bg-neutral-50/60 transition-colors {{ $rank === 1 ? 'bg-brand-50/20 font-medium' : '' }}">
                                 {{-- Rank Chip (Stepped Hierarchy) --}}
                                 {{-- CHANGED: the amber gradient (#1) and slate/amber (#2, #3) chips became one chip shape: brand green for #1, neutral grey for #2 and #3, same size, font-bold. Ranks 4+ darkened from neutral-400 to neutral-500 for contrast. --}}
-                                <td class="py-3.5 px-5 text-center">
+                                <td class="py-3 px-5 text-center">
                                     @if($rank === 1)
                                         <span class="inline-flex items-center justify-center gap-1 px-2.5 py-1 rounded-md bg-brand-50 text-brand-900 border border-brand-200 font-bold text-xs">
                                             <ion-icon name="trophy" class="text-brand-600 text-xs"></ion-icon>
@@ -272,7 +246,7 @@
                                 </td>
 
                                 {{-- Stall Name & Submissions --}}
-                                <td class="py-3.5 px-5">
+                                <td class="py-3 px-5">
                                     <div class="flex items-center gap-2">
                                         {{-- CHANGED: #1 name font-black dropped to font-bold; eval count raised from 10px neutral-400 to 11px neutral-500. --}}
                                         <span class="{{ $rank === 1 ? 'font-bold text-neutral-900 text-base' : 'font-bold text-neutral-900 text-sm' }}">{{ $result->name }}</span>
@@ -283,7 +257,7 @@
                                 {{-- Criteria Scores --}}
                                 {{-- CHANGED: the four cells use the Health Index rule (4 and up green, 3 to 3.99 amber, below 3 red). Before, 3 to 3.99 was plain grey and the red cutoff was 2.9, so a 2.95 showed red in one card and grey in the other. The four copy-pasted cells are now one @foreach. --}}
                                 @foreach(['cleanliness', 'service', 'taste', 'price'] as $criterion)
-                                <td class="py-3.5 px-3 text-center">
+                                <td class="py-3 px-5 text-center">
                                     <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold bg-white text-neutral-800 border border-neutral-200"><span class="w-1.5 h-1.5 mr-1 rounded-full shrink-0 {{ $result->$criterion >= 4 ? 'bg-emerald-500' : ($result->$criterion >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" aria-hidden="true"></span>
                                         {{ number_format($result->$criterion, 2) }}★
                                     </span>
@@ -291,7 +265,7 @@
                                 @endforeach
 
                                 {{-- Overall Composite Score --}}
-                                <td class="py-3.5 px-5 text-center">
+                                <td class="py-3 px-5 text-center">
                                     {{-- CHANGED: font-black dropped to font-bold, and the amber star ion-icon replaced with the ★ glyph used everywhere else on the page. --}}
                                     <span class="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-md text-xs font-bold bg-white text-neutral-800 border border-neutral-200 tabular-nums"><span class="w-1.5 h-1.5 mr-1 rounded-full shrink-0 {{ $composite >= 4 ? 'bg-emerald-500' : ($composite >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" aria-hidden="true"></span>
                                         {{ number_format($composite, 2) }}★
@@ -299,8 +273,8 @@
                                 </td>
 
                                 {{-- DSS Scores (0 to 1) --}}
-                                <td class="py-3.5 px-3 text-center text-xs font-semibold font-mono text-neutral-700 tabular-nums">{{ number_format($result->saw_score, 4) }}</td>
-                                <td class="py-3.5 px-3 text-center text-xs font-semibold font-mono text-neutral-700 tabular-nums">{{ number_format($result->ahp_score, 4) }}</td>
+                                <td class="py-3 px-5 text-center text-xs font-semibold font-mono text-neutral-700 tabular-nums">{{ number_format($result->saw_score, 4) }}</td>
+                                <td class="py-3 px-5 text-center text-xs font-semibold font-mono text-neutral-700 tabular-nums">{{ number_format($result->ahp_score, 4) }}</td>
                             </tr>
                         @endforeach
                     </tbody>
@@ -392,7 +366,8 @@
                 <div class="flex-1 grid grid-cols-2 gap-3">
                     @foreach(['avg_cleanliness' => 'Cleanliness', 'avg_service' => 'Service', 'avg_taste' => 'Food Taste', 'avg_price' => 'Affordability'] as $healthKey => $healthLabel)
                         @php $healthValue = (float) $campusHealth->$healthKey; @endphp
-                        <div class="p-4 bg-neutral-50 rounded-lg flex flex-col justify-between gap-2">
+                        {{-- CHANGED: tiles tinted pale brand green instead of grey. --}}
+                        <div class="p-4 bg-brand-50/70 rounded-lg flex flex-col justify-between gap-2">
                             <span class="text-[11px] font-semibold text-neutral-500 uppercase tracking-wider block">{{ $healthLabel }}</span>
                             <div class="flex items-baseline justify-center gap-1.5">
                                 <span class="text-2xl font-bold tabular-nums {{ $healthValue >= 4 ? 'text-emerald-700' : ($healthValue >= 3 ? 'text-amber-700' : 'text-rose-600') }}">

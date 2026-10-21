@@ -106,17 +106,17 @@
                     <thead>
                         <tr class="bg-neutral-50/80 text-[11px] text-neutral-500 font-bold uppercase tracking-wider border-b border-neutral-200/80">
                             <th class="px-5 py-3">Stall</th>
-                            <th class="px-4 py-3 text-right" aria-sort="{{ $sort === 'rating_low' ? 'ascending' : ($sort === 'rating_high' ? 'descending' : 'none') }}">
+                            <th class="px-5 py-3 text-right" aria-sort="{{ $sort === 'rating_low' ? 'ascending' : ($sort === 'rating_high' ? 'descending' : 'none') }}">
                                 <a href="{{ $sortUrl($sort === 'rating_low' ? 'rating_high' : 'rating_low') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ str_starts_with($sort, 'rating') ? 'text-neutral-900' : '' }}">
                                     Average
                                     <ion-icon name="{{ $sort === 'rating_low' ? 'arrow-up-outline' : ($sort === 'rating_high' ? 'arrow-down-outline' : 'swap-vertical-outline') }}" class="text-xs" aria-hidden="true"></ion-icon>
                                 </a>
                             </th>
-                            <th class="px-3 py-3 text-right">Cleanliness</th>
-                            <th class="px-3 py-3 text-right">Service</th>
-                            <th class="px-3 py-3 text-right">Taste</th>
-                            <th class="px-3 py-3 text-right">Price</th>
-                            <th class="pl-6 pr-5 py-3">Feedback</th>
+                            <th class="px-5 py-3 text-right">Cleanliness</th>
+                            <th class="px-5 py-3 text-right">Service</th>
+                            <th class="px-5 py-3 text-right">Taste</th>
+                            <th class="px-5 py-3 text-right">Price</th>
+                            <th class="px-5 py-3">Feedback</th>
                             <th class="px-5 py-3 text-right" aria-sort="{{ $sort === 'oldest' ? 'ascending' : ($sort === 'latest' ? 'descending' : 'none') }}">
                                 <a href="{{ $sortUrl($sort === 'latest' ? 'oldest' : 'latest') }}" class="inline-flex items-center gap-1 uppercase hover:text-neutral-900 {{ in_array($sort, ['latest', 'oldest']) ? 'text-neutral-900' : '' }}">
                                     Date
@@ -132,13 +132,13 @@
                                 <td class="px-5 py-3 font-medium text-neutral-900 whitespace-nowrap"><button type="button" aria-label="View evaluation for {{ $eval->stall_name }}" class="text-left rounded-sm cursor-pointer focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-600">{{ $eval->stall_name }}</button></td>
 
                                 {{-- CHANGED: plain numbers, two decimals everywhere; colour only marks outliers. Average is the only bold score. --}}
-                                <td class="px-4 py-3 text-right">{!! $score($eval->avg, 'font-bold') !!}</td>
+                                <td class="px-5 py-3 text-right">{!! $score($eval->avg, 'font-bold') !!}</td>
                                 @foreach(['cleanliness', 'service', 'taste', 'price'] as $c)
-                                    <td class="px-3 py-3 text-right">{!! $score($eval->$c) !!}</td>
+                                    <td class="px-5 py-3 text-right">{!! $score($eval->$c) !!}</td>
                                 @endforeach
 
                                 {{-- CHANGED: one-line snippet when there is a comment, a dash when there is none. --}}
-                                <td class="pl-6 pr-5 py-3 text-xs text-neutral-700 max-w-[280px]">
+                                <td class="px-5 py-3 text-xs text-neutral-700 max-w-[280px]">
                                     @if($eval->comment)
                                         <p class="truncate" title="{{ $eval->comment }}">{{ $eval->comment }}</p>
                                     @else
