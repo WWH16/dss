@@ -66,8 +66,11 @@
             height: 172%;
             width: 95%;
             object-fit: fill;
-            -webkit-mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
-            mask-image: linear-gradient(to right, transparent, #000 4%, #000 96%, transparent);
+            /* CHANGED: side fade widened from 4% to 18% so the photo melts into the green at both edges, plus a short fade at the bottom; the two masks are intersected. */
+            -webkit-mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent), linear-gradient(to top, transparent, #000 12%);
+            -webkit-mask-composite: source-in;
+            mask-image: linear-gradient(to right, transparent, #000 18%, #000 82%, transparent), linear-gradient(to top, transparent, #000 12%);
+            mask-composite: intersect;
         }
         .header-bar {
             position: relative;
