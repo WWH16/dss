@@ -42,7 +42,7 @@
                 return '<span class="text-xs text-neutral-600 whitespace-nowrap">Not yet</span>';
             }
             if ($s->month_complete) {
-                return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-emerald-50 text-emerald-800 border border-emerald-200/60 whitespace-nowrap"><ion-icon name="checkmark-circle" class="text-sm text-emerald-600" aria-hidden="true"></ion-icon>All ' . $done . ' ' . Str::plural('stall', $done) . '</span>';
+                return '<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-semibold bg-white text-neutral-800 border border-neutral-200 whitespace-nowrap"><ion-icon name="checkmark-circle" class="text-sm text-emerald-600" aria-hidden="true"></ion-icon>All ' . $done . ' ' . Str::plural('stall', $done) . '</span>';
             }
             return '<span class="text-xs text-neutral-600 whitespace-nowrap tabular-nums"><strong class="font-semibold text-neutral-900">' . $done . '</strong> of ' . $openStalls . ' stalls</span>';
         };

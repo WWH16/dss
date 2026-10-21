@@ -189,7 +189,7 @@
                             <p class="text-[11px] text-neutral-500 mt-0.5">Anonymous student · {{ \Carbon\Carbon::parse($eval->created_at)->diffForHumans() }}</p>
                         </div>
                         {{-- CHANGED: averages below 3 now show red, matching the leaderboard's composite column. --}}
-                        <span class="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold tabular-nums {{ $avg >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200' : ($avg >= 3 ? 'bg-neutral-100 text-neutral-800' : 'bg-rose-50 text-rose-700 border border-rose-200') }}">
+                        <span class="shrink-0 inline-flex items-center gap-0.5 px-2 py-1 rounded-md text-xs font-bold tabular-nums bg-white text-neutral-800 border border-neutral-200"><span class="w-1.5 h-1.5 mr-1 rounded-full shrink-0 {{ $avg >= 4 ? 'bg-emerald-500' : ($avg >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" aria-hidden="true"></span>
                             {{ number_format($avg, 1) }}★
                         </span>
                     </li>
@@ -214,7 +214,7 @@
                             @foreach ($ahpConsistency['weights'] as $criterion => $weight)
                                 <span class="font-mono tabular-nums">{{ str_replace('_', ' ', $criterion) }} {{ number_format($weight, 2) }}</span>
                             @endforeach
-                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-semibold {{ $ahpConsistency['consistent'] ? 'text-emerald-700 bg-emerald-50 border border-emerald-200/60' : 'text-rose-700 bg-rose-50 border border-rose-200/60' }}">
+                            <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded font-semibold bg-white text-neutral-800 border border-neutral-200"><span class="w-1.5 h-1.5 rounded-full shrink-0 {{ $ahpConsistency['consistent'] ? 'bg-emerald-500' : 'bg-rose-500' }}" aria-hidden="true"></span>
                                 CR {{ number_format($ahpConsistency['CR'], 4) }}
                                 {{ $ahpConsistency['consistent'] ? '(consistent)' : '(inconsistent)' }}
                             </span>
@@ -284,7 +284,7 @@
                                 {{-- CHANGED: the four cells use the Health Index rule (4 and up green, 3 to 3.99 amber, below 3 red). Before, 3 to 3.99 was plain grey and the red cutoff was 2.9, so a 2.95 showed red in one card and grey in the other. The four copy-pasted cells are now one @foreach. --}}
                                 @foreach(['cleanliness', 'service', 'taste', 'price'] as $criterion)
                                 <td class="py-3.5 px-3 text-center">
-                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold {{ $result->$criterion >= 4 ? 'text-emerald-700 bg-emerald-50' : ($result->$criterion >= 3 ? 'text-amber-700 bg-amber-50' : 'text-rose-600 bg-rose-50') }}">
+                                    <span class="inline-flex items-center gap-0.5 px-2 py-0.5 rounded text-xs font-semibold bg-white text-neutral-800 border border-neutral-200"><span class="w-1.5 h-1.5 mr-1 rounded-full shrink-0 {{ $result->$criterion >= 4 ? 'bg-emerald-500' : ($result->$criterion >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" aria-hidden="true"></span>
                                         {{ number_format($result->$criterion, 2) }}★
                                     </span>
                                 </td>
@@ -293,7 +293,7 @@
                                 {{-- Overall Composite Score --}}
                                 <td class="py-3.5 px-5 text-center">
                                     {{-- CHANGED: font-black dropped to font-bold, and the amber star ion-icon replaced with the ★ glyph used everywhere else on the page. --}}
-                                    <span class="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-md text-xs font-bold {{ $composite >= 4 ? 'bg-brand-50 text-brand-900 border border-brand-200/90' : ($composite >= 3 ? 'bg-neutral-100 text-neutral-800' : 'bg-rose-50 text-rose-700 border border-rose-200') }} tabular-nums">
+                                    <span class="inline-flex items-center gap-0.5 px-2.5 py-1 rounded-md text-xs font-bold bg-white text-neutral-800 border border-neutral-200 tabular-nums"><span class="w-1.5 h-1.5 mr-1 rounded-full shrink-0 {{ $composite >= 4 ? 'bg-emerald-500' : ($composite >= 3 ? 'bg-amber-500' : 'bg-rose-500') }}" aria-hidden="true"></span>
                                         {{ number_format($composite, 2) }}★
                                     </span>
                                 </td>

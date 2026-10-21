@@ -26,18 +26,18 @@
 
     {{-- ── 2. Pending Staff Assignment Banner (Quick Onboarding) ───────────── --}}
     @if($unassignedStaff->isNotEmpty())
-        <div class="p-4 bg-amber-50/90 border border-amber-200/90 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        {{-- CHANGED: amber fill became a white card with an amber left edge and icon, matching the dashboard's attention banner. --}}
+        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-amber-500 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-start sm:items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
+                <div class="w-8 h-8 rounded-lg bg-amber-50 border border-amber-100 text-amber-700 flex items-center justify-center shrink-0 mt-0.5 sm:mt-0">
                     <ion-icon name="people" class="text-lg text-amber-700"></ion-icon>
                 </div>
                 <div>
                     {{-- CHANGED: "N Staff Accounts Pending Assignment" became "N Unassigned Staff Accounts", the word the Staff & Admins page and the staff pickers use. --}}
-                    <h3 class="text-xs font-bold text-amber-950">
+                    <h3 class="text-xs font-bold text-neutral-900">
                         {{ $unassignedStaff->count() }} Unassigned {{ Str::plural('Staff Account', $unassignedStaff->count()) }}
                     </h3>
-                    {{-- CHANGED: amber-800 at 90% opacity became solid amber-900 for contrast on the amber background. --}}
-                    <p class="text-[11px] text-amber-900 mt-0.5">
+                    <p class="text-[11px] text-neutral-600 mt-0.5">
                         These registered staff members cannot view their stall evaluations or rankings until assigned to an active stall.
                     </p>
                 </div>
@@ -146,7 +146,7 @@
                                         {{-- CHANGED: status tags raised from 9px to 11px; py-0.2 (not a Tailwind v4 step, so no padding was generated) to py-0.5; rounded to rounded-md. --}}
                                         {{-- CHANGED: "Unassigned" is amber (needs a stall) instead of green, and the bare stall name reads "Assigned to …" so a checked box is clearly a move. --}}
                                         @if(!$staff->stall_id)
-                                            <span class="px-1.5 py-0.5 rounded-md bg-white text-amber-900 border border-amber-300 text-[11px] font-semibold shrink-0">Unassigned</span>
+                                            <span class="px-1.5 py-0.5 inline-flex items-center rounded-md bg-white text-neutral-700 border border-neutral-200 text-[11px] font-semibold shrink-0"><span class="w-1.5 h-1.5 mr-1 rounded-full shrink-0 bg-amber-500" aria-hidden="true"></span>Unassigned</span>
                                         @else
                                             <span class="px-1.5 py-0.5 rounded-md bg-white text-neutral-700 border border-neutral-300 text-[11px] font-semibold shrink-0 truncate max-w-[9rem]" title="Assigned to {{ $staff->current_stall_name }}">Assigned to {{ $staff->current_stall_name }}</span>
                                         @endif
@@ -447,7 +447,7 @@
                                 <div class="shrink-0 text-right">
                                     {{-- CHANGED: same tags as the Add form: amber "Unassigned", neutral "Assigned to …". --}}
                                     @if(!$staff->stall_id)
-                                        <span class="px-2 py-0.5 rounded-md bg-white text-amber-900 border border-amber-300 text-[11px] font-semibold">Unassigned</span>
+                                        <span class="px-2 py-0.5 inline-flex items-center rounded-md bg-white text-neutral-700 border border-neutral-200 text-[11px] font-semibold"><span class="w-1.5 h-1.5 mr-1 rounded-full shrink-0 bg-amber-500" aria-hidden="true"></span>Unassigned</span>
                                     @else
                                         <span id="staff-stall-tag-{{ $staff->id }}" class="px-2 py-0.5 rounded-md bg-white text-neutral-700 border border-neutral-300 text-[11px] font-semibold truncate max-w-[10rem] inline-block" title="Assigned to {{ $staff->current_stall_name }}">
                                             Assigned to {{ $staff->current_stall_name }}

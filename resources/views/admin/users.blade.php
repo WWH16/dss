@@ -10,24 +10,25 @@
 
     {{-- ── Flash Messages (Success handled via layout toast) ────────────── --}}
     @if(session('error'))
-        <div class="p-4 bg-red-50 border border-red-200/80 text-red-800 rounded-xl text-xs font-semibold flex items-center justify-between gap-3 shadow-2xs">
+        {{-- CHANGED: red fill became a white card with a red left edge and icon, matching the dashboard's attention banner. --}}
+        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-red-500 text-neutral-800 rounded-xl text-xs font-semibold flex items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-2">
                 <ion-icon name="alert-circle" class="text-lg text-red-600 shrink-0"></ion-icon>
                 <span>{{ session('error') }}</span>
             </div>
-            <button type="button" onclick="this.parentElement.remove()" class="text-red-700 hover:text-red-900 transition-colors p-1" aria-label="Dismiss">
+            <button type="button" onclick="this.parentElement.remove()" class="text-neutral-500 hover:text-neutral-800 transition-colors p-1" aria-label="Dismiss">
                 <ion-icon name="close-outline" class="text-base"></ion-icon>
             </button>
         </div>
     @endif
 
     @if($errors->any())
-        <div class="p-4 bg-red-50 border border-red-200/80 text-red-800 rounded-xl text-xs font-semibold space-y-1 shadow-2xs">
+        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-red-500 text-neutral-800 rounded-xl text-xs font-semibold space-y-1 shadow-2xs">
             <div class="flex items-center gap-2 font-bold mb-1">
                 <ion-icon name="alert-circle" class="text-lg text-red-600 shrink-0"></ion-icon>
                 <span>Please correct the errors below:</span>
             </div>
-            <ul class="list-disc list-inside space-y-0.5 text-[11px] text-red-700 ml-5 font-normal">
+            <ul class="list-disc list-inside space-y-0.5 text-[11px] text-neutral-600 ml-5 font-normal">
                 @foreach($errors->all() as $error)
                     <li>{{ $error }}</li>
                 @endforeach
