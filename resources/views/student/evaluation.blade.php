@@ -48,7 +48,8 @@
             @if(session('success') || $limit)
                 {{-- ── Success Screen ──────────────────────────────────────────── --}}
                 <div class="p-8 sm:p-14 md:p-20 text-center flex flex-col items-center justify-center">
-                    <div class="w-20 h-20 rounded-2xl border-2 flex items-center justify-center mb-6 shadow-xs {{ session('success') ? 'bg-emerald-50 border-emerald-200/80 text-emerald-600' : 'bg-neutral-50 border-neutral-200 text-brand-600' }}">
+                    {{-- CHANGED: the success icon box uses the limit screen's neutral box and brand-green icon (was an emerald box), so both screens match. --}}
+                    <div class="w-20 h-20 rounded-2xl border-2 flex items-center justify-center mb-6 shadow-xs bg-neutral-50 border-neutral-200 text-brand-600">
                         <ion-icon name="{{ session('success') ? 'checkmark-circle' : 'calendar-outline' }}" class="text-5xl"></ion-icon>
                     </div>
 
