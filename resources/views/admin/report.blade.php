@@ -163,7 +163,8 @@
         .lh-office span { display: block; font-family: Cambria, Georgia, serif; font-weight: 700; font-size: calc(2.47 * var(--mm)); }
         .lh-office a { color: #1f4e79; }
         /* The page frame is a one-cell table: its empty head and foot rows repeat on every printed page and keep the content clear of the letterhead; the foot row clears most of the building drawing. Chrome stops repeating a table footer taller than about a quarter of the page (74mm), so it stays under that. */
-        .page-frame { position: relative; z-index: 1; width: 100%; border-collapse: collapse; }
+        /* table-layout: fixed keeps the frame at the sheet width, so a wide ranking table scrolls inside .tbl-scroll on phones instead of widening the page. */
+        .page-frame { position: relative; z-index: 1; width: 100%; border-collapse: collapse; table-layout: fixed; }
         .page-frame > thead > tr > td { height: calc(52 * var(--mm)); padding: 0; }
         .page-frame > tfoot > tr > td { height: calc(72 * var(--mm)); padding: 0; }
         .page-frame > tbody > tr > td { padding: 0 max(18px, calc(25.4 * var(--mm))); vertical-align: top; }
@@ -232,10 +233,23 @@
         }
         @media screen and (max-width: 760px) {
             .sheet { width: 100%; min-height: 0; }
+            /* ADDED: on phones the sheet runs edge to edge; the page frame already keeps 18px of side space, so the extra 16px gutter only narrowed the text. */
+            .sheet-wrap { padding: 0; }
+            /* ADDED: the ranking table scrolls sideways on phones with Rank and Stall pinned, so each row's scores stay tied to a stall name. */
+            .doc-rank thead th:nth-child(-n+2), .doc-rank tbody td:nth-child(-n+2) { position: sticky; z-index: 1; background: var(--paper); }
+            .doc-rank th:nth-child(1), .doc-rank td:nth-child(1) { left: 0; min-width: 48px; }
+            .doc-rank th:nth-child(2), .doc-rank td:nth-child(2) { left: 48px; min-width: 8.5rem; box-shadow: 6px 0 6px -6px oklch(0.2 0.03 155 / 0.25); }
+            .doc-rank tr.first td:nth-child(-n+2) { background: var(--brand-soft); }
+            .doc-rank tfoot .note { display: block; position: sticky; left: 0; max-width: calc(100vw - 2 * max(18px, 25.4 * var(--mm)) - 12px); }
             .meta { grid-template-columns: 1fr 1fr; }
             .meta div:nth-child(3) { border-left: 0; padding-left: 0; }
             .meta div:nth-child(n+3) { border-top: 1px solid var(--rule); }
-            .chart { grid-template-columns: minmax(0, 7rem) 1fr 3rem; }
+            /* CHANGED: on phones each chart row is the stall name and score on one line with a full-width bar under it, so names are no longer cut to "Nelsy's Food Hou…". */
+            .chart { grid-template-columns: minmax(0, 1fr) auto; grid-auto-flow: row dense; row-gap: 2px; }
+            .chart .name { white-space: normal; }
+            .chart .bar { grid-column: 1 / -1; margin-bottom: 6px; }
+            .chart .axis { grid-column: 1 / -1; }
+            .doc-end { flex-direction: column; gap: 2px; }
         }
 
         /* CHANGED: no page margins, so the letterhead reaches the paper edge like the template. The page-number and title
@@ -407,7 +421,7 @@
                         <h2>Stall ranking</h2>
                         @if ($rated->isNotEmpty())
                             <div class="tbl-scroll">
-                                <table class="doc">
+                                <table class="doc doc-rank">
                                     <thead>
                                         <tr>
                                             <th class="rank">Rank</th>
@@ -438,12 +452,12 @@
                                     </tbody>
                                     <tfoot>
                                         <tr>
-                                            <td colspan="{{ 6 + count($columns) }}">
+                                            <td colspan="{{ 6 + count($columns) }}"><span class="note">
                                                 Ranked by SAW score. Means below 3.00 are in bold red.
                                                 @if ($unrated->isNotEmpty())
                                                     Not ranked, no evaluations in this period: {{ $unrated->pluck('name')->join(', ', ' and ') }}.
                                                 @endif
-                                            </td>
+                                            </span></td>
                                         </tr>
                                     </tfoot>
                                 </table>
