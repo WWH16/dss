@@ -50,22 +50,23 @@
 
     {{-- ── 2. Diagnostic Warning (Only if any stall is below 3.0★) ─────── --}}
     @if(isset($attentionStalls) && $attentionStalls->isNotEmpty())
-        <div class="p-4 bg-amber-50/90 border border-amber-200 rounded-xl text-amber-900 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        {{-- CHANGED: amber block became a white card with a rose left edge and icon. Below 3.0 is red in the Health Index legend, and the amber fill clashed with the brand green. --}}
+        <div class="p-4 bg-white border border-neutral-200/70 border-l-4 border-l-rose-500 rounded-xl text-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
             <div class="flex items-center gap-3">
-                <div class="w-8 h-8 rounded-lg bg-amber-100 border border-amber-300 text-amber-800 flex items-center justify-center shrink-0">
+                <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                     <ion-icon name="warning-outline" class="text-lg"></ion-icon>
                 </div>
                 <div>
-                    <h4 class="text-xs font-bold text-amber-950">Attention Required on {{ $attentionStalls->count() }} {{ Str::plural('Stall', $attentionStalls->count()) }}</h4>
-                    <p class="text-[11px] text-amber-800 mt-0.5">
+                    <h4 class="text-xs font-bold text-neutral-900">Attention Required on {{ $attentionStalls->count() }} {{ Str::plural('Stall', $attentionStalls->count()) }}</h4>
+                    <p class="text-[11px] text-neutral-600 mt-0.5">
                         The following stall(s) have scored below the satisfactory 3.0★ threshold:
                         {{-- CHANGED: each stall is followed by its low criteria, lowest first. --}}
-                        <strong>{{ $attentionStalls->map(fn ($s) => $s->name . ' (' . collect(array_keys($s->flags))->map(fn ($c) => \App\Services\NeedsImprovement::LABELS[$c])->join(', ') . ')')->join(', ') }}</strong>.
+                        <strong class="text-neutral-900">{{ $attentionStalls->map(fn ($s) => $s->name . ' (' . collect(array_keys($s->flags))->map(fn ($c) => \App\Services\NeedsImprovement::LABELS[$c])->join(', ') . ')')->join(', ') }}</strong>.
                     </p>
                 </div>
             </div>
-            {{-- CHANGED: added btn-sm for a smaller size, and marked the amber border important because .btn reset it to transparent. --}}
-            <a href="{{ route('admin.evaluations') }}" class="btn btn-sm font-bold bg-amber-100 hover:bg-amber-200 text-amber-900 border-amber-300! self-start sm:self-auto shrink-0">
+            {{-- CHANGED: added btn-sm for a smaller size; button is an outlined brand green so it does not compete with the rose edge, border marked important because .btn resets it to transparent. --}}
+            <a href="{{ route('admin.evaluations') }}" class="btn btn-sm font-bold bg-white hover:bg-brand-50 text-brand-700 border-brand-200! hover:border-brand-300! self-start sm:self-auto shrink-0">
                 Review Evaluations
             </a>
         </div>
@@ -92,7 +93,8 @@
                             <ion-icon name="{{ $stat['icon'] }}" class="text-lg"></ion-icon>
                         </div>
                     </div>
-                    <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none">
+                    {{-- CHANGED: value centered (experiment). --}}
+                    <div class="text-2xl sm:text-3xl font-bold text-neutral-900 tabular-nums tracking-tight leading-none text-center">
                         {{ $stat['value'] }}@if($stat['suffix'])<span class="text-sm sm:text-base font-semibold text-neutral-500 ml-1">{{ $stat['suffix'] }}</span>@endif
                     </div>
                 </div>
