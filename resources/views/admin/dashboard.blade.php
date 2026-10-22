@@ -51,7 +51,8 @@
     {{-- ── 2. Diagnostic Warning (Only if any stall is below 3.0★) ─────── --}}
     @if(isset($attentionStalls) && $attentionStalls->isNotEmpty())
         {{-- CHANGED: amber block became a white card with a rose icon. Below 3.0 is red in the Health Index legend, and the amber fill clashed with the brand green. --}}
-        <div class="p-4 bg-white border border-neutral-200/70 rounded-xl text-neutral-800 flex flex-col sm:flex-row sm:items-center justify-between gap-3 shadow-2xs">
+        <div class="p-4 bg-white border border-neutral-200/70 rounded-xl text-neutral-800 shadow-2xs">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div class="flex items-center gap-3">
                 <div class="w-8 h-8 rounded-lg bg-rose-50 border border-rose-100 text-rose-600 flex items-center justify-center shrink-0">
                     <ion-icon name="warning-outline" class="text-lg"></ion-icon>
@@ -59,9 +60,8 @@
                 <div>
                     <h4 class="text-xs font-bold text-neutral-900">Attention Required on {{ $attentionStalls->count() }} {{ Str::plural('Stall', $attentionStalls->count()) }}</h4>
                     <p class="text-[11px] text-neutral-600 mt-0.5">
-                        The following stall(s) have scored below the satisfactory 3.0★ threshold:
-                        {{-- CHANGED: each stall is followed by its low criteria, lowest first. --}}
-                        <strong class="text-neutral-900">{{ $attentionStalls->map(fn ($s) => $s->name . ' (' . collect(array_keys($s->flags))->map(fn ($c) => \App\Services\NeedsImprovement::LABELS[$c])->join(', ') . ')')->join(', ') }}</strong>.
+                        {{-- CHANGED: the stall list moved to the DSS recommendation cards below. --}}
+                        These stalls have a criterion below the satisfactory 3.0★ threshold. DSS recommendations, lowest criterion first:
                     </p>
                 </div>
             </div>
@@ -69,6 +69,22 @@
             <a href="{{ route('admin.evaluations') }}" class="btn btn-sm btn-primary font-bold self-start sm:self-auto shrink-0">
                 Review Evaluations
             </a>
+        </div>
+            {{-- ADDED: the DSS recommendation for each low criterion of each stall, the same advice the staff dashboard shows. --}}
+            <ul class="mt-4 grid grid-cols-1 lg:grid-cols-2 gap-2.5">
+                @foreach($attentionStalls as $stall)
+                    {{-- Neutral cards with only the score in rose: amber clashed with the brand green (see the card above). --}}
+                    <li class="p-3 bg-neutral-50 border border-neutral-200/70 rounded-md">
+                        <p class="text-xs font-bold text-neutral-900">{{ $stall->name }}</p>
+                        @foreach($stall->flags as $criterion => $score)
+                            <p class="text-xs text-neutral-600 mt-1.5 leading-relaxed">
+                                <span class="font-bold text-neutral-800">{{ \App\Services\NeedsImprovement::LABELS[$criterion] }} <span class="tabular-nums text-rose-600">{{ number_format($score, 2) }}★</span>:</span>
+                                {{ \App\Services\NeedsImprovement::ADVICE[$criterion] }}
+                            </p>
+                        @endforeach
+                    </li>
+                @endforeach
+            </ul>
         </div>
     @endif
 
