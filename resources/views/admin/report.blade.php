@@ -200,6 +200,9 @@
         table.doc td.low { color: var(--low); font-weight: 800; }
         table.doc .rank { font-weight: 800; width: 34px; }
         table.doc .stall { font-weight: 600; }
+        table.doc td.advice { min-width: 14rem; font-size: 8.5pt; }
+        table.doc td.advice p { margin: 0; }
+        table.doc td.advice p + p { margin-top: 4px; }
         table.doc tfoot td { border-bottom: 0; padding-top: 7px; font-size: 8pt; color: var(--ink-2); }
 
 
@@ -482,6 +485,8 @@
                                             <th class="num">Mean</th>
                                             <th>Criteria below 3.00</th>
                                             <th>Lowest-rated criterion</th>
+                                            {{-- ADDED: the DSS's fixed advice for each low criterion, the same text the staff dashboard shows. --}}
+                                            <th>DSS recommendation</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -491,6 +496,11 @@
                                                 <td class="num {{ (float) $row->overall_score < 3 ? 'low' : '' }}">{{ number_format($row->overall_score, 2) }}</td>
                                                 <td>{{ $row->below ? collect($row->below)->map(fn ($c) => $criterionLabels[$c])->join(', ') : 'None' }}</td>
                                                 <td>{{ $criterionLabels[$row->weakest] }} ({{ number_format($row->{$columns[$row->weakest]}, 2) }})</td>
+                                                <td class="advice">
+                                                    @foreach ($row->below ?: [$row->weakest] as $criterion)
+                                                        <p><b>{{ $criterionLabels[$criterion] }}:</b> {{ \App\Services\NeedsImprovement::ADVICE[$criterion] }}</p>
+                                                    @endforeach
+                                                </td>
                                             </tr>
                                         @endforeach
                                     </tbody>
