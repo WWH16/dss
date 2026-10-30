@@ -163,7 +163,8 @@ test('the admin banner flags a stall whose only low criterion is food quality', 
     $this->actingAs($admin)->get(route('admin.dashboard'))
         ->assertOk()
         ->assertViewHas('attentionStalls', fn ($stalls) => $stalls->pluck('name')->all() === ['Improvement Stall'])
-        ->assertSeeText('Improvement Stall (Taste)');
+        ->assertSeeTextInOrder(['Improvement Stall', 'Taste 2.00★:', NeedsImprovement::ADVICE['food_quality']])
+        ->assertDontSeeText('Service 4.00★:');
 });
 
 test('the admin banner names every low criterion, lowest first', function () {
@@ -178,7 +179,11 @@ test('the admin banner names every low criterion, lowest first', function () {
 
     $this->actingAs($admin)->get(route('admin.dashboard'))
         ->assertOk()
-        ->assertSeeText('Improvement Stall (Service, Taste)');
+        ->assertSeeTextInOrder([
+            'Improvement Stall',
+            'Service 2.20★:', NeedsImprovement::ADVICE['service_quality'],
+            'Taste 2.80★:', NeedsImprovement::ADVICE['food_quality'],
+        ]);
 });
 
 test('the admin report uses the Taste and Service names', function () {
