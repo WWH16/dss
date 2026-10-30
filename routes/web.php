@@ -123,6 +123,10 @@ Route::middleware(['auth', 'role:admin'])->group(function () {
         [AdminController::class,'students'])
         ->name('admin.students');
 
+    Route::post('/admin/students',
+        [AdminController::class, 'createStudent'])
+        ->name('admin.students.create');
+
     Route::post('/admin/stall/add',
         [AdminController::class,'addStall'])
         ->name('admin.stall.add');
