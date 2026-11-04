@@ -105,12 +105,6 @@
                         Clear
                     </a>
                 @endif
-
-                <button type="button" onclick="document.getElementById('add-student-modal').showModal()"
-                    class="self-start lg:self-stretch btn btn-primary text-xs font-bold px-4 py-2 rounded-md shadow-2xs flex items-center gap-1.5 cursor-pointer shrink-0">
-                    <ion-icon name="person-add-outline" class="text-sm" aria-hidden="true"></ion-icon>
-                    Add Student
-                </button>
             </form>
 
             {{-- CHANGED: one-line participation summary and an All / Evaluated / Not yet filter, so finding who has not evaluated needs no scanning. Both cover the current month; "Evaluated" means at least one stall this month, since a student rates each stall once a month. Counts follow the search and filters above. --}}
@@ -372,110 +366,8 @@
     </div>
 </dialog>
 
-@php
-    $inputClass = 'w-full px-3 py-2 bg-neutral-50 border border-neutral-200 rounded-md text-base sm:text-sm text-neutral-900 focus:outline-none focus:bg-white focus:border-brand-600 focus:ring-2 focus:ring-brand-600/15 transition-colors';
-@endphp
-<dialog id="add-student-modal" class="confirm-modal sheet-on-phone p-0! border-0!" aria-labelledby="add-student-title" oncancel="if (this.dataset.busy) event.preventDefault()">
-    <div class="sheet-head bg-brand-900 text-white px-6 py-4 flex items-center justify-between gap-3">
-        <div class="flex items-center gap-3 min-w-0">
-            <div class="w-9 h-9 rounded-md bg-brand-800 border border-brand-700/80 flex items-center justify-center text-white shrink-0">
-                <ion-icon name="person-add-outline" class="text-lg" aria-hidden="true"></ion-icon>
-            </div>
-            <h3 id="add-student-title" class="text-sm font-bold text-white leading-tight">Add Student</h3>
-        </div>
-        <button type="button" onclick="this.closest('dialog').close()" class="text-white/70 enabled:hover:text-white p-1 cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed" aria-label="Close">
-            <ion-icon name="close-outline" class="text-xl"></ion-icon>
-        </button>
-    </div>
-
-    <form method="POST" action="{{ route('admin.students.create') }}" onsubmit="var d = this.closest('dialog'); d.dataset.busy = 1; d.querySelectorAll('button').forEach(function (b) { b.disabled = true; })" class="px-6 pb-6 max-sm:pb-0">
-        @csrf
-
-        <div class="mt-5 space-y-4">
-            <div>
-                <label for="add_name" class="block text-xs font-semibold text-neutral-900 mb-1.5">Full name <span class="text-rose-600">*</span></label>
-                <input type="text" id="add_name" name="name" value="{{ old('name') }}" placeholder="e.g. Maria Santos" required class="{{ $inputClass }}">
-                @error('name')<p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <div>
-                <label for="add_email" class="block text-xs font-semibold text-neutral-900 mb-1.5">Email address <span class="text-rose-600">*</span></label>
-                <input type="email" id="add_email" name="email" value="{{ old('email') }}" placeholder="e.g. maria@gmail.com" required class="{{ $inputClass }}">
-                @error('email')<p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <div>
-                <label for="add_student_number" class="block text-xs font-semibold text-neutral-900 mb-1.5">Student number <span class="text-rose-600">*</span></label>
-                <input type="text" id="add_student_number" name="student_number" value="{{ old('student_number') }}" placeholder="26-12345" required class="{{ $inputClass }}">
-                @error('student_number')<p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                    <label for="add_program" class="block text-xs font-semibold text-neutral-900 mb-1.5">Program <span class="text-rose-600">*</span></label>
-                    <select id="add_program" name="program_id" required class="{{ $inputClass }} cursor-pointer">
-                        <option value="">Select program</option>
-                        @foreach($programs as $program)
-                            <option value="{{ $program->id }}" {{ old('program_id') == $program->id ? 'selected' : '' }}>{{ $program->code }}</option>
-                        @endforeach
-                    </select>
-                    @error('program_id')<p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>@enderror
-                </div>
-                <div>
-                    <label for="add_year" class="block text-xs font-semibold text-neutral-900 mb-1.5">Year level <span class="text-rose-600">*</span></label>
-                    <select id="add_year" name="year_level" required class="{{ $inputClass }} cursor-pointer">
-                        <option value="">Select year</option>
-                        @foreach($yearOptions as $y)
-                            <option value="{{ $y }}" {{ old('year_level') == $y ? 'selected' : '' }}>{{ $y }}</option>
-                        @endforeach
-                    </select>
-                    @error('year_level')<p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>@enderror
-                </div>
-            </div>
-
-            <div data-track-field="add_program" class="has-[select:disabled]:opacity-50 has-[select:disabled]:[&_select]:cursor-not-allowed transition-opacity">
-                <label for="add_track" class="block text-xs font-semibold text-neutral-900 mb-1.5">Specialization track <span class="text-rose-600">*</span></label>
-                <select id="add_track" name="track_id" required class="{{ $inputClass }} cursor-pointer">
-                    <option value="">Select track</option>
-                    @foreach($programs as $program)
-                        @foreach($program->tracks as $track)
-                            <option value="{{ $track->id }}" data-program="{{ $program->id }}" {{ old('track_id') == $track->id ? 'selected' : '' }}>{{ $track->code }} - {{ $track->name }}</option>
-                        @endforeach
-                    @endforeach
-                </select>
-                @error('track_id')<p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>@enderror
-            </div>
-
-            <div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <div>
-                        <label for="add_password" class="block text-xs font-semibold text-neutral-900 mb-1.5">Password <span class="text-rose-600">*</span></label>
-                        <input type="password" id="add_password" name="password" placeholder="••••••••" required autocomplete="new-password" class="{{ $inputClass }}">
-                        @error('password')<p class="text-rose-600 text-[11px] font-semibold mt-1">{{ $message }}</p>@enderror
-                    </div>
-                    <div>
-                        <label for="add_password_confirmation" class="block text-xs font-semibold text-neutral-900 mb-1.5">Confirm <span class="text-rose-600">*</span></label>
-                        <input type="password" id="add_password_confirmation" name="password_confirmation" placeholder="••••••••" required autocomplete="new-password" class="{{ $inputClass }}">
-                        <p data-password-match aria-live="polite" hidden class="text-rose-600 data-[match=yes]:text-emerald-700 text-[11px] font-semibold mt-1 flex items-center gap-1"></p>
-                    </div>
-                </div>
-                @include('partials.password-rules')
-            </div>
-        </div>
-
-        <div class="sheet-actions max-sm:-mx-6 max-sm:px-6 flex items-center justify-end gap-2 pt-4 mt-5 border-t border-neutral-100">
-            <button type="button" onclick="this.closest('dialog').close()" class="btn btn-ghost btn-sm text-xs rounded-md cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed">Cancel</button>
-            <button type="submit" class="btn btn-primary btn-sm text-xs font-semibold rounded-md cursor-pointer disabled:opacity-75 disabled:cursor-not-allowed">Create Student</button>
-        </div>
-    </form>
-</dialog>
-
 @section('scripts')
 <script>
-@if($errors->any())
-document.getElementById('add-student-modal').showModal();
-@endif
-
 var detailsModal = document.getElementById('details-modal');
 
 // CHANGED: takes only the student; the Philippine-time registration date arrives on it (registered_label), set by the server. The department line is removed. toggleFilterDrawer() is gone with the drawer.

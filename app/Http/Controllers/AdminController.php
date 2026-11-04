@@ -11,7 +11,6 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\Rules\Password;
-use Illuminate\Validation\Rule;
 use App\Models\Program;
 use App\Models\User;
 use App\Mail\PasswordChangedMail; // ADDED
@@ -501,8 +500,7 @@ class AdminController extends Controller
         $students = $query->paginate($perPage, ['*'], 'page', null, (int) $total)->withQueryString();
 
         // CHANGED: the Program filter lists every row of the programs table (was User::PROGRAMS), including ones no student has registered under yet. The per-program count query and the department lists are gone with the Department filter.
-        $programs = Program::with('tracks')->orderBy('id')->get();
-        $programOptions = $programs->pluck('code');
+        $programOptions = Program::orderBy('id')->pluck('code');
 
         $yearOptions = ['1st year', '2nd year', '3rd year', '4th year'];
 
@@ -515,36 +513,8 @@ class AdminController extends Controller
             'participation',
             'openStalls',
             'programOptions',
-            'yearOptions',
-            'programs'
+            'yearOptions'
         ));
-    }
-
-    public function createStudent(Request $request)
-    {
-        $request->validate([
-            'name'           => 'required|string|max:255',
-            'email'          => 'required|email|max:255|unique:users,email',
-            'student_number' => 'required|string|max:255|unique:students,student_number',
-            'program_id'     => ['bail', 'required', 'integer', Rule::exists('programs', 'id')],
-            'track_id'       => ['bail', 'required', 'integer', Rule::exists('tracks', 'id')->where('program_id', $request->program_id)],
-            'year_level'     => ['required', Rule::in(['1st year', '2nd year', '3rd year', '4th year'])],
-            'password'       => [
-                'required',
-                'confirmed',
-                Password::min(8)->letters()->mixedCase()->numbers()->symbols(),
-            ],
-        ]);
-
-        User::createWithProfile([
-            'role'              => 'student',
-            'name'              => trim($request->name),
-            'email'             => trim($request->email),
-            'password'          => Hash::make($request->password),
-            'email_verified_at' => now(),
-        ], $request->only('student_number', 'program_id', 'track_id', 'year_level'));
-
-        return redirect()->route('admin.students')->with('success', 'Student account created successfully!');
     }
 
     // Add Stall
